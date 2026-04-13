@@ -1,0 +1,26 @@
+source .venv/bin/activate
+%                                                                                                                                                                                                                            
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ ssource .venv/bin/activate
+%                                                                                                                                                                                                                            
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ bbash /Users/m1/projects/demo_insights_share/insights-share/validation/phase3_crud.sh
+[MIGRATE OK] out=/tmp/isv-p3-wiki-tree types=['database', 'infra_cache', 'infra_queue'] cards=3
+{"id": "diana-elasticsearch-shard-2026-04-12"}
+CRUD_OK: add
+edited diana-elasticsearch-shard-2026-04-12
+CRUD_OK: edit
+tagged diana-elasticsearch-shard-2026-04-12 tags=['elasticsearch', 'shard', 'rebalance', 'experimental']
+CRUD_OK: tag
+{"id": "temp-diana-clone-2026-04-12"}
+merged into diana-elasticsearch-shard-2026-04-12
+CRUD_OK: merge
+deleted diana-elasticsearch-shard-2026-04-12
+CRUD_OK: delete
+research wrote new card research-20260413T104047Z
+CRUD_OK: research
+
+[phase3] all 6 CRUD operations completed
+%                                                                                                                                                                                                                            
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 took 22s 
+❯ 

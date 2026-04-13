@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python /Users/m1/projects/demo_insights_share/insights-share/demo_codes/hooks/insights_stop_hook.py"
+          }
+        ]
+      }
+    ]
+  }
+}

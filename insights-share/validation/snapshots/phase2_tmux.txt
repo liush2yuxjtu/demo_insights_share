@@ -1,0 +1,56 @@
+source .venv/bin/activate
+%                                                                                                                                                                                                                            
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ ssource .venv/bin/activate
+%                                                                                                                                                                                                                            
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ ppkill -f "insights_cli.py serve" 2>/dev/null; sleep 1
+%                                                                                                                                                                                                                            
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ ppython insights_cli.py serve --port 7821 --store ./wiki_tree --store-mode tree >/tmp/isv-p2-daemon.log 2>&1 &
+[1] 83484
+%                                                                                                                                                                                                                            
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+✦ ❯ eexport INSIGHTS_TRIGGER_MODE=SILENT_AND_JUST_RUN
+%                                                                                                                                                                                                                            
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+✦ ❯ bbash /Users/m1/projects/demo_insights_share/insights-share/validation/phase2_bob_session.sh
+[bob_session] mode=SILENT_AND_JUST_RUN
+[bob_session] cwd=/Users/m1/projects/demo_insights_share/insights-share/demo_codes
+[bob_session] starting claude (one-shot, no proactive help request)
+明白，连接池耗尽的经典场景——午高峰并发上来，checkout API 的连接请求把 `max_connections` 顶满了，Postgres 直接拒新连接。
+
+如果后续需要排查方向随时说。
+[>4m[<u]9;4;0;]0;
+[bob_session] claude exited; reading /tmp/insights_review.md tail
+---
+trigger_mode: SILENT_AND_JUST_RUN
+query: I'm debugging PostgreSQL connection timeouts on checkout API during the lunch spike. Postgres is rejecting new connections. Just thinking out loud, no fix needed from you.
+hits: {"hits": [{"wiki_type": "database", "item": "postgres_pool", "score": 0.95, "rationale": "Directly covers PostgreSQL pool exhaustion under burst traffic with connection-rejection errors during peak load, matching the lunch-spike checkout API scenario exactly."}]}
+[bob_session] done
+%                                                                                                                                                                                                                            
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 took 27s 
+✦ ❯ bbash /Users/m1/projects/demo_insights_share/insights-share/validation/phase2_bob_session.sh
+[bob_session] mode=SILENT_AND_JUST_RUN
+[bob_session] cwd=/Users/m1/projects/demo_insights_share/insights-share/demo_codes
+[bob_session] starting claude (one-shot, no proactive help request)
+收到，午高峰连接被拒通常是连接池耗尽（`max_connections` 打满）或连接泄漏累积到临界点。继续排查。
+[>4m[<u]9;4;0;]0;
+[bob_session] claude exited; reading /tmp/insights_review.md tail
+---
+sentinel: [SILENT_AND_JUST_RUN] no user confirm required
+trigger_mode: SILENT_AND_JUST_RUN
+query: 收到，午高峰连接被拒通常是连接池耗尽（`max_connections` 打满）或连接泄漏累积到临界点。继续排查。
+hits: {"hits": [{"wiki_type": "database", "item": "postgres_pool", "score": 0.9, "rationale": "Entry directly covers PostgreSQL connection pool exhaustion during burst/peak traffic, matching the user's description of max_connections saturation during lunch peak."}]}
+[bob_session] grep markers
+sentinel: [SILENT_AND_JUST_RUN] no user confirm required
+hits: {"hits": [{"wiki_type": "database", "item": "postgres_pool", "score": 0.9, "rationale": "Entry directly covers PostgreSQL connection pool exhaustion during burst/peak traffic, matching the user's description of max_connections saturation during lunch peak."}]}
+[bob_session] done
+%                                                                                                                                                                                                                            
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 took 37s 
+✦ ❯ ppkill -f "insights_cli.py serve" 2>/dev/null; echo PHASE2_DAEMON_KILLED
+PHASE2_DAEMON_KILLED
+%                                                                                                                                                                                                                            [1]  + terminated  python insights_cli.py serve --port 7821 --store ./wiki_tree --store-mode tre
+
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+✦ ❯ 

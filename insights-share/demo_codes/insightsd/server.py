@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, urlsplit
 
-from .store import InsightStore
+from .store import InsightStore, TreeInsightStore
 
 
 def _detect_lan_ip() -> str:
@@ -25,7 +25,7 @@ def _detect_lan_ip() -> str:
 
 
 class InsightHandler(BaseHTTPRequestHandler):
-    store: InsightStore  # injected by run()
+    store: Any  # InsightStore | TreeInsightStore, injected by run()
 
     def log_message(self, format: str, *args: Any) -> None:  # noqa: A002
         sys.stderr.write(
@@ -42,6 +42,17 @@ class InsightHandler(BaseHTTPRequestHandler):
 
     def _send_404(self) -> None:
         self._send_json(404, {"error": "not_found", "path": self.path})
+
+    def _read_json_body(self) -> tuple[dict[str, Any] | None, str | None]:
+        length = int(self.headers.get("Content-Length") or 0)
+        raw = self.rfile.read(length) if length > 0 else b""
+        try:
+            data = json.loads(raw.decode("utf-8") or "{}")
+        except json.JSONDecodeError as exc:
+            return None, str(exc)
+        if not isinstance(data, dict):
+            return None, "body must be a JSON object"
+        return data, None
 
     def do_GET(self) -> None:  # noqa: N802
         parsed = urlsplit(self.path)
@@ -66,22 +77,112 @@ class InsightHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:  # noqa: N802
         parsed = urlsplit(self.path)
-        if parsed.path != "/insights":
-            self._send_404()
+        path = parsed.path
+
+        # POST /insights → add
+        if path == "/insights":
+            card, err = self._read_json_body()
+            if err is not None or card is None:
+                self._send_json(400, {"error": "invalid_json", "detail": err})
+                return
+            try:
+                if isinstance(self.store, TreeInsightStore):
+                    saved = self.store.add(card, wiki_type=card.get("wiki_type") or "general")
+                else:
+                    saved = self.store.add(card)
+            except ValueError as exc:
+                self._send_json(400, {"error": "invalid_card", "detail": str(exc)})
+                return
+            self._send_json(200, {"id": saved.get("id")})
             return
-        length = int(self.headers.get("Content-Length") or 0)
-        raw = self.rfile.read(length) if length > 0 else b""
-        try:
-            card = json.loads(raw.decode("utf-8") or "{}")
-        except json.JSONDecodeError as exc:
-            self._send_json(400, {"error": "invalid_json", "detail": str(exc)})
+
+        # POST /insights/merge → merge source into target
+        if path == "/insights/merge":
+            if not isinstance(self.store, TreeInsightStore):
+                self._send_json(400, {"error": "merge_not_supported", "detail": "tree mode only"})
+                return
+            body, err = self._read_json_body()
+            if err is not None or body is None:
+                self._send_json(400, {"error": "invalid_json", "detail": err})
+                return
+            result = self.store.merge(body.get("source_id", ""), body.get("target_id", ""))
+            if result is None:
+                self._send_json(404, {"error": "not_found", "detail": "source or target missing"})
+                return
+            self._send_json(200, {"id": result.get("id")})
             return
-        try:
-            saved = self.store.add(card)
-        except ValueError as exc:
-            self._send_json(400, {"error": "invalid_card", "detail": str(exc)})
+
+        # POST /insights/research → agentic search + write new card
+        if path == "/insights/research":
+            if not isinstance(self.store, TreeInsightStore):
+                self._send_json(400, {"error": "research_not_supported", "detail": "tree mode only"})
+                return
+            body, err = self._read_json_body()
+            if err is not None or body is None:
+                self._send_json(400, {"error": "invalid_json", "detail": err})
+                return
+            try:
+                result = self.store.research(body.get("query", ""))
+            except Exception as exc:
+                # 严禁 fallback：异常原样返回 500
+                self._send_json(500, {"error": "research_failed", "detail": f"{type(exc).__name__}: {exc}"})
+                return
+            self._send_json(200, {"id": result.get("id")})
             return
-        self._send_json(200, {"id": saved.get("id")})
+
+        # POST /insights/{id}/edit → patch fields
+        if path.endswith("/edit") and path.startswith("/insights/"):
+            if not isinstance(self.store, TreeInsightStore):
+                self._send_json(400, {"error": "edit_not_supported", "detail": "tree mode only"})
+                return
+            card_id = path[len("/insights/") : -len("/edit")]
+            patch, err = self._read_json_body()
+            if err is not None or patch is None:
+                self._send_json(400, {"error": "invalid_json", "detail": err})
+                return
+            result = self.store.edit(card_id, patch)
+            if result is None:
+                self._send_json(404, {"error": "not_found", "id": card_id})
+                return
+            self._send_json(200, {"id": result.get("id")})
+            return
+
+        # POST /insights/{id}/tag → add tags (sticky for not_triggered)
+        if path.endswith("/tag") and path.startswith("/insights/"):
+            if not isinstance(self.store, TreeInsightStore):
+                self._send_json(400, {"error": "tag_not_supported", "detail": "tree mode only"})
+                return
+            card_id = path[len("/insights/") : -len("/tag")]
+            body, err = self._read_json_body()
+            if err is not None or body is None:
+                self._send_json(400, {"error": "invalid_json", "detail": err})
+                return
+            tags = body.get("tags") or []
+            sticky = bool(body.get("sticky", True))
+            result = self.store.tag(card_id, tags, sticky=sticky)
+            if result is None:
+                self._send_json(404, {"error": "not_found", "id": card_id})
+                return
+            self._send_json(200, {"id": result.get("id"), "tags": result.get("tags")})
+            return
+
+        self._send_404()
+
+    def do_DELETE(self) -> None:  # noqa: N802
+        parsed = urlsplit(self.path)
+        path = parsed.path
+        if path.startswith("/insights/"):
+            if not isinstance(self.store, TreeInsightStore):
+                self._send_json(400, {"error": "delete_not_supported", "detail": "tree mode only"})
+                return
+            card_id = path[len("/insights/") :]
+            ok = self.store.delete(card_id)
+            if not ok:
+                self._send_json(404, {"error": "not_found", "id": card_id})
+                return
+            self._send_json(200, {"id": card_id, "deleted": True})
+            return
+        self._send_404()
 
 
 def _make_handler(store: InsightStore) -> type[InsightHandler]:
@@ -92,12 +193,18 @@ def run(
     host: str = "0.0.0.0",
     port: int = 7821,
     store_path: Path = Path("./wiki.json"),
+    store_mode: str = "flat",
 ) -> None:
-    store = InsightStore(Path(store_path))
+    if store_mode == "tree":
+        store: Any = TreeInsightStore(Path(store_path))
+    else:
+        store = InsightStore(Path(store_path))
     handler_cls = _make_handler(store)
     httpd = ThreadingHTTPServer((host, port), handler_cls)
     lan_ip = _detect_lan_ip()
-    sys.stderr.write(f"[insightsd] bound to {host}:{port}\n")
+    sys.stderr.write(
+        f"[insightsd] bound to {host}:{port} mode={store_mode} store={store_path}\n"
+    )
     sys.stderr.write(f"[insightsd] LAN IP detected: {lan_ip}\n")
     sys.stderr.write(
         f"[insightsd] teammates can publish/consume at http://{lan_ip}:{port}\n"

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<title>insights-share validation 报告</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; margin: 2em; max-width: 1200px; }
+  h1 { font-size: 1.5em; }
+  table { border-collapse: collapse; width: 100%; margin-top: 1em; }
+  th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: left; vertical-align: top; }
+  th { background: #f4f4f4; }
+  .badge { padding: 3px 10px; border-radius: 4px; font-weight: bold; font-size: 0.85em; }
+  .ok { background: #d4edda; color: #155724; }
+  .fail { background: #f8d7da; color: #721c24; }
+  .summary { padding: 12px 16px; border-radius: 6px; margin: 1em 0; font-size: 1.1em; }
+  .summary.ok { background: #d4edda; color: #155724; }
+  .summary.fail { background: #f8d7da; color: #721c24; }
+  code { background: #f4f4f4; padding: 1px 4px; border-radius: 3px; font-size: 0.9em; }
+  footer { margin-top: 2em; color: #888; font-size: 0.85em; }
+</style>
+</head><body>
+<h1>insights-share validation 报告</h1>
+<div class="summary ok">
+  总览：6/6 通过
+  (全部通过 ✓) ·
+  生成时间：2026-04-13 18:43:07
+</div>
+<table>
+<thead><tr><th>Phase</th><th>任务</th><th>对应规则</th><th>状态</th><th>关键指标</th><th>快照</th></tr></thead>
+<tbody>
+<tr><td>Phase 0</td><td>Baseline + MiniMax 预检</td><td><code>validation framework #2 (tmux 抓取)</code></td><td><span class="badge ok">PASS</span></td><td>demo finished + MiniMax PONG</td><td><a href="../snapshots/phase0_tmux.txt">../snapshots/phase0_tmux.txt</a> (1487B)</td></tr><tr><td>Phase 4</td><td>Wiki 4 层结构迁移</td><td><code>validation task #4 (wiki_type → INDEX → item → raw)</code></td><td><span class="badge ok">PASS</span></td><td>20/20 layer checks PASS</td><td><a href="../snapshots/phase4_tmux.txt">../snapshots/phase4_tmux.txt</a> (11608B)</td></tr><tr><td>Phase 1</td><td>Trigger rate 20 cases</td><td><code>validation task #1 (12 train / 8 test)</code></td><td><span class="badge ok">PASS</span></td><td>train f1=0.9231 | test f1=1.0000 precision=1.0000 acc=1.0000</td><td><a href="../snapshots/phase1_tmux.txt">../snapshots/phase1_tmux.txt</a> (12608B)</td></tr><tr><td>Phase 5</td><td>MiniMax agentic search</td><td><code>validation task #5 (agentic search wiki minimax)</code></td><td><span class="badge ok">PASS</span></td><td>real haiku-agent hit postgres_pool, NO fallback</td><td><a href="../snapshots/phase5_tmux.txt">../snapshots/phase5_tmux.txt</a> (2257B)</td></tr><tr><td>Phase 2</td><td>SILENT_AND_JUST_RUN Stop hook</td><td><code>validation task #2 (S-T-A-R + silent trigger)</code></td><td><span class="badge ok">PASS</span></td><td>Bob silent session → Stop hook → postgres_pool</td><td><a href="../snapshots/phase2_tmux.txt">../snapshots/phase2_tmux.txt</a> (5494B)</td></tr><tr><td>Phase 3</td><td>Wiki CRUD 操作</td><td><code>validation task #3 (add/edit/tag/merge/delete/research)</code></td><td><span class="badge ok">PASS</span></td><td>6/6 CRUD ops OK</td><td><a href="../snapshots/phase3_tmux.txt">../snapshots/phase3_tmux.txt</a> (1700B)</td></tr>
+</tbody>
+</table>
+<footer>
+报告由 <code>run_all_validations.sh</code> 生成；快照路径相对 <code>/Users/m1/projects/demo_insights_share/insights-share/validation/reports</code>。
+所有 phase 严格遵守 validation.md 的 5 项规则与"无 fallback in AI path"约束。
+</footer>
+</body></html>

@@ -1,0 +1,56 @@
+{
+  "all_pass": true,
+  "passed": 6,
+  "total": 6,
+  "phases": [
+    {
+      "phase": "Phase 0",
+      "task": "Baseline + MiniMax 预检",
+      "rule": "validation framework #2 (tmux 抓取)",
+      "snapshot": "/Users/m1/projects/demo_insights_share/insights-share/validation/snapshots/phase0_tmux.txt",
+      "pass": true,
+      "metrics": "demo finished + MiniMax PONG"
+    },
+    {
+      "phase": "Phase 4",
+      "task": "Wiki 4 层结构迁移",
+      "rule": "validation task #4 (wiki_type → INDEX → item → raw)",
+      "snapshot": "/Users/m1/projects/demo_insights_share/insights-share/validation/snapshots/phase4_tmux.txt",
+      "pass": true,
+      "metrics": "20/20 layer checks PASS"
+    },
+    {
+      "phase": "Phase 1",
+      "task": "Trigger rate 20 cases",
+      "rule": "validation task #1 (12 train / 8 test)",
+      "snapshot": "/Users/m1/projects/demo_insights_share/insights-share/validation/snapshots/phase1_tmux.txt",
+      "pass": true,
+      "metrics": "train f1=0.9231 | test f1=1.0000 precision=1.0000 acc=1.0000"
+    },
+    {
+      "phase": "Phase 5",
+      "task": "MiniMax agentic search",
+      "rule": "validation task #5 (agentic search wiki minimax)",
+      "snapshot": "/Users/m1/projects/demo_insights_share/insights-share/validation/snapshots/phase5_tmux.txt",
+      "pass": true,
+      "metrics": "real haiku-agent hit postgres_pool, NO fallback"
+    },
+    {
+      "phase": "Phase 2",
+      "task": "SILENT_AND_JUST_RUN Stop hook",
+      "rule": "validation task #2 (S-T-A-R + silent trigger)",
+      "snapshot": "/Users/m1/projects/demo_insights_share/insights-share/validation/snapshots/phase2_tmux.txt",
+      "pass": true,
+      "metrics": "Bob silent session → Stop hook → postgres_pool"
+    },
+    {
+      "phase": "Phase 3",
+      "task": "Wiki CRUD 操作",
+      "rule": "validation task #3 (add/edit/tag/merge/delete/research)",
+      "snapshot": "/Users/m1/projects/demo_insights_share/insights-share/validation/snapshots/phase3_tmux.txt",
+      "pass": true,
+      "metrics": "6/6 CRUD ops OK"
+    }
+  ],
+  "generated_at": "2026-04-13T18:43:07.201961"
+}

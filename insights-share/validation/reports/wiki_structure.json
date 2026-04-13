@@ -1,0 +1,106 @@
+{
+  "root": "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree",
+  "checks": [
+    {
+      "name": "layer1_wiki_types_json",
+      "pass": true,
+      "detail": "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/wiki_types.json"
+    },
+    {
+      "name": "layer1_has_types",
+      "pass": true,
+      "detail": "types=['database', 'infra_cache', 'infra_queue']"
+    },
+    {
+      "name": "layer2_database_dir",
+      "pass": true,
+      "detail": "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/database"
+    },
+    {
+      "name": "layer2_database_INDEX_md",
+      "pass": true,
+      "detail": "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/database/INDEX.md"
+    },
+    {
+      "name": "layer2_database_index_has_items",
+      "pass": true,
+      "detail": "items=['postgres_pool.md']"
+    },
+    {
+      "name": "layer3_database_postgres_pool.md",
+      "pass": true,
+      "detail": "resolves from INDEX → /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/database/postgres_pool.md"
+    },
+    {
+      "name": "layer3_database_postgres_pool.md_frontmatter",
+      "pass": true,
+      "detail": "id=alice-pgpool-2026-04-10"
+    },
+    {
+      "name": "layer4_database_postgres_pool.md_raw_log",
+      "pass": true,
+      "detail": "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/database/raw/alice-pgpool-2026-04-10.jsonl"
+    },
+    {
+      "name": "layer2_infra_cache_dir",
+      "pass": true,
+      "detail": "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_cache"
+    },
+    {
+      "name": "layer2_infra_cache_INDEX_md",
+      "pass": true,
+      "detail": "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_cache/INDEX.md"
+    },
+    {
+      "name": "layer2_infra_cache_index_has_items",
+      "pass": true,
+      "detail": "items=['redis_lru_session_eviction.md']"
+    },
+    {
+      "name": "layer3_infra_cache_redis_lru_session_eviction.md",
+      "pass": true,
+      "detail": "resolves from INDEX → /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_cache/redis_lru_session_eviction.md"
+    },
+    {
+      "name": "layer3_infra_cache_redis_lru_session_eviction.md_frontmatter",
+      "pass": true,
+      "detail": "id=carol-redis-eviction-2026-03-27"
+    },
+    {
+      "name": "layer4_infra_cache_redis_lru_session_eviction.md_raw_log",
+      "pass": true,
+      "detail": "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_cache/raw/carol-redis-eviction-2026-03-27.jsonl"
+    },
+    {
+      "name": "layer2_infra_queue_dir",
+      "pass": true,
+      "detail": "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_queue"
+    },
+    {
+      "name": "layer2_infra_queue_INDEX_md",
+      "pass": true,
+      "detail": "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_queue/INDEX.md"
+    },
+    {
+      "name": "layer2_infra_queue_index_has_items",
+      "pass": true,
+      "detail": "items=['celery_retry_storm.md']"
+    },
+    {
+      "name": "layer3_infra_queue_celery_retry_storm.md",
+      "pass": true,
+      "detail": "resolves from INDEX → /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_queue/celery_retry_storm.md"
+    },
+    {
+      "name": "layer3_infra_queue_celery_retry_storm.md_frontmatter",
+      "pass": true,
+      "detail": "id=alice-celery-retry-2026-04-08"
+    },
+    {
+      "name": "layer4_infra_queue_celery_retry_storm.md_raw_log",
+      "pass": true,
+      "detail": "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_queue/raw/alice-celery-retry-2026-04-08.jsonl"
+    }
+  ],
+  "pass": true
+}

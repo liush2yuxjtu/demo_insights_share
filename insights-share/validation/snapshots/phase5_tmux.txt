@@ -1,0 +1,19 @@
+source .venv/bin/activate
+%                                                                                                                                                                                                                            
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ ssource .venv/bin/activate
+%                                                                                                                                                                                                                            
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ ppython search_agent.py --query "checkout API timing out postgres rejecting connections lunch spike" --wiki-tree /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree 2>&1; echo SEARCH_EXIT=$?
+[search_agent] env: ANTHROPIC_AUTH_TOKEN=sk-cp-oc...Up50 ANTHROPIC_BASE_URL=https://api.minimaxi.com/anthropic HAIKU=MiniMax-M2.7-highspeed
+[search_agent] cwd: /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree
+[search_agent] tools: ['Glob', 'Grep', 'Read']
+[search_agent] assistant: '<<<SEARCH_HITS>>>\n{"hits": [{"wiki_type": "database", "item": "postgres_pool", "score": 0.92, "rationale": "Covers PostgreSQL connection-pool exhaustion under burst traffic; matches all three query si'
+[search_agent] result: '<<<SEARCH_HITS>>>\n{"hits": [{"wiki_type": "database", "item": "postgres_pool", "score": 0.92, "rationale": "Covers PostgreSQL connection-pool exhaustion under burst traffic; matches all three query si'
+<<<SEARCH_HITS>>>
+{"hits": [{"wiki_type": "database", "item": "postgres_pool", "score": 0.92, "rationale": "Covers PostgreSQL connection-pool exhaustion under burst traffic; matches all three query signals: checkout API timeout, postgres rejecting connections, lunch spike."}]}
+<<<END>>>
+SEARCH_EXIT=0
+%                                                                                                                                                                                                                            
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 took 19s 
+❯ 

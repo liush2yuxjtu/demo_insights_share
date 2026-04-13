@@ -1,0 +1,122 @@
+source .venv/bin/activate
+rm -rf wiki_tree
+python /Users/m1/projects/demo_insights_share/insights-share/validation/migrate_wiki_to_tree.py 2>&1; echo MIG_EXIT=$?
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ ssource .venv/bin/activate
+rm -rf wiki_tree
+python /Users/m1/projects/demo_insights_share/insights-share/validation/migrate_wiki_to_tree.py 2>&1; echo MIG_EXIT=$?
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ rrm -rf wiki_tree
+%                                                                                                                                                                                                        python /Users/m1/projects/demo_insights_share/insights-share/validation/migrate_wiki_to_tree.py 2>&1; echo MIG_EXIT=$?
+
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ ppython /Users/m1/projects/demo_insights_share/insights-share/validation/migrate_wiki_to_tree.py 2>&1; echo MIG_EXIT=$?
+[MIGRATE OK] out=/Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree types=['database', 'infra_cache', 'infra_queue'] cards=3
+MIG_EXIT=0
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ ppython /Users/m1/projects/demo_insights_share/insights-share/validation/check_wiki_layers.py /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree --report /Users/m1/projects/de mmo_insights_share/insights-share/validation/reports/wiki_structure.json 2>&1; echo CHECK_EXIT=$?
+[WIKI_LAYERS] 20/20 checks PASS
+  [OK] layer1_wiki_types_json  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/wiki_types.json
+  [OK] layer1_has_types  types=['database', 'infra_cache', 'infra_queue']
+  [OK] layer2_database_dir  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/database
+  [OK] layer2_database_INDEX_md  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/database/INDEX.md
+  [OK] layer2_database_index_has_items  items=['postgres_pool.md']
+  [OK] layer3_database_postgres_pool.md  resolves from INDEX → /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/database/postgres_pool.md
+  [OK] layer3_database_postgres_pool.md_frontmatter  id=alice-pgpool-2026-04-10
+  [OK] layer4_database_postgres_pool.md_raw_log  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/database/raw/alice-pgpool-2026-04-10.jsonl
+  [OK] layer2_infra_cache_dir  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_cache
+  [OK] layer2_infra_cache_INDEX_md  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_cache/INDEX.md
+  [OK] layer2_infra_cache_index_has_items  items=['redis_lru_session_eviction.md']
+  [OK] layer3_infra_cache_redis_lru_session_eviction.md  resolves from INDEX → /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_cache/redis_lru_session_eviction.md
+  [OK] layer3_infra_cache_redis_lru_session_eviction.md_frontmatter  id=carol-redis-eviction-2026-03-27
+  [OK] layer4_infra_cache_redis_lru_session_eviction.md_raw_log  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_cache/raw/carol-redis-eviction-2026-03-27.jsonl
+  [OK] layer2_infra_queue_dir  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_queue
+  [OK] layer2_infra_queue_INDEX_md  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_queue/INDEX.md
+  [OK] layer2_infra_queue_index_has_items  items=['celery_retry_storm.md']
+  [OK] layer3_infra_queue_celery_retry_storm.md  resolves from INDEX → /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_queue/celery_retry_storm.md
+  [OK] layer3_infra_queue_celery_retry_storm.md_frontmatter  id=alice-celery-retry-2026-04-08
+  [OK] layer4_infra_queue_celery_retry_storm.md_raw_log  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_queue/raw/alice-celery-retry-2026-04-08.jsonl
+CHECK_EXIT=0
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ ppkill -f "insights_cli.py serve" 2>/dev/null; sleep 1; python insights_cli.py serve --port 7821 --store ./wiki_tree --store-mode tree >/tmp/isv-p4-daemon.log 2>&1 &
+[1] 72357
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+✦ ❯ ppython /Users/m1/projects/demo_insights_share/insights-share/validation/check_wiki_layers.py /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree --report /Users/m1/projects/ ddemo_insights_share/insights-share/validation/reports/wiki_structure.json
+[WIKI_LAYERS] 20/20 checks PASS
+  [OK] layer1_wiki_types_json  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/wiki_types.json
+  [OK] layer1_has_types  types=['database', 'infra_cache', 'infra_queue']
+  [OK] layer2_database_dir  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/database
+  [OK] layer2_database_INDEX_md  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/database/INDEX.md
+  [OK] layer2_database_index_has_items  items=['postgres_pool.md']
+  [OK] layer3_database_postgres_pool.md  resolves from INDEX → /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/database/postgres_pool.md
+  [OK] layer3_database_postgres_pool.md_frontmatter  id=alice-pgpool-2026-04-10
+  [OK] layer4_database_postgres_pool.md_raw_log  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/database/raw/alice-pgpool-2026-04-10.jsonl
+  [OK] layer2_infra_cache_dir  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_cache
+  [OK] layer2_infra_cache_INDEX_md  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_cache/INDEX.md
+  [OK] layer2_infra_cache_index_has_items  items=['redis_lru_session_eviction.md']
+  [OK] layer3_infra_cache_redis_lru_session_eviction.md  resolves from INDEX → /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_cache/redis_lru_session_eviction.md
+  [OK] layer3_infra_cache_redis_lru_session_eviction.md_frontmatter  id=carol-redis-eviction-2026-03-27
+  [OK] layer4_infra_cache_redis_lru_session_eviction.md_raw_log  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_cache/raw/carol-redis-eviction-2026-03-27.jsonl
+  [OK] layer2_infra_queue_dir  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_queue
+  [OK] layer2_infra_queue_INDEX_md  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_queue/INDEX.md
+  [OK] layer2_infra_queue_index_has_items  items=['celery_retry_storm.md']
+  [OK] layer3_infra_queue_celery_retry_storm.md  resolves from INDEX → /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_queue/celery_retry_storm.md
+  [OK] layer3_infra_queue_celery_retry_storm.md_frontmatter  id=alice-celery-retry-2026-04-08
+  [OK] layer4_infra_queue_celery_retry_storm.md_raw_log  /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree/infra_queue/raw/alice-celery-retry-2026-04-08.jsonl
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+✦ ❯ ssleep 2 && curl -sS "http://127.0.0.1:7821/healthz" && echo
+{"ok": true}
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 took 2s 
+✦ ❯ ccurl -sS "http://127.0.0.1:7821/search?q=postgres+pool+exhaustion+lunch+spike&k=3" | python -m json.tool
+{
+    "hits": [
+        {
+            "id": "alice-pgpool-2026-04-10",
+            "title": "PostgreSQL pool exhaustion under burst traffic",
+            "author": "alice",
+            "confidence": 0.82,
+            "tags": [
+                "postgres",
+                "connection-pool",
+                "latency",
+                "prod-incident"
+            ],
+            "status": "active",
+            "applies_when": [
+                "postgres>=13",
+                "pgbouncer transaction mode"
+            ],
+            "do_not_apply_when": [
+                "session pooling mode",
+                "single-tenant DB"
+            ],
+            "raw_log": "./raw/alice-pgpool-2026-04-10.jsonl",
+            "wiki_type": "database",
+            "item_slug": "postgres_pool",
+            "context": "API tier behind PgBouncer, transaction pooling mode",
+            "root_cause": "API tier behind PgBouncer, transaction pooling mode\n\nLong-lived idle txns held by a misbehaving worker",
+            "symptom": "p99 latency spikes; 'remaining connection slots reserved'",
+            "fix": "Set idle_in_transaction_session_timeout=30s and bump pool size to 2x worker count",
+            "score": 0.0769
+        }
+    ]
+}
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+✦ ❯ ppkill -f "insights_cli.py serve" 2>/dev/null; echo DAEMON_KILLED
+DAEMON_KILLED
+%                                                                                                                                                                                                        [1]  + terminated  python insights_cli.py serve --port 7821 --store ./wiki_tree --store-mode tre
+
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+✦ ❯ ppkill -f "insights_cli.py serve" 2>/dev/null; echo DAEMON_KILLED
+DAEMON_KILLED
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ 

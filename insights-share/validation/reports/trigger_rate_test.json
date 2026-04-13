@@ -1,0 +1,97 @@
+{
+  "split": "test",
+  "threshold": 0.02,
+  "counts": {
+    "tp": 4,
+    "fp": 0,
+    "tn": 4,
+    "fn": 0,
+    "total": 8
+  },
+  "precision": 1.0,
+  "recall": 1.0,
+  "f1": 1.0,
+  "accuracy": 1.0,
+  "per_case": [
+    {
+      "id": "t04",
+      "split": "test",
+      "should_trigger": true,
+      "expected_card_id": "alice-pgpool-2026-04-10",
+      "top_id": "alice-pgpool-2026-04-10",
+      "top_score": 0.1064,
+      "triggered": true,
+      "verdict": "TP"
+    },
+    {
+      "id": "t07",
+      "split": "test",
+      "should_trigger": true,
+      "expected_card_id": "alice-celery-retry-2026-04-08",
+      "top_id": "alice-celery-retry-2026-04-08",
+      "top_score": 0.0659,
+      "triggered": true,
+      "verdict": "TP"
+    },
+    {
+      "id": "t09",
+      "split": "test",
+      "should_trigger": true,
+      "expected_card_id": "carol-redis-eviction-2026-03-27",
+      "top_id": "carol-redis-eviction-2026-03-27",
+      "top_score": 0.099,
+      "triggered": true,
+      "verdict": "TP"
+    },
+    {
+      "id": "t10",
+      "split": "test",
+      "should_trigger": true,
+      "expected_card_id": "carol-redis-eviction-2026-03-27",
+      "top_id": "carol-redis-eviction-2026-03-27",
+      "top_score": 0.0874,
+      "triggered": true,
+      "verdict": "TP"
+    },
+    {
+      "id": "t17",
+      "split": "test",
+      "should_trigger": false,
+      "expected_card_id": null,
+      "top_id": "alice-celery-retry-2026-04-08",
+      "top_score": 0.0101,
+      "triggered": false,
+      "verdict": "TN"
+    },
+    {
+      "id": "t18",
+      "split": "test",
+      "should_trigger": false,
+      "expected_card_id": null,
+      "top_id": null,
+      "top_score": 0.0,
+      "triggered": false,
+      "verdict": "TN"
+    },
+    {
+      "id": "t19",
+      "split": "test",
+      "should_trigger": false,
+      "expected_card_id": null,
+      "top_id": "alice-celery-retry-2026-04-08",
+      "top_score": 0.0105,
+      "triggered": false,
+      "verdict": "TN"
+    },
+    {
+      "id": "t20",
+      "split": "test",
+      "should_trigger": false,
+      "expected_card_id": null,
+      "top_id": null,
+      "top_score": 0.0,
+      "triggered": false,
+      "verdict": "TN"
+    }
+  ]
+}

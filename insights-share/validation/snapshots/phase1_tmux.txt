@@ -1,0 +1,131 @@
+source .venv/bin/activate
+pkill -f "insights_cli.py serve" 2>/dev/null; sleep 1
+python insights_cli.py serve --port 7821 --store ./wiki_tree --store-mode tree >/tmp/isv-p1-daemon.log 2>&1 &
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ ssource .venv/bin/activate
+pkill -f "insights_cli.py serve" 2>/dev/null; sleep 1
+python insights_cli.py serve --port 7821 --store ./wiki_tree --store-mode tree >/tmp/isv-p1-daemon.log 2>&1 &
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ ppkill -f "insights_cli.py serve" 2>/dev/null; sleep 1
+%                                                                                                                                                                                                        python insights_cli.py serve --port 7821 --store ./wiki_tree --store-mode tree >/tmp/isv-p1-daemon.log 2>&1 &
+
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ ppython insights_cli.py serve --port 7821 --store ./wiki_tree --store-mode tree >/tmp/isv-p1-daemon.log 2>&1 &
+[1] 74959
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+✦ ❯ ccurl -sS http://127.0.0.1:7821/healthz && echo
+{"ok": true}
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+✦ ❯ ppython /Users/m1/projects/demo_insights_share/insights-share/validation/trigger_rate.py --split train --threshold 0.02 --report /Users/m1/projects/demo_insights_share/insights-share/validation/rep oorts/trigger_rate_train.json 2>&1; echo TRAIN_EXIT=$?
+[TRIGGER_RATE split=train] total=12 tp=5 fp=1 tn=5 fn=1 precision=0.8333 recall=0.8333 f1=0.8333 acc=0.8333
+  t01 [FN] score=0.0241 top_id=carol-redis-eviction-2026-03-27 expected=alice-pgpool-2026-04-10
+  t02 [TP] score=0.2250 top_id=alice-pgpool-2026-04-10 expected=alice-pgpool-2026-04-10
+  t03 [TP] score=0.0750 top_id=alice-pgpool-2026-04-10 expected=alice-pgpool-2026-04-10
+  t05 [TP] score=0.1429 top_id=alice-celery-retry-2026-04-08 expected=alice-celery-retry-2026-04-08
+  t06 [TP] score=0.0758 top_id=alice-celery-retry-2026-04-08 expected=alice-celery-retry-2026-04-08
+  t08 [TP] score=0.0488 top_id=carol-redis-eviction-2026-03-27 expected=carol-redis-eviction-2026-03-27
+  t11 [FP] score=0.0227 top_id=alice-pgpool-2026-04-10 expected=None
+  t12 [TN] score=0.0000 top_id=None expected=None
+  t13 [TN] score=0.0000 top_id=None expected=None
+  t14 [TN] score=0.0000 top_id=None expected=None
+  t15 [TN] score=0.0000 top_id=None expected=None
+  t16 [TN] score=0.0000 top_id=None expected=None
+TRAIN_EXIT=0
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+✦ ❯ ppython /Users/m1/projects/demo_insights_share/insights-share/validation/trigger_rate.py --split test --threshold 0.02 --report /Users/m1/projects/demo_insights_share/insights-share/validation/repo rrts/trigger_rate_test.json 2>&1; echo TEST_EXIT=$?
+[TRIGGER_RATE split=test] total=8 tp=4 fp=0 tn=4 fn=0 precision=1.0 recall=1.0 f1=1.0 acc=1.0
+  t04 [TP] score=0.1163 top_id=alice-pgpool-2026-04-10 expected=alice-pgpool-2026-04-10
+  t07 [TP] score=0.0769 top_id=alice-celery-retry-2026-04-08 expected=alice-celery-retry-2026-04-08
+  t09 [TP] score=0.1299 top_id=carol-redis-eviction-2026-03-27 expected=carol-redis-eviction-2026-03-27
+  t10 [TP] score=0.1139 top_id=carol-redis-eviction-2026-03-27 expected=carol-redis-eviction-2026-03-27
+  t17 [TN] score=0.0139 top_id=alice-celery-retry-2026-04-08 expected=None
+  t18 [TN] score=0.0000 top_id=None expected=None
+  t19 [TN] score=0.0147 top_id=alice-celery-retry-2026-04-08 expected=None
+  t20 [TN] score=0.0000 top_id=None expected=None
+TEST_EXIT=0
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+✦ ❯ ppkill -f "insights_cli.py serve" 2>/dev/null; sleep 1
+[1]  + terminated  python insights_cli.py serve --port 7821 --store ./wiki_tree --store-mode tre
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ ppkill -f "insights_cli.py serve" 2>/dev/null; sleep 1
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ ppython insights_cli.py serve --port 7821 --store ./wiki_tree --store-mode tree >/tmp/isv-p1-daemon.log 2>&1 &
+[1] 76532
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+✦ ❯ ssleep 2 && curl -sS http://127.0.0.1:7821/healthz && echo
+{"ok": true}
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 took 2s 
+✦ ❯ ppython /Users/m1/projects/demo_insights_share/insights-share/validation/trigger_rate.py --split all --threshold 0.02 --report /Users/m1/projects/demo_insights_share/insights-share/validation/repor tts/trigger_rate_all.json
+[TRIGGER_RATE split=train] total=12 tp=5 fp=1 tn=5 fn=1 precision=0.8333 recall=0.8333 f1=0.8333 acc=0.8333
+  t01 [FN] score=0.0280 top_id=carol-redis-eviction-2026-03-27 expected=alice-pgpool-2026-04-10
+  t02 [TP] score=0.2045 top_id=alice-pgpool-2026-04-10 expected=alice-pgpool-2026-04-10
+  t03 [TP] score=0.0682 top_id=alice-pgpool-2026-04-10 expected=alice-pgpool-2026-04-10
+  t05 [TP] score=0.0989 top_id=alice-celery-retry-2026-04-08 expected=alice-celery-retry-2026-04-08
+  t06 [TP] score=0.0532 top_id=alice-celery-retry-2026-04-08 expected=alice-celery-retry-2026-04-08
+  t08 [TP] score=0.0374 top_id=carol-redis-eviction-2026-03-27 expected=carol-redis-eviction-2026-03-27
+  t11 [FP] score=0.0208 top_id=alice-pgpool-2026-04-10 expected=None
+  t12 [TN] score=0.0000 top_id=None expected=None
+  t13 [TN] score=0.0000 top_id=None expected=None
+  t14 [TN] score=0.0000 top_id=None expected=None
+  t15 [TN] score=0.0000 top_id=None expected=None
+  t16 [TN] score=0.0000 top_id=None expected=None
+[TRIGGER_RATE split=test] total=8 tp=4 fp=0 tn=4 fn=0 precision=1.0 recall=1.0 f1=1.0 acc=1.0
+  t04 [TP] score=0.1064 top_id=alice-pgpool-2026-04-10 expected=alice-pgpool-2026-04-10
+  t07 [TP] score=0.0538 top_id=alice-celery-retry-2026-04-08 expected=alice-celery-retry-2026-04-08
+  t09 [TP] score=0.0980 top_id=carol-redis-eviction-2026-03-27 expected=carol-redis-eviction-2026-03-27
+  t10 [TP] score=0.0865 top_id=carol-redis-eviction-2026-03-27 expected=carol-redis-eviction-2026-03-27
+  t17 [TN] score=0.0100 top_id=alice-celery-retry-2026-04-08 expected=None
+  t18 [TN] score=0.0000 top_id=None expected=None
+  t19 [TN] score=0.0104 top_id=alice-celery-retry-2026-04-08 expected=None
+  t20 [TN] score=0.0000 top_id=None expected=None
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+✦ ❯ ppkill -f "insights_cli.py serve" 2>/dev/null; sleep 1
+[1]  + terminated  python insights_cli.py serve --port 7821 --store ./wiki_tree --store-mode tre
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+❯ ssleep 1 && python insights_cli.py serve --port 7821 --store ./wiki_tree --store-mode tree >/tmp/isv-p1-daemon.log 2>&1 &
+[1] 77813
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+✦ ❯ ssleep 3 && python /Users/m1/projects/demo_insights_share/insights-share/validation/trigger_rate.py --split all --threshold 0.02 --report /Users/m1/projects/demo_insights_share/insights-share/valid aation/reports/trigger_rate_all.json
+[TRIGGER_RATE split=train] total=12 tp=6 fp=1 tn=5 fn=0 precision=0.8571 recall=1.0 f1=0.9231 acc=0.9167
+  t01 [TP] score=0.0625 top_id=alice-pgpool-2026-04-10 expected=alice-pgpool-2026-04-10
+  t02 [TP] score=0.2045 top_id=alice-pgpool-2026-04-10 expected=alice-pgpool-2026-04-10
+  t03 [TP] score=0.0682 top_id=alice-pgpool-2026-04-10 expected=alice-pgpool-2026-04-10
+  t05 [TP] score=0.1000 top_id=alice-celery-retry-2026-04-08 expected=alice-celery-retry-2026-04-08
+  t06 [TP] score=0.0538 top_id=alice-celery-retry-2026-04-08 expected=alice-celery-retry-2026-04-08
+  t08 [TP] score=0.0577 top_id=carol-redis-eviction-2026-03-27 expected=carol-redis-eviction-2026-03-27
+  t11 [FP] score=0.0208 top_id=alice-pgpool-2026-04-10 expected=None
+  t12 [TN] score=0.0000 top_id=None expected=None
+  t13 [TN] score=0.0000 top_id=None expected=None
+  t14 [TN] score=0.0000 top_id=None expected=None
+  t15 [TN] score=0.0000 top_id=None expected=None
+  t16 [TN] score=0.0000 top_id=None expected=None
+[TRIGGER_RATE split=test] total=8 tp=4 fp=0 tn=4 fn=0 precision=1.0 recall=1.0 f1=1.0 acc=1.0
+  t04 [TP] score=0.1064 top_id=alice-pgpool-2026-04-10 expected=alice-pgpool-2026-04-10
+  t07 [TP] score=0.0659 top_id=alice-celery-retry-2026-04-08 expected=alice-celery-retry-2026-04-08
+  t09 [TP] score=0.0990 top_id=carol-redis-eviction-2026-03-27 expected=carol-redis-eviction-2026-03-27
+  t10 [TP] score=0.0874 top_id=carol-redis-eviction-2026-03-27 expected=carol-redis-eviction-2026-03-27
+  t17 [TN] score=0.0101 top_id=alice-celery-retry-2026-04-08 expected=None
+  t18 [TN] score=0.0000 top_id=None expected=None
+  t19 [TN] score=0.0105 top_id=alice-celery-retry-2026-04-08 expected=None
+  t20 [TN] score=0.0000 top_id=None expected=None
+%                                                                                                                                                                                                        
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 took 3s 
+✦ ❯ ppkill -f "insights_cli.py serve" 2>/dev/null; echo PHASE1_DAEMON_KILLED
+PHASE1_DAEMON_KILLED
+%                                                                                                                                                                                                        [1]  + terminated  python insights_cli.py serve --port 7821 --store ./wiki_tree --store-mode tre
+
+demo_insights_share/insights-share/demo_codes on  main [!?] 🐍 v3.12.0 
+✦ ❯ 

@@ -1,0 +1,128 @@
+# 20 个 trigger cases（10 positive + 10 negative）用于 validation task #1。
+# 切分：12 train（6 pos + 6 neg）+ 8 test（4 pos + 4 neg）。
+# 字段说明：
+#   id:                t01..t20，2 位编号
+#   problem:           用户真实问题描述（Bob 可能在 claude code 里打的话）
+#   should_trigger:    是否应该命中某张 wiki 卡
+#   expected_card_id:  positive 才有；必须是 top1 命中
+#   split:             train | test
+#   rationale:         人工标注理由
+cases:
+  # ===== POSITIVE × 10 (6 train + 4 test) =====
+  # --- postgres_pool (4: 3 train + 1 test) ---
+  - id: t01
+    problem: "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike"
+    should_trigger: true
+    expected_card_id: alice-pgpool-2026-04-10
+    split: train
+    rationale: "baseline 演示文案，明显命中 pgpool exhaustion"
+  - id: t02
+    problem: "pgbouncer transaction pooling mode 下 p99 飙高，日志里 'remaining connection slots reserved'"
+    should_trigger: true
+    expected_card_id: alice-pgpool-2026-04-10
+    split: train
+    rationale: "与 card 的 context + symptom 高度重合"
+  - id: t03
+    problem: "idle_in_transaction worker 把 postgres 连接池耗光，prod 503"
+    should_trigger: true
+    expected_card_id: alice-pgpool-2026-04-10
+    split: train
+    rationale: "root_cause 完全同义"
+  - id: t04
+    problem: "FastAPI backend keeps hitting 'FATAL: remaining connection slots are reserved' against postgres"
+    should_trigger: true
+    expected_card_id: alice-pgpool-2026-04-10
+    split: test
+    rationale: "英文同义改写，test 集"
+
+  # --- celery_retry_storm (3: 2 train + 1 test) ---
+  - id: t05
+    problem: "celery workers stuck in retry loop hammering redis broker, queue backlog is exploding"
+    should_trigger: true
+    expected_card_id: alice-celery-retry-2026-04-08
+    split: train
+    rationale: "与 celery retry storm card symptom 重合"
+  - id: t06
+    problem: "下游 HTTP 挂了之后 celery 不停重试，retry 把 redis broker 打爆了"
+    should_trigger: true
+    expected_card_id: alice-celery-retry-2026-04-08
+    split: train
+    rationale: "中英混合同义"
+  - id: t07
+    problem: "Celery 5 worker 的 max_retries 默认立即重试，没有 backoff，broker OOM"
+    should_trigger: true
+    expected_card_id: alice-celery-retry-2026-04-08
+    split: test
+    rationale: "fix 字段同义的问题描述"
+
+  # --- redis_lru_session_eviction (3: 1 train + 2 test) ---
+  - id: t08
+    problem: "用户随机被登出，redis 的 allkeys-lru 把 session key 也给 evict 了"
+    should_trigger: true
+    expected_card_id: carol-redis-eviction-2026-03-27
+    split: train
+    rationale: "session eviction 场景"
+  - id: t09
+    problem: "shared redis with maxmemory-policy=allkeys-lru is dropping auth session data mid-flight"
+    should_trigger: true
+    expected_card_id: carol-redis-eviction-2026-03-27
+    split: test
+    rationale: "英文同义"
+  - id: t10
+    problem: "一批 cache 写入后 auth service 报 'session not found' for keys written 5 min ago"
+    should_trigger: true
+    expected_card_id: carol-redis-eviction-2026-03-27
+    split: test
+    rationale: "症状侧同义"
+
+  # ===== NEGATIVE × 10 (6 train + 4 test) =====
+  - id: t11
+    problem: "Tailwind dark mode 切换后按钮 hover 态失效，要改哪些 class？"
+    should_trigger: false
+    split: train
+    rationale: "纯前端样式，与任何卡都无关"
+  - id: t12
+    problem: "git rebase onto main 之后怎么把一堆 fixup commits squash 成一个？"
+    should_trigger: false
+    split: train
+    rationale: "git 工作流，无基础设施卡"
+  - id: t13
+    problem: "macOS brew upgrade 之后 zsh prompt 显示乱码了"
+    should_trigger: false
+    split: train
+    rationale: "本地环境问题"
+  - id: t14
+    problem: "TypeScript generic constraint T extends Record<string, unknown> 的正确写法"
+    should_trigger: false
+    split: train
+    rationale: "语言语法，无相关卡"
+  - id: t15
+    problem: "ffmpeg 把一段 mp4 压成 webp 动图，保持 10fps"
+    should_trigger: false
+    split: train
+    rationale: "多媒体转码"
+  - id: t16
+    problem: "React Server Component 里怎么用 async generator？"
+    should_trigger: false
+    split: train
+    rationale: "前端框架概念"
+  - id: t17
+    problem: "AWS IAM policy simulator 报 implicit deny 但 bucket policy 看起来 allow 了"
+    should_trigger: false
+    split: test
+    rationale: "云鉴权，不在 wiki 范围"
+  - id: t18
+    problem: "在 vim 里快速把一个函数的所有空格缩进替换成 4 tab"
+    should_trigger: false
+    split: test
+    rationale: "编辑器操作"
+  - id: t19
+    problem: "k6 load test 脚本里怎么自定义 JSON body 并签名 HMAC"
+    should_trigger: false
+    split: test
+    rationale: "压测脚本，无相关卡"
+  - id: t20
+    problem: "macOS 上 xcode-select 报 'agreeing to the Xcode/iOS license requires admin privileges'"
+    should_trigger: false
+    split: test
+    rationale: "Xcode 安装问题"

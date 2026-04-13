@@ -1,0 +1,584 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>insights-share · PM 线性验证手册</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --bg: #fafafa;
+    --fg: #1f2328;
+    --muted: #57606a;
+    --border: #d0d7de;
+    --accent: #0969da;
+    --ok-bg: #d4edda;
+    --ok-fg: #155724;
+    --fail-bg: #f8d7da;
+    --fail-fg: #721c24;
+    --code-bg: #0d1117;
+    --code-fg: #e6edf3;
+    --out-bg: #f6f8fa;
+    --out-border: #d0d7de;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+    line-height: 1.6;
+  }
+  header { border-bottom: 2px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; }
+  header h1 { margin: 0 0 4px; font-size: 1.6em; }
+  header p { margin: 4px 0; color: var(--muted); }
+  .summary {
+    background: var(--ok-bg);
+    color: var(--ok-fg);
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    margin: 16px 0;
+  }
+  nav { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin-bottom: 24px; }
+  nav strong { display: block; margin-bottom: 6px; }
+  nav ol { margin: 0; padding-left: 20px; }
+  nav a { color: var(--accent); text-decoration: none; }
+  nav a:hover { text-decoration: underline; }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 1.25em; border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-top: 32px; }
+  h3 { font-size: 1.05em; margin-top: 18px; color: var(--muted); }
+  .why, .what {
+    background: #fff;
+    border-left: 4px solid var(--accent);
+    padding: 10px 14px;
+    margin: 12px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .what { border-left-color: #6f42c1; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.78em;
+    font-weight: 600;
+    vertical-align: middle;
+  }
+  .badge.ok { background: var(--ok-bg); color: var(--ok-fg); }
+  .badge.fail { background: var(--fail-bg); color: var(--fail-fg); }
+
+  .cmd-wrap { position: relative; margin: 8px 0; }
+  .cmd {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.85em;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 4px;
+    padding: 2px 10px;
+    font-size: 0.72em;
+    cursor: pointer;
+  }
+  .copy-btn:hover { background: rgba(255,255,255,0.22); }
+  .copy-btn.copied { background: var(--ok-bg); color: var(--ok-fg); border-color: var(--ok-bg); }
+
+  .out {
+    background: var(--out-bg);
+    border: 1px solid var(--out-border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.78em;
+    overflow-x: auto;
+    white-space: pre;
+    margin: 8px 0;
+    color: #1f2328;
+  }
+  .out.green { border-left: 3px solid #2da44e; }
+
+  .step-label {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 0.72em;
+    margin-right: 6px;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 0.9em; }
+  th, td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #f4f4f4; }
+  footer { color: var(--muted); font-size: 0.85em; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); }
+  code.inline { background: var(--out-bg); padding: 1px 6px; border-radius: 3px; font-size: 0.88em; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>insights-share · PM 线性验证手册</h1>
+  <p>从零安装到 6 个验证任务全部通过 — 每一步都有可复制的 bash 命令和真实输出快照。</p>
+  <p>对应 <code class="inline">/Users/m1/projects/demo_insights_share/validation.md</code> 定义的 5 项规则 + 框架总则。</p>
+</header>
+
+<div class="summary">
+  ✅ 当前状态：6 / 6 通过 · 严格无 fallback · 全部由 <code style="color:inherit">tmux + claude -p</code> 抓快照
+</div>
+
+<nav>
+  <strong>线性导航（按推荐执行顺序）</strong>
+  <ol>
+    <li><a href="#bg">为什么做（PM 一句话）</a></li>
+    <li><a href="#install">Step 0 — 安装与基线烟测</a></li>
+    <li><a href="#t1">验证任务 1 — Wiki 4 层结构（validation #4）</a></li>
+    <li><a href="#t2">验证任务 2 — 触发率 20 cases（validation #1）</a></li>
+    <li><a href="#t3">验证任务 3 — MiniMax agentic search（validation #5）</a></li>
+    <li><a href="#t4">验证任务 4 — SILENT_AND_JUST_RUN 静默触发（validation #2）</a></li>
+    <li><a href="#t5">验证任务 5 — Wiki CRUD 操作（validation #3）</a></li>
+    <li><a href="#t6">验证任务 6 — 一键汇总 HTML 报告</a></li>
+    <li><a href="#art">产物清单（snapshots / reports / 文档）</a></li>
+  </ol>
+</nav>
+
+<!-- ===================== Background ===================== -->
+<section id="bg">
+<h2>为什么做这件事（PM 一句话）</h2>
+<div class="why">
+  <strong>痛点</strong>：每位工程师都得花 60+ 秒让 <code class="inline">claude /insights</code> 从零悟出队友早就悟出的同一条教训；insight 只在个人 profile 里，不会自动流到下一个踩坑的人手上。
+</div>
+<div class="what">
+  <strong>修复</strong>：LAN 上跑一个 <strong>insight wiki</strong>（HTTP daemon，端口 7821），加 <strong>热加载 + 后台 adapter + 静默 Stop hook</strong>。Bob 即使没主动求助，只要在 claude code 里描述一句问题，系统就会在用户无感知的时间里把 Alice 已经写下的 insight 卡片悄悄送到他眼前。
+</div>
+</section>
+
+<!-- ===================== Install ===================== -->
+<section id="install">
+<h2><span class="step-label">STEP 0</span>安装与基线烟测</h2>
+
+<h3>0.1 准备 Python 虚拟环境与依赖</h3>
+<div class="why">
+  我们要做的第一件事：把 daemon 跑起来 + 确认 MiniMax 凭据可用。这两件事都成功了，之后 6 个任务才有意义。
+</div>
+
+<div class="cmd-wrap">
+<button class="copy-btn" data-copy="cd /Users/m1/projects/demo_insights_share/insights-share/demo_codes
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt -q">复制</button>
+<pre class="cmd">cd /Users/m1/projects/demo_insights_share/insights-share/demo_codes
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt -q</pre>
+</div>
+
+<h3>0.2 配置 MiniMax 凭据</h3>
+<div class="why">
+  <code class="inline">.env</code> 只有两个字段是关键：<code class="inline">ANTHROPIC_AUTH_TOKEN</code> 和 <code class="inline">ANTHROPIC_BASE_URL</code>。token 必须是真的（占位符 <code class="inline">sk-cp-...</code> 会让 Phase 5 失败，因为我们硬性禁止 fallback）。
+</div>
+
+<div class="cmd-wrap">
+<button class="copy-btn" data-copy="cp .env.example .env
+# 用真实 MiniMax token 覆盖 sk-cp-... 这一行（编辑器或 sed 均可）
+# 其余字段保持默认 MiniMax-M2.7-highspeed">复制</button>
+<pre class="cmd">cp .env.example .env
+# 用真实 MiniMax token 覆盖 sk-cp-... 这一行（编辑器或 sed 均可）
+# 其余字段保持默认 MiniMax-M2.7-highspeed</pre>
+</div>
+
+<h3>0.3 跑一次 baseline，确认 demo 没坏</h3>
+
+<div class="cmd-wrap">
+<button class="copy-btn" data-copy="bash run_demo.sh --no-ai">复制</button>
+<pre class="cmd">bash run_demo.sh --no-ai</pre>
+</div>
+
+<div class="what">
+  <strong>实际输出（截取自 <code class="inline">phase0_tmux.txt</code>）</strong>：
+</div>
+<pre class="out green">                          DEMO: Bob hits prod incident
+
+restate: Our checkout API is timing out, postgres is rejecting new connections during the lunch spike
+
+hot-loaded alice-pgpool-2026-04-10 from alice (score=0.0625)
+
++------------------------------------------------------------------------------+
+| Set idle_in_transaction_session_timeout=30s and bump pool size to 2x worker count |
++------------------------------------------------------------------------------+
+| raw (no-ai) confidence=0.82                                                  |
++------------------------------------------------------------------------------+
+
+fast path: 0.0s (no-ai)   slow path baseline: ~62s
+
+demo finished
+---BASELINE-EXIT=0---</pre>
+
+<h3>0.4 验证 MiniMax token 真的能通</h3>
+
+<div class="cmd-wrap">
+<button class="copy-btn" data-copy="python /Users/m1/projects/demo_insights_share/insights-share/validation/minimax_smoke.py">复制</button>
+<pre class="cmd">python /Users/m1/projects/demo_insights_share/insights-share/validation/minimax_smoke.py</pre>
+</div>
+
+<pre class="out green">[SMOKE OK] response_len=9 preview='PONG\nPONG'
+---SMOKE-EXIT=0---</pre>
+
+<div class="what">
+  ✅ <strong>PM 看完应该明白</strong>：daemon 能起来、模型 token 是真的、整条链路 1 秒完成；如果这一步过不了，就别往下走。
+</div>
+</section>
+
+<!-- ===================== Task 1 — Wiki 4 layers ===================== -->
+<section id="t1">
+<h2><span class="step-label">任务 1</span>Wiki 4 层结构 <span class="badge ok">PASS</span></h2>
+<div class="why">
+  <strong>对应规则</strong>：validation.md task #4 — wiki 必须严格 4 层： <code class="inline">wiki_types.json → {type}/INDEX.md → {item}.md → raw/{id}.jsonl</code>。当前 demo 起步时只有一个扁平 <code class="inline">wiki.json</code>，所以这是最严重的 gap。
+</div>
+
+<h3>1.1 把 seeds/*.json 迁移到 4 层目录</h3>
+<div class="cmd-wrap">
+<button class="copy-btn" data-copy="cd /Users/m1/projects/demo_insights_share/insights-share/demo_codes
+source .venv/bin/activate
+python /Users/m1/projects/demo_insights_share/insights-share/validation/migrate_wiki_to_tree.py">复制</button>
+<pre class="cmd">cd /Users/m1/projects/demo_insights_share/insights-share/demo_codes
+source .venv/bin/activate
+python /Users/m1/projects/demo_insights_share/insights-share/validation/migrate_wiki_to_tree.py</pre>
+</div>
+
+<pre class="out green">[MIGRATE OK] out=/Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree types=['database', 'infra_cache', 'infra_queue'] cards=3</pre>
+
+<h3>1.2 静态校验 4 层结构完整性</h3>
+<div class="cmd-wrap">
+<button class="copy-btn" data-copy="python /Users/m1/projects/demo_insights_share/insights-share/validation/check_wiki_layers.py \
+    /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree \
+    --report /Users/m1/projects/demo_insights_share/insights-share/validation/reports/wiki_structure.json">复制</button>
+<pre class="cmd">python /Users/m1/projects/demo_insights_share/insights-share/validation/check_wiki_layers.py \
+    /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree \
+    --report /Users/m1/projects/demo_insights_share/insights-share/validation/reports/wiki_structure.json</pre>
+</div>
+
+<pre class="out green">[WIKI_LAYERS] 20/20 checks PASS
+  [OK] layer1_wiki_types_json
+  [OK] layer1_has_types  types=['database', 'infra_cache', 'infra_queue']
+  [OK] layer2_database_dir
+  [OK] layer2_database_INDEX_md
+  [OK] layer2_database_index_has_items  items=['postgres_pool.md']
+  [OK] layer3_database_postgres_pool.md
+  [OK] layer3_database_postgres_pool.md_frontmatter  id=alice-pgpool-2026-04-10
+  [OK] layer4_database_postgres_pool.md_raw_log
+  [OK] layer2_infra_cache_dir
+  [OK] layer2_infra_cache_INDEX_md
+  [OK] layer3_infra_cache_redis_lru_session_eviction.md
+  [OK] layer4_infra_cache_redis_lru_session_eviction.md_raw_log
+  [OK] layer2_infra_queue_dir
+  [OK] layer2_infra_queue_INDEX_md
+  [OK] layer3_infra_queue_celery_retry_storm.md
+  [OK] layer4_infra_queue_celery_retry_storm.md_raw_log</pre>
+
+<h3>1.3 用 tree 模式启动 daemon，curl 验证 search</h3>
+<div class="cmd-wrap">
+<button class="copy-btn" data-copy="pkill -f &quot;insights_cli.py serve&quot; 2>/dev/null; sleep 1
+python insights_cli.py serve --port 7821 --store ./wiki_tree --store-mode tree &
+sleep 2
+curl -sS &quot;http://127.0.0.1:7821/search?q=postgres+pool+exhaustion+lunch+spike&amp;k=3&quot; | python -m json.tool">复制</button>
+<pre class="cmd">pkill -f "insights_cli.py serve" 2>/dev/null; sleep 1
+python insights_cli.py serve --port 7821 --store ./wiki_tree --store-mode tree &
+sleep 2
+curl -sS "http://127.0.0.1:7821/search?q=postgres+pool+exhaustion+lunch+spike&k=3" | python -m json.tool</pre>
+</div>
+
+<pre class="out green">{
+    "hits": [
+        {
+            "id": "alice-pgpool-2026-04-10",
+            "title": "PostgreSQL pool exhaustion under burst traffic",
+            "wiki_type": "database",
+            "item_slug": "postgres_pool",
+            "score": 0.0769
+        }
+    ]
+}</pre>
+
+<div class="what">
+  ✅ <strong>PM 看完应该明白</strong>：所有 insight 都按 type 进了独立 markdown 文件，可被人读、可被工具检索；wiki 不再是黑盒 JSON。
+</div>
+</section>
+
+<!-- ===================== Task 2 — Trigger Rate ===================== -->
+<section id="t2">
+<h2><span class="step-label">任务 2</span>触发率 20 cases <span class="badge ok">PASS</span></h2>
+<div class="why">
+  <strong>对应规则</strong>：validation.md task #1 — 必须有 20 个触发用例（10 应触发 + 10 不应触发），切成 12 train / 8 test，优化触发率直到合格。
+</div>
+
+<h3>2.1 评测 train 集</h3>
+<div class="cmd-wrap">
+<button class="copy-btn" data-copy="python /Users/m1/projects/demo_insights_share/insights-share/validation/trigger_rate.py \
+    --split train --threshold 0.02 \
+    --report /Users/m1/projects/demo_insights_share/insights-share/validation/reports/trigger_rate_train.json">复制</button>
+<pre class="cmd">python /Users/m1/projects/demo_insights_share/insights-share/validation/trigger_rate.py \
+    --split train --threshold 0.02 \
+    --report /Users/m1/projects/demo_insights_share/insights-share/validation/reports/trigger_rate_train.json</pre>
+</div>
+
+<pre class="out green">[TRIGGER_RATE split=train] total=12 tp=6 fp=1 tn=5 fn=0 precision=0.8571 recall=1.0 f1=0.9231 acc=0.9167</pre>
+
+<h3>2.2 评测 test 集</h3>
+<div class="cmd-wrap">
+<button class="copy-btn" data-copy="python /Users/m1/projects/demo_insights_share/insights-share/validation/trigger_rate.py \
+    --split test --threshold 0.02 \
+    --report /Users/m1/projects/demo_insights_share/insights-share/validation/reports/trigger_rate_test.json">复制</button>
+<pre class="cmd">python /Users/m1/projects/demo_insights_share/insights-share/validation/trigger_rate.py \
+    --split test --threshold 0.02 \
+    --report /Users/m1/projects/demo_insights_share/insights-share/validation/reports/trigger_rate_test.json</pre>
+</div>
+
+<pre class="out green">[TRIGGER_RATE split=test] total=8 tp=4 fp=0 tn=4 fn=0 precision=1.0 recall=1.0 f1=1.0 acc=1.0</pre>
+
+<table>
+  <thead><tr><th>Split</th><th>用例数</th><th>Precision</th><th>Recall</th><th>F1</th><th>判定</th></tr></thead>
+  <tbody>
+    <tr><td>train</td><td>12 (6 pos + 6 neg)</td><td>0.8571</td><td>1.0000</td><td>0.9231</td><td><span class="badge ok">≥ 0.9</span></td></tr>
+    <tr><td>test</td><td>8 (4 pos + 4 neg)</td><td>1.0000</td><td>1.0000</td><td>1.0000</td><td><span class="badge ok">满分</span></td></tr>
+  </tbody>
+</table>
+
+<div class="what">
+  ✅ <strong>PM 看完应该明白</strong>：在没人看过的 8 个测试句子上，系统 100% 知道哪些该触发哪些不该触发；上线前的最低门槛已稳过。
+</div>
+</section>
+
+<!-- ===================== Task 3 — Agentic Search ===================== -->
+<section id="t3">
+<h2><span class="step-label">任务 3</span>MiniMax agentic search <span class="badge ok">PASS</span></h2>
+<div class="why">
+  <strong>对应规则</strong>：validation.md task #5 — 必须有 agentic search wiki minimax。我们让 MiniMax haiku-agent 自己用 Glob/Grep/Read 工具遍历 wiki_tree，返回带 score 和 rationale 的 hits。<strong>严禁 fallback</strong>：任何失败直接判负。
+</div>
+
+<h3>3.1 直接调 search_agent.py</h3>
+<div class="cmd-wrap">
+<button class="copy-btn" data-copy="python search_agent.py \
+    --query &quot;checkout API timing out postgres rejecting connections lunch spike&quot; \
+    --wiki-tree /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree">复制</button>
+<pre class="cmd">python search_agent.py \
+    --query "checkout API timing out postgres rejecting connections lunch spike" \
+    --wiki-tree /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree</pre>
+</div>
+
+<pre class="out green">[search_agent] env: ANTHROPIC_AUTH_TOKEN=sk-cp-oc...Up50 ANTHROPIC_BASE_URL=https://api.minimaxi.com/anthropic HAIKU=MiniMax-M2.7-highspeed
+[search_agent] cwd: /Users/m1/projects/demo_insights_share/insights-share/demo_codes/wiki_tree
+[search_agent] tools: ['Glob', 'Grep', 'Read']
+[search_agent] assistant: '<<<SEARCH_HITS>>>\n{"hits": [{"wiki_type": "database", "item": "postgres_pool", "score": 0.92, "rationale": "Covers PostgreSQL connection-pool exhaustion under burst traffic; matches all three query si'
+&lt;&lt;&lt;SEARCH_HITS&gt;&gt;&gt;
+{"hits": [{"wiki_type": "database", "item": "postgres_pool", "score": 0.92, "rationale": "Covers PostgreSQL connection-pool exhaustion under burst traffic; matches all three query signals: checkout API timeout, postgres rejecting connections, lunch spike."}]}
+&lt;&lt;&lt;END&gt;&gt;&gt;
+SEARCH_EXIT=0</pre>
+
+<div class="what">
+  ✅ <strong>PM 看完应该明白</strong>：真实的 haiku-agent 在 ~19 秒内自己探索了整个 wiki_tree，给出 0.92 置信度命中 + 一段人话解释；不是关键词匹配，是语义理解。
+</div>
+</section>
+
+<!-- ===================== Task 4 — SILENT Stop hook ===================== -->
+<section id="t4">
+<h2><span class="step-label">任务 4</span>SILENT_AND_JUST_RUN 静默触发 <span class="badge ok">PASS</span></h2>
+<div class="why">
+  <strong>对应规则</strong>：validation.md task #2 — Bob 不主动求助，只是在 claude code 里"打字思考"；在最后一条 assistant 消息之后，系统自动触发 haiku-agent 搜 wiki，<strong>触发模式硬编码 SILENT_AND_JUST_RUN，永远不弹"是否要查 wiki"</strong>。
+</div>
+
+<h3>4.1 启动 daemon（tree mode）</h3>
+<div class="cmd-wrap">
+<button class="copy-btn" data-copy="pkill -f &quot;insights_cli.py serve&quot; 2>/dev/null; sleep 1
+python insights_cli.py serve --port 7821 --store ./wiki_tree --store-mode tree &
+sleep 2">复制</button>
+<pre class="cmd">pkill -f "insights_cli.py serve" 2>/dev/null; sleep 1
+python insights_cli.py serve --port 7821 --store ./wiki_tree --store-mode tree &
+sleep 2</pre>
+</div>
+
+<h3>4.2 跑 Bob 的"被动"会话</h3>
+<div class="cmd-wrap">
+<button class="copy-btn" data-copy="export INSIGHTS_TRIGGER_MODE=SILENT_AND_JUST_RUN
+rm -f /tmp/insights_review.md
+bash /Users/m1/projects/demo_insights_share/insights-share/validation/phase2_bob_session.sh">复制</button>
+<pre class="cmd">export INSIGHTS_TRIGGER_MODE=SILENT_AND_JUST_RUN
+rm -f /tmp/insights_review.md
+bash /Users/m1/projects/demo_insights_share/insights-share/validation/phase2_bob_session.sh</pre>
+</div>
+
+<div class="what">
+  <strong>实际输出（截取自 <code class="inline">phase2_tmux.txt</code>）</strong>：
+</div>
+<pre class="out green">[bob_session] mode=SILENT_AND_JUST_RUN
+[bob_session] starting claude (one-shot, no proactive help request)
+明白，连接池耗尽的经典场景——午高峰并发上来，checkout API 的连接请求把 max_connections 顶满了，Postgres 直接拒新连接。
+
+[bob_session] claude exited; reading /tmp/insights_review.md tail
+---
+sentinel: [SILENT_AND_JUST_RUN] no user confirm required
+trigger_mode: SILENT_AND_JUST_RUN
+query: 收到，午高峰连接被拒通常是连接池耗尽（max_connections 打满）或连接泄漏累积到临界点。继续排查。
+hits: {"hits": [{"wiki_type": "database", "item": "postgres_pool", "score": 0.9, "rationale": "Entry directly covers PostgreSQL connection pool exhaustion during burst/peak traffic, matching the user's description of max_connections saturation during lunch peak."}]}
+[bob_session] grep markers
+sentinel: [SILENT_AND_JUST_RUN] no user confirm required
+hits: {"hits": [{"wiki_type": "database", "item": "postgres_pool", "score": 0.9, ...}]}
+[bob_session] done</pre>
+
+<div class="what">
+  ✅ <strong>PM 看完应该明白</strong>：Bob 全程只打了一句"我在排查 PostgreSQL 连接超时"，没点任何按钮，hook 自动跑、search_agent 自动找到了 Alice 留下的 <code class="inline">postgres_pool</code> 卡。零 UI 弹窗、零 fallback、用户无感。
+</div>
+</section>
+
+<!-- ===================== Task 5 — Wiki CRUD ===================== -->
+<section id="t5">
+<h2><span class="step-label">任务 5</span>Wiki CRUD 操作 <span class="badge ok">PASS</span></h2>
+<div class="why">
+  <strong>对应规则</strong>：validation.md task #3 — wiki 必须支持 add / delete / edit / tag (NEVER forget) / merge / research 六种操作；<code class="inline">research</code> 必须是真 AI（无 fallback）。
+</div>
+
+<div class="cmd-wrap">
+<button class="copy-btn" data-copy="bash /Users/m1/projects/demo_insights_share/insights-share/validation/phase3_crud.sh">复制</button>
+<pre class="cmd">bash /Users/m1/projects/demo_insights_share/insights-share/validation/phase3_crud.sh</pre>
+</div>
+
+<pre class="out green">[MIGRATE OK] out=/tmp/isv-p3-wiki-tree types=['database', 'infra_cache', 'infra_queue'] cards=3
+{"id": "diana-elasticsearch-shard-2026-04-12"}
+CRUD_OK: add
+edited diana-elasticsearch-shard-2026-04-12
+CRUD_OK: edit
+tagged diana-elasticsearch-shard-2026-04-12 tags=['elasticsearch', 'shard', 'rebalance', 'experimental']
+CRUD_OK: tag
+{"id": "temp-diana-clone-2026-04-12"}
+merged into diana-elasticsearch-shard-2026-04-12
+CRUD_OK: merge
+deleted diana-elasticsearch-shard-2026-04-12
+CRUD_OK: delete
+research wrote new card research-20260413T104047Z
+CRUD_OK: research
+
+[phase3] all 6 CRUD operations completed</pre>
+
+<table>
+  <thead><tr><th>操作</th><th>验证点</th><th>状态</th></tr></thead>
+  <tbody>
+    <tr><td>add</td><td>POST /insights → 新建 markdown + raw/jsonl</td><td><span class="badge ok">OK</span></td></tr>
+    <tr><td>edit</td><td>POST /insights/{id}/edit → 更新 frontmatter 字段</td><td><span class="badge ok">OK</span></td></tr>
+    <tr><td>tag</td><td>POST /insights/{id}/tag → sticky 模式追加 tag</td><td><span class="badge ok">OK</span></td></tr>
+    <tr><td>merge</td><td>POST /insights/merge → 合并字段、删 source、保留 not_triggered</td><td><span class="badge ok">OK</span></td></tr>
+    <tr><td>delete</td><td>DELETE /insights/{id} → 同时删 md + raw/jsonl</td><td><span class="badge ok">OK</span></td></tr>
+    <tr><td>research</td><td>POST /insights/research → 真 AI 调 search_agent 写新卡</td><td><span class="badge ok">OK</span></td></tr>
+  </tbody>
+</table>
+
+<div class="what">
+  ✅ <strong>PM 看完应该明白</strong>：wiki 不再是只读快照，能被运营/研究 agent 长期维护；最关键的是 <code class="inline">research</code> 调用了真实 MiniMax，证明"agent 自己往 wiki 里写新条目"这条链路也是通的。
+</div>
+</section>
+
+<!-- ===================== Task 6 — Final aggregate ===================== -->
+<section id="t6">
+<h2><span class="step-label">任务 6</span>一键汇总 + HTML 报告 <span class="badge ok">PASS</span></h2>
+<div class="why">
+  <strong>对应规则</strong>：把上面 5 个验证任务的 snapshot/report 收集起来，自动算出 total/passed，输出一个单页 HTML 给 PM 浏览。脚本结尾自动用 Chrome 弹出。
+</div>
+
+<div class="cmd-wrap">
+<button class="copy-btn" data-copy="bash /Users/m1/projects/demo_insights_share/insights-share/validation/run_all_validations.sh">复制</button>
+<pre class="cmd">bash /Users/m1/projects/demo_insights_share/insights-share/validation/run_all_validations.sh</pre>
+</div>
+
+<pre class="out green">[run_all] wrote /Users/m1/projects/demo_insights_share/insights-share/validation/reports/final_report.html
+[run_all] all_pass=True (6/6)
+  [OK] Phase 0 - Baseline + MiniMax 预检 - demo finished + MiniMax PONG
+  [OK] Phase 4 - Wiki 4 层结构迁移 - 20/20 layer checks PASS
+  [OK] Phase 1 - Trigger rate 20 cases - train f1=0.9231 | test f1=1.0000 precision=1.0000 acc=1.0000
+  [OK] Phase 5 - MiniMax agentic search - real haiku-agent hit postgres_pool, NO fallback
+  [OK] Phase 2 - SILENT_AND_JUST_RUN Stop hook - Bob silent session → Stop hook → postgres_pool
+  [OK] Phase 3 - Wiki CRUD 操作 - 6/6 CRUD ops OK
+[run_all] PASS</pre>
+
+<div class="what">
+  ✅ <strong>PM 看完应该明白</strong>：一条命令复验全部 6 项，浏览器自动打开 <code class="inline">final_report.html</code>。如果哪天哪项炸了，这条命令的退出码会变 1，CI 能直接接住。
+</div>
+</section>
+
+<!-- ===================== Artifacts ===================== -->
+<section id="art">
+<h2>产物清单</h2>
+
+<h3>tmux 快照（每个 phase 一份原始终端记录）</h3>
+<pre class="out">insights-share/validation/snapshots/
+├── phase0_tmux.txt    1487 B   Baseline + MiniMax smoke
+├── phase1_tmux.txt   12608 B   Trigger rate train + test
+├── phase2_tmux.txt    5494 B   SILENT_AND_JUST_RUN Bob session
+├── phase3_tmux.txt    1700 B   Wiki CRUD 6 ops
+├── phase4_tmux.txt   11608 B   Wiki tree migrate + check
+└── phase5_tmux.txt    2257 B   Agentic search 真 AI 调用</pre>
+
+<h3>结构化报告（JSON / HTML）</h3>
+<pre class="out">insights-share/validation/reports/
+├── final_report.html       PM 一键汇总（自动 Chrome 弹出）
+├── final_summary.json      6 个 phase 的判定 + 指标
+├── trigger_rate_train.json 12 用例 per-case 详情
+├── trigger_rate_test.json  8 用例 per-case 详情
+├── trigger_rate_all.json   合并
+└── wiki_structure.json     20 层校验细节</pre>
+
+<h3>关键源码（修改 / 新建）</h3>
+<table>
+<thead><tr><th>文件</th><th>角色</th></tr></thead>
+<tbody>
+<tr><td><code class="inline">demo_codes/insightsd/store.py</code></td><td>新增 <code class="inline">TreeInsightStore</code>（4 层读 + CRUD）</td></tr>
+<tr><td><code class="inline">demo_codes/insightsd/server.py</code></td><td>加 <code class="inline">--store-mode tree</code> + 5 个 CRUD route</td></tr>
+<tr><td><code class="inline">demo_codes/insights_cli.py</code></td><td>加 <code class="inline">delete/edit/tag/merge/research</code> 子命令</td></tr>
+<tr><td><code class="inline">demo_codes/search_agent.py</code></td><td>haiku-agent 用 Glob/Grep/Read 自主搜 wiki_tree（无 fallback）</td></tr>
+<tr><td><code class="inline">demo_codes/_sdk_common.py</code></td><td>共享 dotenv + SDK 初始化</td></tr>
+<tr><td><code class="inline">demo_codes/.claude/settings.json</code></td><td>注册 Stop hook</td></tr>
+<tr><td><code class="inline">demo_codes/hooks/insights_stop_hook.py</code></td><td>SILENT_AND_JUST_RUN：抽 transcript → 调 search_agent → 写 review.md</td></tr>
+<tr><td><code class="inline">demo_docs/pm_walkthrough_star.md</code></td><td>严格 S-T-A-R 版 PM 演示文档</td></tr>
+<tr><td><code class="inline">validation/migrate_wiki_to_tree.py</code></td><td>seeds → 4 层 wiki_tree ETL</td></tr>
+<tr><td><code class="inline">validation/check_wiki_layers.py</code></td><td>4 层结构静态校验</td></tr>
+<tr><td><code class="inline">validation/trigger_rate.py</code></td><td>20 cases 评测脚本</td></tr>
+<tr><td><code class="inline">validation/trigger_cases/cases.yml</code></td><td>20 个测试用例（12 train / 8 test）</td></tr>
+<tr><td><code class="inline">validation/phase2_bob_session.sh</code></td><td>Bob 静默 session 包装</td></tr>
+<tr><td><code class="inline">validation/phase3_crud.sh</code></td><td>6 个 CRUD 端到端</td></tr>
+<tr><td><code class="inline">validation/run_all_validations.sh</code></td><td>一键汇总 + Chrome 弹出</td></tr>
+<tr><td><code class="inline">validation/minimax_smoke.py</code></td><td>token 烟测</td></tr>
+</tbody>
+</table>
+
+</section>
+
+<footer>
+  本手册由 <code class="inline">linear_walkthrough_PM_verification.html</code> 生成；所有命令直接复制就能跑。任何一条命令失败都意味着对应的 validation rule 没满足 — 不存在"看起来通过实际是 fallback"的灰区，这是用户的硬约束。
+</footer>
+
+<script>
+document.querySelectorAll('.copy-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const text = btn.getAttribute('data-copy');
+    try {
+      await navigator.clipboard.writeText(text);
+      const orig = btn.textContent;
+      btn.textContent = '已复制';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = orig;
+        btn.classList.remove('copied');
+      }, 1200);
+    } catch (e) {
+      btn.textContent = '复制失败';
+    }
+  });
+});
+</script>
+</body></html>
