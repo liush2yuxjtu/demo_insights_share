@@ -1,0 +1,13 @@
+{
+  "id": "alice-pgpool-2026-04-10",
+  "title": "PostgreSQL pool exhaustion under burst traffic",
+  "author": "alice",
+  "tags": ["postgres", "connection-pool", "latency", "prod-incident"],
+  "context": "API tier behind PgBouncer, transaction pooling mode",
+  "symptom": "p99 latency spikes; 'remaining connection slots reserved'",
+  "root_cause": "Long-lived idle txns held by a misbehaving worker",
+  "fix": "Set idle_in_transaction_session_timeout=30s and bump pool size to 2x worker count",
+  "confidence": 0.82,
+  "applies_when": ["postgres>=13", "pgbouncer transaction mode"],
+  "do_not_apply_when": ["session pooling mode", "single-tenant DB"]
+}

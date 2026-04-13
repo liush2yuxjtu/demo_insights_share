@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <title>Claude Code 使用洞察报告</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif; background: #f8fafc; color: #334155; line-height: 1.75; padding: 48px 24px; }
+    .container { max-width: 820px; margin: 0 auto; }
+    h1 { font-size: 32px; font-weight: 700; color: #0f172a; margin-bottom: 8px; }
+    h2 { font-size: 20px; font-weight: 600; color: #0f172a; margin-top: 48px; margin-bottom: 16px; }
+    .subtitle { color: #64748b; font-size: 15px; margin-bottom: 32px; }
+    .nav-toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 24px 0 32px 0; padding: 16px; background: white; border-radius: 8px; border: 1px solid #e2e8f0; }
+    .nav-toc a { font-size: 12px; color: #64748b; text-decoration: none; padding: 6px 12px; border-radius: 6px; background: #f1f5f9; transition: all 0.15s; }
+    .nav-toc a:hover { background: #e2e8f0; color: #334155; }
+    .stats-row { display: flex; gap: 24px; margin-bottom: 40px; padding: 20px 0; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; justify-content: space-around; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 24px; font-weight: 700; color: #0f172a; }
+    .stat-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+    .at-a-glance { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #f59e0b; border-radius: 12px; padding: 20px 24px; margin-bottom: 32px; }
+    .glance-title { font-size: 16px; font-weight: 700; color: #92400e; margin-bottom: 16px; }
+    .glance-sections { display: flex; flex-direction: column; gap: 12px; }
+    .glance-section { font-size: 14px; color: #78350f; line-height: 1.75; }
+    .glance-section strong { color: #92400e; }
+    .see-more { color: #b45309; text-decoration: none; font-size: 13px; white-space: nowrap; }
+    .see-more:hover { text-decoration: underline; }
+    .project-areas { display: flex; flex-direction: column; gap: 12px; margin-bottom: 32px; }
+    .project-area { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; }
+    .area-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px; }
+    .area-name { font-weight: 600; font-size: 15px; color: #0f172a; }
+    .area-count { font-size: 12px; color: #64748b; background: #f1f5f9; padding: 2px 8px; border-radius: 4px; white-space: nowrap; }
+    .area-desc { font-size: 14px; color: #475569; line-height: 1.75; }
+    .narrative { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin-bottom: 24px; }
+    .narrative p { margin-bottom: 12px; font-size: 14px; color: #475569; line-height: 1.85; }
+    .key-insight { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 12px 16px; margin-top: 12px; font-size: 14px; color: #166534; }
+    .section-intro { font-size: 14px; color: #64748b; margin-bottom: 16px; }
+    .big-wins { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    .big-win { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 16px; }
+    .big-win-title { font-weight: 600; font-size: 15px; color: #166534; margin-bottom: 8px; }
+    .big-win-desc { font-size: 14px; color: #15803d; line-height: 1.75; }
+    .friction-categories { display: flex; flex-direction: column; gap: 16px; margin-bottom: 24px; }
+    .friction-category { background: #fef2f2; border: 1px solid #fca5a5; border-radius: 8px; padding: 16px; }
+    .friction-title { font-weight: 600; font-size: 15px; color: #991b1b; margin-bottom: 6px; }
+    .friction-desc { font-size: 13px; color: #7f1d1d; margin-bottom: 10px; line-height: 1.75; }
+    .friction-examples { margin: 0 0 0 20px; font-size: 13px; color: #334155; }
+    .friction-examples li { margin-bottom: 6px; line-height: 1.75; }
+    .claude-md-section { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px; margin-bottom: 20px; }
+    .claude-md-section h3 { font-size: 14px; font-weight: 600; color: #1e40af; margin: 0 0 12px 0; }
+    .claude-md-actions { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #dbeafe; }
+    .copy-all-btn { background: #2563eb; color: white; border: none; border-radius: 4px; padding: 6px 12px; font-size: 12px; cursor: pointer; font-weight: 500; transition: all 0.2s; }
+    .copy-all-btn:hover { background: #1d4ed8; }
+    .copy-all-btn.copied { background: #16a34a; }
+    .claude-md-item { display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px; padding: 10px 0; border-bottom: 1px solid #dbeafe; }
+    .claude-md-item:last-child { border-bottom: none; }
+    .cmd-checkbox { margin-top: 6px; }
+    .cmd-code { background: white; padding: 8px 12px; border-radius: 4px; font-size: 12px; color: #1e40af; border: 1px solid #bfdbfe; font-family: 'SF Mono', Menlo, Consolas, monospace; display: block; white-space: pre-wrap; word-break: break-word; flex: 1; line-height: 1.6; }
+    .cmd-why { font-size: 12px; color: #64748b; width: 100%; padding-left: 24px; margin-top: 4px; line-height: 1.75; }
+    .features-section, .patterns-section { display: flex; flex-direction: column; gap: 12px; margin: 16px 0; }
+    .feature-card { background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; padding: 16px; }
+    .pattern-card { background: #f0f9ff; border: 1px solid #7dd3fc; border-radius: 8px; padding: 16px; }
+    .feature-title, .pattern-title { font-weight: 600; font-size: 15px; color: #0f172a; margin-bottom: 6px; }
+    .feature-oneliner { font-size: 14px; color: #475569; margin-bottom: 8px; }
+    .pattern-summary { font-size: 14px; color: #475569; margin-bottom: 8px; }
+    .feature-why, .pattern-detail { font-size: 13px; color: #334155; line-height: 1.75; }
+    .feature-examples { margin-top: 12px; }
+    .feature-example { padding: 8px 0; border-top: 1px solid #d1fae5; }
+    .feature-example:first-child { border-top: none; }
+    .example-code-row { display: flex; align-items: flex-start; gap: 8px; }
+    .example-code { flex: 1; background: #f1f5f9; padding: 8px 12px; border-radius: 4px; font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 12px; color: #334155; overflow-x: auto; white-space: pre-wrap; line-height: 1.6; }
+    .copyable-prompt-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; }
+    .copyable-prompt-row { display: flex; align-items: flex-start; gap: 8px; }
+    .copyable-prompt { flex: 1; background: #f8fafc; padding: 10px 12px; border-radius: 4px; font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 12px; color: #334155; border: 1px solid #e2e8f0; white-space: pre-wrap; line-height: 1.7; }
+    .pattern-prompt { background: #f8fafc; padding: 12px; border-radius: 6px; margin-top: 12px; border: 1px solid #e2e8f0; }
+    .pattern-prompt code { font-family: 'SF Mono', Menlo, Consolas, monospace; font-size: 12px; color: #334155; display: block; white-space: pre-wrap; margin-bottom: 8px; line-height: 1.7; }
+    .prompt-label { font-size: 11px; font-weight: 600; text-transform: uppercase; color: #64748b; margin-bottom: 6px; letter-spacing: 0.5px; }
+    .copy-btn { background: #e2e8f0; border: none; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer; color: #475569; flex-shrink: 0; }
+    .copy-btn:hover { background: #cbd5e1; }
+    .charts-row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin: 24px 0; }
+    .chart-card { background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; }
+    .chart-title { font-size: 12px; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 12px; letter-spacing: 0.5px; }
+    .bar-row { display: flex; align-items: center; margin-bottom: 6px; }
+    .bar-label { width: 110px; font-size: 11px; color: #475569; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .bar-track { flex: 1; height: 6px; background: #f1f5f9; border-radius: 3px; margin: 0 8px; }
+    .bar-fill { height: 100%; border-radius: 3px; }
+    .bar-value { width: 36px; font-size: 11px; font-weight: 500; color: #64748b; text-align: right; }
+    .horizon-section { display: flex; flex-direction: column; gap: 16px; }
+    .horizon-card { background: linear-gradient(135deg, #faf5ff 0%, #f5f3ff 100%); border: 1px solid #c4b5fd; border-radius: 8px; padding: 16px; }
+    .horizon-title { font-weight: 600; font-size: 15px; color: #5b21b6; margin-bottom: 8px; }
+    .horizon-possible { font-size: 14px; color: #334155; margin-bottom: 10px; line-height: 1.75; }
+    .horizon-tip { font-size: 13px; color: #6b21a8; background: rgba(255,255,255,0.6); padding: 8px 12px; border-radius: 4px; line-height: 1.75; }
+    .fun-ending { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border: 1px solid #fbbf24; border-radius: 12px; padding: 24px; margin-top: 40px; text-align: center; }
+    .fun-headline { font-size: 18px; font-weight: 600; color: #78350f; margin-bottom: 8px; line-height: 1.6; }
+    .fun-detail { font-size: 14px; color: #92400e; line-height: 1.75; }
+    @media (max-width: 640px) { .charts-row { grid-template-columns: 1fr; } .stats-row { justify-content: center; } .bar-label { width: 90px; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Claude Code 使用洞察</h1>
+    <p class="subtitle">3,067 条消息，跨 265 个会话（共 1,314 个） | 2026-03-17 至 2026-04-13</p>
+
+    <div class="at-a-glance">
+      <div class="glance-title">一图速览</div>
+      <div class="glance-sections">
+        <div class="glance-section"><strong>做得最好的：</strong>你的 "生成器-评估器" 沙盘循环（Generator-Evaluator Harness Loop）相当出色——让两个角色互相对抗，一个负责实现 Sprint 契约，另一个独立验证每条 Done Criteria，直到全部通过。这是绝大多数用户都到不了的成熟模式。你也很自信地横向扩展，常常为文档、研究和技能构建任务一次性派出 4–15 个并行子智能体，而不是串行硬磕。<a href="#section-wins" class="see-more">查看亮眼成就 →</a></div>
+        <div class="glance-section"><strong>正在拖累你的：</strong>Claude 这一侧：验证常常停留在语法或静态检查就声称"完成"；另外，Claude 在创建文件前往往不先看现有内容是什么，迫使你打断并重定向。你这一侧：经常在执行中途改变方向，浪费工具调用；如果在请求开头就把约束（智能体数量、排除范围、验证方式）写清楚，每个会话能省下好几轮迭代。<a href="#section-friction" class="see-more">查看摩擦点 →</a></div>
+        <div class="glance-section"><strong>可以马上试的快赢：</strong>写一个 Hook 强制执行 "先读后写"——文件创建前先 Glob/LS 看下现有结构，这是你在 notebook、文档、技能里反复遇到的摩擦点。另外值得试一下 Headless Mode（无头模式）来跑批量任务，比如那次 127 个 JSONL transcript 生成 harness spec 的批处理被打断了两次，无头模式可以让你点一下就走开，不用担心会话中断把整个进度毁掉。<a href="#section-features" class="see-more">查看可试功能 →</a></div>
+        <div class="glance-section"><strong>更有野心的路线：</strong>你的 doc-gardener "1.0 通过率" 循环本身就是一个等待规模化的模板：想象一下让 10+ 个 Sprint Harness 在夜里并行跑，每个都通过 "生成→评估→修复" 自循环，只在真的卡住时才升级给你。更激进的是——一个自主的技能进化管线，能监测你重复出现的 repeated_analysis_loop 模式，每周自动提议、构建并验证新技能，让你每周一醒来就有几个经过实战测试的新工具。<a href="#section-horizon" class="see-more">查看远景 →</a></div>
+      </div>
+    </div>
+
+    <nav class="nav-toc">
+      <a href="#section-work">你在做什么</a>
+      <a href="#section-usage">你怎么用 CC</a>
+      <a href="#section-wins">亮眼成就</a>
+      <a href="#section-friction">摩擦点</a>
+      <a href="#section-features">可试功能</a>
+      <a href="#section-patterns">新使用模式</a>
+      <a href="#section-horizon">远景路线</a>
+    </nav>
+
+    <div class="stats-row">
+      <div class="stat"><div class="stat-value">3,067</div><div class="stat-label">消息数</div></div>
+      <div class="stat"><div class="stat-value">+99,525/-2,553</div><div class="stat-label">代码行数</div></div>
+      <div class="stat"><div class="stat-value">632</div><div class="stat-label">文件数</div></div>
+      <div class="stat"><div class="stat-value">22</div><div class="stat-label">活跃天数</div></div>
+      <div class="stat"><div class="stat-value">139.4</div><div class="stat-label">日均消息</div></div>
+    </div>
+
+    <h2 id="section-work">你在做什么</h2>
+    <div class="project-areas">
+      <div class="project-area">
+        <div class="area-header">
+          <span class="area-name">AI 智能体团队 & Harness 编排</span>
+          <span class="area-count">约 35 个会话</span>
+        </div>
+        <div class="area-desc">用 Claude Code 作为协调者，搭建并运行多智能体工作流：派 8 个智能体并发生成研究主题文档、4 个智能体在 13 分钟内产出 16 个文档文件、对 127 个 JSONL transcript 批量生成 harness spec，并通过 "生成器-评估器" 角色扮演循环驱动 Sprint 开发。Agent 工具调用 400 次、SendMessage 325 次、TaskUpdate 248 次，主要用于跨智能体协调。</div>
+      </div>
+      <div class="project-area">
+        <div class="area-header">
+          <span class="area-name">技能开发 & 管理</span>
+          <span class="area-count">约 25 个会话</span>
+        </div>
+        <div class="area-desc">创建、验证并迭代 Claude Code 技能，包括 doc-gardener、research-code、dev-codex-use、team-onboarding 等，常常用机器验证循环来抓出缺失的 CLI 入口或命名问题。管理技能市场（ECC），安装/禁用插件，使用并行探索智能体盘点了 72+ 个技能。</div>
+      </div>
+      <div class="project-area">
+        <div class="area-header">
+          <span class="area-name">通过生成器-评估器循环驱动的 Sprint Web 开发</span>
+          <span class="area-count">约 20 个会话</span>
+        </div>
+        <div class="area-desc">运行基于契约的 Sprint 1 工作流：让 Claude 在生成器和评估器角色间切换，构建 HTML/CSS/JS 项目（个人主页、计数器、像素编辑器、设计系统），迭代直到所有 Done Criteria 都通过验证。多个循环都产出了带通过测试和 QA 批准的可用代码。</div>
+      </div>
+      <div class="project-area">
+        <div class="area-header">
+          <span class="area-name">文档 & 知识管理</span>
+          <span class="area-count">约 20 个会话</span>
+        </div>
+        <div class="area-desc">生成并维护大量 Markdown 文档（共触及 1,501 个文件），包括研究报告、上手指南、knowledge-ops 输出和仓库结构分析。配合 /knowledge-ops 和 /council 技能用并行智能体团队填充文档，并抓取外部文档（如 OpenAI Codex）作为参考。</div>
+      </div>
+      <div class="project-area">
+        <div class="area-header">
+          <span class="area-name">基础设施、Hooks & 自托管</span>
+          <span class="area-count">约 15 个会话</span>
+        </div>
+        <div class="area-desc">修复 stop hook、BOOSTRAP.sh 集成和 instinct rule；通过反复调试 API，把 notebook 从云端 Mem0 迁移到自托管的 MiniMax + Kimi + Chroma 后端。管理 git 操作（207 次提交），推送到 GitHub/Gitee 远端，并在后台执行流程中处理 SLURM/GPU 资源问题。</div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">你的需求类型</div>
+        <div class="bar-row"><div class="bar-label">重复分析循环</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:#2563eb"></div></div><div class="bar-value">26</div></div>
+        <div class="bar-row"><div class="bar-label">重复状态检查</div><div class="bar-track"><div class="bar-fill" style="width:57.7%;background:#2563eb"></div></div><div class="bar-value">15</div></div>
+        <div class="bar-row"><div class="bar-label">文档</div><div class="bar-track"><div class="bar-fill" style="width:23.1%;background:#2563eb"></div></div><div class="bar-value">6</div></div>
+        <div class="bar-row"><div class="bar-label">Git 操作</div><div class="bar-track"><div class="bar-fill" style="width:23.1%;background:#2563eb"></div></div><div class="bar-value">6</div></div>
+        <div class="bar-row"><div class="bar-label">提交并推送</div><div class="bar-track"><div class="bar-fill" style="width:23.1%;background:#2563eb"></div></div><div class="bar-value">6</div></div>
+        <div class="bar-row"><div class="bar-label">文件操作</div><div class="bar-track"><div class="bar-fill" style="width:19.2%;background:#2563eb"></div></div><div class="bar-value">5</div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">最常用的工具</div>
+        <div class="bar-row"><div class="bar-label">Bash</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:#0891b2"></div></div><div class="bar-value">4021</div></div>
+        <div class="bar-row"><div class="bar-label">Read</div><div class="bar-track"><div class="bar-fill" style="width:32.4%;background:#0891b2"></div></div><div class="bar-value">1301</div></div>
+        <div class="bar-row"><div class="bar-label">Write</div><div class="bar-track"><div class="bar-fill" style="width:14.3%;background:#0891b2"></div></div><div class="bar-value">573</div></div>
+        <div class="bar-row"><div class="bar-label">Edit</div><div class="bar-track"><div class="bar-fill" style="width:12.5%;background:#0891b2"></div></div><div class="bar-value">504</div></div>
+        <div class="bar-row"><div class="bar-label">Glob</div><div class="bar-track"><div class="bar-fill" style="width:10.0%;background:#0891b2"></div></div><div class="bar-value">401</div></div>
+        <div class="bar-row"><div class="bar-label">Agent</div><div class="bar-track"><div class="bar-fill" style="width:9.9%;background:#0891b2"></div></div><div class="bar-value">400</div></div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">语言分布</div>
+        <div class="bar-row"><div class="bar-label">Markdown</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:#10b981"></div></div><div class="bar-value">1501</div></div>
+        <div class="bar-row"><div class="bar-label">Python</div><div class="bar-track"><div class="bar-fill" style="width:22.6%;background:#10b981"></div></div><div class="bar-value">339</div></div>
+        <div class="bar-row"><div class="bar-label">HTML</div><div class="bar-track"><div class="bar-fill" style="width:9.7%;background:#10b981"></div></div><div class="bar-value">145</div></div>
+        <div class="bar-row"><div class="bar-label">JSON</div><div class="bar-track"><div class="bar-fill" style="width:6.6%;background:#10b981"></div></div><div class="bar-value">99</div></div>
+        <div class="bar-row"><div class="bar-label">Shell</div><div class="bar-track"><div class="bar-fill" style="width:3.5%;background:#10b981"></div></div><div class="bar-value">52</div></div>
+        <div class="bar-row"><div class="bar-label">JavaScript</div><div class="bar-track"><div class="bar-fill" style="width:2.3%;background:#10b981"></div></div><div class="bar-value">35</div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">会话类型</div>
+        <div class="bar-row"><div class="bar-label">多任务</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:#8b5cf6"></div></div><div class="bar-value">40</div></div>
+        <div class="bar-row"><div class="bar-label">迭代式精炼</div><div class="bar-track"><div class="bar-fill" style="width:95%;background:#8b5cf6"></div></div><div class="bar-value">38</div></div>
+        <div class="bar-row"><div class="bar-label">单一任务</div><div class="bar-track"><div class="bar-fill" style="width:65%;background:#8b5cf6"></div></div><div class="bar-value">26</div></div>
+        <div class="bar-row"><div class="bar-label">快速问答</div><div class="bar-track"><div class="bar-fill" style="width:27.5%;background:#8b5cf6"></div></div><div class="bar-value">11</div></div>
+        <div class="bar-row"><div class="bar-label">探索性</div><div class="bar-track"><div class="bar-fill" style="width:10%;background:#8b5cf6"></div></div><div class="bar-value">4</div></div>
+        <div class="bar-row"><div class="bar-label">不明确</div><div class="bar-track"><div class="bar-fill" style="width:2.5%;background:#8b5cf6"></div></div><div class="bar-value">1</div></div>
+      </div>
+    </div>
+
+    <h2 id="section-usage">你怎么使用 Claude Code</h2>
+    <div class="narrative">
+      <p>你处于<strong>高带宽、多智能体编排模式</strong>。265 个会话里，你跑了 400 次 Agent 调用和 4,021 条 Bash 命令，常常派出并行子智能体处理大批量任务——8 个智能体同时生成研究文档、4 个智能体在 13 分钟内产出 16 个文档文件、15 个子智能体处理 transcript 文件。你不太把 Claude 当结对编程伙伴，更像是把它当成一个团队主管在委派任务，而且经常显式地角色扮演 harness（生成器→评估器→生成器循环出现在很多会话里）来通过 Sprint 契约自验工作。语言比例很说明问题：Markdown 1,501 次操作 vs. Python 339 次——你主要在<strong>构建技能、harness 和文档系统</strong>，而不是在交付应用代码。</p>
+      <p>你<strong>迭代很快、打断也很多</strong>。数据显示 37 次需求被误解、29 次方法被纠正，但你都抓得很快——Claude 不查现有 notebook 就开始创建时你打断它，它把 `/plugin` 当成 shell 命令时你打断它，验证只走表面时你也直接点出 "语法检查不等于真正的 tmux 集成测试"。你很少先写详细的 spec，更习惯丢一个目标、看 Claude 怎么开始、然后边做边改方向。好几个会话能看到你在任务中间转弯——从 "调研一个代码库" 转到 "构建一个 research-code 技能"，或者在 3 个和 8 个子智能体之间反复调整直到觉得形状对了。事情走偏时（那次本来要 100 条规则只挖出 31 条、那次 127 个文件的批处理被打断了两次），你会及时止损退出，而不是硬磕。</p>
+      <p>尽管摩擦不少，你的<strong>满意度依然非常高</strong>（152 次 likely_satisfied vs. 15 次 frustrated/dissatisfied），因为你已经把验证内嵌进了工作流。你大量依赖评估器-生成器 harness 模式让 Claude 自我批判，并通过 TMUX/REPL 检验工作而不是相信它声称的"完成"。你能熟练在中英文之间切换（好几个会话里上手指南和任务计划用的都是中文），并且把 Claude Code 本身当成工作对象——为它构建技能、为它写文档、为它制定关于会话历史上下文的元规则。<strong>你不是在用 Claude 写代码，你是在用 Claude 构建编排 Claude 的系统。</strong></p>
+      <div class="key-insight"><strong>核心模式：</strong>你把任务委派给并行智能体团队，并用生成器-评估器 harness 循环做自验证；当 Claude 跑偏时你打断得很快，而不是事先写详细的 spec。</div>
+    </div>
+
+    <div class="chart-card" style="margin: 24px 0;">
+      <div class="chart-title">用户响应时间分布</div>
+      <div class="bar-row"><div class="bar-label">2-10 秒</div><div class="bar-track"><div class="bar-fill" style="width:59.8%;background:#6366f1"></div></div><div class="bar-value">244</div></div>
+      <div class="bar-row"><div class="bar-label">10-30 秒</div><div class="bar-track"><div class="bar-fill" style="width:86.0%;background:#6366f1"></div></div><div class="bar-value">351</div></div>
+      <div class="bar-row"><div class="bar-label">30 秒-1 分</div><div class="bar-track"><div class="bar-fill" style="width:73.8%;background:#6366f1"></div></div><div class="bar-value">301</div></div>
+      <div class="bar-row"><div class="bar-label">1-2 分</div><div class="bar-track"><div class="bar-fill" style="width:78.7%;background:#6366f1"></div></div><div class="bar-value">321</div></div>
+      <div class="bar-row"><div class="bar-label">2-5 分</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:#6366f1"></div></div><div class="bar-value">408</div></div>
+      <div class="bar-row"><div class="bar-label">5-15 分</div><div class="bar-track"><div class="bar-fill" style="width:84.1%;background:#6366f1"></div></div><div class="bar-value">343</div></div>
+      <div class="bar-row"><div class="bar-label">>15 分</div><div class="bar-track"><div class="bar-fill" style="width:22.8%;background:#6366f1"></div></div><div class="bar-value">93</div></div>
+      <div style="font-size: 12px; color: #64748b; margin-top: 8px;">中位数：78.6 秒 &bull; 平均：228.4 秒</div>
+    </div>
+
+    <div class="chart-card" style="margin: 24px 0;">
+      <div class="chart-title">多 Claude 并行（Multi-Clauding）</div>
+      <div style="display: flex; gap: 24px; margin: 12px 0; flex-wrap: wrap;">
+        <div style="text-align: center;">
+          <div style="font-size: 24px; font-weight: 700; color: #7c3aed;">179</div>
+          <div style="font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">重叠事件</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 24px; font-weight: 700; color: #7c3aed;">173</div>
+          <div style="font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">涉及的会话</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="font-size: 24px; font-weight: 700; color: #7c3aed;">27%</div>
+          <div style="font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">的消息</div>
+        </div>
+      </div>
+      <p style="font-size: 13px; color: #475569; margin-top: 12px; line-height: 1.75;">你经常同时跑多个 Claude Code 会话。Multi-Clauding 是指会话在时间上有重叠——这通常意味着你在并行推进多条工作流。</p>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">一天中的消息分布</div>
+        <div class="bar-row"><div class="bar-label">早晨 (6-12)</div><div class="bar-track"><div class="bar-fill" style="width:75.0%;background:#8b5cf6"></div></div><div class="bar-value">748</div></div>
+        <div class="bar-row"><div class="bar-label">下午 (12-18)</div><div class="bar-track"><div class="bar-fill" style="width:70.2%;background:#8b5cf6"></div></div><div class="bar-value">700</div></div>
+        <div class="bar-row"><div class="bar-label">晚上 (18-24)</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:#8b5cf6"></div></div><div class="bar-value">997</div></div>
+        <div class="bar-row"><div class="bar-label">深夜 (0-6)</div><div class="bar-track"><div class="bar-fill" style="width:62.4%;background:#8b5cf6"></div></div><div class="bar-value">622</div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">遇到的工具错误</div>
+        <div class="bar-row"><div class="bar-label">命令失败</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:#dc2626"></div></div><div class="bar-value">303</div></div>
+        <div class="bar-row"><div class="bar-label">其他</div><div class="bar-track"><div class="bar-fill" style="width:83.5%;background:#dc2626"></div></div><div class="bar-value">253</div></div>
+        <div class="bar-row"><div class="bar-label">文件未找到</div><div class="bar-track"><div class="bar-fill" style="width:29.4%;background:#dc2626"></div></div><div class="bar-value">89</div></div>
+        <div class="bar-row"><div class="bar-label">用户拒绝</div><div class="bar-track"><div class="bar-fill" style="width:9.6%;background:#dc2626"></div></div><div class="bar-value">29</div></div>
+        <div class="bar-row"><div class="bar-label">编辑失败</div><div class="bar-track"><div class="bar-fill" style="width:6.9%;background:#dc2626"></div></div><div class="bar-value">21</div></div>
+        <div class="bar-row"><div class="bar-label">文件过大</div><div class="bar-track"><div class="bar-fill" style="width:2.0%;background:#dc2626"></div></div><div class="bar-value">6</div></div>
+      </div>
+    </div>
+
+    <h2 id="section-wins">亮眼成就</h2>
+    <p class="section-intro">在 265 个会话、170 小时的工作中，你已经把自己塑造成了一个成熟的编排者：会构建自定义技能、会跑多智能体工作流，并且会严格验证结果。</p>
+    <div class="big-wins">
+      <div class="big-win">
+        <div class="big-win-title">生成器-评估器 Sprint 循环</div>
+        <div class="big-win-desc">你持续在跑迭代式的角色扮演工作流——一个智能体实现 Sprint 契约，另一个独立验证它是否满足 Done Criteria。这种对抗式循环能早早抓出 bug——比如你的评估器在 Pixel Forge 里发现了 2 个问题，生成器修复后达到完整 PASS；又比如你的着陆页在一轮修订后通过了 17 项验证检查。</div>
+      </div>
+      <div class="big-win">
+        <div class="big-win-title">并行多智能体编排</div>
+        <div class="big-win-desc">你常态化地派出并行子智能体团队来处理大规模任务——8 个智能体同时生成研究主题、4 个智能体在 13 分钟内产出 16 个文档文件、15 个子智能体处理 transcript 文件。你愿意横向扩展而不是串行硬磕，这显示出你对智能体协调模式有真正的熟练度。</div>
+      </div>
+      <div class="big-win">
+        <div class="big-win-title">带验证的技能构建</div>
+        <div class="big-win-desc">你不只是用技能——你构建技能、用机器验证它们，并迭代到通过率达到 1.0 为止。doc-gardener 工作流就是典型：你跑了一遍验证、抓出缺失的 CLI 入口，然后部署一个 /loop 子智能体把所有问题都修掉，直到没有任何关键失败。</div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">最有帮助的能力（Claude 侧）</div>
+        <div class="bar-row"><div class="bar-label">多文件改动</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:#16a34a"></div></div><div class="bar-value">51</div></div>
+        <div class="bar-row"><div class="bar-label">解释清楚</div><div class="bar-track"><div class="bar-fill" style="width:45.1%;background:#16a34a"></div></div><div class="bar-value">23</div></div>
+        <div class="bar-row"><div class="bar-label">代码改对</div><div class="bar-track"><div class="bar-fill" style="width:39.2%;background:#16a34a"></div></div><div class="bar-value">20</div></div>
+        <div class="bar-row"><div class="bar-label">调试到位</div><div class="bar-track"><div class="bar-fill" style="width:11.8%;background:#16a34a"></div></div><div class="bar-value">6</div></div>
+        <div class="bar-row"><div class="bar-label">主动帮助</div><div class="bar-track"><div class="bar-fill" style="width:11.8%;background:#16a34a"></div></div><div class="bar-value">6</div></div>
+        <div class="bar-row"><div class="bar-label">快速准确搜索</div><div class="bar-track"><div class="bar-fill" style="width:7.8%;background:#16a34a"></div></div><div class="bar-value">4</div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">任务结果</div>
+        <div class="bar-row"><div class="bar-label">未达成</div><div class="bar-track"><div class="bar-fill" style="width:5.3%;background:#8b5cf6"></div></div><div class="bar-value">4</div></div>
+        <div class="bar-row"><div class="bar-label">部分达成</div><div class="bar-track"><div class="bar-fill" style="width:26.7%;background:#8b5cf6"></div></div><div class="bar-value">20</div></div>
+        <div class="bar-row"><div class="bar-label">大部分达成</div><div class="bar-track"><div class="bar-fill" style="width:20%;background:#8b5cf6"></div></div><div class="bar-value">15</div></div>
+        <div class="bar-row"><div class="bar-label">完全达成</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:#8b5cf6"></div></div><div class="bar-value">75</div></div>
+        <div class="bar-row"><div class="bar-label">不明确</div><div class="bar-track"><div class="bar-fill" style="width:8%;background:#8b5cf6"></div></div><div class="bar-value">6</div></div>
+      </div>
+    </div>
+
+    <h2 id="section-friction">摩擦点：哪里出问题了</h2>
+    <p class="section-intro">你工作流里的摩擦主要来自三方面：自己在执行中途打断自己、Claude 在动手前不先看现有上下文、以及验证步骤跳过了真正的集成测试。</p>
+    <div class="friction-categories">
+      <div class="friction-category">
+        <div class="friction-title">自我打断和半途变向</div>
+        <div class="friction-desc">你经常在 Claude 执行到一半时打断它，换方向、重复请求或重定向工作，导致工具调用浪费、任务做了一半。可以试着把需求前置（比如 "用 8 个子智能体，跳过 remote-explore"），而不是先广撒网再边走边修。</div>
+        <ul class="friction-examples">
+          <li>处理 127 个 JSONL transcript 文件时打断了两次，子智能体已经派出去了，结果 harness spec 生成只完成了一半</li>
+          <li>doc-gardener 工作中途，把方案从单智能体改成团队、又改成 8 个子智能体，逼着 Claude 多次重新开始</li>
+        </ul>
+      </div>
+      <div class="friction-category">
+        <div class="friction-title">动手前没检查上下文</div>
+        <div class="friction-desc">Claude 经常不先查现有文件就开始创建或修改，逼你打断纠正。可以预先要求一个 "发现/盘点" 步骤，或者依赖那些能强制 "先读后写" 的技能。</div>
+        <ul class="friction-examples">
+          <li>Claude 直接从零开始创建 notebook，而不是先看现有的有什么——你被迫停下来，把它重定向到 "先盘点" 的方式</li>
+          <li>Claude 把 /plugin 当成 shell 命令在 bash 里跑，而不是认出它是 Claude Code 的斜杠命令，反复试了好几次都失败</li>
+        </ul>
+      </div>
+      <div class="friction-category">
+        <div class="friction-title">浅层验证就声称完成</div>
+        <div class="friction-desc">Claude 只做了语法检查或静态校验就报告任务"已验证"，错过了你后来才抓到的真正集成问题。当验证很关键时，请明确写出测试方式（比如 "通过 tmux REPL 验证" 或 "实际跑命令，不要只 lint"）。</div>
+        <ul class="friction-examples">
+          <li>Claude 声称 hookify BOOTSTRAP.sh 验证已完成，但实际只跑了语法检查，没做真正的 tmux 集成测试——是你抓到的</li>
+          <li>doc-gardener 第一次验证通过了 Claude 自己的检查，但完全没注意到 CLI 入口缺失，最后是 /loop 子智能体修完才真正通过</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-title">主要摩擦类型</div>
+        <div class="bar-row"><div class="bar-label">需求被误解</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:#dc2626"></div></div><div class="bar-value">37</div></div>
+        <div class="bar-row"><div class="bar-label">方法不对</div><div class="bar-track"><div class="bar-fill" style="width:78.4%;background:#dc2626"></div></div><div class="bar-value">29</div></div>
+        <div class="bar-row"><div class="bar-label">代码有 bug</div><div class="bar-track"><div class="bar-fill" style="width:56.8%;background:#dc2626"></div></div><div class="bar-value">21</div></div>
+        <div class="bar-row"><div class="bar-label">用户拒绝动作</div><div class="bar-track"><div class="bar-fill" style="width:46.0%;background:#dc2626"></div></div><div class="bar-value">17</div></div>
+        <div class="bar-row"><div class="bar-label">改动过多</div><div class="bar-track"><div class="bar-fill" style="width:24.3%;background:#dc2626"></div></div><div class="bar-value">9</div></div>
+        <div class="bar-row"><div class="bar-label">请求被中断</div><div class="bar-track"><div class="bar-fill" style="width:5.4%;background:#dc2626"></div></div><div class="bar-value">2</div></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">推断的满意度（模型估计）</div>
+        <div class="bar-row"><div class="bar-label">沮丧</div><div class="bar-track"><div class="bar-fill" style="width:1.3%;background:#eab308"></div></div><div class="bar-value">2</div></div>
+        <div class="bar-row"><div class="bar-label">不满意</div><div class="bar-track"><div class="bar-fill" style="width:8.6%;background:#eab308"></div></div><div class="bar-value">13</div></div>
+        <div class="bar-row"><div class="bar-label">大概满意</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:#eab308"></div></div><div class="bar-value">152</div></div>
+        <div class="bar-row"><div class="bar-label">满意</div><div class="bar-track"><div class="bar-fill" style="width:13.8%;background:#eab308"></div></div><div class="bar-value">21</div></div>
+        <div class="bar-row"><div class="bar-label">很开心</div><div class="bar-track"><div class="bar-fill" style="width:0.7%;background:#eab308"></div></div><div class="bar-value">1</div></div>
+      </div>
+    </div>
+
+    <h2 id="section-features">可以试的现有 CC 功能</h2>
+    <div class="claude-md-section">
+      <h3>建议加到 CLAUDE.md 的内容</h3>
+      <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">直接复制下面的内容贴到 Claude Code 里，就能加进你的 CLAUDE.md。</p>
+      <div class="claude-md-actions">
+        <button class="copy-all-btn" onclick="copyAllCheckedClaudeMd()">复制全部勾选项</button>
+      </div>
+      <div class="claude-md-item">
+        <input type="checkbox" id="cmd-0" class="cmd-checkbox" checked data-text="在 CLAUDE.md 顶部（项目概览之后）新增一个一级章节 ## 工作流约定。\n\n## 工作流约定&#10;&#10;- 创建任何新文件（notebook、技能、文档）之前，必须先用 Glob/LS 检查现有文件，避免重复劳动&#10;- 技能名用 kebab-case（短横线连接），不要用 snake_case——例如 `dev-codex-use` 而不是 `dev_codex_use`，`research-code` 而不是 `reserach_code`&#10;- 验证集成（特别是 tmux/REPL 工作流）时，跑真实的端到端测试，而不只是语法检查">
+        <label for="cmd-0">
+          <code class="cmd-code">## 工作流约定
+
+- 创建任何新文件（notebook、技能、文档）之前，必须先用 Glob/LS 检查现有文件，避免重复劳动
+- 技能名用 kebab-case（短横线连接），不要用 snake_case——例如 `dev-codex-use` 而不是 `dev_codex_use`，`research-code` 而不是 `reserach_code`
+- 验证集成（特别是 tmux/REPL 工作流）时，跑真实的端到端测试，而不只是语法检查</code>
+          <button class="copy-btn" onclick="copyCmdItem(0)">复制</button>
+        </label>
+        <div class="cmd-why">这三类纠正在多个会话中反复出现——你抓到 Claude 不查现有 notebook 就创建、多个技能有命名拼写/约定问题，并且明确指出过验证 "只是语法检查、没有真正测试 tmux"。</div>
+      </div>
+      <div class="claude-md-item">
+        <input type="checkbox" id="cmd-1" class="cmd-checkbox" checked data-text="在已有的 '工作风格' 或 '智能体' 章节下新增一个 ## 并行智能体工作 章节。\n\n## 并行智能体工作&#10;&#10;- 当任务涉及大量相似项目（例如 127 个 transcript 文件、16 个文档、8 个研究主题）时，默认派出并行 Task 智能体而不是顺序处理&#10;- 启动批量任务前，先和用户确认计划，并说明会跑多少个智能体">
+        <label for="cmd-1">
+          <code class="cmd-code">## 并行智能体工作
+
+- 当任务涉及大量相似项目（例如 127 个 transcript 文件、16 个文档、8 个研究主题）时，默认派出并行 Task 智能体而不是顺序处理
+- 启动批量任务前，先和用户确认计划，并说明会跑多少个智能体</code>
+          <button class="copy-btn" onclick="copyCmdItem(1)">复制</button>
+        </label>
+        <div class="cmd-why">你反复把单智能体方案重构成并行团队（8 个子智能体处理研究主题、4 个并行处理 16 个文档、15 个并行处理 transcript）——把这个设成默认能省下打断周期。</div>
+      </div>
+      <div class="claude-md-item">
+        <input type="checkbox" id="cmd-2" class="cmd-checkbox" checked data-text="加到现有的 ## 测试 或 ## 验证 章节下面，或者在 CLAUDE.md 末尾新增一个 ## 任务完成 章节。\n\n## 任务完成&#10;&#10;- 在所有 Done Criteria 都被显式检查过之前，不要标记任务完成或声称验证通过&#10;- 当存在 TODO 列表时，把未完成的 TODO 显式留出来并标注，而不是直接宣称成功">
+        <label for="cmd-2">
+          <code class="cmd-code">## 任务完成
+
+- 在所有 Done Criteria 都被显式检查过之前，不要标记任务完成或声称验证通过
+- 当存在 TODO 列表时，把未完成的 TODO 显式留出来并标注，而不是直接宣称成功</code>
+          <button class="copy-btn" onclick="copyCmdItem(2)">复制</button>
+        </label>
+        <div class="cmd-why">多个会话里出现了 mostly_achieved 的结果——Claude 声称完成但 TODO 没填完或验证流于表面，最后都是你自己抓到的缺口。</div>
+      </div>
+    </div>
+
+    <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">直接复制下面的指令贴到 Claude Code 里，它会帮你设置好。</p>
+    <div class="features-section">
+      <div class="feature-card">
+        <div class="feature-title">自定义技能（Custom Skills）</div>
+        <div class="feature-oneliner">把可复用的提示词存成 markdown 文件，用一个 /command 调用</div>
+        <div class="feature-why"><strong>为什么适合你：</strong>你已经在大量构建和使用技能（doc-gardener、research-code、dev-codex-use、/knowledge-ops、/council、/team-onboarding、/loop）——把你最常用的循环（比如生成器→评估器 Sprint 模式）正式封装成 /sprint 命令，就不用每次都重新解释那套角色扮演设定。</div>
+        <div class="feature-examples">
+          <div class="feature-example">
+            <div class="example-code-row">
+              <code class="example-code">mkdir -p .claude/skills/sprint &amp;&amp; cat &gt; .claude/skills/sprint/SKILL.md &lt;&lt;'EOF'
+# Sprint Harness 技能
+
+为当前 Sprint 契约跑一个 生成器→评估器→生成器 循环。
+
+1. 从 case_plan/sprint-N.md 读取 Sprint 契约
+2. 扮演生成器：实现所有 Done Criteria
+3. 切换到评估器角色：逐项验证
+4. 如果失败，带着修复清单回到生成器
+5. 重复直到 PASS，然后报告总结
+EOF</code>
+              <button class="copy-btn" onclick="copyText(this)">复制</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">钩子（Hooks）</div>
+        <div class="feature-oneliner">在特定生命周期事件（工具使用前/后、会话开始等）自动执行的 shell 命令</div>
+        <div class="feature-why"><strong>为什么适合你：</strong>你那次修 stop-hook JSON 验证的会话表明你已经在用 hooks——再加一个编辑后自动格式化 Python/Markdown 的 post-edit hook，以及一个跑 tmux REPL 验证的 pre-commit hook，就能堵上你明确点出过的那个 "Claude 声称已验证但只查了语法" 的缺口。</div>
+        <div class="feature-examples">
+          <div class="feature-example">
+            <div class="example-code-row">
+              <code class="example-code">// .claude/settings.json
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{"type": "command", "command": "if [[ $FILE == *.py ]]; then ruff format $FILE; fi"}]
+      }
+    ]
+  }
+}</code>
+              <button class="copy-btn" onclick="copyText(this)">复制</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-title">无头模式（Headless Mode）</div>
+        <div class="feature-oneliner">从脚本里非交互地跑 Claude，用于批量任务和 CI/CD</div>
+        <div class="feature-why"><strong>为什么适合你：</strong>你试过把 127 个 transcript JSONL 文件批量生成 harness spec，跑到一半被打断了两次——配合 shell 循环的无头模式可以让你"丢出去就走"，每个文件独立处理、稍后再回看结果，避免会话级中断把整个进度毁掉。</div>
+        <div class="feature-examples">
+          <div class="feature-example">
+            <div class="example-code-row">
+              <code class="example-code">for f in transcripts/*.jsonl; do
+  claude -p "Analyze $f and write harness spec to specs/$(basename $f .jsonl).md" \
+    --allowedTools "Read,Write,Bash"
+done</code>
+              <button class="copy-btn" onclick="copyText(this)">复制</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="section-patterns">使用 Claude Code 的新模式</h2>
+    <p style="font-size: 13px; color: #64748b; margin-bottom: 12px;">直接复制下面的指令贴到 Claude Code 里，它会引导你完成。</p>
+    <div class="patterns-section">
+      <div class="pattern-card">
+        <div class="pattern-title">大批量操作前先确认计划</div>
+        <div class="pattern-summary">在启动多智能体或多文件批量任务前，明确陈述计划，并要求一个单字确认。</div>
+        <div class="pattern-detail">你的摩擦记录里至少有 4 个会话是因为你在执行中途打断 Claude 重定向方案——把单智能体改成团队、纠正 notebook 创建顺序、或者停掉一个 127 个文件的批处理。一句 10 秒钟的计划确认本可以省下几十分钟的工具调用浪费。这点尤其有价值，因为你的会话平均约 85 分钟，且很多都涉及并行智能体派发。</div>
+        <div class="copyable-prompt-section">
+          <div class="prompt-label">贴到 Claude Code：</div>
+          <div class="copyable-prompt-row">
+            <code class="copyable-prompt">开始之前，请先总结：(1) 你会创建哪些文件/智能体，(2) 按什么顺序，(3) 怎么验证成功。等我说 'go' 再执行。</code>
+            <button class="copy-btn" onclick="copyText(this)">复制</button>
+          </div>
+        </div>
+      </div>
+      <div class="pattern-card">
+        <div class="pattern-title">用真实执行验证，而不是只做静态检查</div>
+        <div class="pattern-summary">验证集成或完成度时，要求来自实际运行的证据——tmux 输出、测试结果、文件 diff——而不只是 "语法看起来没问题"。</div>
+        <div class="pattern-detail">你已经明确地在两次都抓到 Claude 只做语法检查就声称已验证（hookify BOOTSTRAP.sh、doc-gardener CLI 入口）。你 170 小时的会话里有大量 tmux/REPL 工作流，所以 "看起来对" 和 "真的能跑" 之间的差距是个反复出现的问题。把这点写成 CLAUDE.md 里的标准验证契约，再配一个技能，就能消除大部分 mostly_achieved 的结果。</div>
+        <div class="copyable-prompt-section">
+          <div class="prompt-label">贴到 Claude Code：</div>
+          <div class="copyable-prompt-row">
+            <code class="copyable-prompt">验证规则：对每条 Done Criteria，告诉我你实际跑了什么命令以及它的输出。"看起来正确"是不可接受的——我需要看到 tmux/REPL/测试的证据。</code>
+            <button class="copy-btn" onclick="copyText(this)">复制</button>
+          </div>
+        </div>
+      </div>
+      <div class="pattern-card">
+        <div class="pattern-title">先查再创建</div>
+        <div class="pattern-summary">默认在创建新文件前先 Glob/LS/Read 现有文件，特别是 notebook、文档和技能。</div>
+        <div class="pattern-detail">notebook 创建那次会话以及好几个技能构建会话都暴露出一个模式：Claude 没先看现有内容就跳到创建文件。鉴于你有 73+ 个技能、并且在很多并行项目里同时工作，"先检查" 应该是默认行为。这一点也和你的命名约定摩擦相关（reserach_code 拼写错误、装错路径）——一个预检步骤同时能抓到重复和约定错误。</div>
+        <div class="copyable-prompt-section">
+          <div class="prompt-label">贴到 Claude Code：</div>
+          <div class="copyable-prompt-row">
+            <code class="copyable-prompt">长期规则：创建任何新文件之前，先对目标目录跑一次 Glob 或 LS，告诉我现在有什么。我确认之后你才能继续创建。</code>
+            <button class="copy-btn" onclick="copyText(this)">复制</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h2 id="section-horizon">远景：未来可以走向哪里</h2>
+    <p class="section-intro">你的工作流正在从单智能体辅助进化到带验证循环的自主多智能体编排——现在该往更深的方向推一步：自愈、并行、测试驱动的自主系统。</p>
+    <div class="horizon-section">
+      <div class="horizon-card">
+        <div class="horizon-title">规模化的自愈 Harness 循环</div>
+        <div class="horizon-possible">你的生成器-评估器 harness 模式在 Sprint 契约上已经跑得很好——想象一下让 10+ 个 sprint 在夜里并行跑，每一个都有自己独立的 自主修复-验证 循环，只在卡住时才升级给你。系统能识别像 MiniMax API endpoint 失败这样的问题，研究替代方案、自动重试，无需人工介入。你的 doc-gardener 验证循环已经证明了它能跑通；现在只是把它扩展到几十个并发项目。</div>
+        <div class="horizon-tip"><strong>怎么开始：</strong>用 Claude Agent SDK 配合后台 Task 工具调用和持久化状态文件，再结合你已有的 /loop 子智能体模式和 TMUX REPL 验证工作流。</div>
+        <div class="pattern-prompt"><div class="prompt-label">贴到 Claude Code：</div><code>设计一个夜间自主 harness 系统：(1) 读取一个包含 10 条 sprint 契约的 queue.json；(2) 把每个契约启动为一个并行 Task 智能体，扮演 生成器→评估器→修复者 角色；(3) 每个智能体每轮迭代都把状态写到 state/sprint-N.json；(4) 失败时，智能体通过 WebSearch 研究错误，最多尝试 3 种修复策略，全部失败才升级到 human-review.md；(5) 一个 monitor 智能体每 5 分钟把所有状态聚合到 dashboard.html。把整套构建到 ~/.claude/skills/autonomous-harness/，并附完整 SKILL.md，然后用我 case_plan/ 目录里的 3 个真实 sprint 演示一遍。</code><button class="copy-btn" onclick="copyText(this)">复制</button></div>
+      </div>
+      <div class="horizon-card">
+        <div class="horizon-title">测试驱动的多智能体规则挖掘</div>
+        <div class="horizon-possible">你那次只挖出 31 条规则的尝试之所以失败，是因为没有迭代式的测试-验证循环——想象一下改成派 8 个并行智能体，每个负责一个特定类别（避测、推卸所有权等等），再加一个 coverage-verifier 智能体在每一类没达到配额前都拒绝提交。系统会自主迭代直到出现 100+ 条均衡分布的规则，就像你成功跑出的 doc-gardener 1.0 通过率工作流一样。</div>
+        <div class="horizon-tip"><strong>怎么开始：</strong>把并行 Agent 工具调用、一个验证契约文件（coverage.contract.json）以及你在 Pixel Forge Sprint 工作流里验证过的评估器模式组合起来。</div>
+        <div class="pattern-prompt"><div class="prompt-label">贴到 Claude Code：</div><code>构建一个测试驱动的规则挖掘系统：(1) 创建 coverage.contract.json，规定 8 个类别 × 每类至少 15 条 = 共 120 条；(2) 派出 8 个并行的类别专家智能体，每个只读取 ~/.claude transcript 历史并只为自己分配的类别挖掘规则；(3) 一个 coverage-evaluator 智能体在每批之后运行，对照契约检查并返回 PASS/FAIL 以及具体缺口；(4) FAIL 时，只重新派发不达标的专家并附上缺口反馈；(5) 循环直到 PASS 或 5 次迭代为止。把整条管线保存到 ~/.claude/skills/tdd-mining/，现在就对我的会话历史跑一遍。</code><button class="copy-btn" onclick="copyText(this)">复制</button></div>
+      </div>
+      <div class="horizon-card">
+        <div class="horizon-title">自主技能进化管线</div>
+        <div class="horizon-possible">你目前是手动创建技能（doc-gardener、dev-codex-use、research-code），但 Claude 完全可以监测你的 transcript 模式，识别重复出现的工作流（比如你那 26 次 repeated_analysis_loop），然后每周自主提议+构建+测试新技能。想象一下每周一醒来就有 3 个新的、经过实战测试的技能已经装好并验证通过，全部源自上周会话里的摩擦模式。</div>
+        <div class="horizon-tip"><strong>怎么开始：</strong>用 Claude Agent SDK 配合定时后台任务、你已有的 knowledge-ops/council 技能模式，以及 harness 验证来闭环。</div>
+        <div class="pattern-prompt"><div class="prompt-label">贴到 Claude Code：</div><code>在 ~/.claude/skills/skill-evolver/ 里创建一个自主技能进化系统：(1) 每周跑一次的定时任务分析 ~/.claude/projects 最近 7 天的 transcript，识别 top 5 重复工作流模式和摩擦点；(2) 对每个模式，由一个 'skill-architect' 智能体起草带示例的 SKILL.md 提案；(3) 一个并行的 'skill-builder' 智能体实现它，包括 CLI 入口和测试用例；(4) 一个 'skill-verifier' 智能体跑 harness 验证循环（就像 doc-gardener 达到 1.0 通过率那样）直到技能通过；(5) 一个 'skill-reviewer' 智能体把人类可读的总结写到 weekly-skills-report.html 并把通过的技能装到 ~/.claude/skills/。现在就对我最近 30 天的会话跑一遍，看看它会提出什么。</code><button class="copy-btn" onclick="copyText(this)">复制</button></div>
+      </div>
+    </div>
+
+    <div class="fun-ending">
+      <div class="fun-headline">"Claude 在一次 tmux 集成里宣称'验证完成'——结果用户立刻抓到它只跑了语法检查，根本没做任何真实测试"</div>
+      <div class="fun-detail">在 hookify BOOSTRAP.sh 集成那次会话里，Claude 信心满满地报告 "工作已验证、可以交付"，但用户一眼看穿：根本没有任何真正的 tmux 测试发生过——只有表层的语法校验。这是经典的 "我跑了编译器就当测过了" 反射，被现场抓个正着。</div>
+    </div>
+  </div>
+
+  <script>
+    function copyText(btn) {
+      const code = btn.previousElementSibling;
+      navigator.clipboard.writeText(code.textContent).then(() => {
+        btn.textContent = '已复制!';
+        setTimeout(() => { btn.textContent = '复制'; }, 2000);
+      });
+    }
+    function copyCmdItem(idx) {
+      const checkbox = document.getElementById('cmd-' + idx);
+      if (checkbox) {
+        const text = checkbox.dataset.text;
+        navigator.clipboard.writeText(text).then(() => {
+          const btn = checkbox.nextElementSibling.querySelector('.copy-btn');
+          if (btn) { btn.textContent = '已复制!'; setTimeout(() => { btn.textContent = '复制'; }, 2000); }
+        });
+      }
+    }
+    function copyAllCheckedClaudeMd() {
+      const checkboxes = document.querySelectorAll('.cmd-checkbox:checked');
+      const texts = [];
+      checkboxes.forEach(cb => { if (cb.dataset.text) { texts.push(cb.dataset.text); } });
+      const combined = texts.join('\n');
+      const btn = document.querySelector('.copy-all-btn');
+      if (btn) {
+        navigator.clipboard.writeText(combined).then(() => {
+          btn.textContent = '已复制 ' + texts.length + ' 条!';
+          btn.classList.add('copied');
+          setTimeout(() => { btn.textContent = '复制全部勾选项'; btn.classList.remove('copied'); }, 2000);
+        });
+      }
+    }
+  </script>
+</body>
+</html>
