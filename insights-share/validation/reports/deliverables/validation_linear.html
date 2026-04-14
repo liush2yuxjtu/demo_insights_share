@@ -1,0 +1,516 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>validation.md · 线性解读</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root {
+  --bg: #f8f9fa;
+  --fg: #1a1a2e;
+  --muted: #6c757d;
+  --border: #dee2e6;
+  --accent: #0077b6;
+  --accent2: #00b4d8;
+  --ok: #2d6a4f;
+  --ok-bg: #d8f3dc;
+  --fail-bg: #f8d7da;
+  --fail-fg: #721c24;
+  --code-bg: #0d1117;
+  --code-fg: #e6edf3;
+  --white: #ffffff;
+  --c1: #0077b6;
+  --c2: #5e60ce;
+  --c3: #e85d04;
+  --c4: #2d6a4f;
+  --c5: #7209b7;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.7;
+}
+.hero {
+  background: linear-gradient(135deg, #0077b6 0%, #5e60ce 100%);
+  color: #fff;
+  padding: 56px 40px 48px;
+  text-align: center;
+}
+.hero .label {
+  font-size: 0.78em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  margin-bottom: 12px;
+}
+.hero h1 { font-size: 2.2em; font-weight: 700; margin-bottom: 12px; }
+.hero p { font-size: 1.05em; opacity: 0.85; max-width: 680px; margin: 0 auto; }
+.toc-bar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  overflow-x: auto;
+}
+.toc-bar a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 20px;
+  text-decoration: none;
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--muted);
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s;
+}
+.toc-bar a:hover { color: var(--accent); border-color: var(--accent); }
+.toc-bar a .num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; border-radius: 50%;
+  font-size: 0.78em; font-weight: 800; color: #fff;
+}
+.container { max-width: 860px; margin: 0 auto; padding: 0 24px 80px; }
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 48px;
+}
+@media (max-width: 600px) { .overview-grid { grid-template-columns: 1fr; } }
+.overview-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+.overview-card .oc-num { font-size: 0.78em; font-weight: 700; color: var(--muted); margin-bottom: 6px; }
+.overview-card .oc-title { font-size: 1em; font-weight: 700; margin-bottom: 6px; }
+.overview-card .oc-desc { font-size: 0.88em; color: #555; }
+.section {
+  margin-top: 48px;
+  background: var(--white);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 28px;
+  border-bottom: 1px solid var(--border);
+}
+.section-header .step-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3em; flex-shrink: 0;
+}
+.i1{background:#e0f3ff;color:#0077b6;} .i2{background:#ebe8ff;color:#5e60ce;}
+.i3{background:#fff3eb;color:#e85d04;} .i4{background:#d8f3dc;color:#2d6a4f;}
+.i5{background:#f3e8ff;color:#7209b7;}
+.section-header h2 { font-size: 1.2em; font-weight: 700; }
+.section-header .subtitle { font-size: 0.85em; color: var(--muted); margin-top: 2px; }
+.section-body { padding: 24px 28px; }
+.star-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 600px) { .star-grid { grid-template-columns: 1fr; } }
+.star-card {
+  border-radius: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+}
+.star-s { background: #e0f3ff; border-color: #90caf9; }
+.star-t { background: #ebe8ff; border-color: #b39ddb; }
+.star-a { background: #fff3eb; border-color: #ffcc80; }
+.star-r { background: #d8f3dc; border-color: #81c784; }
+.star-card .star-label { font-size: 0.75em; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; opacity: 0.7; }
+.star-card .star-text { font-size: 0.9em; color: var(--fg); }
+.pill {
+  display: inline-block; padding: 2px 10px; border-radius: 12px;
+  font-size: 0.78em; font-weight: 600; margin: 0 3px 4px 0;
+}
+.pill.silent { background: #d8f3dc; color: #1b5e20; }
+.pill.trigger { background: #e0f3ff; color: #01579b; }
+.pill.haiku { background: #f3e8ff; color: #4a148c; }
+.pill.wiki { background: #fff3eb; color: #bf360c; }
+.pill.merge { background: #ede7f6; color: #4527a0; }
+.pill.layer { background: #e8f5e9; color: #1b5e20; }
+.split-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 10px;
+}
+@media (max-width: 560px) { .split-box { grid-template-columns: 1fr; } }
+.split-half {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px;
+}
+.split-half .split-label { font-size: 0.78em; font-weight: 700; margin-bottom: 8px; color: var(--muted); text-transform: uppercase; }
+.split-half ul { padding-left: 18px; font-size: 0.88em; }
+.split-half ul li { margin-bottom: 4px; }
+.split-half.ok { border-color: #66bb6a; background: #f1f8f1; }
+.split-half.ok .split-label { color: var(--ok); }
+.split-half.fail { border-color: #ef9a9a; background: #fdf3f3; }
+.split-half.fail .split-label { color: #c62828; }
+.step-list { list-style: none; margin-top: 8px; }
+.step-list li {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.step-list li:last-child { border-bottom: none; }
+.step-list li .bullet {
+  width: 26px; height: 26px; border-radius: 50%;
+  color: #fff; font-size: 0.78em; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.b1{background:#0077b6;} .b2{background:#5e60ce;} .b3{background:#e85d04;}
+.b4{background:#2d6a4f;} .b5{background:#7209b7;}
+.step-list li .text { font-size: 0.92em; }
+.tree-block {
+  background: var(--code-bg);
+  color: var(--code-fg);
+  border-radius: 8px;
+  padding: 16px 18px;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.83em;
+  overflow-x: auto;
+  white-space: pre;
+  margin-top: 10px;
+  line-height: 1.7;
+}
+.layer-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.layer-row:last-child { border-bottom: none; }
+.layer-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 3px 10px; border-radius: 6px;
+  font-size: 0.78em; font-weight: 700;
+  flex-shrink: 0; min-width: 60px; text-align: center;
+}
+.lb1{background:#e0f3ff;color:#0077b6;} .lb2{background:#ebe8ff;color:#5e60ce;}
+.lb3{background:#d8f3dc;color:#2d6a4f;} .lb4{background:#fff3eb;color:#e85d04;}
+.layer-row .layer-name { font-weight: 600; font-size: 0.9em; min-width: 170px; }
+.layer-row .layer-desc { font-size: 0.86em; color: #555; }
+.note {
+  background: #f0f8ff;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  padding: 10px 14px;
+  font-size: 0.88em;
+  margin-top: 12px;
+  color: #1a3a5c;
+}
+.divider { height: 1px; background: var(--border); margin: 18px 0; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="label">validation.md · 线性解读</div>
+  <h1>insights-share 验证体系</h1>
+  <p>逐节拆解验证框架的 5 个任务：从触发率测试，到 wiki 结构四层设计，再到 agentic 搜索集成。</p>
+</div>
+
+<nav class="toc-bar">
+  <a href="#framework"><span class="num" style="background:#0077b6">框</span>框架</a>
+  <a href="#task1"><span class="num" style="background:#5e60ce">1</span>触发率</a>
+  <a href="#task2"><span class="num" style="background:#e85d04">2</span>触发效果</a>
+  <a href="#task3"><span class="num" style="background:#2d6a4f">3</span>wiki 更新</a>
+  <a href="#task4"><span class="num" style="background:#7209b7">4</span>wiki 结构</a>
+  <a href="#task5"><span class="num" style="background:#0077b6">5</span>搜索集成</a>
+</nav>
+
+<div class="container">
+
+  <!-- FRAMEWORK OVERVIEW -->
+  <div class="section" id="framework">
+    <div class="section-header">
+      <div class="step-icon i1">🧪</div>
+      <div>
+        <h2>验证框架概述</h2>
+        <div class="subtitle">两条基本原则，贯穿所有 5 个验证任务</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="overview-grid">
+        <div class="overview-card">
+          <div class="oc-num">原则 1</div>
+          <div class="oc-title">PM 友好展示</div>
+          <div class="oc-desc">输入 / 输出必须以 PM 能看懂的方式呈现，使用 <strong>S-T-A-R 框架</strong>（现状、任务、行动、结果）组织每个验证场景。</div>
+        </div>
+        <div class="overview-card">
+          <div class="oc-num">原则 2</div>
+          <div class="oc-title">tmux + claude -p 捕获</div>
+          <div class="oc-desc">用 <code>tmux</code> + <code>claude -p</code> 运行并捕获截图，从每条命令行和 tmux pane 开始记录，保留完整可复现的执行证据。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TASK 1 -->
+  <div class="section" id="task1">
+    <div class="section-header">
+      <div class="step-icon i2">🎯</div>
+      <div>
+        <h2>验证任务 1 · 触发率</h2>
+        <div class="subtitle">用 20 个用例验证 hook 的触发精度，12/8 训练测试划分</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <p style="font-size:0.92em;margin-bottom:16px;">验证体系的第一步：量化系统"知道什么时候该出手"的能力。</p>
+      <div class="split-box">
+        <div class="split-half ok">
+          <div class="split-label">✅ 应触发（10 个用例）</div>
+          <ul>
+            <li>提到 PostgreSQL 连接池</li>
+            <li>提到 Redis LRU / session eviction</li>
+            <li>提到 Celery retry storm</li>
+            <li>类似已知故障模式的描述</li>
+            <li>…共 10 个正样本</li>
+          </ul>
+        </div>
+        <div class="split-half fail">
+          <div class="split-label">🚫 不应触发（10 个用例）</div>
+          <ul>
+            <li>普通 Python 语法问题</li>
+            <li>无关领域（前端 CSS 等）</li>
+            <li>闲聊 / 问候语</li>
+            <li>已在 wiki 中标记为低置信度的条目</li>
+            <li>…共 10 个负样本</li>
+          </ul>
+        </div>
+      </div>
+      <div class="split-box">
+        <div class="split-half">
+          <div class="split-label">训练集（12 个）</div>
+          <ul>
+            <li>用于调整触发关键词权重</li>
+            <li>优化 INDEX.md 触发条件描述</li>
+          </ul>
+        </div>
+        <div class="split-half">
+          <div class="split-label">测试集（8 个）</div>
+          <ul>
+            <li>保持盲测，不参与调参</li>
+            <li>触发率必须达标才视为通过</li>
+          </ul>
+        </div>
+      </div>
+      <div class="note" style="margin-top:14px;"><strong>迭代原则</strong>：持续优化触发率，直到达标。"达标"由每次 demo 前的验证报告决定，而非一次性定义。</div>
+    </div>
+  </div>
+
+  <!-- TASK 2 -->
+  <div class="section" id="task2">
+    <div class="section-header">
+      <div class="step-icon i3">⚡</div>
+      <div>
+        <h2>验证任务 2 · 优化触发效果</h2>
+        <div class="subtitle">用 Alice & Bob 案例演示完整触发链路，并确认 SILENT_AND_JUST_RUN 机制</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <p style="font-size:0.92em;margin-bottom:16px;">这是整个 demo 的核心故事：Bob 不主动求助，系统自动识别并提前送上 Alice 的经验。</p>
+
+      <div class="star-grid">
+        <div class="star-card star-s">
+          <div class="star-label">S · 现状</div>
+          <div class="star-text">来自 <em>Alice 和 Bob 案例</em>（pm_walkthrough.md）：Bob 上周 Alice 已经解了 PostgreSQL 连接池被午高峰打爆的故障，insight 却躺在 Alice 个人 profile 里。</div>
+        </div>
+        <div class="star-card star-t">
+          <div class="star-label">T · 任务</div>
+          <div class="star-text">Bob 打开 Claude Code，输入与 PostgreSQL 相关的内容时，<strong>不是主动求助</strong>，但可能遇到同样的陷阱。</div>
+        </div>
+        <div class="star-card star-a">
+          <div class="star-label">A · 行动</div>
+          <div class="star-text">Claude 发出最后一张图片后，Claude Code 触发一个 <strong>haiku-agent</strong> 对 insights-wiki 进行语义搜索并汇报最终结果。<span class="pill haiku">haiku-agent</span></div>
+        </div>
+        <div class="star-card star-r">
+          <div class="star-label">R · 结果</div>
+          <div class="star-text">Claude Code 审查相关问题，Bob 不需要知道背后发生了什么，已经自动携带 Alice 的经验继续工作。</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <h3 style="font-size:0.95em;font-weight:700;margin-bottom:10px;">触发机制选型</h3>
+      <div class="step-list">
+        <li>
+          <span class="bullet b3" style="font-size:0.72em;white-space:nowrap;letter-spacing:-0.5px;">选定</span>
+          <div class="text"><strong>SILENT_AND_JUST_RUN</strong>：静默直接执行，用户无感知，系统自动在后台完成 haiku-agent 调用和结果注入。<span class="pill silent">静默</span></div>
+        </li>
+        <li>
+          <span class="bullet" style="background:#aaa;font-size:0.72em;">弃用</span>
+          <div class="text"><strong>ASK_USER_APPROVAL</strong>（可选项，本设计不采用）：请求用户确认。保留为占位符，但强制默认值为 SILENT_AND_JUST_RUN，不打断用户流。</div>
+        </li>
+      </div>
+    </div>
+  </div>
+
+  <!-- TASK 3 -->
+  <div class="section" id="task3">
+    <div class="section-header">
+      <div class="step-icon i4">🔄</div>
+      <div>
+        <h2>验证任务 3 · 更新 Wiki</h2>
+        <div class="subtitle">5 种 wiki 更新操作，确保知识库不腐化</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <ul class="step-list">
+        <li>
+          <span class="bullet b4">合</span>
+          <div class="text">
+            <strong>合并</strong>：同一条目存在旧版和新版时，合并为一条，不留冗余。
+            <span class="pill merge">Merge</span>
+          </div>
+        </li>
+        <li>
+          <span class="bullet b4">标</span>
+          <div class="text">
+            <strong>标记未触发</strong>：绝不遗忘——对于长期未被触发的条目，标记状态而非删除，保留历史。
+          </div>
+        </li>
+        <li>
+          <span class="bullet b4">新</span>
+          <div class="text"><strong>新增</strong>：遇到新的已解问题模式，立即创建新 wiki 条目。</div>
+        </li>
+        <li>
+          <span class="bullet b4">删</span>
+          <div class="text"><strong>删除</strong>：条目被证明无效或完全过时时，可删除。（删前需标记并留存归档版本。）</div>
+        </li>
+        <li>
+          <span class="bullet b4">研</span>
+          <div class="text"><strong>调研</strong>：对存疑的条目标记为"待调研"状态，等待验证后再决定去留。</div>
+        </li>
+        <li>
+          <span class="bullet b4">编</span>
+          <div class="text"><strong>编辑</strong>：对现有条目做内容修正或补充，更新 fix 字段、增加 example，或调整触发条件。</div>
+        </li>
+      </ul>
+      <div class="note">这 5 种操作覆盖了 wiki 的完整生命周期，让知识库既能增长、也能自我清洁，不因时间流逝而变成垃圾堆。</div>
+    </div>
+  </div>
+
+  <!-- TASK 4 -->
+  <div class="section" id="task4">
+    <div class="section-header">
+      <div class="step-icon i5">🏗️</div>
+      <div>
+        <h2>验证任务 4 · Wiki 结构</h2>
+        <div class="subtitle">强制 4 层结构：wiki_type → INDEX.md → item.md → 原始日志</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <h3 style="font-size:0.92em;font-weight:700;margin-bottom:10px;color:var(--muted);">Wiki 类型（wiki_type）</h3>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">
+        <span class="pill wiki">general_python</span>
+        <span class="pill wiki">frontend_python</span>
+        <span class="pill wiki">database</span>
+        <span class="pill wiki">infra_cache</span>
+        <span class="pill wiki">infra_queue</span>
+        <span class="pill wiki">…（按域扩展）</span>
+      </div>
+
+      <h3 style="font-size:0.92em;font-weight:700;margin-bottom:10px;color:var(--muted);">四层结构（重要：必须严格遵循）</h3>
+
+      <div>
+        <div class="layer-row">
+          <span class="layer-badge lb1">层 1</span>
+          <div class="layer-name">wiki_type_index</div>
+          <div class="layer-desc">wiki 类型目录，如 <code>database/</code>、<code>infra_cache/</code>，按技术域分组。</div>
+        </div>
+        <div class="layer-row">
+          <span class="layer-badge lb2">层 2</span>
+          <div class="layer-name">类型 INDEX.md</div>
+          <div class="layer-desc">每个 wiki_type 有一个 INDEX.md，条目格式严格为：<code>| 名称 | 描述 | 触发时机 | 文档链接 |</code></div>
+        </div>
+        <div class="layer-row">
+          <span class="layer-badge lb3">层 3</span>
+          <div class="layer-name">wiki_item.md</div>
+          <div class="layer-desc">完整问题描述 + 反例（失败案例）+ 正例（成功案例），指向原始日志。</div>
+        </div>
+        <div class="layer-row">
+          <span class="layer-badge lb4">层 4</span>
+          <div class="layer-name">原始日志</div>
+          <div class="layer-desc">完整的 <code>.jsonl</code> 对话记录或 <code>.txt</code> 导出，可完整溯源。</div>
+        </div>
+      </div>
+
+      <div class="tree-block">wiki_tree/
+├── database/
+│   ├── INDEX.md              ← 层 2：| 名称 | 描述 | 触发时机 | 链接 |
+│   ├── postgres_pool.md      ← 层 3：问题+反例+正例
+│   └── postgres_memory.md
+├── infra_cache/
+│   ├── INDEX.md
+│   └── redis_lru_session_eviction.md
+└── infra_queue/
+    ├── INDEX.md
+    └── celery_retry_storm.md</div>
+
+      <div class="note" style="margin-top:12px;">
+        INDEX.md 中的"触发时机"列是触发器的直接依据：haiku-agent 把用户消息和各 INDEX.md 的触发时机做语义对比，命中则热加载对应 item.md。
+      </div>
+    </div>
+  </div>
+
+  <!-- TASK 5 -->
+  <div class="section" id="task5">
+    <div class="section-header">
+      <div class="step-icon i1">🤖</div>
+      <div>
+        <h2>验证任务 5 · MiniMax 驱动的 Agentic 搜索</h2>
+        <div class="subtitle">wiki 搜索本身必须是 AI 驱动的，而非简单关键词匹配</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <ul class="step-list">
+        <li>
+          <span class="bullet b1">搜</span>
+          <div class="text">
+            <strong>语义搜索</strong>：用户消息 → MiniMax M2.7 高速版 → 与 INDEX.md 各条目做语义相似度对比，返回得分最高的 top-k 条目。<span class="pill trigger">语义匹配</span>
+          </div>
+        </li>
+        <li>
+          <span class="bullet b1">验</span>
+          <div class="text">
+            <strong>Agentic 验证</strong>：MiniMax agent 不仅做搜索，还做一次 JSON-in / JSON-out 的校验 + 改写，把原始 insight 适配到当前上下文。
+          </div>
+        </li>
+        <li>
+          <span class="bullet b1">降</span>
+          <div class="text">
+            <strong>优雅降级</strong>：即使 MiniMax API 调用失败，fallback 会把原卡的 <code>fix</code> 字段以 <code>verdict=adopt</code> 原样返回。demo 永远不会硬崩。<span class="pill silent">fallback</span>
+          </div>
+        </li>
+        <li>
+          <span class="bullet b1">速</span>
+          <div class="text">
+            <strong>速度目标</strong>：fast path（热加载 + adapter）约 1.3 秒；slow path 基线约 62 秒。差距约 <strong>48×</strong>。
+          </div>
+        </li>
+      </ul>
+      <div class="note">
+        <strong>为什么必须是 Agentic 搜索？</strong><br/>
+        纯关键词匹配会错过语义相关但措辞不同的案例。MiniMax-driven search 能识别"checkout API timeout + postgres rejecting connections"和"postgres 连接池被打爆"是同一类问题，即使用词完全不同。
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

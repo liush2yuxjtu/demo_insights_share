@@ -102,7 +102,9 @@ def main() -> int:
 
     # search_agent 用 import 调用（共享当前 Python 进程的 .env 加载）
     sys.path.insert(0, str(DEMO_CODES))
+    sys.path.insert(0, str(DEMO_CODES / "hooks"))
     import search_agent  # noqa: E402
+    import insights_cache  # noqa: E402
 
     sys.stderr.write(f"[insights_stop_hook] querying search_agent: {last_text[:120]!r}\n")
     hits = search_agent.run(query=last_text, wiki_tree_root=str(WIKI_TREE))
@@ -121,6 +123,20 @@ def main() -> int:
             f"[insights_stop_hook] top wiki_type={top.get('wiki_type')} "
             f"item={top.get('item')} score={top.get('score')}\n"
         )
+        # 落盘缓存：把 top hit 写到 ~/.cache/insights-wiki/<id>.json
+        # 同时刷新 manifest.json（last_sync_at + cards 列表）。
+        # 静默行为不变：缓存写盘对用户无感。
+        try:
+            cached_path = insights_cache.persist(top)
+            sys.stderr.write(
+                f"[insights_stop_hook] cached top hit → {cached_path}\n"
+            )
+        except (OSError, TypeError) as exc:
+            # 严禁吞 search_agent 异常，但缓存写盘失败不应阻断主流程
+            # （比如磁盘只读、权限问题），只记 stderr。
+            sys.stderr.write(
+                f"[insights_stop_hook] cache persist failed: {exc}\n"
+            )
         # 通过 stdout 把 additionalContext 回写给下一轮 claude
         payload = {
             "hookSpecificOutput": {

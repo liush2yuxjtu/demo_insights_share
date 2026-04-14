@@ -1,0 +1,109 @@
+这个项目里没有 checkout 或 PostgreSQL 相关代码。你描述的是一个生产故障场景，我直接给出诊断步骤和修复方案。
+
+---
+
+## 立即诊断（按序执行）
+
+**第一步：确认连接数现状**
+
+```sql
+-- 当前连接数 vs 上限
+SELECT count(*), max_conn, count(*) * 100 / max_conn AS pct
+FROM pg_stat_activity,
+     (SELECT setting::int AS max_conn FROM pg_settings WHERE name = 'max_connections') s
+GROUP BY max_conn;
+
+-- 按状态分布，找出 idle in transaction（连接泄漏的典型信号）
+SELECT state, count(*)
+FROM pg_stat_activity
+WHERE datname = 'your_db_name'
+GROUP BY state;
+
+-- 找出占用最久的连接
+SELECT pid, usename, application_name, state, wait_event_type,
+       now() - query_start AS duration, left(query, 80) AS query
+FROM pg_stat_activity
+WHERE datname = 'your_db_name'
+ORDER BY duration DESC NULLS LAST
+LIMIT 20;
+```
+
+**第二步：应急止血**
+
+```sql
+-- 终止所有 idle 连接（不影响活跃事务）
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE datname = 'your_db_name'
+  AND state = 'idle'
+  AND query_start < now() - interval '5 minutes';
+```
+
+---
+
+## 根本原因 & 修复
+
+**99% 概率原因：没有连接池，或连接池配置不当**
+
+| 症状 | 原因 |
+|------|------|
+| `idle in transaction` 连接堆积 | 事务未关闭 / 连接泄漏 |
+| `active` 连接数 = max_connections | 池子满了，新请求排队超时 |
+| 仅午餐高峰出现 | 平时并发不够高，峰值触发连接上限 |
+
+**修复一：加连接池（PgBouncer）——最快见效**
+
+```bash
+# 如果直连 Postgres，立刻在中间加 PgBouncer
+# pool_mode = transaction  适合 checkout 这类短事务
+# max_client_conn = 1000   应用侧可以开很多连接
+# default_pool_size = 20   实际到 PG 的连接控制在 20 以内
+```
+
+**修复二：如果用 SQLAlchemy（Python）**
+
+```python
+# 问题配置（每请求新建连接）
+engine = create_engine(DATABASE_URL)
+
+# 修复：显式设置池参数
+engine = create_engine(
+    DATABASE_URL,
+    pool_size=10,          # 基础连接数
+    max_overflow=20,       # 峰值时最多额外 20 个
+    pool_timeout=30,       # 等待连接超时，不要无限等
+    pool_pre_ping=True,    # 避免拿到死连接
+)
+```
+
+**修复三：如果用 psycopg2 / asyncpg（无池）**
+
+```python
+# asyncpg 示例，加连接池
+pool = await asyncpg.create_pool(
+    DATABASE_URL,
+    min_size=5,
+    max_size=20,
+    command_timeout=10,
+)
+```
+
+**修复四：提高 PostgreSQL max_connections（临时缓解，非根治）**
+
+```sql
+-- postgresql.conf
+max_connections = 200       -- 从默认 100 提高
+-- 注意：每个连接消耗约 5-10MB 内存，不要无限加
+```
+
+---
+
+## 你需要提供哪些信息，我才能看具体代码
+
+把以下内容发给我：
+
+1. checkout API 的数据库初始化/连接代码
+2. 你用的是哪个框架（Django / FastAPI / Express / 其他）
+3. 有没有用连接池中间件（PgBouncer / pgpool）
+
+发过来我直接改代码。

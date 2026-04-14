@@ -1,0 +1,64 @@
+这个症状和 `alice_pgpool.json` 里记录的 2026-04-10 事故完全吻合——连接槽耗尽 + 午高峰爆发。根因是**某个 worker 持有长期 idle-in-transaction 连接没释放，导致连接池被榨干**。
+
+直接执行以下两步：
+
+---
+
+## 立即止血（5 分钟内）
+
+**步骤 1：在 Postgres 侧设超时**
+
+```sql
+-- 连接到 postgres，执行：
+ALTER SYSTEM SET idle_in_transaction_session_timeout = '30s';
+SELECT pg_reload_conf();
+```
+
+这会立刻杀掉所有挂着 idle-in-transaction 超过 30 秒的连接，释放被占用的连接槽。
+
+**步骤 2：确认当前是否有"僵尸"连接**
+
+```sql
+SELECT pid, usename, application_name, state, 
+       now() - state_change AS idle_duration, query
+FROM pg_stat_activity
+WHERE state = 'idle in transaction'
+ORDER BY idle_duration DESC;
+```
+
+如果看到 `idle_duration` 超过几分钟的行，手动 `pg_terminate_backend(pid)` 立即回收。
+
+---
+
+## 根本修复
+
+Alice 的 card 给的是 PgBouncer + transaction pooling 场景（confidence 0.82）：
+
+```ini
+# pgbouncer.ini
+pool_mode = transaction          # 确认是 transaction 模式，不是 session
+default_pool_size = <2x worker数>  # 例如 20 个 worker → pool_size = 40
+max_client_conn = 200
+```
+
+重载配置：`pgbouncer -d -R /etc/pgbouncer/pgbouncer.ini`
+
+**注意**：Alice 的 card 标注 `do_not_apply_when: session pooling mode`——先确认你们用的是 transaction pooling，否则调参方向不同。
+
+---
+
+## 验证恢复
+
+```sql
+-- 连接数应该回落
+SELECT count(*), state FROM pg_stat_activity GROUP BY state;
+
+-- 确认超时参数生效
+SHOW idle_in_transaction_session_timeout;
+```
+
+目标：`idle in transaction` 状态的连接数降回个位数，`active` 连接数 < pool_size。
+
+---
+
+**根因追查**（峰值过后）：看哪个 `application_name` / `usename` 在 `pg_stat_activity` 里持有时间最长，定位到具体 worker 代码里漏 commit/rollback 的地方。

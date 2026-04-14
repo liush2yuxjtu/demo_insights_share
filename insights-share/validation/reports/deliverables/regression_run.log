@@ -1,0 +1,9 @@
+[run_all] wrote /Users/m1/projects/demo_insights_share/insights-share/validation/reports/final_report.html
+[run_all] all_pass=True (6/6)
+  [OK] Phase 0 - Baseline + MiniMax 预检 - demo finished + MiniMax PONG
+  [OK] Phase 4 - Wiki 4 层结构迁移 - 20/20 layer checks PASS
+  [OK] Phase 1 - Trigger rate 20 cases - train f1=0.9231 | test f1=1.0000 precision=1.0000 acc=1.0000
+  [OK] Phase 5 - MiniMax agentic search - real haiku-agent hit postgres_pool, NO fallback
+  [OK] Phase 2 - SILENT_AND_JUST_RUN Stop hook - Bob silent session → Stop hook → postgres_pool
+  [OK] Phase 3 - Wiki CRUD 操作 - 6/6 CRUD ops OK
+[run_all] PASS

@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>insights-share · 0414 更新交付物证据</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --bg: #fafafa;
+    --fg: #1f2328;
+    --muted: #57606a;
+    --border: #d0d7de;
+    --accent: #0969da;
+    --ok-bg: #d4edda;
+    --ok-fg: #155724;
+    --fail-bg: #f8d7da;
+    --fail-fg: #721c24;
+    --code-bg: #0d1117;
+    --code-fg: #e6edf3;
+    --out-bg: #f6f8fa;
+    --out-border: #d0d7de;
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+    line-height: 1.6;
+  }
+  header { border-bottom: 2px solid var(--border); padding-bottom: 16px; margin-bottom: 24px; }
+  header h1 { margin: 0 0 4px; font-size: 1.6em; }
+  header p { margin: 4px 0; color: var(--muted); }
+  .summary {
+    background: var(--ok-bg);
+    color: var(--ok-fg);
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    margin: 16px 0;
+  }
+  .summary.fail { background: var(--fail-bg); color: var(--fail-fg); }
+  nav { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 12px 16px; margin-bottom: 24px; }
+  nav strong { display: block; margin-bottom: 6px; }
+  nav ol { margin: 0; padding-left: 20px; }
+  nav a { color: var(--accent); text-decoration: none; }
+  nav a:hover { text-decoration: underline; }
+  section { margin-bottom: 36px; }
+  h2 { font-size: 1.25em; border-bottom: 1px solid var(--border); padding-bottom: 6px; margin-top: 32px; }
+  h3 { font-size: 1.05em; margin-top: 18px; color: var(--muted); }
+  .why, .what {
+    background: #fff;
+    border-left: 4px solid var(--accent);
+    padding: 10px 14px;
+    margin: 12px 0;
+    border-radius: 0 4px 4px 0;
+  }
+  .what { border-left-color: #6f42c1; }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.78em;
+    font-weight: 600;
+    vertical-align: middle;
+  }
+  .badge.ok { background: var(--ok-bg); color: var(--ok-fg); }
+  .badge.fail { background: var(--fail-bg); color: var(--fail-fg); }
+  .badge.big { font-size: 1.0em; padding: 6px 14px; }
+
+  .cmd {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    border-radius: 6px;
+    padding: 14px 16px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.85em;
+    overflow-x: auto;
+    white-space: pre;
+    margin: 8px 0;
+  }
+
+  .out {
+    background: var(--out-bg);
+    border: 1px solid var(--out-border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 0.78em;
+    overflow-x: auto;
+    white-space: pre;
+    margin: 8px 0;
+    color: #1f2328;
+  }
+  .out.green { border-left: 3px solid #2da44e; }
+
+  .step-label {
+    display: inline-block;
+    background: var(--accent);
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 0.72em;
+    margin-right: 6px;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 0.9em; }
+  th, td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; vertical-align: top; }
+  th { background: #f4f4f4; }
+  footer { color: var(--muted); font-size: 0.85em; margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); }
+  code.inline { background: var(--out-bg); padding: 1px 6px; border-radius: 3px; font-size: 0.88em; }
+  .kv { display: grid; grid-template-columns: 80px 1fr; gap: 6px 14px; margin: 8px 0; }
+  .kv .k { color: var(--muted); font-size: 0.85em; }
+  .findings { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 14px 18px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>insights-share · 0414 更新交付物证据</h1>
+  <p>团队：team-a / team-b / team-c / team-d · 主题：wiki-insights skill 化 + 静默下载补强 + linear 时间线 + WITH/WITHOUT 对照</p>
+  <p>生成于：2026-04-14 · 工作目录：<code class="inline">/Users/m1/projects/demo_insights_share</code></p>
+  <div class="summary"><span class="badge ok big">验收通过</span> &nbsp; 6/6 phase PASS · regression_run.log 末行 <code class="inline">[run_all] PASS</code></div>
+</header>
+
+<nav>
+  <strong>导航</strong>
+  <ol>
+    <li><a href="#overview">交付物概览</a></li>
+    <li><a href="#sec1">验证 1 · skill 骨架</a></li>
+    <li><a href="#sec2">验证 2 · 静默下载</a></li>
+    <li><a href="#sec3">验证 3 · linear 时间线</a></li>
+    <li><a href="#sec4">验证 4 · tmux WITH/WITHOUT 对照</a></li>
+    <li><a href="#findings">关键发现</a></li>
+  </ol>
+</nav>
+
+<section id="overview">
+  <h2>交付物概览</h2>
+  <table>
+    <thead><tr><th>文件</th><th>生成者</th><th>大小</th><th>状态</th></tr></thead>
+    <tbody>
+      <tr><td><a href="proposal_linear.html">proposal_linear.html</a></td><td>team-b</td><td>21 KB · 42 事件</td><td><span class="badge ok">OK</span></td></tr>
+      <tr><td><a href="validation_linear.html">validation_linear.html</a></td><td>team-b</td><td>54 KB · 118 事件</td><td><span class="badge ok">OK</span></td></tr>
+      <tr><td><a href="claude_export_WITH.txt">claude_export_WITH.txt</a></td><td>team-c</td><td>1962 B</td><td><span class="badge ok">OK</span></td></tr>
+      <tr><td><a href="claude_export_WITHOUT.txt">claude_export_WITHOUT.txt</a></td><td>team-c</td><td>3018 B</td><td><span class="badge ok">OK</span></td></tr>
+      <tr><td><a href="diff.md">diff.md</a></td><td>team-c</td><td>3.2 KB</td><td>辅助</td></tr>
+      <tr><td><a href="TEAM_B_REPORT.md">TEAM_B_REPORT.md</a></td><td>team-b</td><td>2.8 KB</td><td>辅助</td></tr>
+      <tr><td><a href="../../tools/TEAM_C_REPORT.md">TEAM_C_REPORT.md</a></td><td>team-c</td><td>tools/</td><td>辅助</td></tr>
+      <tr><td><a href="regression_run.log">regression_run.log</a></td><td>team-d</td><td>回归日志</td><td><span class="badge ok">PASS</span></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="sec1">
+  <h2>验证 1 · skill 骨架（team-a）</h2>
+  <div class="why">证明 <code class="inline">insights-wiki</code> 已在 <code class="inline">demo_codes/.claude/skills/</code> 落地，可被 Claude Code 自动加载。</div>
+
+  <h3><span class="step-label">命令</span>检视 skill 骨架</h3>
+  <div class="cmd">ls insights-share/demo_codes/.claude/skills/insights-wiki/
+cat insights-share/demo_codes/.claude/skills/insights-wiki/SKILL.md | head -20</div>
+
+  <h3><span class="step-label">预期</span></h3>
+  <div class="what">存在 <code class="inline">SKILL.md</code> + 可被 <code class="inline">tmux_with_without.sh</code> 拷贝到 <code class="inline">~/.claude/skills/</code> 后被 claude -p 自动调用。</div>
+
+  <h3><span class="step-label">实际</span></h3>
+  <div class="out green">SKILL.md 已交付（team-a），WITH 轮 claude 答复中命中 4 个本地 wiki 专有名词，证实 skill 被自动加载。</div>
+</section>
+
+<section id="sec2">
+  <h2>验证 2 · 静默下载补强（team-a）</h2>
+  <div class="why">原 hook 缺乏 <code class="inline">insights_cache</code> persist 调用，新增 <code class="inline">insights_cache.py</code> + <code class="inline">insights_prefetch.py</code> + <code class="inline">test_insights_cache.py</code>。</div>
+
+  <h3><span class="step-label">命令</span>跑回归脚本</h3>
+  <div class="cmd">bash insights-share/validation/run_all_validations.sh \
+  2&gt;&amp;1 | tee insights-share/validation/reports/deliverables/regression_run.log</div>
+
+  <h3><span class="step-label">预期</span></h3>
+  <div class="what">Phase 0–5 全 PASS，<code class="inline">[SILENT_AND_JUST_RUN]</code> Stop hook 触发 + 命中 <code class="inline">postgres_pool</code>，零 fallback。</div>
+
+  <h3><span class="step-label">实际</span></h3>
+  <div class="out green">[run_all] all_pass=True (6/6)
+  [OK] Phase 0 - Baseline + MiniMax 预检 - demo finished + MiniMax PONG
+  [OK] Phase 4 - Wiki 4 层结构迁移 - 20/20 layer checks PASS
+  [OK] Phase 1 - Trigger rate 20 cases - test f1=1.0000 precision=1.0000
+  [OK] Phase 5 - MiniMax agentic search - real haiku-agent hit postgres_pool
+  [OK] Phase 2 - SILENT_AND_JUST_RUN Stop hook - Bob silent → postgres_pool
+  [OK] Phase 3 - Wiki CRUD 操作 - 6/6 CRUD ops OK
+[run_all] PASS</div>
+</section>
+
+<section id="sec3">
+  <h2>验证 3 · proposal/validation linear 时间线（team-b）</h2>
+  <div class="why">用 jsonl 顺序还原 PM 视角的关键词演化，体现「先方案后验证」的线性叙事。</div>
+
+  <h3><span class="step-label">命令</span></h3>
+  <div class="cmd">python3 insights-share/validation/tools/extract_linear_timeline.py \
+  --keyword proposal.md --out -
+
+python3 insights-share/validation/tools/extract_linear_timeline.py \
+  --keyword validation.md --keyword 'validation/' --out -</div>
+
+  <h3><span class="step-label">预期</span></h3>
+  <div class="what"><code class="inline">proposal_linear.html</code> ≥ 30 事件、<code class="inline">validation_linear.html</code> ≥ 50 事件，按 ts 升序，去 ANSI/XML 标签。</div>
+
+  <h3><span class="step-label">实际</span></h3>
+  <div class="out green">proposal_linear.html · 21288 B · 42 事件 · ts 升序
+validation_linear.html · 54858 B · 118 事件 · ts 升序
+两份 HTML 已 open -a "Google Chrome" 弹出预览</div>
+</section>
+
+<section id="sec4">
+  <h2>验证 4 · tmux WITH/WITHOUT 对照（team-c）</h2>
+  <div class="why">证明 <code class="inline">insights-wiki</code> 一旦注册，<code class="inline">claude -p</code> 会在收到匹配主题的 prompt 时自动注入本地 card。</div>
+
+  <h3><span class="step-label">命令</span></h3>
+  <div class="cmd">bash insights-share/validation/tmux_with_without.sh
+# 内部固定 prompt:
+# Our checkout API is timing out, postgres is rejecting
+# new connections during the lunch spike</div>
+
+  <h3><span class="step-label">预期</span></h3>
+  <div class="what">WITH 轮命中本地 wiki 专有名词（<code class="inline">alice</code> / <code class="inline">2026-04-10</code> / <code class="inline">idle_in_transaction</code>），WITHOUT 轮全部为 0；体量对照成立。</div>
+
+  <h3><span class="step-label">实际</span></h3>
+  <table>
+    <thead><tr><th>关键词</th><th>WITHOUT</th><th>WITH</th></tr></thead>
+    <tbody>
+      <tr><td><code class="inline">alice</code></td><td>0</td><td><strong>3</strong></td></tr>
+      <tr><td><code class="inline">2026-04-10</code></td><td>0</td><td><strong>1</strong></td></tr>
+      <tr><td><code class="inline">confidence</code></td><td>0</td><td><strong>1</strong></td></tr>
+      <tr><td><code class="inline">do_not_apply</code></td><td>0</td><td><strong>1</strong></td></tr>
+      <tr><td><code class="inline">idle_in_transaction</code></td><td>0</td><td><strong>2</strong></td></tr>
+      <tr><td>字节</td><td>3018</td><td><strong>1962（-35%）</strong></td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="findings">
+  <h2>关键发现</h2>
+  <div class="findings">
+    <p><strong>WITH vs WITHOUT — 字数减少 35%，信息密度反而上升。</strong></p>
+    <ul>
+      <li>WITH 轮直接定位到 <code class="inline">alice_pgpool.json</code> 的 2026-04-10 事故，给出 <code class="inline">idle_in_transaction_session_timeout = '30s'</code> 这种「按本团队既往经验」的具体止血参数。</li>
+      <li>WITH 轮显式声明 <code class="inline">do_not_apply_when: session pooling mode</code> 反向适用边界，避免在错误场景下误用。</li>
+      <li>WITHOUT 轮开场即承认「项目里没有 checkout 或 PostgreSQL 相关代码」，只能罗列 <code class="inline">pg_stat_activity</code> 三段查询 + 四种连接池配置示例 + 反问，完全是教科书答案。</li>
+      <li>结论：<code class="inline">insights-wiki</code> skill 一旦在 <code class="inline">~/.claude/skills/</code> 注册，Claude Code 会在收到匹配主题的问题时自动调用 — demo 的核心价值「局域网集体智慧自动注入」由本对照实验证实。</li>
+    </ul>
+  </div>
+</section>
+
+<footer>
+  生成于 2026-04-14 · 数据源 jsonl glob: <code class="inline">~/.claude/projects/-Users-m1-projects-demo-insights-share/*.jsonl</code> · 回归脚本 <code class="inline">insights-share/validation/run_all_validations.sh</code> · 团队：team-a / team-b / team-c / team-d
+</footer>
+</body>
+</html>

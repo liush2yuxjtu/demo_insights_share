@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>proposal.md · 线性解读</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root {
+  --bg: #f8f9fa;
+  --fg: #1a1a2e;
+  --muted: #6c757d;
+  --border: #dee2e6;
+  --accent: #4361ee;
+  --accent2: #7209b7;
+  --ok: #2d6a4f;
+  --ok-bg: #d8f3dc;
+  --warn: #7a5b00;
+  --warn-bg: #fff3cd;
+  --code-bg: #0d1117;
+  --code-fg: #e6edf3;
+  --white: #ffffff;
+  --step-1: #4361ee;
+  --step-2: #7209b7;
+  --step-3: #e85d04;
+  --step-4: #2d6a4f;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  line-height: 1.7;
+}
+.hero {
+  background: linear-gradient(135deg, #4361ee 0%, #7209b7 100%);
+  color: #fff;
+  padding: 56px 40px 48px;
+  text-align: center;
+}
+.hero .label {
+  font-size: 0.78em;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  margin-bottom: 12px;
+}
+.hero h1 { font-size: 2.2em; font-weight: 700; margin-bottom: 12px; }
+.hero p { font-size: 1.05em; opacity: 0.85; max-width: 640px; margin: 0 auto; }
+.toc-bar {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  overflow-x: auto;
+}
+.toc-bar a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 24px;
+  text-decoration: none;
+  font-size: 0.88em;
+  font-weight: 600;
+  color: var(--muted);
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s;
+}
+.toc-bar a:hover { color: var(--accent); border-color: var(--accent); }
+.toc-bar a .num {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 20px; height: 20px; border-radius: 50%;
+  font-size: 0.78em; font-weight: 700; color: #fff;
+}
+.n1 { background: var(--step-1); } .n2 { background: var(--step-2); }
+.n3 { background: var(--step-3); } .n4 { background: var(--step-4); }
+.container { max-width: 860px; margin: 0 auto; padding: 0 24px 80px; }
+.section {
+  margin-top: 56px;
+  background: var(--white);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 28px;
+  border-bottom: 1px solid var(--border);
+}
+.section-header .step-icon {
+  width: 44px; height: 44px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.3em; flex-shrink: 0;
+}
+.s1 { background: #eef2ff; color: var(--step-1); }
+.s2 { background: #f3e8ff; color: var(--step-2); }
+.s3 { background: #fff3eb; color: var(--step-3); }
+.s4 { background: #d8f3dc; color: var(--step-4); }
+.section-header h2 { font-size: 1.2em; font-weight: 700; }
+.section-header .subtitle { font-size: 0.85em; color: var(--muted); margin-top: 2px; }
+.section-body { padding: 24px 28px; }
+.card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 4px; }
+@media (max-width: 600px) { .card-grid { grid-template-columns: 1fr; } }
+.card {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  background: var(--bg);
+}
+.card .card-num {
+  font-size: 0.72em; font-weight: 700; letter-spacing: 0.06em;
+  text-transform: uppercase; color: var(--muted); margin-bottom: 6px;
+}
+.card .card-title { font-size: 0.95em; font-weight: 600; margin-bottom: 4px; }
+.card .card-desc { font-size: 0.87em; color: #444; }
+.card.highlight { border-color: var(--accent); background: #f0f4ff; }
+.card.highlight .card-num { color: var(--accent); }
+.tag {
+  display: inline-block; padding: 2px 9px; border-radius: 12px;
+  font-size: 0.76em; font-weight: 600; margin: 0 3px 4px 0; vertical-align: middle;
+}
+.tag.silent { background: #d8f3dc; color: #1b5e20; }
+.tag.force { background: #fff3e0; color: #e65100; }
+.tag.admin { background: #e8eaf6; color: #283593; }
+.tag.skill { background: #fce4ec; color: #880e4f; }
+.tag.cli { background: #e0f7fa; color: #006064; }
+.update-box {
+  background: #fffde7;
+  border: 1px solid #f9a825;
+  border-left: 4px solid #f9a825;
+  border-radius: 4px;
+  padding: 12px 16px;
+  font-size: 0.88em;
+  margin-bottom: 16px;
+}
+.update-box .update-label { font-weight: 700; color: #f57f17; font-size: 0.82em; margin-bottom: 4px; }
+.step-list { list-style: none; margin-top: 8px; }
+.step-list li {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+}
+.step-list li:last-child { border-bottom: none; }
+.step-list li .bullet {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  font-size: 0.78em; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.step-list li .text { font-size: 0.93em; }
+.step-list li .text strong { color: var(--fg); }
+.config-block {
+  background: var(--code-bg);
+  color: var(--code-fg);
+  border-radius: 8px;
+  padding: 16px 18px;
+  font-family: "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.82em;
+  overflow-x: auto;
+  white-space: pre;
+  margin-top: 12px;
+}
+.config-label { font-size: 0.8em; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+.deliverable-row {
+  display: flex; gap: 12px; align-items: center;
+  padding: 12px 0; border-bottom: 1px solid var(--border);
+}
+.deliverable-row:last-child { border-bottom: none; }
+.deliverable-row .icon { font-size: 1.2em; flex-shrink: 0; }
+.deliverable-row .name { font-weight: 600; font-size: 0.92em; margin-bottom: 2px; }
+.deliverable-row .desc { font-size: 0.85em; color: var(--muted); }
+.divider { height: 1px; background: var(--border); margin: 16px 0; }
+.note {
+  background: #f0f4ff;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  padding: 10px 14px;
+  font-size: 0.88em;
+  margin-top: 12px;
+  color: #2c3e70;
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="label">proposal.md · 线性解读</div>
+  <h1>insights-share 项目提案</h1>
+  <p>用 STAR 框架拆解这份提案的每一段：它从哪里来、要做什么、怎么做、交付什么。</p>
+</div>
+
+<nav class="toc-bar">
+  <a href="#situation"><span class="num n1">S</span>现状</a>
+  <a href="#task"><span class="num n2">T</span>任务</a>
+  <a href="#action"><span class="num n3">A</span>行动</a>
+  <a href="#results"><span class="num n4">R</span>预期结果</a>
+</nav>
+
+<div class="container">
+
+  <!-- SITUATION -->
+  <div class="section" id="situation">
+    <div class="section-header">
+      <div class="step-icon s1">⚠️</div>
+      <div>
+        <h2>S — 现状（Situation）</h2>
+        <div class="subtitle">claude /insights 本身有价值，但三个核心问题让它无法团队化</div>
+      </div>
+    </div>
+    <div class="section-body">
+
+      <div class="card-grid">
+        <div class="card highlight">
+          <div class="card-num">问题 1</div>
+          <div class="card-title">生成耗时过长</div>
+          <div class="card-desc">每次冷启动都要重新跑完整 insight 生成流程，约需 60+ 秒。</div>
+        </div>
+        <div class="card highlight">
+          <div class="card-num">问题 2</div>
+          <div class="card-title">insights 仅对个人有效</div>
+          <div class="card-desc">生成出来的 insight 存在个人 profile 里，其他团队成员完全看不到。</div>
+        </div>
+        <div class="card highlight">
+          <div class="card-num">问题 3</div>
+          <div class="card-title">直接复用导致次优表现</div>
+          <div class="card-desc">直接把别人的 insight 套用到自己的上下文，结果可能比没有更差。</div>
+        </div>
+        <div class="card">
+          <div class="card-num">以上三点是初版痛点</div>
+          <div class="card-title">这就是 MVP 的起点</div>
+          <div class="card-desc">后续在 0414 两次更新中加入了更多设计约束（见下）。</div>
+        </div>
+      </div>
+
+      <div class="update-box" style="margin-top:20px;">
+        <div class="update-label">📌 update 0414 09:29 — 新增 4 条设计约束</div>
+        <ul class="step-list">
+          <li>
+            <span class="bullet">4</span>
+            <div class="text"><strong>SILENT-IN-BACKGROUND</strong>：上传 / 下载 insights 必须在后台静默完成，用户无感知。<span class="tag silent">静默后台</span></div>
+          </li>
+          <li>
+            <span class="bullet">5</span>
+            <div class="text"><strong>强制下载</strong>：只要用户加载了我们的 insights 工具，就自动把最新 insights 推送到本地，用户无需主动操作。<span class="tag force">强制推送</span></div>
+          </li>
+          <li>
+            <span class="bullet">6</span>
+            <div class="text"><strong>管理员 CRUD</strong>：管理员可以对 wiki-insights 做增删改查和审核。Demo 阶段所有人都是管理员。<span class="tag admin">Admin CRUD</span></div>
+          </li>
+          <li>
+            <span class="bullet">7</span>
+            <div class="text"><strong>skill 形式交付</strong>：wiki-insights 目前以 Claude Code skill 的形式存在和被调用。<span class="tag skill">Skill</span></div>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TASK -->
+  <div class="section" id="task">
+    <div class="section-header">
+      <div class="step-icon s2">🎯</div>
+      <div>
+        <h2>T — 任务（Task）</h2>
+        <div class="subtitle">在局域网内制作一个 insights-share 功能 demo，CLI 优先</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <ul class="step-list">
+        <li>
+          <span class="bullet">1</span>
+          <div class="text"><strong>生成一条 insight</strong>：展示 insight 从产生到入库的完整路径。</div>
+        </li>
+        <li>
+          <span class="bullet">2</span>
+          <div class="text"><strong>公司 wiki / 渐进式披露系统</strong>：有一个中央存储，分类管理所有团队 insights。</div>
+        </li>
+        <li>
+          <span class="bullet">3</span>
+          <div class="text"><strong>遇到新问题先检索</strong>：每次遇到问题时，优先从公司 wiki 语义检索相关 insights，而非冷启动生成。</div>
+        </li>
+        <li>
+          <span class="bullet">4</span>
+          <div class="text"><strong>仅热加载 wiki-insights</strong>：不全量加载，只取最相关的那一张卡热加载，保持速度。</div>
+        </li>
+        <li>
+          <span class="bullet">5</span>
+          <div class="text"><strong>用户无感知比对验证</strong>：在后台快速验证 insight 是否适用于当前上下文，不打断用户。</div>
+        </li>
+        <li>
+          <span class="bullet">6</span>
+          <div class="text"><strong>携带高层次 insights 继续工作</strong>：把验证通过的 insight 注入当前工作上下文，让 agent 带着"前人经验"继续。</div>
+        </li>
+      </ul>
+
+      <div class="note">
+        <strong>设计约束：demo 必须基于 CLI</strong><br/>
+        AGENTS 更容易通过 CLI 使用；如需 REPL，应提供用于启动守护进程或服务器的 CLI 命令。
+        <span class="tag cli">CLI-first</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="config-label">AI 能力配置（agent-sdk，via MiniMax 2.7 高速通道）</div>
+      <div class="config-block">"ANTHROPIC_AUTH_TOKEN": "sk-cp-ocXR33d...（已脱敏）",
+"ANTHROPIC_BASE_URL": "https://api.minimaxi.com/anthropic",
+"ANTHROPIC_DEFAULT_HAIKU_MODEL":  "MiniMax-M2.7-highspeed",
+"ANTHROPIC_DEFAULT_OPUS_MODEL":   "MiniMax-M2.7-highspeed",
+"ANTHROPIC_DEFAULT_SONNET_MODEL": "MiniMax-M2.7-highspeed",
+"ANTHROPIC_MODEL":                "MiniMax-M2.7-highspeed"</div>
+      <div class="note" style="margin-top:10px;">MiniMax 2.7 高速版：速度快、成本较高。所有 AI 调用（adapter、搜索、验证）都走同一个 endpoint，保持 demo 延迟稳定可预测。</div>
+
+    </div>
+  </div>
+
+  <!-- ACTION -->
+  <div class="section" id="action">
+    <div class="section-header">
+      <div class="step-icon s3">⚡</div>
+      <div>
+        <h2>A — 行动（Action）</h2>
+        <div class="subtitle">如何执行这份提案</div>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="card-grid">
+        <div class="card">
+          <div class="card-num">定位</div>
+          <div class="card-title">面向 PM，而非开发者</div>
+          <div class="card-desc">演示的语言、界面、交互流程，以 PM 能直接看懂为标准。不要堆技术术语。</div>
+        </div>
+        <div class="card">
+          <div class="card-num">产品形态</div>
+          <div class="card-title">MVP · 即点即用</div>
+          <div class="card-desc">展示一个可运行的最小产品，而非原型图或文档。要能当场跑出来。</div>
+        </div>
+        <div class="card">
+          <div class="card-num">执行策略</div>
+          <div class="card-title">请立即开始执行</div>
+          <div class="card-desc">先执行再门控——先产出可检查的结果，再请用户确认，而不是反复确认再动手。</div>
+        </div>
+        <div class="card">
+          <div class="card-num">目标受众</div>
+          <div class="card-title">也展示给其他 agent 开发者</div>
+          <div class="card-desc">0414 更新明确：还需要一套交付物来展示"这套 agent 协作是怎么设计的"。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="section" id="results">
+    <div class="section-header">
+      <div class="step-icon s4">📦</div>
+      <div>
+        <h2>R — 预期结果（Expected Results）</h2>
+        <div class="subtitle">两层交付：demo 产物 + agent 开发者向交付物</div>
+      </div>
+    </div>
+    <div class="section-body">
+
+      <h3 style="font-size:0.95em;font-weight:700;margin-bottom:12px;color:var(--muted);">层一：基础 demo 产物</h3>
+      <div class="deliverable-row">
+        <span class="icon">📁</span>
+        <div>
+          <div class="name">demo_codes/ + demo_docs/</div>
+          <div class="desc">完整 demo 代码及配套设计文档，存放于 <code>demos/{demo_topic}/demo_codes</code> 和 <code>demo_docs</code> 目录下。</div>
+        </div>
+      </div>
+      <div class="deliverable-row">
+        <span class="icon">📄</span>
+        <div>
+          <div class="name">终端截图 / .md 日志</div>
+          <div class="desc">完整的执行过程记录，用于展示 demo 真实运行情况。</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="update-box">
+        <div class="update-label">📌 update 0414 09:26 — 新增：面向 agent 开发者的 6 项交付物</div>
+      </div>
+
+      <h3 style="font-size:0.95em;font-weight:700;margin:0 0 12px;color:var(--muted);">层二：agent 开发者向交付物（共 6 项）</h3>
+
+      <div class="deliverable-row">
+        <span class="icon">⏱️</span>
+        <div>
+          <div class="name">① 线性时间线（before start）</div>
+          <div class="desc">以 linear 风格追踪 <code>~/.claude/projects/*</code>，展示完整的 agent 决策时间线。</div>
+        </div>
+      </div>
+      <div class="deliverable-row">
+        <span class="icon">📋</span>
+        <div>
+          <div class="name">② proposal_linear.html（即本页）</div>
+          <div class="desc">逐步解说 proposal.md 的写法——说明我们如何用 STAR 框架来写提案。</div>
+        </div>
+      </div>
+      <div class="deliverable-row">
+        <span class="icon">✅</span>
+        <div>
+          <div class="name">③ validation_linear.html</div>
+          <div class="desc">逐步解说 validation.md 的设计——说明我们如何设计验证体系。</div>
+        </div>
+      </div>
+      <div class="deliverable-row">
+        <span class="icon">💬</span>
+        <div>
+          <div class="name">④ claude_export_WITHOUT.txt</div>
+          <div class="desc">在 tmux 中打开 claude，不加载 demo，与 claude 对话后导出 <code>/export</code> 可读 .txt 对话记录。</div>
+        </div>
+      </div>
+      <div class="deliverable-row">
+        <span class="icon">🚀</span>
+        <div>
+          <div class="name">⑤ claude_export_WITH.txt</div>
+          <div class="desc">在 tmux 中打开 claude，加载我们的 demo（insights-wiki skill），对话后导出 <code>/export</code> 对比记录。</div>
+        </div>
+      </div>
+      <div class="deliverable-row">
+        <span class="icon">📦</span>
+        <div>
+          <div class="name">⑥ 收集器（Collector）</div>
+          <div class="desc">汇总以上全部交付物：<code>proposal_linear.html</code>、<code>validation_linear.html</code>、<code>claude_export_WITH.txt</code>、<code>claude_export_WITHOUT.txt</code>。</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
