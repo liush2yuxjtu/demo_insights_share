@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>insights-wiki · 鸭子池塘 A/B 对照</title>
+<style>
+  :root {
+    --bg: #fef3c7;
+    --bg2: #fde68a;
+    --panel: #ffffff;
+    --fg: #1f2937;
+    --muted: #6b7280;
+    --border: #f59e0b;
+    --a: #ec4899;
+    --b: #3b82f6;
+    --ok: #10b981;
+    --code-bg: #0f172a;
+    --code-fg: #e2e8f0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+    color: var(--fg);
+    margin: 0;
+    padding: 32px 24px;
+    line-height: 1.8;
+    min-height: 100vh;
+  }
+  .container { max-width: 1000px; margin: 0 auto; }
+  h1 { font-size: 32px; margin: 0 0 8px 0; }
+  h2 {
+    margin-top: 40px;
+    font-size: 22px;
+    border-bottom: 3px solid var(--border);
+    padding-bottom: 8px;
+  }
+  h3 { font-size: 16px; color: var(--muted); margin-top: 20px; }
+  .header {
+    background: var(--panel);
+    padding: 28px 32px;
+    border-radius: 16px;
+    border: 2px solid var(--border);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    text-align: center;
+  }
+  .duck-row { font-size: 44px; letter-spacing: 8px; margin-bottom: 8px; }
+  .subtitle { color: var(--muted); font-size: 14px; }
+  .badges { margin-top: 12px; }
+  .badge {
+    display: inline-block;
+    background: var(--ok);
+    color: white;
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    margin: 2px;
+  }
+  .badge.a { background: var(--a); }
+  .badge.b { background: var(--b); }
+  .badge.purple { background: #8b5cf6; }
+  .badge.amber { background: #f59e0b; }
+
+  /* 鸭子故事 */
+  .story-box {
+    background: var(--panel);
+    padding: 28px 36px;
+    border-radius: 14px;
+    border: 2px dashed var(--border);
+    font-size: 15px;
+    margin-top: 16px;
+  }
+  .story-box p { margin: 14px 0; }
+  .story-box strong { color: var(--b); }
+  .story-box ul { margin: 12px 0; padding-left: 28px; }
+  .story-box li { margin: 8px 0; }
+  .story-box .highlight {
+    background: linear-gradient(transparent 60%, #fef08a 60%);
+    font-weight: 600;
+  }
+
+  /* 命令卡片（更人性化） */
+  .cmd-card {
+    background: var(--panel);
+    border-radius: 14px;
+    padding: 24px 28px;
+    margin-top: 16px;
+    border: 2px solid #e5e7eb;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  .cmd-card.a { border-left: 8px solid var(--a); }
+  .cmd-card.b { border-left: 8px solid var(--b); }
+  .cmd-card h3 {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+    color: var(--fg);
+  }
+  .cmd-card .what-happens {
+    background: #f9fafb;
+    border-left: 3px solid var(--ok);
+    padding: 10px 16px;
+    border-radius: 6px;
+    margin: 12px 0;
+    font-size: 13px;
+    color: #374151;
+  }
+  .cmd-card .what-happens strong { color: var(--ok); }
+  .cmd-card .steps {
+    font-size: 13px;
+    color: var(--muted);
+    margin: 8px 0 12px 0;
+  }
+  .cmd-card .steps ol { margin: 6px 0; padding-left: 20px; }
+  .cmd-card .steps li { margin: 4px 0; }
+
+  pre {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 16px 20px;
+    border-radius: 10px;
+    overflow-x: auto;
+    font-family: "SF Mono", Menlo, Consolas, "Courier New", monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    border: 1px solid #334155;
+    white-space: pre-wrap;
+    word-break: break-all;
+    position: relative;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: #334155;
+    color: #fbbf24;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.15s;
+  }
+  .copy-btn:hover { background: #475569; color: #fde68a; }
+  .copy-btn.copied { background: #10b981; color: white; }
+
+  .expected {
+    background: #ecfdf5;
+    border: 1px solid #10b981;
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #065f46;
+  }
+  .expected code {
+    background: #d1fae5;
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: #064e3b;
+  }
+
+  /* 交付物清单 */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 14px;
+    background: var(--panel);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  }
+  th, td {
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e5e7eb;
+    font-size: 13px;
+  }
+  th {
+    background: #fef3c7;
+    color: #78350f;
+    font-weight: 700;
+    font-size: 12px;
+    text-transform: uppercase;
+  }
+  tr:last-child td { border-bottom: none; }
+  td a.file-link {
+    color: #2563eb;
+    text-decoration: none;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+    background: #eff6ff;
+    padding: 4px 10px;
+    border-radius: 5px;
+    border: 1px solid #bfdbfe;
+    display: inline-block;
+    transition: all 0.15s;
+  }
+  td a.file-link:hover {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-color: #3b82f6;
+    transform: translateY(-1px);
+  }
+  td a.file-link::before { content: "🔗 "; }
+  .category-row td {
+    background: #fef3c7;
+    color: #78350f;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  .category-row.purple td { background: #ede9fe; color: #4c1d95; }
+  .category-row.amber td { background: #fef3c7; color: #92400e; }
+  .category-row.green td { background: #f0fdf4; color: #166534; }
+
+  /* 按钮 */
+  .action-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: #111827;
+    color: #fbbf24;
+    border-radius: 8px;
+    text-decoration: none;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+    border: 1px solid #374151;
+    transition: all 0.15s;
+    font-weight: 600;
+  }
+  .btn:hover {
+    background: #1f2937;
+    color: #fde68a;
+    border-color: #fbbf24;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  }
+  .btn.pink { background: #ec4899; color: white; border-color: #be185d; }
+  .btn.pink:hover { background: #db2777; }
+  .btn.blue { background: #3b82f6; color: white; border-color: #1d4ed8; }
+  .btn.blue:hover { background: #2563eb; }
+  .btn.purple { background: #8b5cf6; color: white; border-color: #6d28d9; }
+  .btn.purple:hover { background: #7c3aed; }
+  .btn.amber { background: #f59e0b; color: white; border-color: #b45309; }
+  .btn.amber:hover { background: #d97706; }
+  .btn.green { background: #10b981; color: white; border-color: #047857; }
+  .btn.green:hover { background: #059669; }
+
+  .footer {
+    text-align: center;
+    margin-top: 48px;
+    color: var(--muted);
+    font-size: 12px;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div class="header">
+  <div class="duck-row">🦆 🦆 🦆</div>
+  <h1>insights-wiki · 鸭子池塘 A/B 对照</h1>
+  <p class="subtitle">
+    一个可爱小鸭子都能看懂的故事 + 两行可复制粘贴的 sandbox 验证命令 + 6 份真实 A/B 对照日志
+  </p>
+  <div class="badges">
+    <span class="badge a">A / WITHOUT skill</span>
+    <span class="badge b">B / WITH skill + daemon</span>
+    <span class="badge purple">🤖 agent JSON ×2</span>
+    <span class="badge amber">🧑 human /export ×2</span>
+  </div>
+</div>
+
+<!-- ===================== 鸭子故事 ===================== -->
+<h2>🦆 鸭子故事（连刚孵出来的小鸭子都能听懂）</h2>
+
+<div class="story-box">
+
+<p>从前，有一个很大很大的池塘 🪷，住着一群叫「工程师」的鸭子。</p>
+
+<p>这群鸭子每天都在池塘里游来游去、写代码、修 bug。可是池塘里藏了好多麻烦：有时候莲花叶子下面躲着一条叫 <strong>Postgres</strong> 的水蛇 🐍，它会在<strong>午饭时间</strong>（也就是大家都在喝水的时候）突然冒出来咬人；有时候芦苇荡里会长出一种叫 <strong>Celery</strong> 的水草 🌾，把鸭子们缠得游不动。</p>
+
+<p>小鸭子们每次踩了坑，都会咬着羽毛笔，把教训写在一张<strong>荷叶 🌿</strong>上：</p>
+
+<ul>
+  <li>🌿 <strong>红鸭子 Alice 的荷叶</strong>：「午饭时间 Postgres 水蛇最凶。要提前把 <code>idle_in_transaction_session_timeout</code> 设成 30 秒，再给 PgBouncer 的 <code>pool_size</code> 设成鸭子数量的 2 倍，它就咬不到你了。」</li>
+  <li>🌿 <strong>红鸭子 Alice 的另一张荷叶</strong>：「Celery 水草的重试不能立刻重来，要等它歇一会儿。设 <code>retry_backoff=True</code>，它就会自动松开。」</li>
+  <li>🌿 <strong>黄鸭子 Carol 的荷叶</strong>：「Redis 池子如果满了，它会悄悄把热乎乎的会话扔掉。要把 <code>maxmemory-policy</code> 设成 <code>volatile-lru</code>。」</li>
+</ul>
+
+<p>鸭子们把所有的荷叶都塞进池塘中央一个<strong>大大的木头筐</strong> 📦。这个木头筐有个名字，叫 <code>insightsd</code>，它住在池塘的 <strong>7821</strong> 号洞里，谁来问它要荷叶，它都能找到。</p>
+
+<hr style="border:0; border-top:1px dashed #d1d5db; margin:24px 0;">
+
+<p>池塘边还住着一只<strong>谁也看不见的老鸭奶奶</strong> 👵（戴着老花镜）。</p>
+
+<p>每当池塘里任何一只小鸭子张嘴说话——</p>
+
+<blockquote style="background:#f9fafb; border-left:4px solid #9ca3af; padding:10px 16px; margin:12px 0; font-style:italic;">
+"哎呀，我的 checkout API 超时了，postgres 中午就是不让我进去喝水……"
+</blockquote>
+
+<p>老鸭奶奶就会立刻跑到木头筐面前，用她的老花镜把所有荷叶飞快地翻一遍，挑出<strong>最相关</strong>的那几张。然后——</p>
+
+<p class="highlight">🤫 她蹑手蹑脚地走到正在说话的小鸭子身后，悄悄地把红鸭子 Alice 的荷叶塞进了它的羽毛底下。</p>
+
+<p>小鸭子<strong>根本不知道</strong>老鸭奶奶来过。它只是突然觉得脑子里多了一段回忆——"哦，原来中午 Postgres 水蛇是被 idle-in-transaction 招来的，Alice 以前也遇到过，她是这么解决的…"——于是它就照着这段回忆，给出了一个特别靠谱的答案。</p>
+
+<p>老鸭奶奶不会打断小鸭子玩耍、不会弹窗、不会让它选 A 还是 B。她只是在小鸭子<strong>最需要的时候</strong>，悄悄地、静静地把前辈的经验塞到它身边。</p>
+
+<p>这只看不见的老鸭奶奶，有一个技术名字，叫 <code>Stop hook</code>。</p>
+
+<hr style="border:0; border-top:1px dashed #d1d5db; margin:24px 0;">
+
+<h3 style="margin-top:8px">🐥 两只小鸭子的对照实验</h3>
+
+<p>池塘里来了两只一模一样的小鸭子，我们叫它们 <strong>小 A</strong> 和 <strong>小 B</strong>。它们被问了同一个问题：</p>
+
+<blockquote style="background:#f9fafb; border-left:4px solid #9ca3af; padding:10px 16px; margin:12px 0; font-style:italic;">
+"我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，怎么办？"
+</blockquote>
+
+<p><strong>小 A 的池塘里</strong>，没有老鸭奶奶（Stop hook），也没有木头筐 insightsd。小 A 只能靠自己十年读代码的本事，给出一个<strong>通用教科书答案</strong>：查连接池、加 PgBouncer、设超时……都对，但就像一本书上抄的。</p>
+
+<p><strong>小 B 的池塘里</strong>，老鸭奶奶正在值班，木头筐 insightsd 也敞开着。小 B 刚张嘴说完"postgres 午高峰拒绝连接"，老鸭奶奶立刻从筐里翻出红鸭子 Alice 在 <code>2026-04-10</code> 留下的那张荷叶，悄悄塞了过来。小 B 低头一看——原来 Alice 当年就是这个场景！于是小 B 的回答变成了：</p>
+
+<div style="background:#ecfdf5; border:1px solid #10b981; border-radius:8px; padding:14px 18px; margin:12px 0;">
+<p style="margin:0 0 6px 0;">📜 <strong>引用红鸭子 Alice 的荷叶</strong>（<code>alice-pgpool-2026-04-10</code>, 置信度 0.82）：</p>
+<p style="margin:6px 0;">"Alice 2026-04-10 踩过同样的坑——PgBouncer transaction 模式下，午饭尖峰连接池被 idle-in-transaction 的僵死 worker 耗尽，p99 直线拉升，日志出现 <code>remaining connection slots reserved</code>。下面的方案基于她的实战卡片展开……</p>
+<ul style="margin:6px 0;">
+  <li><code>idle_in_transaction_session_timeout = 30s</code>（Alice 原话）</li>
+  <li><code>default_pool_size = 2 × worker_count</code>（Alice 原话）</li>
+  <li>适用条件：<code>postgres ≥ 13</code> + <code>pgbouncer transaction mode</code></li>
+  <li>不适用：<code>session pooling mode</code>、单租户独占 DB"</li>
+</ul>
+</div>
+
+<p>同样的问题、同样的小鸭子、同样的 Claude 脑容量。<br>
+唯一的差别：<span class="highlight">小 B 的池塘里有一只老鸭奶奶，她把前辈的荷叶悄悄塞给了它</span>。</p>
+
+<p style="text-align:center; font-size:18px; margin-top:20px;">
+  <strong>"不要让每一只小鸭子都自己去撞同一条水蛇。" 🐍</strong>
+</p>
+
+</div>
+
+<!-- ===================== 2 行验证命令 ===================== -->
+<h2>⚡ 两行 sandbox 验证命令（直接复制粘贴）</h2>
+
+<p style="font-size:13px; color:var(--muted)">
+  打开一个<strong>干净的终端</strong>（推荐新开一个 tab 或一个 docker sandbox），
+  先跑命令 1️⃣ 看 A 鸭子的答案，再跑命令 2️⃣ 看 B 鸭子的答案，最后一行命令帮你验证差异。
+</p>
+
+<!-- 命令 1 -->
+<div class="cmd-card a">
+  <h3>1️⃣ 命令一 · 小 A（没有老鸭奶奶）</h3>
+  <div class="steps">
+    这条命令会：
+    <ol>
+      <li>把 <code>~/.claude/skills/insights-wiki*</code> 删掉（确保纯净环境）</li>
+      <li>让 Claude 回答同一个 checkout API 超时问题</li>
+      <li>把答案清洗后保存到 <code>/tmp/A_without.log</code></li>
+    </ol>
+  </div>
+  <div class="what-happens">
+    <strong>你会看到：</strong>Claude 给出一段通用的 PostgreSQL 诊断方案（idle in transaction 检查、PgBouncer 配置、SQLAlchemy 连接池等），但<strong>不会</strong>引用任何团队内部卡片。
+  </div>
+<pre id="cmd1">pkill -f "insights_cli.py serve" 2>/dev/null; rm -rf ~/.claude/skills/insights-wiki ~/.claude/skills/insights-wiki-server && claude -p "我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？请给出可执行的 SQL 与代码片段。" 2>&1 | sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g' > /tmp/A_without.log && echo "✅ A/WITHOUT → /tmp/A_without.log ($(wc -c &lt; /tmp/A_without.log) bytes)"<button class="copy-btn" onclick="copyCmd(this,'cmd1')">📋 复制</button></pre>
+  <div class="expected">
+    ✅ <strong>预期输出：</strong><code>✅ A/WITHOUT → /tmp/A_without.log (约 4000-6000 bytes)</code>
+  </div>
+</div>
+
+<!-- 命令 2 -->
+<div class="cmd-card b">
+  <h3>2️⃣ 命令二 · 小 B（有老鸭奶奶 + 木头筐）</h3>
+  <div class="steps">
+    这条命令会：
+    <ol>
+      <li>清掉旧 skill，从 GitHub <strong>clone</strong> 整个仓库到 <code>/tmp/isw-clone</code></li>
+      <li>把 <code>insights-wiki</code> 和 <code>insights-wiki-server</code> 两个 skill 拷到 <code>~/.claude/skills/</code></li>
+      <li>后台启动 LAN daemon <code>insightsd:7821</code>（读 <code>wiki.json</code>，3 张实战卡片）</li>
+      <li>让 Claude 回答同一个问题（Stop hook 会自动把最相关的卡片塞给它）</li>
+      <li>把答案清洗后保存到 <code>/tmp/B_with.log</code></li>
+    </ol>
+  </div>
+  <div class="what-happens">
+    <strong>你会看到：</strong>Claude 在回答里<strong>明确引用</strong> <code>alice-pgpool-2026-04-10</code>，
+    给出 Alice 当年的精确阈值 <code>idle_in_transaction_session_timeout=30s</code> 和 <code>default_pool_size = 2 × worker_count</code>，并标注置信度 0.82 + 适用/不适用条件。
+  </div>
+<pre id="cmd2">rm -rf ~/.claude/skills/insights-wiki ~/.claude/skills/insights-wiki-server /tmp/isw-clone && git clone --depth 1 https://github.com/liush2yuxjtu/demo_insights_share.git /tmp/isw-clone && cp -r /tmp/isw-clone/insights-share/demo_codes/.claude/skills/insights-wiki ~/.claude/skills/ && cp -r /tmp/isw-clone/insights-share/demo_codes/.claude/skills/insights-wiki-server ~/.claude/skills/ && (cd /tmp/isw-clone/insights-share/demo_codes && nohup python3 insights_cli.py serve --host 0.0.0.0 --port 7821 --store ./wiki.json > /tmp/isd.log 2>&1 &) && sleep 3 && curl -sf http://127.0.0.1:7821/insights >/dev/null && claude -p "我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？请给出可执行的 SQL 与代码片段；若有 insights-wiki 注入的 LAN 实战卡片请在回答里明确引用。" 2>&1 | sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g' > /tmp/B_with.log && echo "✅ B/WITH → /tmp/B_with.log ($(wc -c &lt; /tmp/B_with.log) bytes)"<button class="copy-btn" onclick="copyCmd(this,'cmd2')">📋 复制</button></pre>
+  <div class="expected">
+    ✅ <strong>预期输出：</strong><code>✅ B/WITH → /tmp/B_with.log (约 5000-12000 bytes)</code>
+  </div>
+</div>
+
+<!-- 命令 3 差异验证 -->
+<div class="cmd-card" style="border-left:8px solid var(--ok)">
+  <h3>3️⃣ 一行命令验证差异（A 应为 0，B 应 ≥ 1）</h3>
+  <div class="steps">
+    这是<strong>最重要的证据行</strong>。如果 A log 里完全不提 Alice 卡片，而 B log 里引用了至少一次，就说明 insights-wiki 在 B 环境下确实把团队的实战经验静默注入了 Claude。
+  </div>
+<pre id="cmd3">printf 'A/WITHOUT alice-pgpool hits = %s\nB/WITH    alice-pgpool hits = %s\n' "$(grep -c alice-pgpool-2026-04-10 /tmp/A_without.log)" "$(grep -c alice-pgpool-2026-04-10 /tmp/B_with.log)"<button class="copy-btn" onclick="copyCmd(this,'cmd3')">📋 复制</button></pre>
+  <div class="expected">
+    ✅ <strong>预期输出：</strong>
+    <code>A/WITHOUT alice-pgpool hits = 0</code><br>
+    <code>B/WITH &nbsp;&nbsp;&nbsp;alice-pgpool hits = 1</code>（或更多）
+  </div>
+</div>
+
+<!-- ===================== 交付物清单 ===================== -->
+<h2>📁 交付物清单（点击打开）</h2>
+
+<p style="font-size:13px; color:var(--muted)">
+  所有 A/B 日志、鸭子故事、sandbox 脚本都在同一个 <code>examples/</code> 目录。
+  点击文件名直接在 GitHub Pages 里打开（或 raw 查看）。
+</p>
+
+<table>
+  <thead>
+    <tr><th>#</th><th>文件</th><th>大小</th><th>说明</th></tr>
+  </thead>
+  <tbody>
+    <tr class="category-row"><td colspan="4">📜 基础 /export 风格（手造对话块）</td></tr>
+    <tr>
+      <td>1</td>
+      <td><a class="file-link" href="./A_without.md" target="_blank">A_without.md</a></td>
+      <td>6.4 KB</td>
+      <td>A · 无 skill · Claude 给通用答案</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><a class="file-link" href="./B_with.md" target="_blank">B_with.md</a></td>
+      <td>6.9 KB</td>
+      <td>B · 有 skill + daemon · Claude 引用 Alice 卡片</td>
+    </tr>
+    <tr class="category-row purple"><td colspan="4">🤖 Agent JSON（<code>claude -p --output-format json</code>）</td></tr>
+    <tr>
+      <td>3</td>
+      <td><a class="file-link" href="./A_without.agent.json" target="_blank">A_without.agent.json</a></td>
+      <td>22 KB</td>
+      <td>A · 非交互 JSON · 5 msgs · 1 turn · $0.19</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><a class="file-link" href="./B_with.agent.json" target="_blank">B_with.agent.json</a></td>
+      <td>49 KB</td>
+      <td>B · 非交互 JSON · 22 msgs · 8 turns · $0.17</td>
+    </tr>
+    <tr class="category-row amber"><td colspan="4">🧑 Human MD（<code>tmux</code> 启动交互式 claude → <code>/export</code> slash）</td></tr>
+    <tr>
+      <td>5</td>
+      <td><a class="file-link" href="./A_without.human.md" target="_blank">A_without.human.md</a></td>
+      <td>5.7 KB</td>
+      <td>A · 真实交互会话 · /export 落盘</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td><a class="file-link" href="./B_with.human.md" target="_blank">B_with.human.md</a></td>
+      <td>11.6 KB</td>
+      <td>B · 真实交互会话 · 引用 Alice 卡片</td>
+    </tr>
+    <tr class="category-row green"><td colspan="4">🦆 其它产物</td></tr>
+    <tr>
+      <td>7</td>
+      <td><a class="file-link" href="./duck_story.md" target="_blank">duck_story.md</a></td>
+      <td>5.2 KB</td>
+      <td>🦆 鸭子故事原文 Markdown</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td><a class="file-link" href="./validate_commands.sh" target="_blank">validate_commands.sh</a></td>
+      <td>2.8 KB</td>
+      <td>⚡ 两行 sandbox 命令脚本</td>
+    </tr>
+    <tr>
+      <td>9</td>
+      <td><a class="file-link" href="./run_human_AB.sh" target="_blank">run_human_AB.sh</a></td>
+      <td>4.4 KB</td>
+      <td>🤖 自动化 tmux + /export 脚本</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- ===================== 快捷按钮 ===================== -->
+<div class="action-bar">
+  <a class="btn pink" href="./A_without.md" target="_blank">📄 A 基础</a>
+  <a class="btn blue" href="./B_with.md" target="_blank">📄 B 基础</a>
+  <a class="btn purple" href="./A_without.agent.json" target="_blank">🤖 A agent</a>
+  <a class="btn purple" href="./B_with.agent.json" target="_blank">🤖 B agent</a>
+  <a class="btn amber" href="./A_without.human.md" target="_blank">🧑 A human</a>
+  <a class="btn amber" href="./B_with.human.md" target="_blank">🧑 B human</a>
+  <a class="btn green" href="./duck_story.md" target="_blank">🦆 鸭子故事</a>
+  <a class="btn" href="./validate_commands.sh" target="_blank">⚡ 两行命令</a>
+  <a class="btn" href="./run_human_AB.sh" target="_blank">🔧 自动化脚本</a>
+  <a class="btn" href="https://github.com/liush2yuxjtu/demo_insights_share/tree/main/examples" target="_blank">🐙 GitHub 源码</a>
+</div>
+
+<div class="footer">
+  🦆 <a href="https://liush2yuxjtu.github.io/demo_insights_share/examples/" style="color:#6b7280;">liush2yuxjtu.github.io/demo_insights_share/examples/</a>
+  · 生成时间 2026-04-14
+  · <a href="https://github.com/liush2yuxjtu/demo_insights_share" style="color:#6b7280;">GitHub repo</a>
+</div>
+
+</div>
+
+<script>
+function copyCmd(btn, id) {
+  const pre = document.getElementById(id);
+  const text = pre.childNodes[0].nodeValue; // 取第一段文本节点，排除 button
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✅ 已复制';
+    btn.classList.add('copied');
+    setTimeout(() => {
+      btn.textContent = '📋 复制';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+</script>
+
+</body>
+</html>
