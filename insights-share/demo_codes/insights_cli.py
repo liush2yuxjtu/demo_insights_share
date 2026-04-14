@@ -207,6 +207,32 @@ def cmd_research(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_wiki_install(args: argparse.Namespace) -> int:
+    from datetime import datetime
+
+    server = args.server.rstrip("/")
+    try:
+        _http_get(f"{server}/healthz")
+    except urllib.error.URLError as exc:
+        print(ui.color(f"unreachable: {server} ({exc})", "red"), file=sys.stderr)
+        return 2
+    cfg_dir = Path.home() / ".cache" / "insights-wiki"
+    cfg_dir.mkdir(parents=True, exist_ok=True)
+    cfg = {"server_url": server, "installed_at": datetime.now().isoformat()}
+    (cfg_dir / "config.json").write_text(
+        json.dumps(cfg, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    cards = _http_get(f"{server}/insights").get("cards") or []
+    for c in cards:
+        cid = c.get("id")
+        if cid:
+            (cfg_dir / f"{cid}.json").write_text(
+                json.dumps(c, ensure_ascii=False), encoding="utf-8"
+            )
+    print(ui.color(f"install ok server={server} cached={len(cards)} cards", "green"))
+    return 0
+
+
 def cmd_demo(args: argparse.Namespace) -> int:  # noqa: ARG001
     script = Path(__file__).parent / "run_demo.sh"
     if script.exists():
@@ -276,6 +302,15 @@ def build_parser() -> argparse.ArgumentParser:
     p_res.add_argument("query")
     p_res.add_argument("--wiki", default=DEFAULT_WIKI)
     p_res.set_defaults(func=cmd_research)
+
+    p_inst = sub.add_parser(
+        "wiki-install", help="install and connect insights-wiki to LAN server"
+    )
+    p_inst.add_argument(
+        "--server", required=True,
+        help="LAN server URL, e.g. http://192.168.22.42:7821"
+    )
+    p_inst.set_defaults(func=cmd_wiki_install)
 
     p_demo = sub.add_parser("demo", help="print how to run the end-to-end demo")
     p_demo.set_defaults(func=cmd_demo)

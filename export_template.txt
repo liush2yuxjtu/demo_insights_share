@@ -1,0 +1,14 @@
+▗ ▗   ▖ ▖  Claude Code v2.1.104
+           Opus 4.6 (1M context) · Claude Max
+  ▘▘ ▝▝    ~/projects/demo_insights_share
+
+  /remote-control is active · Code in CLI or at
+  https://claude.ai/code/session_01JtAbSQ3yTqFRs8n8kPVpNx
+
+❯ hi this is a demo to test claude code /export slash commands . just say HI to
+   me
+
+⏺ HI！
+
+❯ /export export_template.txt
+  ⎿  Conversation exported to: /Users/m1/projects/demo_insights_share/export_template.txt

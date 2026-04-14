@@ -64,6 +64,41 @@
   .badge.amber { background: #f59e0b; }
 
   /* 鸭子故事 */
+  .story-section {
+    margin-top: 16px;
+  }
+  .story-tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .story-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: #111827;
+    color: #fbbf24;
+    border: 1px solid #374151;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .story-tab:hover {
+    background: #1f2937;
+    color: #fde68a;
+    border-color: #fbbf24;
+    transform: translateY(-1px);
+  }
+  .story-tab.active {
+    background: var(--b);
+    color: white;
+    border-color: #1d4ed8;
+    box-shadow: 0 6px 14px rgba(59,130,246,0.18);
+  }
   .story-box {
     background: var(--panel);
     padding: 28px 36px;
@@ -272,7 +307,7 @@
   <div class="duck-row">🦆 🦆 🦆</div>
   <h1>insights-wiki · 鸭子池塘 A/B 对照</h1>
   <p class="subtitle">
-    一个可爱小鸭子都能看懂的故事 + 两行可复制粘贴的 sandbox 验证命令 + 6 份真实 A/B 对照日志
+    一个可爱小鸭子都能看懂的故事 + 三段可复制粘贴的 sandbox 验证命令 + 6 份真实 A/B 对照日志
   </p>
   <div class="badges">
     <span class="badge a">A / WITHOUT skill</span>
@@ -285,82 +320,41 @@
 <!-- ===================== 鸭子故事 ===================== -->
 <h2>🦆 鸭子故事（连刚孵出来的小鸭子都能听懂）</h2>
 
-<div class="story-box">
+<section class="story-section">
+  <div class="story-tabs">
+    <button class="story-tab" data-role="frontend" onclick="showStory('frontend')">👩‍🎨 我是前端</button>
+    <button class="story-tab active" data-role="backend" onclick="showStory('backend')">🛠️ 我是后端</button>
+    <button class="story-tab" data-role="dl" onclick="showStory('dl')">🧠 我是深度学习</button>
+    <button class="story-tab" data-role="noob" onclick="showStory('noob')">🐣 我是 AI 小白</button>
+  </div>
 
-<p>从前，有一个很大很大的池塘 🪷，住着一群叫「工程师」的鸭子。</p>
+  <div id="story-frontend" class="story-box" style="display:none;">
+    <p>前端鸭子最烦的事，不是写按钮，而是每次组件重新 mount 都要重新 fetch、重新算 state、重新翻旧 issue。明明昨天有人处理过 checkout 超时，今天换个人又像从零搭一遍页面。后来老鸭奶奶做了个木头筐，把团队验证过的 hooks 写法、性能坑和事故卡片都装进去，谁再遇到类似报错，她就先递一张最像的给你。</p>
+    <p>放到 Claude Code 里，这个木头筐就是 <code>insights-wiki</code> skill；它像团队级的 <code>useMemo</code> + Context，把已经验证过的经验直接复用。于是 B 场景不会只说“去检查超时”，而是能顺着 <code>alice-pgpool-2026-04-10</code> 这张卡片，把 Alice 当时怎么排查 checkout 卡住说清楚。</p>
+  </div>
 
-<p>这群鸭子每天都在池塘里游来游去、写代码、修 bug。可是池塘里藏了好多麻烦：有时候莲花叶子下面躲着一条叫 <strong>Postgres</strong> 的水蛇 🐍，它会在<strong>午饭时间</strong>（也就是大家都在喝水的时候）突然冒出来咬人；有时候芦苇荡里会长出一种叫 <strong>Celery</strong> 的水草 🌾，把鸭子们缠得游不动。</p>
+  <div id="story-backend" class="story-box">
+    <p>后端鸭子最怕的不是写 SQL，而是每次 checkout 超时都要重新翻 Slack、旧事故和数据库面板。这样像每个请求都临时建连接，时间全耗在重复排查里。老鸭奶奶后来做了个木头筐，里面装着团队验证过的 PgBouncer、超时阈值和诊断顺序，谁遇到午餐高峰拒绝连接，她就先把这筐方案递过去。</p>
+    <p>放到 Claude Code 里，这个木头筐就是 <code>insights-wiki</code> skill，<code>Stop hook</code> 会静悄悄把最相关的卡片塞进当前回答。于是 B 场景不再只说“检查连接池”，而是能直接引用 <code>alice-pgpool-2026-04-10</code> 这张 Alice 留下的实战卡片，把阈值、适用条件和排障顺序一起带出来。</p>
+  </div>
 
-<p>小鸭子们每次踩了坑，都会咬着羽毛笔，把教训写在一张<strong>荷叶 🌿</strong>上：</p>
+  <div id="story-dl" class="story-box" style="display:none;">
+    <p>深度学习鸭子最能理解这种痛：如果每次 fine-tune 都从随机初始化开始，训练会又慢又不稳；有 checkpoint 和预训练权重，很多坑就不用重踩。池塘里的木头筐干的也是这件事，它把团队遇到过的生产事故压成可复用的“经验权重”，谁再问类似问题，就先加载最像的那份知识。</p>
+    <p>在 Claude Code 里，<code>insights-wiki</code> 就像把实战卡片当作团队预训练层，<code>Stop hook</code> 则负责按当前问题做一次检索加载。所以 B 场景不像 A 只给通用答案，它会把 <code>alice-pgpool-2026-04-10</code> 当成已训好的 insight 直接 load 进回答，少走很多从零试错的 epoch。</p>
+  </div>
 
-<ul>
-  <li>🌿 <strong>红鸭子 Alice 的荷叶</strong>：「午饭时间 Postgres 水蛇最凶。要提前把 <code>idle_in_transaction_session_timeout</code> 设成 30 秒，再给 PgBouncer 的 <code>pool_size</code> 设成鸭子数量的 2 倍，它就咬不到你了。」</li>
-  <li>🌿 <strong>红鸭子 Alice 的另一张荷叶</strong>：「Celery 水草的重试不能立刻重来，要等它歇一会儿。设 <code>retry_backoff=True</code>，它就会自动松开。」</li>
-  <li>🌿 <strong>黄鸭子 Carol 的荷叶</strong>：「Redis 池子如果满了，它会悄悄把热乎乎的会话扔掉。要把 <code>maxmemory-policy</code> 设成 <code>volatile-lru</code>。」</li>
-</ul>
+  <div id="story-noob" class="story-box" style="display:none;">
+    <p>如果你是 AI 小白，可以把这件事想成“新同事翻便签本”。没有便签本的时候，每次系统报错都得重新搜 Google、翻聊天记录、问同事，速度慢还容易漏关键细节。老鸭奶奶后来把前辈们写过的解决办法都塞进一个木头筐，谁再遇到同样的问题，她就先把那张最像的小纸条递过去。</p>
+    <p>这就是 <code>insights-wiki</code> 的作用：Claude 回答前，会先偷偷翻一眼团队便签本。于是 B 场景不是空口讲大道理，而是能拿出 <code>alice-pgpool-2026-04-10</code> 这张 Alice 在 4 月 10 号写下的小贴士，直接告诉你这类 postgres 午高峰超时以前是怎么修好的。</p>
+  </div>
+</section>
 
-<p>鸭子们把所有的荷叶都塞进池塘中央一个<strong>大大的木头筐</strong> 📦。这个木头筐有个名字，叫 <code>insightsd</code>，它住在池塘的 <strong>7821</strong> 号洞里，谁来问它要荷叶，它都能找到。</p>
-
-<hr style="border:0; border-top:1px dashed #d1d5db; margin:24px 0;">
-
-<p>池塘边还住着一只<strong>谁也看不见的老鸭奶奶</strong> 👵（戴着老花镜）。</p>
-
-<p>每当池塘里任何一只小鸭子张嘴说话——</p>
-
-<blockquote style="background:#f9fafb; border-left:4px solid #9ca3af; padding:10px 16px; margin:12px 0; font-style:italic;">
-"哎呀，我的 checkout API 超时了，postgres 中午就是不让我进去喝水……"
-</blockquote>
-
-<p>老鸭奶奶就会立刻跑到木头筐面前，用她的老花镜把所有荷叶飞快地翻一遍，挑出<strong>最相关</strong>的那几张。然后——</p>
-
-<p class="highlight">🤫 她蹑手蹑脚地走到正在说话的小鸭子身后，悄悄地把红鸭子 Alice 的荷叶塞进了它的羽毛底下。</p>
-
-<p>小鸭子<strong>根本不知道</strong>老鸭奶奶来过。它只是突然觉得脑子里多了一段回忆——"哦，原来中午 Postgres 水蛇是被 idle-in-transaction 招来的，Alice 以前也遇到过，她是这么解决的…"——于是它就照着这段回忆，给出了一个特别靠谱的答案。</p>
-
-<p>老鸭奶奶不会打断小鸭子玩耍、不会弹窗、不会让它选 A 还是 B。她只是在小鸭子<strong>最需要的时候</strong>，悄悄地、静静地把前辈的经验塞到它身边。</p>
-
-<p>这只看不见的老鸭奶奶，有一个技术名字，叫 <code>Stop hook</code>。</p>
-
-<hr style="border:0; border-top:1px dashed #d1d5db; margin:24px 0;">
-
-<h3 style="margin-top:8px">🐥 两只小鸭子的对照实验</h3>
-
-<p>池塘里来了两只一模一样的小鸭子，我们叫它们 <strong>小 A</strong> 和 <strong>小 B</strong>。它们被问了同一个问题：</p>
-
-<blockquote style="background:#f9fafb; border-left:4px solid #9ca3af; padding:10px 16px; margin:12px 0; font-style:italic;">
-"我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，怎么办？"
-</blockquote>
-
-<p><strong>小 A 的池塘里</strong>，没有老鸭奶奶（Stop hook），也没有木头筐 insightsd。小 A 只能靠自己十年读代码的本事，给出一个<strong>通用教科书答案</strong>：查连接池、加 PgBouncer、设超时……都对，但就像一本书上抄的。</p>
-
-<p><strong>小 B 的池塘里</strong>，老鸭奶奶正在值班，木头筐 insightsd 也敞开着。小 B 刚张嘴说完"postgres 午高峰拒绝连接"，老鸭奶奶立刻从筐里翻出红鸭子 Alice 在 <code>2026-04-10</code> 留下的那张荷叶，悄悄塞了过来。小 B 低头一看——原来 Alice 当年就是这个场景！于是小 B 的回答变成了：</p>
-
-<div style="background:#ecfdf5; border:1px solid #10b981; border-radius:8px; padding:14px 18px; margin:12px 0;">
-<p style="margin:0 0 6px 0;">📜 <strong>引用红鸭子 Alice 的荷叶</strong>（<code>alice-pgpool-2026-04-10</code>, 置信度 0.82）：</p>
-<p style="margin:6px 0;">"Alice 2026-04-10 踩过同样的坑——PgBouncer transaction 模式下，午饭尖峰连接池被 idle-in-transaction 的僵死 worker 耗尽，p99 直线拉升，日志出现 <code>remaining connection slots reserved</code>。下面的方案基于她的实战卡片展开……</p>
-<ul style="margin:6px 0;">
-  <li><code>idle_in_transaction_session_timeout = 30s</code>（Alice 原话）</li>
-  <li><code>default_pool_size = 2 × worker_count</code>（Alice 原话）</li>
-  <li>适用条件：<code>postgres ≥ 13</code> + <code>pgbouncer transaction mode</code></li>
-  <li>不适用：<code>session pooling mode</code>、单租户独占 DB"</li>
-</ul>
-</div>
-
-<p>同样的问题、同样的小鸭子、同样的 Claude 脑容量。<br>
-唯一的差别：<span class="highlight">小 B 的池塘里有一只老鸭奶奶，她把前辈的荷叶悄悄塞给了它</span>。</p>
-
-<p style="text-align:center; font-size:18px; margin-top:20px;">
-  <strong>"不要让每一只小鸭子都自己去撞同一条水蛇。" 🐍</strong>
-</p>
-
-</div>
-
-<!-- ===================== 2 行验证命令 ===================== -->
-<h2>⚡ 两行 sandbox 验证命令（直接复制粘贴）</h2>
+<!-- ===================== 3 步验证命令 ===================== -->
+<h2>⚡ 三步 sandbox 验证命令（直接复制粘贴）</h2>
 
 <p style="font-size:13px; color:var(--muted)">
   打开一个<strong>干净的终端</strong>（推荐新开一个 tab 或一个 docker sandbox），
-  先跑命令 1️⃣ 看 A 鸭子的答案，再跑命令 2️⃣ 看 B 鸭子的答案，最后一行命令帮你验证差异。
+  先跑命令 1️⃣ 看 A 鸭子的答案，再跑命令 2a 和 2b 生成 B 鸭子的答案，最后一行命令帮你验证差异。
 </p>
 
 <!-- 命令 1 -->
@@ -371,38 +365,71 @@
     <ol>
       <li>把 <code>~/.claude/skills/insights-wiki*</code> 删掉（确保纯净环境）</li>
       <li>让 Claude 回答同一个 checkout API 超时问题</li>
-      <li>把答案清洗后保存到 <code>/tmp/A_without.log</code></li>
+      <li>把答案清洗后保存到 <code>/tmp/demo_insights_A/A_without.log</code></li>
     </ol>
   </div>
   <div class="what-happens">
     <strong>你会看到：</strong>Claude 给出一段通用的 PostgreSQL 诊断方案（idle in transaction 检查、PgBouncer 配置、SQLAlchemy 连接池等），但<strong>不会</strong>引用任何团队内部卡片。
   </div>
-<pre id="cmd1">pkill -f "insights_cli.py serve" 2>/dev/null; rm -rf ~/.claude/skills/insights-wiki ~/.claude/skills/insights-wiki-server && claude -p "我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？请给出可执行的 SQL 与代码片段。" 2>&1 | sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g' > /tmp/A_without.log && echo "✅ A/WITHOUT → /tmp/A_without.log ($(wc -c &lt; /tmp/A_without.log) bytes)"<button class="copy-btn" onclick="copyCmd(this,'cmd1')">📋 复制</button></pre>
+<pre id="cmd1">pkill -f "insights_cli.py serve" 2>/dev/null; \
+rm -rf ~/.claude/skills/insights-wiki ~/.claude/skills/insights-wiki-server && \
+mkdir -p /tmp/demo_insights_A && cd /tmp/demo_insights_A && \
+claude -p "我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？请给出可执行的 SQL 与代码片段。" 2>&1 | sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g' > /tmp/demo_insights_A/A_without.log && \
+echo "✅ A/WITHOUT → /tmp/demo_insights_A/A_without.log ($(wc -c &lt; /tmp/demo_insights_A/A_without.log) bytes)"<button class="copy-btn" onclick="copyCmd(this,'cmd1')">📋 复制</button></pre>
   <div class="expected">
-    ✅ <strong>预期输出：</strong><code>✅ A/WITHOUT → /tmp/A_without.log (约 4000-6000 bytes)</code>
+    ✅ <strong>预期输出：</strong><code>✅ A/WITHOUT → /tmp/demo_insights_A/A_without.log (约 4000-6000 bytes)</code>
   </div>
 </div>
 
-<!-- 命令 2 -->
+<!-- 命令 2a -->
 <div class="cmd-card b">
-  <h3>2️⃣ 命令二 · 小 B（有老鸭奶奶 + 木头筐）</h3>
+  <h3>2a️⃣ 命令二 A · 先 clone 一个干净的 B 工作区</h3>
   <div class="steps">
     这条命令会：
     <ol>
-      <li>清掉旧 skill，从 GitHub <strong>clone</strong> 整个仓库到 <code>/tmp/isw-clone</code></li>
-      <li>把 <code>insights-wiki</code> 和 <code>insights-wiki-server</code> 两个 skill 拷到 <code>~/.claude/skills/</code></li>
-      <li>后台启动 LAN daemon <code>insightsd:7821</code>（读 <code>wiki.json</code>，3 张实战卡片）</li>
-      <li>让 Claude 回答同一个问题（Stop hook 会自动把最相关的卡片塞给它）</li>
-      <li>把答案清洗后保存到 <code>/tmp/B_with.log</code></li>
+      <li>切到 <code>/tmp/demo_insights_B</code> 这个隔离工作区</li>
+      <li>删除旧 clone，再从 GitHub <strong>clone</strong> 仓库到 <code>/tmp/demo_insights_B/isw-clone</code></li>
+      <li>clone 成功时打印明确的 Step 2a 完成提示</li>
+    </ol>
+  </div>
+  <div class="what-happens">
+    <strong>你会看到：</strong>绿色提示 <code>✅ Step 2a: clone 完成 → /tmp/demo_insights_B/isw-clone</code>。如果 clone 失败，命令会直接打印报错，不会把后续步骤混在一起。
+  </div>
+<pre id="cmd2a">mkdir -p /tmp/demo_insights_B && cd /tmp/demo_insights_B && \
+rm -rf isw-clone && \
+git clone --depth 1 https://github.com/liush2yuxjtu/demo_insights_share.git isw-clone \
+  || { echo "❌ git clone 失败，请检查 github 配置（ssh key / https token）后重试"; exit 1; } && \
+echo "✅ Step 2a: clone 完成 → /tmp/demo_insights_B/isw-clone"<button class="copy-btn" onclick="copyCmd(this,'cmd2a')">📋 复制</button></pre>
+  <div class="expected">
+    ✅ <strong>预期输出：</strong><code>✅ Step 2a: clone 完成 → /tmp/demo_insights_B/isw-clone</code>
+  </div>
+</div>
+
+<!-- 命令 2b -->
+<div class="cmd-card b">
+  <h3>2b️⃣ 命令二 B · 安装 skill、启动 daemon、生成 B 日志</h3>
+  <div class="steps">
+    这条命令会：
+    <ol>
+      <li>从刚才 clone 的目录把 <code>insights-wiki</code> 和 <code>insights-wiki-server</code> 拷到 <code>~/.claude/skills/</code></li>
+      <li>后台启动 LAN daemon <code>insightsd:7821</code>，日志写入 <code>/tmp/demo_insights_B/isd.log</code></li>
+      <li>让 Claude 回答同一个问题，并把结果保存到 <code>/tmp/demo_insights_B/B_with.log</code></li>
     </ol>
   </div>
   <div class="what-happens">
     <strong>你会看到：</strong>Claude 在回答里<strong>明确引用</strong> <code>alice-pgpool-2026-04-10</code>，
-    给出 Alice 当年的精确阈值 <code>idle_in_transaction_session_timeout=30s</code> 和 <code>default_pool_size = 2 × worker_count</code>，并标注置信度 0.82 + 适用/不适用条件。
+    给出 Alice 当年的精确阈值 <code>idle_in_transaction_session_timeout=30s</code> 和 <code>default_pool_size = 2 × worker_count</code>，最后打印 B 日志大小。
   </div>
-<pre id="cmd2">rm -rf ~/.claude/skills/insights-wiki ~/.claude/skills/insights-wiki-server /tmp/isw-clone && git clone --depth 1 https://github.com/liush2yuxjtu/demo_insights_share.git /tmp/isw-clone && cp -r /tmp/isw-clone/insights-share/demo_codes/.claude/skills/insights-wiki ~/.claude/skills/ && cp -r /tmp/isw-clone/insights-share/demo_codes/.claude/skills/insights-wiki-server ~/.claude/skills/ && (cd /tmp/isw-clone/insights-share/demo_codes && nohup python3 insights_cli.py serve --host 0.0.0.0 --port 7821 --store ./wiki.json > /tmp/isd.log 2>&1 &) && sleep 3 && curl -sf http://127.0.0.1:7821/insights >/dev/null && claude -p "我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？请给出可执行的 SQL 与代码片段；若有 insights-wiki 注入的 LAN 实战卡片请在回答里明确引用。" 2>&1 | sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g' > /tmp/B_with.log && echo "✅ B/WITH → /tmp/B_with.log ($(wc -c &lt; /tmp/B_with.log) bytes)"<button class="copy-btn" onclick="copyCmd(this,'cmd2')">📋 复制</button></pre>
+<pre id="cmd2b">cd /tmp/demo_insights_B && \
+rm -rf ~/.claude/skills.disabled/insights-wiki.active ~/.claude/skills.disabled/insights-wiki-server.active 2>/dev/null; \
+cp -r isw-clone/insights-share/demo_codes/.claude/skills/insights-wiki ~/.claude/skills/ && \
+cp -r isw-clone/insights-share/demo_codes/.claude/skills/insights-wiki-server ~/.claude/skills/ && \
+(cd isw-clone/insights-share/demo_codes && nohup python3 insights_cli.py serve --host 0.0.0.0 --port 7821 --store ./wiki.json > /tmp/demo_insights_B/isd.log 2>&1 &) && \
+sleep 3 && curl -sf http://127.0.0.1:7821/insights >/dev/null && \
+claude -p "我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？若 insights-wiki 注入了 LAN 实战卡片请在回答里明确引用。" 2>&1 | sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g' > /tmp/demo_insights_B/B_with.log && \
+echo "✅ Step 2b: B_with.log $(wc -c &lt; /tmp/demo_insights_B/B_with.log) bytes"<button class="copy-btn" onclick="copyCmd(this,'cmd2b')">📋 复制</button></pre>
   <div class="expected">
-    ✅ <strong>预期输出：</strong><code>✅ B/WITH → /tmp/B_with.log (约 5000-12000 bytes)</code>
+    ✅ <strong>预期输出：</strong><code>✅ Step 2b: B_with.log 约 5000-12000 bytes</code>
   </div>
 </div>
 
@@ -412,11 +439,11 @@
   <div class="steps">
     这是<strong>最重要的证据行</strong>。如果 A log 里完全不提 Alice 卡片，而 B log 里引用了至少一次，就说明 insights-wiki 在 B 环境下确实把团队的实战经验静默注入了 Claude。
   </div>
-<pre id="cmd3">printf 'A/WITHOUT alice-pgpool hits = %s\nB/WITH    alice-pgpool hits = %s\n' "$(grep -c alice-pgpool-2026-04-10 /tmp/A_without.log)" "$(grep -c alice-pgpool-2026-04-10 /tmp/B_with.log)"<button class="copy-btn" onclick="copyCmd(this,'cmd3')">📋 复制</button></pre>
+<pre id="cmd3">grep -c alice-pgpool-2026-04-10 /tmp/demo_insights_A/A_without.log /tmp/demo_insights_B/B_with.log<button class="copy-btn" onclick="copyCmd(this,'cmd3')">📋 复制</button></pre>
   <div class="expected">
     ✅ <strong>预期输出：</strong>
-    <code>A/WITHOUT alice-pgpool hits = 0</code><br>
-    <code>B/WITH &nbsp;&nbsp;&nbsp;alice-pgpool hits = 1</code>（或更多）
+    <code>/tmp/demo_insights_A/A_without.log:0</code><br>
+    <code>/tmp/demo_insights_B/B_with.log:1</code>（或更多）
   </div>
 </div>
 
@@ -483,7 +510,7 @@
       <td>8</td>
       <td><a class="file-link" href="./validate_commands.sh" target="_blank">validate_commands.sh</a></td>
       <td>2.8 KB</td>
-      <td>⚡ 两行 sandbox 命令脚本</td>
+      <td>⚡ sandbox 命令脚本</td>
     </tr>
     <tr>
       <td>9</td>
@@ -503,7 +530,7 @@
   <a class="btn amber" href="./A_without.human.md" target="_blank">🧑 A human</a>
   <a class="btn amber" href="./B_with.human.md" target="_blank">🧑 B human</a>
   <a class="btn green" href="./duck_story.md" target="_blank">🦆 鸭子故事</a>
-  <a class="btn" href="./validate_commands.sh" target="_blank">⚡ 两行命令</a>
+  <a class="btn" href="./validate_commands.sh" target="_blank">⚡ sandbox 命令</a>
   <a class="btn" href="./run_human_AB.sh" target="_blank">🔧 自动化脚本</a>
   <a class="btn" href="https://github.com/liush2yuxjtu/demo_insights_share/tree/main/examples" target="_blank">🐙 GitHub 源码</a>
 </div>
@@ -517,6 +544,13 @@
 </div>
 
 <script>
+function showStory(id) {
+  ['frontend', 'backend', 'dl', 'noob'].forEach((key) => {
+    document.getElementById('story-' + key).style.display = (key === id ? 'block' : 'none');
+    document.querySelector('.story-tab[data-role="' + key + '"]').classList.toggle('active', key === id);
+  });
+}
+
 function copyCmd(btn, id) {
   const pre = document.getElementById(id);
   const text = pre.childNodes[0].nodeValue; // 取第一段文本节点，排除 button

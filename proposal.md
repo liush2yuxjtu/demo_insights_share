@@ -4,9 +4,11 @@
     3. 直接沿用他人的 insights 可能导致次优表现
     # update 0414 09:29
     4. uploading/downloading insights must be SILENT-IN-BACKGROUND
-    5. force downloading insights to users when users are not aware as long as then load our insights tool 
-    6. administrators can CRUD wiki-insights and review the wiki-insights . In this demo developing stage  , everyone is administrators 
-    7. the wiki-insights work as a skill for now . 
+    # fix in 0414 10:35 :
+    4. uploading insights must be SILENT-IN-BACKGROUND, no downloading , web fetch from wiki-host page ONLINE instead from local storage
+    5. force downloading insights to users when users are not aware as long as then load our insights tool
+    6. administrators can CRUD wiki-insights and review the wiki-insights . In this demo developing stage  , everyone is administrators
+    7. the wiki-insights work as a skill for now .
 
 任务（Task）：制作一个 demo，在局域网内发布 insights-share 功能
     1. 生成一条 insight
@@ -18,12 +20,22 @@
     备注：demo 必须基于 CLI。AGENTS 更容易使用 CLI；如需 REPL，应提供用于启动守护进程或服务器的 CLI
     备注：使用以下配置通过 agent-sdk 添加 AI 功能（minimax 2.7 速度快但较贵）：
 
-    "ANTHROPIC_AUTH_TOKEN": "sk-cp-ocXR33dHiaUN25FsLP1kVkGtEW8gA71UoNWWIw_2zdllZXZ5j6hMH7LGiYpQdtVm8eHXOlTwCGNhBGnnRObBEdrkWlsmJBjpd3FCEdLK7ScX3hKOtbMUp50",
+    "ANTHROPIC_AUTH_TOKEN": "sk-cp-...（真实 token 仅放环境变量，不进仓库）",
     "ANTHROPIC_BASE_URL": "https://api.minimaxi.com/anthropic",
     "ANTHROPIC_DEFAULT_HAIKU_MODEL": "MiniMax-M2.7-highspeed",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "MiniMax-M2.7-highspeed",
     "ANTHROPIC_DEFAULT_SONNET_MODEL": "MiniMax-M2.7-highspeed",
     "ANTHROPIC_MODEL": "MiniMax-M2.7-highspeed",
+    # update 0414 : 10:25
+    8. 监听地址从 127.0.0.1 改为 0.0.0.0：  any same wiki user can connect to http://192.168.22.42:7821 (this ONLY work when we develope codes.)
+    9. make two skills
+        1. insights-wiki-server
+            this one will OPEN the server , by default will not assign to users and assign  administators ONLY
+            have a flag --start ( start the server, run this by default) --ui ( start the control dashboard/kanban .html to manage the wiki online )
+        2. insights-wiki
+            this one have flag --install to install and connect to server and verify install ;
+
+
 
 行动（Action）：
     请立即开始执行
@@ -34,14 +46,24 @@
     一份完整的 demo 及配套 design.md，存放于 demos/{demo_topic}/demo_codes 和 demo_docs 目录下
     一份完整的终端截图或 .md 格式日志，用于展示执行过程
     # updates 0414 09:26
-    1. fix : we MUST show to other agent developers 
+    1. fix : we MUST show to other agent developers
     here is full list:
-        1. before start : MUST write in linear style , tracking ~/.claude/projects/*, show the full timeline  
-        2. a step by step of our proposal.md in html format 
-            explain how we write proposal. 
-        3. a step by step of our vlaidation.md in html format 
-            explain how we design validation 
-        4. open tmux and open claude and chat WITHOUT our demo and run /export in claude session to export a human-readable .txt format chat messages 
-        5. open tmux and open claude and chat WITH our demo and run /export in claude session to export a human-readable .txt format chat messages 
-        6. collector : proposal_linear.html , validation_linear.html , claude_export_WITH.txt , claude_expoert_WITHOUT.txt 
+        1. before start : MUST write in linear style , tracking ~/.claude/projects/*, show the full timeline
+        2. a step by step of our proposal.md in html format
+            explain how we write proposal.
+        3. a step by step of our vlaidation.md in html format
+            explain how we design validation
+        4. open tmux and open claude and chat WITHOUT our demo and run /export in claude session to export a human-readable .txt format chat messages
+        # updates 0414 : 10:27
+        USE export_template.txt as example
+        5. open tmux and open claude and chat WITH our demo and run /export in claude session to export a human-readable .txt format chat messages
+        # updates 0414 : 10:27
+        USE export_template.txt as example
+        X 6. collector : proposal_linear.html , validation_linear.html , claude_export_WITH.txt , claude_expoert_WITHOUT.txt X
 
+    # updates 0414 : 10:27
+        6. server host : how to start the server and close the server ;
+        7. wiki user upload :
+        9. wiki user use case (the SAME with 4 and 5 )
+        7. collector : proposal_linear.html , validation_linear.html , claude_export_WITH.txt , claude_expoert_WITHOUT.txt, server_host_export.txt, wiki_upload.txt
+        NOTES: USE export_template.txt as example to use claude code chat session as report .

@@ -57,6 +57,20 @@ class InsightHandler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:  # noqa: N802
         parsed = urlsplit(self.path)
         path = parsed.path
+        # 根路径 / /dashboard 直接返回同目录下的 dashboard.html
+        if path in ("/", "/dashboard"):
+            html = Path(__file__).resolve().parent / "dashboard.html"
+            if not html.is_file():
+                self._send_404()
+                return
+            body = html.read_bytes()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/html; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(body)
+            return
         if path == "/healthz":
             self._send_json(200, {"ok": True})
             return

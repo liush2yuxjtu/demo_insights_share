@@ -1,0 +1,1 @@
+任务被打断——你没回答问题。我没有 insight 正文也没有 wiki 地址，没法 POST 到 `/insights`。再发一次时把正文和 daemon 地址一起给我，我直接生成卡片 JSON 并 publish。

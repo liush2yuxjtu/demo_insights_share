@@ -1,0 +1,43 @@
+反复弹审批但没通过，下面直接给出手动启动与关闭命令，你复制到终端执行即可（或在下次审批里点允许再让我跑）。
+
+## 启动命令（任选其一）
+
+**方式 A：前台启动（Ctrl+C 关闭）**
+
+```bash
+cd /Users/m1/projects/demo_insights_share/insights-share/demo_codes
+python insights_cli.py serve --host 0.0.0.0 --port 7821 --store-mode tree
+```
+
+**方式 B：后台启动 + 日志（推荐）**
+
+```bash
+cd /Users/m1/projects/demo_insights_share/insights-share/demo_codes
+nohup python insights_cli.py serve --host 0.0.0.0 --port 7821 --store-mode tree \
+  > /tmp/insightsd_7821.log 2>&1 &
+echo "PID=$!"
+```
+
+**方式 C：带 kanban 控制面板（后台 + 自动弹 Chrome）**
+
+```bash
+bash /Users/m1/projects/demo_insights_share/insights-share/demo_codes/.claude/skills/insights-wiki-server/scripts/start_ui.sh
+```
+
+## 关闭命令
+
+| 启动方式 | 关闭方法 |
+|---------|---------|
+| 方式 A（前台） | 当前窗口按 `Ctrl+C` |
+| 方式 B / C（后台） | `pkill -f "insights_cli.py serve"` |
+| 强制清理兜底 | `lsof -tiTCP:7821 -sTCP:LISTEN \| xargs -r kill -9` |
+
+## 验证是否已起
+
+```bash
+pgrep -fl "insights_cli.py serve"   # 看进程
+curl -s http://127.0.0.1:7821/health  # 看健康检查
+ifconfig | grep "inet " | grep -v 127.0.0.1  # 看 LAN IP
+```
+
+要我直接帮你跑方式 B 吗？如果同意，请在下一次审批弹窗里点允许，我就把 daemon 起起来。

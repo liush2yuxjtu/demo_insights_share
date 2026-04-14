@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<title>insights-share · 卡片看板</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+  :root {
+    --bg: #fafafa;
+    --fg: #1f2328;
+    --muted: #57606a;
+    --border: #d0d7de;
+    --accent: #0969da;
+    --ok-bg: #d4edda;
+    --ok-fg: #155724;
+    --fail-bg: #f8d7da;
+    --fail-fg: #721c24;
+    --col-bg: #ffffff;
+    --chip-bg: #ddf4ff;
+    --chip-fg: #0969da;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: var(--fg);
+    background: var(--bg);
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+  }
+  header.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  header .title { font-weight: 700; font-size: 1.05em; margin-right: 12px; }
+  header input[type=text], header input[type=search] {
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.88em;
+    font-family: inherit;
+  }
+  header .research-input { width: 280px; }
+  header .search-input { width: 200px; }
+  header button {
+    border: 1px solid var(--border);
+    background: #f6f8fa;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.88em;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  header button:hover { background: #eaeef2; }
+  header button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  header button.primary:hover { background: #0860c7; }
+  header .lan-ip { margin-left: auto; color: var(--muted); font-size: 0.82em; font-family: "SF Mono", Menlo, monospace; }
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    padding: 20px;
+  }
+  .column {
+    background: var(--col-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    min-height: 400px;
+  }
+  .column h2 {
+    margin: 0 0 12px;
+    font-size: 0.95em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  .column h2 .count { color: var(--accent); font-weight: 700; margin-left: 6px; }
+  .card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  }
+  .card h3 { margin: 0 0 6px; font-size: 0.95em; font-weight: 600; }
+  .card .meta { font-size: 0.78em; color: var(--muted); margin: 4px 0; }
+  .card .chips { margin: 6px 0; }
+  .chip {
+    display: inline-block;
+    background: var(--chip-bg);
+    color: var(--chip-fg);
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.72em;
+    margin: 2px 4px 2px 0;
+  }
+  .card .ops { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .card .ops button {
+    border: 1px solid var(--border);
+    background: #f6f8fa;
+    border-radius: 4px;
+    padding: 3px 8px;
+    font-size: 0.75em;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .card .ops button:hover { background: #eaeef2; }
+  .card .ops button.danger { color: var(--fail-fg); }
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px 24px;
+    min-width: 360px;
+    max-width: 520px;
+  }
+  .modal h3 { margin: 0 0 12px; font-size: 1em; }
+  .modal label { display: block; font-size: 0.82em; color: var(--muted); margin: 8px 0 4px; }
+  .modal input, .modal textarea, .modal select {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 0.88em;
+    font-family: inherit;
+  }
+  .modal textarea { min-height: 60px; resize: vertical; }
+  .modal .row { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; }
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #1f2328;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    z-index: 200;
+    display: none;
+  }
+  .toast.show { display: block; }
+</style>
+</head>
+<body>
+<header class="toolbar">
+  <span class="title">insights-share · 卡片看板</span>
+  <button class="primary" id="btn-new">+ 新增卡</button>
+  <input type="text" class="research-input" id="research-input" placeholder="research 输入：describe topic…" />
+  <button id="btn-research">research</button>
+  <input type="search" class="search-input" id="search-input" placeholder="关键词搜索…" />
+  <button id="btn-search">搜索</button>
+  <button id="btn-reload">刷新</button>
+  <span class="lan-ip" id="lan-ip"></span>
+</header>
+
+<section class="board">
+  <div class="column" id="col-all">
+    <h2>全部卡 <span class="count" id="count-all">0</span></h2>
+    <div class="cards"></div>
+  </div>
+  <div class="column" id="col-triggered">
+    <h2>已触发 <span class="count" id="count-triggered">0</span></h2>
+    <div class="cards"></div>
+  </div>
+  <div class="column" id="col-untriggered">
+    <h2>未触发 <span class="count" id="count-untriggered">0</span></h2>
+    <div class="cards"></div>
+  </div>
+</section>
+
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal">
+    <h3 id="modal-title">新增卡</h3>
+    <label>标题 title</label>
+    <input type="text" id="m-title" />
+    <label>标签 tags（英文逗号分隔）</label>
+    <input type="text" id="m-tags" placeholder="例如：bug,fixed" />
+    <label>作者 author</label>
+    <input type="text" id="m-author" />
+    <label>wiki_type</label>
+    <input type="text" id="m-wiki-type" placeholder="general" />
+    <label>修复说明 fix</label>
+    <textarea id="m-fix"></textarea>
+    <div class="row">
+      <button id="m-cancel">取消</button>
+      <button class="primary" id="m-confirm">确认</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ---- 全局状态 ----
+let allCards = [];
+let modalMode = "new"; // "new" | "edit"
+let editingId = null;
+
+// ---- 工具函数 ----
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 2000);
+}
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function parseTags(s) {
+  return String(s || "").split(",").map(x => x.trim()).filter(Boolean);
+}
+function isTriggered(card) {
+  const tags = Array.isArray(card.tags) ? card.tags : [];
+  if (tags.length === 0) return false;
+  if (tags.includes("not_triggered")) return false;
+  return true;
+}
+
+// ---- 渲染 ----
+function renderCard(card) {
+  const tags = Array.isArray(card.tags) ? card.tags : [];
+  const chips = tags.map(t => `<span class="chip">${esc(t)}</span>`).join("");
+  return `
+    <div class="card" data-id="${esc(card.id)}">
+      <h3>${esc(card.title || "(无标题)")}</h3>
+      <div class="chips">${chips}</div>
+      <div class="meta">作者：${esc(card.author || "-")} · 类型：${esc(card.wiki_type || "general")}</div>
+      <div class="ops">
+        <button class="op-edit">编辑</button>
+        <button class="op-tag">打标签</button>
+        <button class="op-delete danger">删除</button>
+      </div>
+    </div>
+  `;
+}
+function render() {
+  const colAll = document.querySelector("#col-all .cards");
+  const colTri = document.querySelector("#col-triggered .cards");
+  const colUn = document.querySelector("#col-untriggered .cards");
+  colAll.innerHTML = allCards.map(renderCard).join("");
+  const tri = allCards.filter(isTriggered);
+  const un = allCards.filter(c => !isTriggered(c));
+  colTri.innerHTML = tri.map(renderCard).join("");
+  colUn.innerHTML = un.map(renderCard).join("");
+  document.getElementById("count-all").textContent = allCards.length;
+  document.getElementById("count-triggered").textContent = tri.length;
+  document.getElementById("count-untriggered").textContent = un.length;
+  // 绑定每张卡的操作
+  document.querySelectorAll(".card").forEach(el => {
+    const id = el.dataset.id;
+    el.querySelector(".op-edit").onclick = () => openEdit(id);
+    el.querySelector(".op-tag").onclick = () => tagCard(id);
+    el.querySelector(".op-delete").onclick = () => deleteCard(id);
+  });
+}
+
+// ---- API 调用 ----
+async function reload() {
+  try {
+    const r = await fetch("/insights");
+    const j = await r.json();
+    allCards = Array.isArray(j.cards) ? j.cards : [];
+    render();
+  } catch (e) {
+    showToast("加载失败：" + e.message);
+  }
+}
+
+async function createCard(payload) {
+  const r = await fetch("/insights", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(payload),
+  });
+  if (!r.ok) throw new Error("创建失败 " + r.status);
+  return r.json();
+}
+
+async function editCard(id, payload) {
+  const r = await fetch(`/insights/${encodeURIComponent(id)}/edit`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(payload),
+  });
+  if (!r.ok) throw new Error("编辑失败 " + r.status);
+  return r.json();
+}
+
+async function deleteCard(id) {
+  if (!confirm(`确认删除卡片 ${id} ?`)) return;
+  try {
+    const r = await fetch(`/insights/${encodeURIComponent(id)}`, {method: "DELETE"});
+    if (!r.ok) throw new Error("删除失败 " + r.status);
+    showToast("已删除");
+    await reload();
+  } catch (e) {
+    showToast(e.message);
+  }
+}
+
+async function tagCard(id) {
+  const input = prompt("输入标签（英文逗号分隔）:", "");
+  if (input === null) return;
+  const tags = parseTags(input);
+  try {
+    const r = await fetch(`/insights/${encodeURIComponent(id)}/tag`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({tags, sticky: true}),
+    });
+    if (!r.ok) throw new Error("打标签失败 " + r.status);
+    showToast("已更新标签");
+    await reload();
+  } catch (e) {
+    showToast(e.message);
+  }
+}
+
+async function runResearch() {
+  const q = document.getElementById("research-input").value.trim();
+  if (!q) { showToast("请输入 research 主题"); return; }
+  try {
+    const r = await fetch("/insights/research", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({query: q}),
+    });
+    if (!r.ok) throw new Error("research 失败 " + r.status);
+    showToast("research 已提交");
+    await reload();
+  } catch (e) {
+    showToast(e.message);
+  }
+}
+
+async function runSearch() {
+  const q = document.getElementById("search-input").value.trim();
+  if (!q) { await reload(); return; }
+  try {
+    const r = await fetch(`/search?q=${encodeURIComponent(q)}&k=10`);
+    const j = await r.json();
+    const hits = Array.isArray(j.hits) ? j.hits : [];
+    // 搜索结果直接覆盖 allCards 渲染，方便查看
+    allCards = hits;
+    render();
+    showToast(`搜索到 ${hits.length} 条`);
+  } catch (e) {
+    showToast(e.message);
+  }
+}
+
+// ---- modal ----
+function openNew() {
+  modalMode = "new";
+  editingId = null;
+  document.getElementById("modal-title").textContent = "新增卡";
+  document.getElementById("m-title").value = "";
+  document.getElementById("m-tags").value = "";
+  document.getElementById("m-author").value = "";
+  document.getElementById("m-wiki-type").value = "general";
+  document.getElementById("m-fix").value = "";
+  document.getElementById("modal-backdrop").classList.add("show");
+}
+function openEdit(id) {
+  const card = allCards.find(c => c.id === id);
+  if (!card) return;
+  modalMode = "edit";
+  editingId = id;
+  document.getElementById("modal-title").textContent = "编辑卡 " + id;
+  document.getElementById("m-title").value = card.title || "";
+  document.getElementById("m-tags").value = (Array.isArray(card.tags) ? card.tags : []).join(",");
+  document.getElementById("m-author").value = card.author || "";
+  document.getElementById("m-wiki-type").value = card.wiki_type || "general";
+  document.getElementById("m-fix").value = card.fix || "";
+  document.getElementById("modal-backdrop").classList.add("show");
+}
+function closeModal() {
+  document.getElementById("modal-backdrop").classList.remove("show");
+}
+async function confirmModal() {
+  const payload = {
+    title: document.getElementById("m-title").value.trim(),
+    tags: parseTags(document.getElementById("m-tags").value),
+    author: document.getElementById("m-author").value.trim(),
+    wiki_type: document.getElementById("m-wiki-type").value.trim() || "general",
+    fix: document.getElementById("m-fix").value.trim(),
+  };
+  if (!payload.title) { showToast("标题不能为空"); return; }
+  try {
+    if (modalMode === "new") {
+      await createCard(payload);
+      showToast("已创建");
+    } else {
+      await editCard(editingId, payload);
+      showToast("已更新");
+    }
+    closeModal();
+    await reload();
+  } catch (e) {
+    showToast(e.message);
+  }
+}
+
+// ---- 事件绑定 ----
+document.getElementById("btn-new").onclick = openNew;
+document.getElementById("btn-research").onclick = runResearch;
+document.getElementById("btn-search").onclick = runSearch;
+document.getElementById("btn-reload").onclick = reload;
+document.getElementById("m-cancel").onclick = closeModal;
+document.getElementById("m-confirm").onclick = confirmModal;
+document.getElementById("search-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") runSearch();
+});
+document.getElementById("research-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") runResearch();
+});
+
+// 显示 LAN 入口
+document.getElementById("lan-ip").textContent = location.host;
+
+// 初次加载
+reload();
+</script>
+</body>
+</html>
