@@ -1,48 +1,49 @@
-validation 
+验证
 
-validation framework 
+验证框架
 
-1. MUST show users how the inputs ,outputs in PM-friendly way and use S-T-A-R frames 
-2. use tmux + claude -p to run and catch the snapshots (start from every command line and tmux please )
+1. 必须以 PM 友好的方式向用户展示输入/输出，使用 S-T-A-R 框架
+2. 使用 tmux + claude -p 运行并捕获截图（从每条命令行和 tmux 开始）
 
-Validation task 
-1. trigger rate 
-    have 20 trigger cases (10 should trigger and 10 should NOT trigger) and test in 12 train vs 8 test 
-    optimize the trigger rate until it works 
+验证任务
 
-2. optimize the triggered effects 
-    for example : 
-        Situation : alice and bob case from [text](insights-share/demo_docs/pm_walkthrough.md)
-        Task : bob open the claude code , NOT asking for help , but just typing something about PostgreSQL and he 'may' got the same trap. 
-        Action : after claude assitance last image was send , the claude code will trigger a haiku-agent to semantic search the insights-wiki and report the final cases. 
-        Result : claude code review the issues 
+1. 触发率
+    准备 20 个触发用例（10 个应触发、10 个不应触发），按 12 训练 / 8 测试划分
+    持续优化触发率，直到达标
 
-        NOTES: the trigger should be 
-                SLIENT_AND_JUST_RUN (optinal but not in this design : ASK_USER_APPROVAL, have a placehold but force default values to SLIENT_AND_JUST_RUN)
-        
-3. update wiki : 
-    - one old wiki and one new wiki of same item :  merge as one 
-    - NEVER forget , tagged as not triggerd 
-    - add 
-    - delete 
-    - research 
-    - edit 
+2. 优化触发效果
+    示例：
+        现状（Situation）：来自 [Alice 和 Bob 案例](insights-share/demo_docs/pm_walkthrough.md)
+        任务（Task）：Bob 打开 Claude Code，不是主动求助，而是在输入与 PostgreSQL 相关的内容时，可能遇到同样的陷阱
+        行动（Action）：Claude 发出最后一张图片后，Claude Code 触发一个 haiku-agent 对 insights-wiki 进行语义搜索并汇报最终结果
+        结果（Result）：Claude Code 审查相关问题
 
+        备注：触发方式应为
+                静默直接执行（SILENT_AND_JUST_RUN）
+                （可选但本设计不采用：请求用户确认 ASK_USER_APPROVAL，保留占位符但强制默认值为 SILENT_AND_JUST_RUN）
 
-4. wiki structure :
-    wiki_type :
+3. 更新 wiki：
+    - 同一条目存在旧版和新版时：合并为一条
+    - 绝不遗忘，标记为未触发
+    - 新增
+    - 删除
+    - 调研
+    - 编辑
+
+4. wiki 结构：
+    wiki_type（类型）：
         general_python
         frontend_python
         ...
-        database 
+        database
             INDEX.md
-                items : | name | description | trigger when | docs to  {type}/*.md|
-            postgres_并发_.md 
-                full descriptions of the issues , bad examples (failed cases) and good examples ( good cases ), entry to {full_log}.jsonl or {full_export}.txt 
+                条目格式：| 名称 | 描述 | 触发时机 | 指向 {type}/*.md 的文档链接 |
+            postgres_并发_.md
+                完整问题描述、反例（失败案例）与正例（成功案例），指向 {full_log}.jsonl 或 {full_export}.txt
             postgres_内存.md
-            postgres_硬盘读取io.md 
+            postgres_硬盘读取io.md
 
-    IMPORTANT: MUST follow 4 layers strucrtures : 
-        wiki_type_index => wiki type / type INDEX.md => wiki_item.md => raw log jsonl/txt 
-    
-5. MUST have agentic search wiki minimax 
+    重要：必须遵循 4 层结构：
+        wiki_type_index => wiki 类型目录 / 类型 INDEX.md => wiki_item.md => 原始日志 jsonl/txt
+
+5. 必须支持基于 minimax 的 agentic wiki 搜索
