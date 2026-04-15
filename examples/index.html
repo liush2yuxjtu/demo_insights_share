@@ -307,12 +307,11 @@
   <div class="duck-row">🦆 🦆 🦆</div>
   <h1>insights-wiki · 鸭子池塘 A/B 对照</h1>
   <p class="subtitle">
-    一个可爱小鸭子都能看懂的故事 + 三段可复制粘贴的 sandbox 验证命令 + 6 份真实 A/B 对照日志
+    一个可爱小鸭子都能看懂的故事 + 三段可复制粘贴的 sandbox 验证命令 + 2 份真实 human A/B 对照日志
   </p>
   <div class="badges">
     <span class="badge a">A / WITHOUT skill</span>
     <span class="badge b">B / WITH skill + daemon</span>
-    <span class="badge purple">🤖 agent JSON ×2</span>
     <span class="badge amber">🧑 human /export ×2</span>
   </div>
 </div>
@@ -460,78 +459,26 @@ echo "✅ Step 2b: B_with.log $(wc -c &lt; /tmp/demo_insights_B/B_with.log) byte
     <tr><th>#</th><th>文件</th><th>大小</th><th>说明</th></tr>
   </thead>
   <tbody>
-    <tr class="category-row"><td colspan="4">📜 基础 /export 风格（手造对话块）</td></tr>
-    <tr>
-      <td>1</td>
-      <td><a class="file-link" href="./A_without.md" target="_blank">A_without.md</a></td>
-      <td>6.4 KB</td>
-      <td>A · 无 skill · Claude 给通用答案</td>
-    </tr>
-    <tr>
-      <td>2</td>
-      <td><a class="file-link" href="./B_with.md" target="_blank">B_with.md</a></td>
-      <td>6.9 KB</td>
-      <td>B · 有 skill + daemon · Claude 引用 Alice 卡片</td>
-    </tr>
-    <tr class="category-row purple"><td colspan="4">🤖 Agent JSON（<code>claude -p --output-format json</code>）</td></tr>
-    <tr>
-      <td>3</td>
-      <td><a class="file-link" href="./A_without.agent.json" target="_blank">A_without.agent.json</a></td>
-      <td>22 KB</td>
-      <td>A · 非交互 JSON · 5 msgs · 1 turn · $0.19</td>
-    </tr>
-    <tr>
-      <td>4</td>
-      <td><a class="file-link" href="./B_with.agent.json" target="_blank">B_with.agent.json</a></td>
-      <td>49 KB</td>
-      <td>B · 非交互 JSON · 22 msgs · 8 turns · $0.17</td>
-    </tr>
     <tr class="category-row amber"><td colspan="4">🧑 Human MD（<code>tmux</code> 启动交互式 claude → <code>/export</code> slash）</td></tr>
     <tr>
-      <td>5</td>
+      <td>1</td>
       <td><a class="file-link" href="./A_without.human.md" target="_blank">A_without.human.md</a></td>
-      <td>5.7 KB</td>
+      <td>10.1 KB</td>
       <td>A · 真实交互会话 · /export 落盘</td>
     </tr>
     <tr>
-      <td>6</td>
+      <td>2</td>
       <td><a class="file-link" href="./B_with.human.md" target="_blank">B_with.human.md</a></td>
-      <td>11.6 KB</td>
+      <td>6.9 KB</td>
       <td>B · 真实交互会话 · 引用 Alice 卡片</td>
-    </tr>
-    <tr class="category-row green"><td colspan="4">🦆 其它产物</td></tr>
-    <tr>
-      <td>7</td>
-      <td><a class="file-link" href="./duck_story.md" target="_blank">duck_story.md</a></td>
-      <td>5.2 KB</td>
-      <td>🦆 鸭子故事原文 Markdown</td>
-    </tr>
-    <tr>
-      <td>8</td>
-      <td><a class="file-link" href="./validate_commands.sh" target="_blank">validate_commands.sh</a></td>
-      <td>2.8 KB</td>
-      <td>⚡ sandbox 命令脚本</td>
-    </tr>
-    <tr>
-      <td>9</td>
-      <td><a class="file-link" href="./run_human_AB.sh" target="_blank">run_human_AB.sh</a></td>
-      <td>4.4 KB</td>
-      <td>🤖 自动化 tmux + /export 脚本</td>
     </tr>
   </tbody>
 </table>
 
 <!-- ===================== 快捷按钮 ===================== -->
 <div class="action-bar">
-  <a class="btn pink" href="./A_without.md" target="_blank">📄 A 基础</a>
-  <a class="btn blue" href="./B_with.md" target="_blank">📄 B 基础</a>
-  <a class="btn purple" href="./A_without.agent.json" target="_blank">🤖 A agent</a>
-  <a class="btn purple" href="./B_with.agent.json" target="_blank">🤖 B agent</a>
   <a class="btn amber" href="./A_without.human.md" target="_blank">🧑 A human</a>
   <a class="btn amber" href="./B_with.human.md" target="_blank">🧑 B human</a>
-  <a class="btn green" href="./duck_story.md" target="_blank">🦆 鸭子故事</a>
-  <a class="btn" href="./validate_commands.sh" target="_blank">⚡ sandbox 命令</a>
-  <a class="btn" href="./run_human_AB.sh" target="_blank">🔧 自动化脚本</a>
   <a class="btn" href="https://github.com/liush2yuxjtu/demo_insights_share/tree/main/examples" target="_blank">🐙 GitHub 源码</a>
 </div>
 
