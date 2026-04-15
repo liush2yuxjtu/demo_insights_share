@@ -1,6 +1,7 @@
 """MiniMax agentic search over the 4-layer wiki_tree.
 
-让 haiku-agent 自己用 Glob/Grep/Read 探索 wiki_tree，最终返回排序好的 hits。
+让 haiku-agent 自己用 Glob/Grep/Read 为主、必要时用只读 Bash 探索 wiki_tree，
+最终返回排序好的 hits。
 对齐 validation.md task #5 的 "MUST have agentic search wiki minimax"。
 
 **严禁 fallback**：任何 SDK / 网络 / 解析异常直接 raise；validation 阶段
@@ -65,7 +66,8 @@ Required output format (verbatim):
 <<<END>>>
 
 Hard rules:
-- Use only Glob / Grep / Read tools.
+- Prefer Glob / Grep / Read. Bash is allowed only for read-only local inspection
+  such as ls / find / cat; never modify files.
 - Max 5 turns.
 - "item" must be the slug WITHOUT the .md suffix.
 - "hits" is an array; sort by score descending; you may include up to 3 entries but the first one is what matters.
@@ -108,7 +110,7 @@ async def _run_async(query_text: str, wiki_tree: str) -> dict:
 
     options = ClaudeAgentOptions(
         permission_mode="dontAsk",
-        allowed_tools=["Glob", "Grep", "Read"],
+        allowed_tools=["Glob", "Grep", "Read", "Bash"],
         max_turns=5,
         model=get_haiku_model(),
         cwd=wiki_tree_abs,

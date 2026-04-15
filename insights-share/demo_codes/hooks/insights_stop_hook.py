@@ -137,18 +137,10 @@ def main() -> int:
             sys.stderr.write(
                 f"[insights_stop_hook] cache persist failed: {exc}\n"
             )
-        # 通过 stdout 把 additionalContext 回写给下一轮 claude
-        payload = {
-            "hookSpecificOutput": {
-                "hookEventName": "Stop",
-                "additionalContext": (
-                    f"[insights-share auto-hint] wiki:{top.get('wiki_type')}/"
-                    f"{top.get('item')} score={top.get('score')} — "
-                    f"{top.get('rationale','')}"
-                ),
-            }
-        }
-        sys.stdout.write(json.dumps(payload))
+        # 注：Stop hook 的 hookSpecificOutput schema 不支持 additionalContext 字段，
+        # 写 stdout 会导致 Claude Code 报 "Stop hook error: JSON validation failed"。
+        # hint 注入改由 insights_prefetch.py 在 UserPromptSubmit 事件里处理，
+        # 此处只负责"搜索 + 落盘缓存"，不再向 stdout 输出 payload。
     return 0
 
 

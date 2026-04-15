@@ -11,12 +11,17 @@ set -u
 
 REPO_ROOT="/Users/m1/projects/demo_insights_share"
 EXAMPLES_DIR="${REPO_ROOT}/examples"
-GITHUB_URL="https://github.com/liush2yuxjtu/demo_insights_share.git"
+DEMO_ENV_SRC="${REPO_ROOT}/insights-share/demo_codes/.env"
 
 WORKSPACE_A="/tmp/demo_insights_A"
 WORKSPACE_B="/tmp/demo_insights_B"
 CLONE_DIR="${WORKSPACE_B}/isw-clone"
 DAEMON_LOG="${WORKSPACE_B}/isd.log"
+PYTHON_BIN="${REPO_ROOT}/insights-share/demo_codes/.venv/bin/python"
+A_SETTINGS="${WORKSPACE_A}/.claude/settings.json"
+B_SETTINGS="${WORKSPACE_B}/.claude/settings.json"
+ACTIVE_SETTINGS_DST="${HOME}/.claude/settings.json"
+ACTIVE_SETTINGS_BAK="${HOME}/.claude/settings.json.human-bak.$$"
 
 A_EXPORT="${WORKSPACE_A}/A_without.human.md"
 B_EXPORT="${WORKSPACE_B}/B_with.human.md"
@@ -28,14 +33,34 @@ SKILL_SERVER_DST="${HOME}/.claude/skills/insights-wiki-server"
 SKILL_BAK="${HOME}/.claude/skills/insights-wiki.human-bak.$$"
 SKILL_SERVER_BAK="${HOME}/.claude/skills/insights-wiki-server.human-bak.$$"
 
-PROMPT_WITHOUT='请严格按顺序执行三步。第一步：运行 !pwd 打印当前工作目录。第二步：运行 !ls -la ~/.claude/skills/ 展示已安装的 skill 列表（若目录不存在也要显示该事实）。第三步：回答 — 我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？请给出可执行的 SQL 与代码片段。若意外出现 LAN 卡片 alice-pgpool-2026-04-10，请明确说明这是污染。'
+PROMPT_WITHOUT='请严格按顺序执行三步。第一步：运行 !pwd 打印当前工作目录。第二步：运行 !ls -la ~/.claude/skills/ 展示已安装的 skill 列表（若目录不存在也要显示该事实）。第三步：回答 — 我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？请给出可执行的 SQL 与代码片段。若意外出现 LAN 卡片引用，请明确说明这是污染。'
 PROMPT_WITH='请严格按顺序执行三步。第一步：运行 !pwd 打印当前工作目录。第二步：运行 !ls -la ~/.claude/skills/ 展示已安装的 skill 列表。第三步：回答 — 我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？请给出可执行的 SQL 与代码片段；若 insights-wiki 注入了 LAN 实战卡片请明确引用 alice-pgpool-2026-04-10。'
 
 WAIT_CLAUDE_READY=10
-WAIT_ANSWER=150
+WAIT_TRUST_CONFIRM=4
+WAIT_ANSWER=240
 WAIT_EXPORT=5
+PANE_STABLE_MIN_ELAPSED=120
+PANE_STABLE_REQUIRED=2
 
 log() { printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*"; }
+
+require_file() {
+  local path="$1"
+  local label="$2"
+  if [ ! -f "${path}" ]; then
+    log "✗ 缺少 ${label}: ${path}"
+    exit 12
+  fi
+}
+
+count_matches() {
+  local needle="$1"
+  local file="$2"
+  local count=""
+  count="$(grep -F -c -- "${needle}" "${file}" 2>/dev/null || true)"
+  printf '%s' "${count:-0}"
+}
 
 backup_active_skills() {
   mkdir -p "${HOME}/.claude/skills"
@@ -44,6 +69,13 @@ backup_active_skills() {
   fi
   if [ -d "${SKILL_SERVER_DST}" ]; then
     mv "${SKILL_SERVER_DST}" "${SKILL_SERVER_BAK}"
+  fi
+}
+
+backup_active_settings() {
+  mkdir -p "${HOME}/.claude"
+  if [ -f "${ACTIVE_SETTINGS_DST}" ]; then
+    cp "${ACTIVE_SETTINGS_DST}" "${ACTIVE_SETTINGS_BAK}"
   fi
 }
 
@@ -57,10 +89,25 @@ restore_active_skills() {
   fi
 }
 
+restore_active_settings() {
+  if [ -f "${ACTIVE_SETTINGS_BAK}" ]; then
+    mv "${ACTIVE_SETTINGS_BAK}" "${ACTIVE_SETTINGS_DST}"
+  else
+    rm -f "${ACTIVE_SETTINGS_DST}"
+  fi
+}
+
+activate_settings() {
+  local src="$1"
+  mkdir -p "${HOME}/.claude"
+  cp "${src}" "${ACTIVE_SETTINGS_DST}"
+}
+
 cleanup() {
   tmux kill-session -t "human_without" 2>/dev/null || true
   tmux kill-session -t "human_with" 2>/dev/null || true
   pkill -f "insights_cli.py serve" 2>/dev/null || true
+  restore_active_settings
   restore_active_skills
 }
 
@@ -71,6 +118,89 @@ prepare_workspace_a() {
   pkill -f "insights_cli.py serve" 2>/dev/null || true
   rm -rf "${WORKSPACE_A}"
   mkdir -p "${WORKSPACE_A}"
+  require_file "${DEMO_ENV_SRC}" "A/B 录制 .env"
+
+  log "A 轮前置：强化净室隔离 — 显式删除 skill 目录"
+  rm -rf "${SKILL_DST}" "${SKILL_SERVER_DST}"
+
+  if ls ~/.claude/skills/insights-wiki* 2>/dev/null | grep -q .; then
+    log "✗ A 轮净室隔离失败：~/.claude/skills/insights-wiki* 仍有残留"
+    ls -la ~/.claude/skills/ 2>&1 | sed 's/^/    /'
+    exit 7
+  fi
+  log "A 轮前置：✓ 净室隔离验证通过"
+
+  log "A 轮前置：写入最小 Claude 配置 → ${A_SETTINGS}"
+  write_a_workspace_settings
+  activate_settings "${A_SETTINGS}"
+}
+
+sync_local_repo_snapshot() {
+  log "B 轮前置：同步当前工作树 → ${CLONE_DIR}"
+  rsync -a --delete \
+    --exclude '.git' \
+    --exclude '.venv' \
+    --exclude '.pytest_cache' \
+    --exclude '__pycache__' \
+    --exclude '.DS_Store' \
+    "${REPO_ROOT}/" "${CLONE_DIR}/"
+}
+
+write_a_workspace_settings() {
+  mkdir -p "${WORKSPACE_A}/.claude"
+  cat > "${A_SETTINGS}" <<EOF
+{
+  "env": {
+    "CLAUDE_CODE_ENABLE_AWAY_SUMMARY": "0"
+  },
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
+  "language": "Chinese",
+  "skipDangerousModePermissionPrompt": true,
+  "hooks": {}
+}
+EOF
+}
+
+write_b_workspace_settings() {
+  mkdir -p "${WORKSPACE_B}/.claude"
+  cat > "${B_SETTINGS}" <<EOF
+{
+  "env": {
+    "CLAUDE_CODE_ENABLE_AWAY_SUMMARY": "0"
+  },
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
+  "language": "Chinese",
+  "skipDangerousModePermissionPrompt": true,
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${PYTHON_BIN} ${CLONE_DIR}/insights-share/demo_codes/hooks/insights_stop_hook.py"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${PYTHON_BIN} ${CLONE_DIR}/insights-share/demo_codes/hooks/insights_prefetch.py >/dev/null 2>&1 &"
+          }
+        ]
+      }
+    ]
+  }
+}
+EOF
 }
 
 prepare_workspace_b() {
@@ -79,15 +209,24 @@ prepare_workspace_b() {
   rm -rf "${WORKSPACE_B}"
   mkdir -p "${WORKSPACE_B}" "${HOME}/.claude/skills"
 
-  log "B 轮前置：clone github 仓库 → ${CLONE_DIR}"
-  git clone --depth 1 "${GITHUB_URL}" "${CLONE_DIR}" 2>&1 | tail -5
+  if [ ! -x "${PYTHON_BIN}" ]; then
+    log "✗ 缺少 hook/runtime Python：${PYTHON_BIN}"
+    exit 8
+  fi
+
+  sync_local_repo_snapshot
+  require_file "${CLONE_DIR}/insights-share/demo_codes/.env" "B 轮 clone .env"
 
   log "B 轮前置：安装 insights-wiki skill 到 ~/.claude/skills/"
   cp -r "${CLONE_DIR}/insights-share/demo_codes/.claude/skills/insights-wiki" "${HOME}/.claude/skills/"
   cp -r "${CLONE_DIR}/insights-share/demo_codes/.claude/skills/insights-wiki-server" "${HOME}/.claude/skills/"
 
+  log "B 轮前置：写入 workspace hooks → ${B_SETTINGS}"
+  write_b_workspace_settings
+  activate_settings "${B_SETTINGS}"
+
   log "B 轮前置：启动 daemon → ${DAEMON_LOG}"
-  (cd "${CLONE_DIR}/insights-share/demo_codes" && nohup python3 insights_cli.py serve --host 0.0.0.0 --port 7821 --store ./wiki.json > "${DAEMON_LOG}" 2>&1 &)
+  (cd "${CLONE_DIR}/insights-share/demo_codes" && nohup "${PYTHON_BIN}" insights_cli.py serve --host 0.0.0.0 --port 7821 --store ./wiki.json > "${DAEMON_LOG}" 2>&1 &)
   sleep 3
   if ! curl -sf http://127.0.0.1:7821/insights >/dev/null; then
     log "✗ daemon 健康检查失败"
@@ -102,10 +241,17 @@ run_tmux_human() {
   local snapshot="$4"
   local session="human_${round}"
   local start_cmd=""
+  local env_src=""
 
   case "${round}" in
-    without) start_cmd="cd \"${WORKSPACE_A}\" && claude" ;;
-    with)    start_cmd="cd \"${WORKSPACE_B}\" && claude" ;;
+    without)
+      env_src="${DEMO_ENV_SRC}"
+      start_cmd="cd \"${WORKSPACE_A}\" && bash -lc 'set -a; source \"${env_src}\"; set +a; exec claude'"
+      ;;
+    with)
+      env_src="${CLONE_DIR}/insights-share/demo_codes/.env"
+      start_cmd="cd \"${WORKSPACE_B}\" && bash -lc 'set -a; source \"${env_src}\"; set +a; exec claude'"
+      ;;
     *) log "未知 round: ${round}"; exit 4 ;;
   esac
 
@@ -121,35 +267,87 @@ run_tmux_human() {
   log "Step 2: 等待 ${WAIT_CLAUDE_READY}s 让 claude UI 就绪"
   sleep "${WAIT_CLAUDE_READY}"
 
-  log "Step 3: 发送 prompt（${#prompt} 字符）"
+  log "Step 3: 先按 Enter 接受 trust prompt"
+  tmux send-keys -t "${session}" Enter
+  sleep "${WAIT_TRUST_CONFIRM}"
+
+  log "Step 4: 发送 prompt（${#prompt} 字符）"
   tmux send-keys -t "${session}" -l "${prompt}"
   tmux send-keys -t "${session}" Enter
 
-  log "Step 4: 等待 ${WAIT_ANSWER}s 让 Claude 回答完成"
+  log "Step 5: 等待 ${WAIT_ANSWER}s 让 Claude 回答完成"
   local elapsed=0
+  local prev_pane=""
+  local stable_hits=0
   while [ "${elapsed}" -lt "${WAIT_ANSWER}" ]; do
     sleep 10
     elapsed=$((elapsed + 10))
-    log "  ...elapsed=${elapsed}s/${WAIT_ANSWER}s"
+    local pane=""
+    pane="$(tmux capture-pane -t "${session}" -p 2>/dev/null || true)"
+    if [ "${elapsed}" -ge "${PANE_STABLE_MIN_ELAPSED}" ] && [ -n "${pane}" ]; then
+      if [ "${pane}" = "${prev_pane}" ]; then
+        stable_hits=$((stable_hits + 1))
+      else
+        stable_hits=0
+      fi
+      log "  ...elapsed=${elapsed}s/${WAIT_ANSWER}s stable=${stable_hits}/${PANE_STABLE_REQUIRED}"
+      if [ "${stable_hits}" -ge "${PANE_STABLE_REQUIRED}" ]; then
+        log "  ...pane 连续稳定，提前结束等待"
+        break
+      fi
+    else
+      log "  ...elapsed=${elapsed}s/${WAIT_ANSWER}s"
+    fi
+    prev_pane="${pane}"
   done
 
-  log "Step 5: 发送 /export ${out}"
+  log "Step 6: 发送 /export ${out}"
   tmux send-keys -t "${session}" -l "/export ${out}"
   tmux send-keys -t "${session}" Enter
   sleep "${WAIT_EXPORT}"
 
-  log "Step 6: capture-pane → ${snapshot}"
+  log "Step 7: capture-pane → ${snapshot}"
   tmux capture-pane -t "${session}" -p > "${snapshot}" 2>/dev/null || true
 
-  log "Step 7: 发送 /exit"
+  log "Step 8: 发送 /exit"
   tmux send-keys -t "${session}" -l "/exit"
   tmux send-keys -t "${session}" Enter
   sleep 2
   tmux kill-session -t "${session}" 2>/dev/null || true
 
   if [ ! -s "${out}" ]; then
+    if [ -s "${snapshot}" ] && rg -q "You've hit your limit|resets" "${snapshot}"; then
+      log "✗ ${round} human 导出失败：Claude 当前会话额度已用尽，请额度恢复后重跑"
+      exit 6
+    fi
     log "✗ ${out} 为空或不存在"
     exit 5
+  fi
+
+  local alice_count
+  local skill_count
+  local stop_error_count
+  local interrupted_count
+  alice_count="$(count_matches "alice-pgpool-2026-04-10" "${out}")"
+  skill_count="$(count_matches "Skill(insights-wiki)" "${out}")"
+  stop_error_count="$(count_matches "Stop hook error" "${out}")"
+  interrupted_count="$(count_matches "Interrupted" "${out}")"
+
+  log "Step 9: 校验导出内容 alice=${alice_count} skill=${skill_count} stop_error=${stop_error_count} interrupted=${interrupted_count}"
+  if [ "${stop_error_count}" -ne 0 ] || [ "${interrupted_count}" -ne 0 ]; then
+    log "✗ ${round} human 导出包含 Stop hook 错误或中断痕迹"
+    exit 9
+  fi
+  if [ "${round}" = "without" ]; then
+    if [ "${alice_count}" -ne 0 ] || [ "${skill_count}" -ne 0 ]; then
+      log "✗ A 轮导出被污染：期望 alice=0 且 Skill(insights-wiki)=0"
+      exit 10
+    fi
+  else
+    if [ "${alice_count}" -lt 1 ]; then
+      log "✗ B 轮导出未引用 alice-pgpool-2026-04-10"
+      exit 11
+    fi
   fi
 
   if [ "${round}" = "without" ]; then
@@ -163,6 +361,7 @@ run_tmux_human() {
   echo
 }
 
+backup_active_settings
 backup_active_skills
 prepare_workspace_a
 run_tmux_human without "${PROMPT_WITHOUT}" "${A_EXPORT}" "${A_SNAPSHOT}"
