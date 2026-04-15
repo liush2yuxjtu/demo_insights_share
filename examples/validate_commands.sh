@@ -13,7 +13,7 @@
 pkill -f "insights_cli.py serve" 2>/dev/null; \
 rm -rf ~/.claude/skills/insights-wiki ~/.claude/skills/insights-wiki-server && \
 mkdir -p /tmp/demo_insights_A && cd /tmp/demo_insights_A && \
-claude -p "我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？请给出可执行的 SQL 与代码片段。" 2>&1 | sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g' > /tmp/demo_insights_A/A_without.log && \
+claude -p "请严格按顺序执行三步。第一步：运行 !pwd 打印当前工作目录。第二步：运行 !ls -la ~/.claude/skills/ 展示已安装的 skill 列表；如果 ~/.claude/skills/insights-wiki/SKILL.md 存在，再运行 !head -40 ~/.claude/skills/insights-wiki/SKILL.md 读取前 40 行；若不存在也要明确说明该事实。第三步：回答 — 我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接（English restate: Our checkout API is timing out, postgres is rejecting new connections during the lunch spike），应该如何诊断与修复？请给出可执行的 SQL 与代码片段。如果有 insights-wiki 注入的 LAN 实战卡片，请在回答里明确引用卡片 ID；若没有，请明确写“未引用任何 LAN 卡片”。" 2>&1 | sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g' > /tmp/demo_insights_A/A_without.log && \
 echo "✅ A/WITHOUT → /tmp/demo_insights_A/A_without.log ($(wc -c < /tmp/demo_insights_A/A_without.log) bytes)"
 
 # ----------------------------------------------------------------
@@ -34,7 +34,7 @@ cp -r isw-clone/insights-share/demo_codes/.claude/skills/insights-wiki ~/.claude
 cp -r isw-clone/insights-share/demo_codes/.claude/skills/insights-wiki-server ~/.claude/skills/ && \
 (cd isw-clone/insights-share/demo_codes && nohup python3 insights_cli.py serve --host 0.0.0.0 --port 7821 --store ./wiki.json > /tmp/demo_insights_B/isd.log 2>&1 &) && \
 sleep 3 && curl -sf http://127.0.0.1:7821/insights >/dev/null && \
-claude -p "我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？若 insights-wiki 注入了 LAN 实战卡片请在回答里明确引用。" 2>&1 | sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g' > /tmp/demo_insights_B/B_with.log && \
+claude -p "请严格按顺序执行三步。第一步：运行 !pwd 打印当前工作目录。第二步：运行 !ls -la ~/.claude/skills/ 展示已安装的 skill 列表；如果 ~/.claude/skills/insights-wiki/SKILL.md 存在，再运行 !head -40 ~/.claude/skills/insights-wiki/SKILL.md 读取前 40 行；若不存在也要明确说明该事实。第三步：回答 — 我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接（English restate: Our checkout API is timing out, postgres is rejecting new connections during the lunch spike），应该如何诊断与修复？请给出可执行的 SQL 与代码片段。如果有 insights-wiki 注入的 LAN 实战卡片，请在回答里明确引用卡片 ID；若没有，请明确写“未引用任何 LAN 卡片”。" 2>&1 | sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g' > /tmp/demo_insights_B/B_with.log && \
 echo "✅ Step 2b: B_with.log $(wc -c < /tmp/demo_insights_B/B_with.log) bytes"
 
 # ----------------------------------------------------------------

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>insights-wiki · 鸭子池塘 A/B 对照</title>
+<title>insights-wiki · 鸭子池塘 Strict A/B 对照</title>
 <style>
   :root {
     --bg: #fef3c7;
@@ -62,6 +62,45 @@
   .badge.b { background: var(--b); }
   .badge.purple { background: #8b5cf6; }
   .badge.amber { background: #f59e0b; }
+  .badge.gray { background: #4b5563; }
+
+  .validation-card {
+    margin-top: 18px;
+    background: rgba(255,255,255,0.92);
+    border: 2px solid #f59e0b;
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+  }
+  .validation-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #92400e;
+    margin-bottom: 8px;
+  }
+  .validation-copy {
+    font-size: 13px;
+    color: #374151;
+    margin: 0;
+  }
+  .validation-list {
+    margin: 12px 0 0 0;
+    padding-left: 20px;
+    font-size: 13px;
+    color: #374151;
+  }
+  .validation-list li { margin: 6px 0; }
+  .validation-path {
+    display: inline-block;
+    margin-top: 12px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+    color: #92400e;
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 999px;
+    padding: 6px 10px;
+  }
 
   /* 鸭子故事 */
   .story-section {
@@ -385,19 +424,36 @@
 
 <div class="header">
   <div class="duck-row">🦆 🦆 🦆</div>
-  <h1>insights-wiki · 鸭子池塘 A/B 对照</h1>
+  <h1>insights-wiki · 鸭子池塘 Strict A/B 对照</h1>
   <p class="subtitle">
-    一个可爱小鸭子都能看懂的故事 + 三段可复制粘贴的 sandbox 验证命令 + 2 份真实 human A/B 对照日志
+    一个可爱小鸭子都能看懂的原理故事 + 三段可复制粘贴的 sandbox 验证命令 + 2 份已通过 strict A/B 门禁的 human export
   </p>
   <div class="badges">
     <span class="badge a">A / WITHOUT skill</span>
     <span class="badge b">B / WITH skill + daemon</span>
-    <span class="badge amber">🧑 human /export ×2</span>
+    <span class="badge amber">🧑 human /export ×2（已校验）</span>
+    <span class="badge gray">📏 prompt equality passed</span>
   </div>
 </div>
 
+<section class="validation-card">
+  <div class="validation-title">Strict A/B 已通过</div>
+  <p class="validation-copy">
+    当前这两份 human export 已通过 <code>validation_AB.md</code> 定义的 strict A/B 门禁：
+    <code>A_without.human.md</code> 和 <code>B_with.human.md</code> 的首个用户 prompt 完全相同，
+    且唯一实验变量只剩 <code>insights-wiki</code> / daemon / fresh cache 是否存在。
+  </p>
+  <ul class="validation-list">
+    <li>A/B 两边必须复用同一份 prompt 文本，不能各自带不同尾句、不同引用要求、不同污染说明。</li>
+    <li>为防止机器上的旧缓存污染实验，A 轮前会清空 <code>~/.cache/insights-wiki/</code>；B 轮只允许通过同一 prompt 触发的 prefetch 重建缓存。</li>
+    <li>当前验证结果：A 中 <code>alice-pgpool-2026-04-10</code> = 0，B 中命中该 card ID 4 次，且 B 无 <code>Stop hook error</code> / <code>Interrupted</code>。</li>
+    <li>严格校验规则与 canonical prompt 以 <a href="https://github.com/liush2yuxjtu/demo_insights_share/blob/main/validation_AB.md" target="_blank">validation_AB.md</a> 为准。</li>
+  </ul>
+  <div class="validation-path">repo root: validation_AB.md</div>
+</section>
+
 <!-- ===================== 鸭子故事 ===================== -->
-<h2>🦆 鸭子故事（连刚孵出来的小鸭子都能听懂）</h2>
+<h2>🦆 鸭子故事（讲原理，也对应当前 strict A/B 结果）</h2>
 
 <section class="story-section">
   <div class="story-tabs">
@@ -409,31 +465,32 @@
 
   <div id="story-frontend" class="story-box" style="display:none;">
     <p>前端鸭子最烦的事，不是写按钮，而是每次组件重新 mount 都要重新 fetch、重新算 state、重新翻旧 issue。明明昨天有人处理过 checkout 超时，今天换个人又像从零搭一遍页面。后来老鸭奶奶做了个木头筐，把团队验证过的 hooks 写法、性能坑和事故卡片都装进去，谁再遇到类似报错，她就先递一张最像的给你。</p>
-    <p>放到 Claude Code 里，这个木头筐就是 <code>insights-wiki</code> skill；它像团队级的 <code>useMemo</code> + Context，把已经验证过的经验直接复用。于是 B 场景不会只说“去检查超时”，而是能顺着 <code>alice-pgpool-2026-04-10</code> 这张卡片，把 Alice 当时怎么排查 checkout 卡住说清楚。</p>
+    <p>放到 Claude Code 里，这个木头筐就是 <code>insights-wiki</code> skill；它像团队级的 <code>useMemo</code> + Context，把已经验证过的经验直接复用。只有在 strict A/B 门禁通过后的 B 场景里，页面才应该把“可能顺着 <code>alice-pgpool-2026-04-10</code> 这张卡片展开”当成有效证据，而不是先把结论写死。</p>
   </div>
 
   <div id="story-backend" class="story-box">
     <p>后端鸭子最怕的不是写 SQL，而是每次 checkout 超时都要重新翻 Slack、旧事故和数据库面板。这样像每个请求都临时建连接，时间全耗在重复排查里。老鸭奶奶后来做了个木头筐，里面装着团队验证过的 PgBouncer、超时阈值和诊断顺序，谁遇到午餐高峰拒绝连接，她就先把这筐方案递过去。</p>
-    <p>放到 Claude Code 里，这个木头筐就是 <code>insights-wiki</code> skill，<code>Stop hook</code> 会静悄悄把最相关的卡片塞进当前回答。于是 B 场景不再只说“检查连接池”，而是能直接引用 <code>alice-pgpool-2026-04-10</code> 这张 Alice 留下的实战卡片，把阈值、适用条件和排障顺序一起带出来。</p>
+    <p>放到 Claude Code 里，这个木头筐就是 <code>insights-wiki</code> skill，<code>Stop hook</code> 会静悄悄把最相关的卡片塞进当前回答。严格 A/B 成立时，B 才可能比 A 多带出像 <code>alice-pgpool-2026-04-10</code> 这样的团队卡片、阈值和排障顺序；如果 A/B prompt 不同，这种差异就不能被当成有效证明。</p>
   </div>
 
   <div id="story-dl" class="story-box" style="display:none;">
     <p>深度学习鸭子最能理解这种痛：如果每次 fine-tune 都从随机初始化开始，训练会又慢又不稳；有 checkpoint 和预训练权重，很多坑就不用重踩。池塘里的木头筐干的也是这件事，它把团队遇到过的生产事故压成可复用的“经验权重”，谁再问类似问题，就先加载最像的那份知识。</p>
-    <p>在 Claude Code 里，<code>insights-wiki</code> 就像把实战卡片当作团队预训练层，<code>Stop hook</code> 则负责按当前问题做一次检索加载。所以 B 场景不像 A 只给通用答案，它会把 <code>alice-pgpool-2026-04-10</code> 当成已训好的 insight 直接 load 进回答，少走很多从零试错的 epoch。</p>
+    <p>在 Claude Code 里，<code>insights-wiki</code> 就像把实战卡片当作团队预训练层，<code>Stop hook</code> 则负责按当前问题做一次检索加载。所以当 strict A/B 通过后，B 就能被解读成“比 A 多 load 了一层像 <code>alice-pgpool-2026-04-10</code> 这样的团队经验”；这次页面展示的两份 human export 正是这种结果。</p>
   </div>
 
   <div id="story-noob" class="story-box" style="display:none;">
     <p>如果你是 AI 小白，可以把这件事想成“新同事翻便签本”。没有便签本的时候，每次系统报错都得重新搜 Google、翻聊天记录、问同事，速度慢还容易漏关键细节。老鸭奶奶后来把前辈们写过的解决办法都塞进一个木头筐，谁再遇到同样的问题，她就先把那张最像的小纸条递过去。</p>
-    <p>这就是 <code>insights-wiki</code> 的作用：Claude 回答前，会先偷偷翻一眼团队便签本。于是 B 场景不是空口讲大道理，而是能拿出 <code>alice-pgpool-2026-04-10</code> 这张 Alice 在 4 月 10 号写下的小贴士，直接告诉你这类 postgres 午高峰超时以前是怎么修好的。</p>
+    <p>这就是 <code>insights-wiki</code> 的作用：Claude 回答前，会先偷偷翻一眼团队便签本。等 strict A/B 规则满足之后，你才能把 “B 可能拿出 <code>alice-pgpool-2026-04-10</code> 这张小贴士” 解读成有效结果；否则它只是一个被 prompt 差异污染的样例。</p>
   </div>
 </section>
 
 <!-- ===================== 3 步验证命令 ===================== -->
-<h2>⚡ 三步 sandbox 验证命令（直接复制粘贴）</h2>
+<h2>⚡ 三步 sandbox 验证命令（当前页面同 prompt 已通过 strict A/B）</h2>
 
 <p style="font-size:13px; color:var(--muted)">
   打开一个<strong>干净的终端</strong>（推荐新开一个 tab 或一个 docker sandbox），
-  先跑命令 1️⃣ 看 A 鸭子的答案，再跑命令 2a 和 2b 生成 B 鸭子的答案，最后一行命令帮你验证差异。
+  先跑命令 1️⃣ 生成 A，再跑命令 2a 和 2b 生成 B。注意：下面两条 <code>claude -p</code> 必须复制同一份 canonical prompt；
+  是否构成 strict A/B，以 <a href="https://github.com/liush2yuxjtu/demo_insights_share/blob/main/validation_AB.md" target="_blank">validation_AB.md</a> 的 prompt equality gate 为准。
 </p>
 
 <!-- 命令 1 -->
@@ -448,12 +505,12 @@
     </ol>
   </div>
   <div class="what-happens">
-    <strong>你会看到：</strong>Claude 给出一段通用的 PostgreSQL 诊断方案（idle in transaction 检查、PgBouncer 配置、SQLAlchemy 连接池等），但<strong>不会</strong>引用任何团队内部卡片。
+    <strong>你会看到：</strong>A 侧是没有 skill 的基线样本。只有在 A/B 首个 prompt 完全相同的前提下，A 中“不引用任何 LAN 卡片”这件事才可用于后续比较。
   </div>
 <pre id="cmd1">pkill -f "insights_cli.py serve" 2>/dev/null; \
 rm -rf ~/.claude/skills/insights-wiki ~/.claude/skills/insights-wiki-server && \
 mkdir -p /tmp/demo_insights_A && cd /tmp/demo_insights_A && \
-claude -p "我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？请给出可执行的 SQL 与代码片段。" 2>&1 | sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g' > /tmp/demo_insights_A/A_without.log && \
+claude -p "请严格按顺序执行三步。第一步：运行 !pwd 打印当前工作目录。第二步：运行 !ls -la ~/.claude/skills/ 展示已安装的 skill 列表；如果 ~/.claude/skills/insights-wiki/SKILL.md 存在，再运行 !head -40 ~/.claude/skills/insights-wiki/SKILL.md 读取前 40 行；如果 ~/.cache/insights-wiki/manifest.json 存在，再运行 !cat ~/.cache/insights-wiki/manifest.json 查看缓存卡片 ID；若上述文件不存在也要明确说明该事实。第三步：回答 — 我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接（English restate: Our checkout API is timing out, postgres is rejecting new connections during the lunch spike），应该如何诊断与修复？请给出可执行的 SQL 与代码片段。如果第二步发现 ~/.cache/insights-wiki 中有相关卡片，请先读取与当前问题最相关的缓存卡片再作答，并明确引用卡片 ID；若缓存不存在或未命中，请明确写“未引用任何 LAN 卡片”。" 2>&1 | sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g' > /tmp/demo_insights_A/A_without.log && \
 echo "✅ A/WITHOUT → /tmp/demo_insights_A/A_without.log ($(wc -c &lt; /tmp/demo_insights_A/A_without.log) bytes)"<button class="copy-btn" onclick="copyCmd(this,'cmd1')">📋 复制</button></pre>
   <div class="expected">
     ✅ <strong>预期输出：</strong><code>✅ A/WITHOUT → /tmp/demo_insights_A/A_without.log (约 4000-6000 bytes)</code>
@@ -496,8 +553,7 @@ echo "✅ Step 2a: clone 完成 → /tmp/demo_insights_B/isw-clone"<button class
     </ol>
   </div>
   <div class="what-happens">
-    <strong>你会看到：</strong>Claude 在回答里<strong>明确引用</strong> <code>alice-pgpool-2026-04-10</code>，
-    给出 Alice 当年的精确阈值 <code>idle_in_transaction_session_timeout=30s</code> 和 <code>default_pool_size = 2 × worker_count</code>，最后打印 B 日志大小。
+    <strong>你会看到：</strong>B 侧只比 A 多一个变量：装了 <code>insights-wiki</code> + daemon。后续能不能把卡片差异当成证据，取决于这里的 prompt 是否与 A 逐字一致，而不是取决于页面先写了什么结论。
   </div>
 <pre id="cmd2b">cd /tmp/demo_insights_B && \
 rm -rf ~/.claude/skills.disabled/insights-wiki.active ~/.claude/skills.disabled/insights-wiki-server.active 2>/dev/null; \
@@ -505,7 +561,7 @@ cp -r isw-clone/insights-share/demo_codes/.claude/skills/insights-wiki ~/.claude
 cp -r isw-clone/insights-share/demo_codes/.claude/skills/insights-wiki-server ~/.claude/skills/ && \
 (cd isw-clone/insights-share/demo_codes && nohup python3 insights_cli.py serve --host 0.0.0.0 --port 7821 --store ./wiki.json > /tmp/demo_insights_B/isd.log 2>&1 &) && \
 sleep 3 && curl -sf http://127.0.0.1:7821/insights >/dev/null && \
-claude -p "我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？若 insights-wiki 注入了 LAN 实战卡片请在回答里明确引用。" 2>&1 | sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g' > /tmp/demo_insights_B/B_with.log && \
+claude -p "请严格按顺序执行三步。第一步：运行 !pwd 打印当前工作目录。第二步：运行 !ls -la ~/.claude/skills/ 展示已安装的 skill 列表；如果 ~/.claude/skills/insights-wiki/SKILL.md 存在，再运行 !head -40 ~/.claude/skills/insights-wiki/SKILL.md 读取前 40 行；如果 ~/.cache/insights-wiki/manifest.json 存在，再运行 !cat ~/.cache/insights-wiki/manifest.json 查看缓存卡片 ID；若上述文件不存在也要明确说明该事实。第三步：回答 — 我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接（English restate: Our checkout API is timing out, postgres is rejecting new connections during the lunch spike），应该如何诊断与修复？请给出可执行的 SQL 与代码片段。如果第二步发现 ~/.cache/insights-wiki 中有相关卡片，请先读取与当前问题最相关的缓存卡片再作答，并明确引用卡片 ID；若缓存不存在或未命中，请明确写“未引用任何 LAN 卡片”。" 2>&1 | sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g' > /tmp/demo_insights_B/B_with.log && \
 echo "✅ Step 2b: B_with.log $(wc -c &lt; /tmp/demo_insights_B/B_with.log) bytes"<button class="copy-btn" onclick="copyCmd(this,'cmd2b')">📋 复制</button></pre>
   <div class="expected">
     ✅ <strong>预期输出：</strong><code>✅ Step 2b: B_with.log 约 5000-12000 bytes</code>
@@ -514,13 +570,13 @@ echo "✅ Step 2b: B_with.log $(wc -c &lt; /tmp/demo_insights_B/B_with.log) byte
 
 <!-- 命令 3 差异验证 -->
 <div class="cmd-card" style="border-left:8px solid var(--ok)">
-  <h3>3️⃣ 一行命令验证差异（A 应为 0，B 应 ≥ 1）</h3>
+  <h3>3️⃣ 一行命令辅助观察差异（前提：prompt equality 先通过）</h3>
   <div class="steps">
-    这是<strong>最重要的证据行</strong>。如果 A log 里完全不提 Alice 卡片，而 B log 里引用了至少一次，就说明 insights-wiki 在 B 环境下确实把团队的实战经验静默注入了 Claude。
+    这行 <code>grep</code> 只能作为后续观察项，不能单独证明 A/B 成立。只有先确认两份 export 的首个用户 prompt 完全一致，再去看 A 是否为 0、B 是否大于等于 1，结论才干净。
   </div>
 <pre id="cmd3">grep -c alice-pgpool-2026-04-10 /tmp/demo_insights_A/A_without.log /tmp/demo_insights_B/B_with.log<button class="copy-btn" onclick="copyCmd(this,'cmd3')">📋 复制</button></pre>
   <div class="expected">
-    ✅ <strong>预期输出：</strong>
+    ✅ <strong>通过 prompt equality gate 后，预期输出：</strong>
     <code>/tmp/demo_insights_A/A_without.log:0</code><br>
     <code>/tmp/demo_insights_B/B_with.log:1</code>（或更多）
   </div>
@@ -530,8 +586,8 @@ echo "✅ Step 2b: B_with.log $(wc -c &lt; /tmp/demo_insights_B/B_with.log) byte
 <h2>📁 交付物清单（点击打开）</h2>
 
 <p style="font-size:13px; color:var(--muted)">
-  所有 A/B 日志、鸭子故事、sandbox 脚本都在同一个 <code>examples/</code> 目录。
-  点击文件名直接在 GitHub Pages 里打开（或 raw 查看）。
+  下列文件是当前页面展示并已通过 strict A/B 门禁的 human export。
+  它们的首个用户 prompt 已按 <a href="https://github.com/liush2yuxjtu/demo_insights_share/blob/main/validation_AB.md" target="_blank">validation_AB.md</a> 完全对齐。
 </p>
 
 <table>
@@ -543,14 +599,14 @@ echo "✅ Step 2b: B_with.log $(wc -c &lt; /tmp/demo_insights_B/B_with.log) byte
     <tr>
       <td>1</td>
       <td><a class="file-link" href="./A_without.human.md" target="_blank">A_without.human.md</a></td>
-      <td>10.1 KB</td>
-      <td>A · 真实交互会话 · /export 落盘</td>
+      <td>13.5 KB</td>
+      <td>A · 真实交互会话 · same prompt · 未命中 Alice card ID</td>
     </tr>
     <tr>
       <td>2</td>
       <td><a class="file-link" href="./B_with.human.md" target="_blank">B_with.human.md</a></td>
-      <td>6.9 KB</td>
-      <td>B · 真实交互会话 · 引用 Alice 卡片</td>
+      <td>9.0 KB</td>
+      <td>B · 真实交互会话 · same prompt · 命中 Alice card ID 4 次</td>
     </tr>
   </tbody>
 </table>
@@ -559,6 +615,7 @@ echo "✅ Step 2b: B_with.log $(wc -c &lt; /tmp/demo_insights_B/B_with.log) byte
 <div class="action-bar">
   <a class="btn amber" href="./A_without.human.md" target="_blank">🧑 A human</a>
   <a class="btn amber" href="./B_with.human.md" target="_blank">🧑 B human</a>
+  <a class="btn purple" href="https://github.com/liush2yuxjtu/demo_insights_share/blob/main/validation_AB.md" target="_blank">📏 validation_AB.md</a>
   <button class="btn green" id="rawCompareToggle" type="button" onclick="toggleRawCompare()">🪵 展开 A/B 全量对比</button>
   <a class="btn" href="https://github.com/liush2yuxjtu/demo_insights_share/tree/main/examples" target="_blank">🐙 GitHub 源码</a>
 </div>
@@ -567,7 +624,7 @@ echo "✅ Step 2b: B_with.log $(wc -c &lt; /tmp/demo_insights_B/B_with.log) byte
   <div class="raw-compare-head">
     <div>
       <div class="raw-compare-title">A / B 原始日志全文对比</div>
-      <div class="raw-compare-note">默认折叠；展开后会懒加载两份 human export 原文，方便直接肉眼对照。</div>
+      <div class="raw-compare-note">默认折叠；展开后会懒加载两份 human export 原文。当前这两份原文的首个用户 prompt 已通过 equality gate，可直接肉眼对照差异。</div>
     </div>
     <div class="raw-status" id="rawCompareStatus">准备加载</div>
   </div>

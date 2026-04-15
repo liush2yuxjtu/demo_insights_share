@@ -31,7 +31,7 @@ def _resolve_trigger_mode() -> str:
     return "SILENT_AND_JUST_RUN"
 
 
-def _last_assistant_text(transcript_path: str | None) -> str:
+def _last_message_text(transcript_path: str | None, role: str) -> str:
     if not transcript_path:
         return ""
     p = Path(transcript_path)
@@ -48,7 +48,7 @@ def _last_assistant_text(transcript_path: str | None) -> str:
             continue
         # claude code transcript 是 jsonl，每行可能是 message / tool / system
         msg = event.get("message") or {}
-        if msg.get("role") == "assistant":
+        if msg.get("role") == role:
             content = msg.get("content")
             if isinstance(content, str):
                 last = content
@@ -76,25 +76,11 @@ def main() -> int:
     sys.stderr.write(f"[insights_stop_hook] mode={mode}\n")
 
     transcript_path = event.get("transcript_path")
-    last_text = _last_assistant_text(transcript_path)
+    # 对 wiki 检索来说，最后一条 user 问题比 assistant 的中间解释更稳定。
+    # 这能避免把 “正在读取 SKILL.md” 之类的助手旁白误当成 incident query。
+    last_text = _last_message_text(transcript_path, "user")
     if not last_text:
-        # 兜底：把 Bob 自己输入的最后一条 user message 当成 query
-        # （这种兜底不是 fallback，是因为 Stop hook 在 transcript 里有合法的
-        # 多种格式，避免 demo 因为格式差异空跑）
-        for line in (Path(transcript_path).read_text(encoding="utf-8").splitlines() if transcript_path and Path(transcript_path).is_file() else []):
-            try:
-                event2 = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            msg = event2.get("message") or {}
-            if msg.get("role") == "user":
-                content = msg.get("content")
-                if isinstance(content, str):
-                    last_text = content
-                elif isinstance(content, list):
-                    for block in content:
-                        if isinstance(block, dict) and block.get("type") == "text":
-                            last_text = block.get("text", last_text)
+        last_text = _last_message_text(transcript_path, "assistant")
 
     if not last_text:
         sys.stderr.write("[insights_stop_hook] no assistant/user text found in transcript\n")
@@ -107,7 +93,11 @@ def main() -> int:
     import insights_cache  # noqa: E402
 
     sys.stderr.write(f"[insights_stop_hook] querying search_agent: {last_text[:120]!r}\n")
-    hits = search_agent.run(query=last_text, wiki_tree_root=str(WIKI_TREE))
+    try:
+        hits = search_agent.run(query=last_text, wiki_tree_root=str(WIKI_TREE))
+    except Exception as exc:  # noqa: BLE001
+        sys.stderr.write(f"[insights_stop_hook] search_agent failed: {exc}\n")
+        return 0
     top = (hits.get("hits") or [None])[0]
 
     REVIEW_PATH.parent.mkdir(parents=True, exist_ok=True)

@@ -32,9 +32,10 @@ SKILL_DST="${HOME}/.claude/skills/insights-wiki"
 SKILL_SERVER_DST="${HOME}/.claude/skills/insights-wiki-server"
 SKILL_BAK="${HOME}/.claude/skills/insights-wiki.human-bak.$$"
 SKILL_SERVER_BAK="${HOME}/.claude/skills/insights-wiki-server.human-bak.$$"
+CACHE_DIR="${HOME}/.cache/insights-wiki"
+CACHE_BAK="${HOME}/.cache/insights-wiki.human-bak.$$"
 
-PROMPT_WITHOUT='请严格按顺序执行三步。第一步：运行 !pwd 打印当前工作目录。第二步：运行 !ls -la ~/.claude/skills/ 展示已安装的 skill 列表（若目录不存在也要显示该事实）。第三步：回答 — 我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？请给出可执行的 SQL 与代码片段。若意外出现 LAN 卡片引用，请明确说明这是污染。'
-PROMPT_WITH='请严格按顺序执行三步。第一步：运行 !pwd 打印当前工作目录。第二步：运行 !ls -la ~/.claude/skills/ 展示已安装的 skill 列表。第三步：回答 — 我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？请给出可执行的 SQL 与代码片段；若 insights-wiki 注入了 LAN 实战卡片请明确引用 alice-pgpool-2026-04-10。'
+COMMON_PROMPT='请严格按顺序执行三步。第一步：运行 !pwd 打印当前工作目录。第二步：运行 !ls -la ~/.claude/skills/ 展示已安装的 skill 列表；如果 ~/.claude/skills/insights-wiki/SKILL.md 存在，再运行 !head -40 ~/.claude/skills/insights-wiki/SKILL.md 读取前 40 行；如果 ~/.cache/insights-wiki/manifest.json 存在，再运行 !cat ~/.cache/insights-wiki/manifest.json 查看缓存卡片 ID；若上述文件不存在也要明确说明该事实。第三步：回答 — 我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接（English restate: Our checkout API is timing out, postgres is rejecting new connections during the lunch spike），应该如何诊断与修复？请给出可执行的 SQL 与代码片段。如果第二步发现 ~/.cache/insights-wiki 中有相关卡片，请先读取与当前问题最相关的缓存卡片再作答，并明确引用卡片 ID；若缓存不存在或未命中，请明确写“未引用任何 LAN 卡片”。'
 
 WAIT_CLAUDE_READY=10
 WAIT_TRUST_CONFIRM=4
@@ -62,6 +63,68 @@ count_matches() {
   printf '%s' "${count:-0}"
 }
 
+normalize_prompt_text() {
+  printf '%s\n' "$1" \
+    | tr '\n' ' ' \
+    | sed -E 's/[[:space:]]+/ /g; s/^[[:space:]]+//; s/[[:space:]]+$//'
+}
+
+extract_export_prompt() {
+  local file="$1"
+  awk '
+    /^❯ / { capture = 1 }
+    capture {
+      if ($0 ~ /^⏺ /) exit
+      print
+    }
+  ' "${file}" \
+    | sed -E '1s/^❯[[:space:]]*//; s/^[[:space:]]{2,}//' \
+    | tr '\n' ' ' \
+    | sed -E 's/[[:space:]]+/ /g; s/^[[:space:]]+//; s/[[:space:]]+$//'
+}
+
+assert_export_prompt_matches_common() {
+  local round="$1"
+  local file="$2"
+  local expected_prompt=""
+  local actual_prompt=""
+
+  expected_prompt="$(normalize_prompt_text "${COMMON_PROMPT}")"
+  actual_prompt="$(extract_export_prompt "${file}")"
+
+  if [ -z "${actual_prompt}" ]; then
+    log "✗ ${round} human 导出缺少可抽取 prompt"
+    exit 13
+  fi
+
+  if [ "${actual_prompt}" != "${expected_prompt}" ]; then
+    log "✗ ${round} human 导出 prompt 与 COMMON_PROMPT 不一致"
+    log "  expected: ${expected_prompt}"
+    log "  actual:   ${actual_prompt}"
+    exit 14
+  fi
+}
+
+assert_ab_prompts_identical() {
+  local prompt_a=""
+  local prompt_b=""
+
+  prompt_a="$(extract_export_prompt "${A_EXPORT}")"
+  prompt_b="$(extract_export_prompt "${B_EXPORT}")"
+
+  if [ -z "${prompt_a}" ] || [ -z "${prompt_b}" ]; then
+    log "✗ A/B 导出缺少 prompt，无法执行 strict A/B gate"
+    exit 15
+  fi
+
+  if [ "${prompt_a}" != "${prompt_b}" ]; then
+    log "✗ A/B 导出 prompt 不一致，strict A/B 失效"
+    log "  A: ${prompt_a}"
+    log "  B: ${prompt_b}"
+    exit 16
+  fi
+}
+
 backup_active_skills() {
   mkdir -p "${HOME}/.claude/skills"
   if [ -d "${SKILL_DST}" ]; then
@@ -69,6 +132,13 @@ backup_active_skills() {
   fi
   if [ -d "${SKILL_SERVER_DST}" ]; then
     mv "${SKILL_SERVER_DST}" "${SKILL_SERVER_BAK}"
+  fi
+}
+
+backup_active_cache() {
+  mkdir -p "${HOME}/.cache"
+  if [ -d "${CACHE_DIR}" ]; then
+    mv "${CACHE_DIR}" "${CACHE_BAK}"
   fi
 }
 
@@ -86,6 +156,13 @@ restore_active_skills() {
   fi
   if [ -d "${SKILL_SERVER_BAK}" ]; then
     mv "${SKILL_SERVER_BAK}" "${SKILL_SERVER_DST}"
+  fi
+}
+
+restore_active_cache() {
+  rm -rf "${CACHE_DIR}"
+  if [ -d "${CACHE_BAK}" ]; then
+    mv "${CACHE_BAK}" "${CACHE_DIR}"
   fi
 }
 
@@ -109,6 +186,7 @@ cleanup() {
   pkill -f "insights_cli.py serve" 2>/dev/null || true
   restore_active_settings
   restore_active_skills
+  restore_active_cache
 }
 
 trap cleanup EXIT
@@ -122,11 +200,17 @@ prepare_workspace_a() {
 
   log "A 轮前置：强化净室隔离 — 显式删除 skill 目录"
   rm -rf "${SKILL_DST}" "${SKILL_SERVER_DST}"
+  rm -rf "${CACHE_DIR}"
 
   if ls ~/.claude/skills/insights-wiki* 2>/dev/null | grep -q .; then
     log "✗ A 轮净室隔离失败：~/.claude/skills/insights-wiki* 仍有残留"
     ls -la ~/.claude/skills/ 2>&1 | sed 's/^/    /'
     exit 7
+  fi
+  if [ -e "${CACHE_DIR}" ]; then
+    log "✗ A 轮净室隔离失败：${CACHE_DIR} 仍有残留"
+    find "${CACHE_DIR}" -maxdepth 2 -type f 2>&1 | sed 's/^/    /'
+    exit 17
   fi
   log "A 轮前置：✓ 净室隔离验证通过"
 
@@ -208,6 +292,7 @@ prepare_workspace_b() {
   pkill -f "insights_cli.py serve" 2>/dev/null || true
   rm -rf "${WORKSPACE_B}"
   mkdir -p "${WORKSPACE_B}" "${HOME}/.claude/skills"
+  rm -rf "${CACHE_DIR}"
 
   if [ ! -x "${PYTHON_BIN}" ]; then
     log "✗ 缺少 hook/runtime Python：${PYTHON_BIN}"
@@ -333,7 +418,10 @@ run_tmux_human() {
   stop_error_count="$(count_matches "Stop hook error" "${out}")"
   interrupted_count="$(count_matches "Interrupted" "${out}")"
 
-  log "Step 9: 校验导出内容 alice=${alice_count} skill=${skill_count} stop_error=${stop_error_count} interrupted=${interrupted_count}"
+  log "Step 9: 校验导出 prompt 与 COMMON_PROMPT"
+  assert_export_prompt_matches_common "${round}" "${out}"
+
+  log "Step 10: 校验导出内容 alice=${alice_count} skill=${skill_count} stop_error=${stop_error_count} interrupted=${interrupted_count}"
   if [ "${stop_error_count}" -ne 0 ] || [ "${interrupted_count}" -ne 0 ]; then
     log "✗ ${round} human 导出包含 Stop hook 错误或中断痕迹"
     exit 9
@@ -350,12 +438,6 @@ run_tmux_human() {
     fi
   fi
 
-  if [ "${round}" = "without" ]; then
-    cp "${A_EXPORT}" "${EXAMPLES_DIR}/A_without.human.md"
-  else
-    cp "${B_EXPORT}" "${EXAMPLES_DIR}/B_with.human.md"
-  fi
-
   log "✓ ${out} 落盘成功 ($(wc -c < "${out}" | tr -d ' ') 字节)"
   log "=== ${round} human 轮结束 ==="
   echo
@@ -363,11 +445,19 @@ run_tmux_human() {
 
 backup_active_settings
 backup_active_skills
+backup_active_cache
 prepare_workspace_a
-run_tmux_human without "${PROMPT_WITHOUT}" "${A_EXPORT}" "${A_SNAPSHOT}"
+run_tmux_human without "${COMMON_PROMPT}" "${A_EXPORT}" "${A_SNAPSHOT}"
 
 prepare_workspace_b
-run_tmux_human with "${PROMPT_WITH}" "${B_EXPORT}" "${B_SNAPSHOT}"
+run_tmux_human with "${COMMON_PROMPT}" "${B_EXPORT}" "${B_SNAPSHOT}"
+
+log "Step 11: 执行 strict A/B prompt equality gate"
+assert_ab_prompts_identical
+
+log "Step 12: prompt gate 通过，回写 examples/ human 资产"
+cp "${A_EXPORT}" "${EXAMPLES_DIR}/A_without.human.md"
+cp "${B_EXPORT}" "${EXAMPLES_DIR}/B_with.human.md"
 
 log "全部完成："
 ls -la "${A_EXPORT}" "${B_EXPORT}" "${EXAMPLES_DIR}/A_without.human.md" "${EXAMPLES_DIR}/B_with.human.md" 2>&1

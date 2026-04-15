@@ -11,242 +11,305 @@
 ╰──────────────────────────────────────────────────────────────────────────────╯
 
 ❯ 请严格按顺序执行三步。第一步：运行 !pwd 打印当前工作目录。第二步：运行 !ls    
-  -la ~/.claude/skills/ 展示已安装的 skill                                      
-  列表（若目录不存在也要显示该事实）。第三步：回答 — 我们的 checkout API        
-  正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？请给出可执行的   
-  SQL 与代码片段。若意外出现 LAN 卡片引用，请明确说明这是污染。                 
+  -la ~/.claude/skills/ 展示已安装的 skill 列表；如果                           
+  ~/.claude/skills/insights-wiki/SKILL.md 存在，再运行 !head -40                
+  ~/.claude/skills/insights-wiki/SKILL.md 读取前 40 行；如果                    
+  ~/.cache/insights-wiki/manifest.json 存在，再运行 !cat                        
+  ~/.cache/insights-wiki/manifest.json 查看缓存卡片                             
+  ID；若上述文件不存在也要明确说明该事实。第三步：回答 — 我们的 checkout API    
+  正在超时，postgres 在午餐高峰拒绝新连接（English restate: Our checkout API is 
+   timing out, postgres is rejecting new connections during the lunch           
+  spike），应该如何诊断与修复？请给出可执行的 SQL 与代码片段。如果第二步发现    
+  ~/.cache/insights-wiki                                                        
+  中有相关卡片，请先读取与当前问题最相关的缓存卡片再作答，并明确引用卡片        
+  ID；若缓存不存在或未命中，请明确写“未引用任何 LAN 卡片”。                     
 
-⏺ Bash(!pwd)
-  ⎿  Error: Exit code 127
-     (eval):1: command not found: !pwd
+⏺ 我来按顺序执行这三步。
 
-⏺ Bash(!ls -la ~/.claude/skills/)
-  ⎿  Error: Exit code 127
-     (eval):1: command not found: !ls
+  第一步：打印当前工作目录
 
 ⏺ Bash(pwd)
   ⎿  /tmp/demo_insights_A
 
+⏺ 第二步：检查已安装的 skill 及相关文件
+
   Listed 1 directory (ctrl+o to expand)
 
-⏺ 第一步结果： /tmp/demo_insights_A
+⏺ Bash(test -f ~/.claude/skills/insights-wiki/SKILL.md && echo "EXISTS" || echo
+      "NOT_FOUND")
+  ⎿  NOT_FOUND
 
-  第二步结果： ~/.claude/skills/ 目录存在，共安装 65+ 个 skills。
+⏺ Bash(test -f ~/.cache/insights-wiki/manifest.json && echo "EXISTS" || echo
+      "NOT_FOUND")
+  ⎿  NOT_FOUND
+
+⏺ 第二步结果：
+  - ~/.claude/skills/insights-wiki/SKILL.md — NOT_FOUND（不存在）
+  - ~/.cache/insights-wiki/manifest.json — NOT_FOUND（不存在）
+
+  因此 未引用任何 LAN 卡片。
 
   ---
-  Checkout API 超时 & PostgreSQL 午餐高峰拒绝新连接 — 诊断与修复
+  第三步：诊断与修复方案
 
-  一、快速诊断 SQL
+  ---
+  问题分析
 
-  -- 1. 查看当前连接数快照（需 Superuser 或 pg_stat_activity 权限）
+  两个独立症状，同一根本原因：PostgreSQL 连接数被打满。
+
+  - checkout API 超时 → 请求堆积、响应时间恶化
+  - PostgreSQL 午餐高峰拒绝新连接 → too many connections 或连接池耗尽
+
+  ---
+  一、立即诊断（执行顺序）
+
+  1.1 PostgreSQL 连接状态
+
+  -- 当前总连接数 vs max_connections
+  SELECT
+      count(*) AS current_connections,
+      setting AS max_connections
+  FROM pg_stat_activity, pg_settings
+  WHERE name = 'max_connections';
+
+  -- 按状态分类
   SELECT
       state,
-      wait_event_type,
-      wait_event,
-      COUNT(*) AS conn_count,
-      MAX(EXTRACT(EPOCH FROM (now() - state_change)) ) AS seconds_in_state
+      count(*) AS count
   FROM pg_stat_activity
-  WHERE datname = current_database()
-  GROUP BY state, wait_event_type, wait_event
+  GROUP BY state;
+
+  -- 查找最慢的查询（可能是 checkout 慢的元凶）
+  SELECT
+      pid,
+      now() - query_start AS duration,
+      state,
+      left(query, 100) AS query_preview
+  FROM pg_stat_activity
+  WHERE state != 'idle'
+  ORDER BY duration DESC
+  LIMIT 10;
+
+  -- 查找长时间运行的 transaction
+  SELECT
+      pid,
+      now() - xact_start AS xact_age,
+      now() - query_start AS query_age,
+      state,
+      left(query, 100) AS query
+  FROM pg_stat_activity
+  WHERE xact_start IS NOT NULL
+    AND state IN ('active', 'idle in transaction')
+  ORDER BY xact_age DESC
+  LIMIT 5;
+
+  1.2 连接来源分布（哪个服务占用最多）
+
+  -- 按 application_name/datname/user 分组
+  SELECT
+      application_name,
+      datname,
+      usename,
+      count(*) AS conn_count
+  FROM pg_stat_activity
+  GROUP BY application_name, datname, usename
   ORDER BY conn_count DESC;
 
-  -- 2. 查看 max_connections vs 当前实际连接
-  SELECT
-      current_setting('max_connections')::int AS max_conn,
-      COUNT(*) AS current_conn,
-      current_setting('max_connections')::int - COUNT(*) AS available
-  FROM pg_stat_activity;
+  1.3 等待事件（谁在等锁/IO）
 
-  -- 3. 查看等待锁的 Query（连接堆积常见原因）
   SELECT
-      pid, usename, query, wait_event_type, wait_event, state
+      wait_event_type,
+      wait_event,
+      count(*) AS waiting_count
   FROM pg_stat_activity
-  WHERE wait_event_type = 'Lock'
-     OR wait_event_type = 'LWLock'
-     OR state = 'active' AND query_start < now() - INTERVAL '30 seconds';
+  WHERE state = 'active'
+    AND wait_event IS NOT NULL
+  GROUP BY wait_event_type, wait_event
+  ORDER BY waiting_count DESC;
 
-  -- 4. 查看最慢的活跃 Query（可能拖住连接池）
-  SELECT
-      pid, query, state, now() - query_start AS duration, wait_event
-  FROM pg_stat_activity
-  WHERE state = 'active' AND query_start < now() - INTERVAL '10 seconds'
-  ORDER BY duration DESC;
+  ---
+  二、根因定位 Checklist
 
-  二、根因分析
+  ┌────────────────────────┬─────────────────────────────────────────────────┐
+  │        可能原因        │                    检查方式                     │
+  ├────────────────────────┼─────────────────────────────────────────────────┤
+  │ 连接池配置太小         │ SHOW max_connections; + 你的 pooler config      │
+  ├────────────────────────┼─────────────────────────────────────────────────┤
+  │ 连接泄漏（未关闭连接） │ pg_stat_activity 中 state = 'idle in            │
+  │                        │ transaction' 数量                               │
+  ├────────────────────────┼─────────────────────────────────────────────────┤
+  │ 慢查询阻塞             │ 1.1 节的 slow query 检查                        │
+  ├────────────────────────┼─────────────────────────────────────────────────┤
+  │ 午餐高峰流量突增       │ 对比 count(*) 在高峰 vs 非高峰                  │
+  ├────────────────────────┼─────────────────────────────────────────────────┤
+  │ 单一长事务占满连接     │ 1.1 节的 xact_age 查询                          │
+  └────────────────────────┴─────────────────────────────────────────────────┘
 
-  症状 → 可能原因：
+  ---
+  三、修复方案
 
-  ┌────────────────────┬────────────────────────────────────────────────────┐
-  │        症状        │                     最可能原因                     │
-  ├────────────────────┼────────────────────────────────────────────────────┤
-  │ Checkout API 超时  │ Long-running transaction                           │
-  │                    │ 占用连接、缺少索引导致查询慢                       │
-  ├────────────────────┼────────────────────────────────────────────────────┤
-  │ Postgres           │ max_connections 达到上限、连接泄漏（未 Close）     │
-  │ 拒绝新连接         │                                                    │
-  ├────────────────────┼────────────────────────────────────────────────────┤
-  │ 午餐高峰集中爆发   │ 短连接模式 + 连接建立开销大、未使用连接池          │
-  └────────────────────┴────────────────────────────────────────────────────┘
+  3.1 连接泄漏修复（最常见根因）
 
-  三、立即可执行的修复
+  检查你的 checkout API 代码中是否在所有代码路径上正确释放连接：
 
-  修复 1：连接池（推荐 PgBouncer）
+  # ❌ 错误示例 — 异常时不释放
+  def checkout(user_id, cart_id):
+      conn = get_db_connection()
+      try:
+          result = process_order(conn, user_id, cart_id)
+          conn.commit()
+          return result
+      except Exception as e:
+          conn.rollback()  # 可能未执行
+          raise
+      # conn.close() 可能永远不到
 
-  # Ubuntu/Debian 安装
-  apt install pgbouncer -y
+  # ✅ 正确写法 — 用 context manager
+  import contextlib
 
-  # /etc/pgbouncer/pgbouncer.ini
-  [databases]
-  mydb = host=127.0.0.1 port=5432 dbname=checkout
+  @contextlib.contextmanager
+  def get_connection():
+      conn = get_db_connection()
+      try:
+          yield conn
+          conn.commit()
+      except Exception:
+          conn.rollback()
+          raise
+      finally:
+          conn.close()  # 无论是否异常都关闭
 
-  [pgbouncer]
-  pool_mode = transaction          # 重要：事务模式，非 session
-  max_client_conn = 2000
-  default_pool_size = 20          # 根据 CPU 核数调整，通常 2-4 per core
-  min_pool_size = 5
-  reserve_pool_size = 5
-  reserve_pool_timeout = 3
-  server_lifetime = 3600
-  server_idle_timeout = 600
-  log_connections = 1
-  log_disconnections = 1
+  def checkout(user_id, cart_id):
+      with get_connection() as conn:
+          return process_order(conn, user_id, cart_id)
 
-  systemctl enable pgbouncer && systemctl start pgbouncer
+  如果用 SQLAlchemy：
 
-  应用侧连接字符串改为：
-  postgresql://user:pass@127.0.0.1:6432/checkout
+  # ✅ 正确 — 用 scoped_session 或 connection pool properly
+  from sqlalchemy.orm import sessionmaker
+  from contextlib import contextmanager
 
-  修复 2：杀掉占用连接的僵尸 Query
+  Session = sessionmaker(bind=engine)
 
-  -- 查找 Idle in transaction > 5 分钟的进程（最常见的连接泄漏）
+  @contextmanager
+  def get_session():
+      session = Session()
+      try:
+          yield session
+          session.commit()
+      except Exception:
+          session.rollback()
+          raise
+      finally:
+          session.close()
+
+  def checkout(user_id, cart_id):
+      with get_session() as session:
+          return process_order(session, user_id, cart_id)
+
+  3.2 调整 PostgreSQL 最大连接数
+
+  -- 查看当前值
+  SHOW max_connections;  -- 通常默认 100
+
+  -- 临时调大（需 reload）
+  ALTER SYSTEM SET max_connections = 200;
+  SELECT pg_reload_conf();
+
+  -- 长期方案：使用 PgBouncer 等连接池
+  -- 安装后配置 /etc/pgbouncer/pgbouncer.ini:
+  -- [databases]
+  ; yourapp = host=127.0.0.1 port=5432 dbname=yourdb
+
+  ; [pgbouncer]
+  ; pool_mode = transaction  <-- 关键：事务级池化
+  ; max_client_conn = 1000
+  ; default_pool_size = 20   <--- 根据 CPU 核数调整
+
+  3.3 事务泄漏修复（idle in transaction）
+
+  -- 查找并强制终止长时间 idle in transaction（> 5 分钟）
   SELECT pg_terminate_backend(pid)
   FROM pg_stat_activity
   WHERE state = 'idle in transaction'
-    AND state_change < now() - INTERVAL '5 minutes';
+    AND query_start < now() - interval '5 minutes';
 
-  -- 查找持续运行 > 2 分钟的慢 Query
-  SELECT pg_terminate_backend(pid)
-  FROM pg_stat_activity
-  WHERE state = 'active'
-    AND query_start < now() - INTERVAL '2 minutes'
-    AND query NOT LIKE '%pg_stat%';
+  在应用层设置 statement_timeout：
 
-  修复 3：应用侧代码 — 强制使用连接池 + 合理超时
+  -- 单次查询超时 30 秒
+  SET statement_timeout = '30s';
 
-  Node.js / TypeScript (pg 库)：
-  import { Pool } from 'pg';
+  -- 事务超时（防止长事务泄漏）
+  SET idle_in_transaction_session_timeout = '2min';
 
-  const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    max: 20,               // 池上限，而非无限制
-    idleTimeoutMillis: 30000,
-    connectionTimeoutMillis: 5000,  // 5s 超时，避免无限等待
-    statement_timeout: 10000,       // Query 10s 超时
-  });
+  3.4 checkout API 超时优化
 
-  // 关键：checkout 专用函数，确保释放
-  export async function checkoutGet(orderId: string) {
-    const client = await pool.connect();
-    try {
-      const result = await client.query(
-        'SELECT * FROM orders WHERE id = $1',
-        [orderId]
-      );
-      return result.rows[0];
-    } finally {
-      client.release(); // 必须释放，否则连接泄漏
-    }
+  # 为关键查询添加索引（如果有的话）
+  -- 检查 checkout 常用查询的执行计划
+  EXPLAIN (ANALYZE, BUFFERS)
+  SELECT * FROM orders
+  WHERE user_id = 123
+    AND status = 'pending'
+  ORDER BY created_at DESC
+  LIMIT 1;
+
+  -- 添加缺失索引
+  CREATE INDEX CONCURRENTLY IF NOT EXISTS
+  idx_orders_user_status_created ON orders(user_id, status, created_at DESC);
+
+  3.5 完整修复 Checklist
+
+  # 1. 在 settings.py 或 config.yaml 中确保连接池配置合理
+  # PostgreSQL 连接池典型配置
+  POOL = {
+      "pool_size": 10,        # 常规连接数
+      "max_overflow": 10,     # 临时超出 pool_size 的连接数
+      "pool_timeout": 30,     # 等待连接超时
+      "pool_recycle": 3600,   # 连接回收时间（秒）
   }
 
-  // 事务包装
-  export async function checkoutComplete(orderId: string, items: Item[]) {
-    const client = await pool.connect();
-    try {
-      await client.query('BEGIN');
-      // ... 业务逻辑
-      await client.query('COMMIT');
-    } catch (e) {
-      await client.query('ROLLBACK');
-      throw e;
-    } finally {
-      client.release();
-    }
-  }
-
-  Python / FastAPI (asyncpg + asyncpg_pool)：
-  from contextlib import asynccontextmanager
-  import asyncpg
-
-  pool: asyncpg.Pool = None
-
-  async def init_pool():
-      global pool
-      pool = await asyncpg.create_pool(
-          host='127.0.0.1', port=5432, database='checkout',
-          user='app', password='***',
-          min_size=5, max_size=20,
-          command_timeout=10,   # 10s statement timeout
-          timeout=5,            # 5s connect timeout
-      )
-
-  @asynccontextmanager
-  async def get_checkout(order_id: str):
-      async with pool.acquire() as conn:
-          try:
-              row = await conn.fetchrow(
-                  'SELECT * FROM orders WHERE id = $1', order_id
-              )
-              yield row
-          finally:
-              # asyncpg 自动归还连接，但显式 done 不影响
-              pass
-
-  # FastAPI 依赖注入
-  from fastapi import Depends
-
-  async def get_checkout_order(order_id: str) -> dict:
-      async with get_checkout(order_id) as order:
-          return order
-
-  修复 4：PostgreSQL 配置调优
-
-  -- 临时生效，立即执行
-  ALTER SYSTEM SET max_connections = 500;  -- 不要无限上调
-  ALTER SYSTEM SET shared_buffers = '4GB';
-  ALTER SYSTEM SET effective_cache_size = '12GB';
-  ALTER SYSTEM SET work_mem = '16MB';
-  ALTER SYSTEM SET maintenance_work_mem = '512MB';
-  ALTER SYSTEM SET idle_in_transaction_session_timeout = '5min';
-  ALTER SYSTEM SET statement_timeout = '10000';  -- 10s 全局
-
-  -- 需重启生效
-  SELECT pg_reload_conf();
-
-  四、监控告警（防止再次发生）
-
-  -- 创建监控视图
-  CREATE VIEW connection_health AS
-  SELECT
-      (SELECT COUNT(*) FROM pg_stat_activity) AS total_conns,
-      (SELECT current_setting('max_connections')::int) AS max_conns,
-      (SELECT COUNT(*) FROM pg_stat_activity WHERE state = 'idle in 
-  transaction') AS idle_in_tx,
-      (SELECT COUNT(*) FROM pg_stat_activity WHERE wait_event_type = 'Lock') AS
-  waiting_locks,
-      (SELECT COUNT(*) FROM pg_stat_activity WHERE query_start < now() -
-  INTERVAL '1 minute' AND state = 'active') AS slow_queries;
-
-  推荐监控指标告警阈值：
-  - total_conns > max_connections * 0.8 → 告警
-  - idle_in_transaction > 10 → 告警
-  - slow_queries > 5 → 告警
+  # 2. 添加健康检查端点
+  @app.get("/health")
+  def health_check():
+      try:
+          with get_connection() as conn:
+              conn.execute(text("SELECT 1"))
+          return {"status": "ok", "db": "connected"}
+      except Exception as e:
+          return {"status": "error", "db": str(e)}, 503
 
   ---
-  执行优先级
+  四、验证修复
 
-  1. 立即：用 pg_terminate_backend 杀掉 idle in transaction 进程
-  2. 当天：应用侧加 connectionTimeout + statement_timeout
-  3. 本周：部署 PgBouncer transaction pooling mode
-  4. 长期：添加必要索引，拆分单库为多库
+  -- 修复后观察这些指标
+  -- 1. 连接数应稳定在 pool_size 附近
+  SELECT count(*) FROM pg_stat_activity
+  WHERE application_name = 'checkout-api';
 
-✻ Brewed for 1m 2s
+  -- 2. idle in transaction 应为 0 或很少
+  SELECT count(*) FROM pg_stat_activity
+  WHERE state = 'idle in transaction';
+
+  -- 3. checkout 延迟应下降
+  -- 在应用层埋点记录 query duration
+
+  ---
+  总结优先级
+
+  ┌────────┬───────────────────────────────────────┬────────────────────────┐
+  │ 紧急度 │                 操作                  │        预期效果        │
+  ├────────┼───────────────────────────────────────┼────────────────────────┤
+  │ 🔴     │ 调高 max_connections + 终止泄漏事务   │ 恢复服务，拒绝连接缓解 │
+  │ 立即   │                                       │                        │
+  ├────────┼───────────────────────────────────────┼────────────────────────┤
+  │ 🟠     │ 修复连接泄漏代码 + 添加               │ 根治连接泄漏           │
+  │ 今天   │ idle_in_transaction_session_timeout   │                        │
+  ├────────┼───────────────────────────────────────┼────────────────────────┤
+  │ 🟡     │ 接入 PgBouncer 事务池化 +             │ 长期高并发支撑         │
+  │ 本周   │ 添加慢查询索引                        │                        │
+  ├────────┼───────────────────────────────────────┼────────────────────────┤
+  │ 🟢     │ 添加连接数告警 + checkout P99         │ 提前发现问题           │
+  │ 监控   │ 延迟监控                              │                        │
+  └────────┴───────────────────────────────────────┴────────────────────────┘
+
+✻ Cogitated for 1m 10s
