@@ -258,6 +258,74 @@
     flex-wrap: wrap;
     justify-content: center;
   }
+  .raw-compare {
+    margin-top: 24px;
+    background: rgba(255,255,255,0.82);
+    border: 2px solid #fbbf24;
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: 0 10px 24px rgba(180,83,9,0.10);
+  }
+  .raw-compare[hidden] { display: none; }
+  .raw-compare-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .raw-compare-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #78350f;
+  }
+  .raw-compare-note {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .raw-status {
+    font-size: 12px;
+    color: #92400e;
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 999px;
+    padding: 6px 12px;
+  }
+  .raw-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .raw-panel { min-width: 0; }
+  .raw-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: #111827;
+  }
+  .raw-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    display: inline-block;
+  }
+  .raw-dot.a { background: var(--a); }
+  .raw-dot.b { background: var(--b); }
+  .raw-log {
+    margin: 0;
+    min-height: 420px;
+    max-height: 72vh;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 11px;
+    line-height: 1.65;
+  }
   .btn {
     display: inline-flex;
     align-items: center;
@@ -272,6 +340,7 @@
     border: 1px solid #374151;
     transition: all 0.15s;
     font-weight: 600;
+    cursor: pointer;
   }
   .btn:hover {
     background: #1f2937;
@@ -296,6 +365,14 @@
     margin-top: 48px;
     color: var(--muted);
     font-size: 12px;
+  }
+
+  @media (max-width: 860px) {
+    .raw-grid { grid-template-columns: 1fr; }
+    .raw-log {
+      min-height: 280px;
+      max-height: 45vh;
+    }
   }
 </style>
 </head>
@@ -479,8 +556,29 @@ echo "✅ Step 2b: B_with.log $(wc -c &lt; /tmp/demo_insights_B/B_with.log) byte
 <div class="action-bar">
   <a class="btn amber" href="./A_without.human.md" target="_blank">🧑 A human</a>
   <a class="btn amber" href="./B_with.human.md" target="_blank">🧑 B human</a>
+  <button class="btn green" id="rawCompareToggle" type="button" onclick="toggleRawCompare()">🪵 展开 A/B 全量对比</button>
   <a class="btn" href="https://github.com/liush2yuxjtu/demo_insights_share/tree/main/examples" target="_blank">🐙 GitHub 源码</a>
 </div>
+
+<section class="raw-compare" id="rawCompare" hidden>
+  <div class="raw-compare-head">
+    <div>
+      <div class="raw-compare-title">A / B 原始日志全文对比</div>
+      <div class="raw-compare-note">默认折叠；展开后会懒加载两份 human export 原文，方便直接肉眼对照。</div>
+    </div>
+    <div class="raw-status" id="rawCompareStatus">准备加载</div>
+  </div>
+  <div class="raw-grid">
+    <div class="raw-panel">
+      <div class="raw-label"><span class="raw-dot a"></span> A_without.human.md</div>
+      <pre class="raw-log" id="rawLogA">等待加载 A 日志...</pre>
+    </div>
+    <div class="raw-panel">
+      <div class="raw-label"><span class="raw-dot b"></span> B_with.human.md</div>
+      <pre class="raw-log" id="rawLogB">等待加载 B 日志...</pre>
+    </div>
+  </div>
+</section>
 
 <div class="footer">
   🦆 <a href="https://liush2yuxjtu.github.io/demo_insights_share/examples/" style="color:#6b7280;">liush2yuxjtu.github.io/demo_insights_share/examples/</a>
@@ -509,6 +607,57 @@ function copyCmd(btn, id) {
       btn.classList.remove('copied');
     }, 2000);
   });
+}
+
+let rawCompareLoaded = false;
+
+async function loadRawLogs() {
+  if (rawCompareLoaded) {
+    document.getElementById('rawCompareStatus').textContent = '已加载完成';
+    return;
+  }
+
+  const status = document.getElementById('rawCompareStatus');
+  status.textContent = '正在加载 A / B 全文...';
+
+  try {
+    const [aText, bText] = await Promise.all([
+      fetch('./A_without.human.md').then((response) => {
+        if (!response.ok) {
+          throw new Error('A 日志加载失败');
+        }
+        return response.text();
+      }),
+      fetch('./B_with.human.md').then((response) => {
+        if (!response.ok) {
+          throw new Error('B 日志加载失败');
+        }
+        return response.text();
+      }),
+    ]);
+
+    document.getElementById('rawLogA').textContent = aText;
+    document.getElementById('rawLogB').textContent = bText;
+    status.textContent = '已加载完成';
+    rawCompareLoaded = true;
+  } catch (error) {
+    document.getElementById('rawLogA').textContent = '加载失败，请直接点击上面的 A human 链接查看原文。';
+    document.getElementById('rawLogB').textContent = '加载失败，请直接点击上面的 B human 链接查看原文。';
+    status.textContent = error.message || '加载失败';
+  }
+}
+
+function toggleRawCompare() {
+  const section = document.getElementById('rawCompare');
+  const button = document.getElementById('rawCompareToggle');
+  const isOpening = section.hidden;
+
+  section.hidden = !isOpening;
+  button.textContent = isOpening ? '🪵 收起 A/B 全量对比' : '🪵 展开 A/B 全量对比';
+
+  if (isOpening) {
+    loadRawLogs();
+  }
 }
 </script>
 
