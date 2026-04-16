@@ -229,6 +229,13 @@ def _render_item_md(card: dict[str, Any]) -> str:
         "do_not_apply_when": list(card.get("do_not_apply_when") or []),
         "raw_log": card.get("raw_log", f"./raw/{card['id']}.jsonl"),
     }
+    fm["topic_id"] = card.get("topic_id", "")
+    fm["label"] = card.get("label", "good")
+    fm["label_note"] = card.get("label_note", "")
+    fm["label_override"] = card.get("label_override", None)
+    fm["label_override_by"] = card.get("label_override_by", None)
+    fm["label_override_at"] = card.get("label_override_at", None)
+    fm["raw_log_type"] = card.get("raw_log_type", "jsonl")
     return "\n".join(
         [
             "---",
@@ -267,6 +274,20 @@ def _render_item_md(card: dict[str, Any]) -> str:
             "",
         ]
     )
+
+
+def migrate_card(card: dict[str, Any], slug: str) -> dict[str, Any]:
+    """为老 card 补齐缺失字段：topic_id / label / raw_log_type。
+
+    不会覆盖已有值。slug 用于生成 topic_id（把下划线替换为连字符）。
+    """
+    if "topic_id" not in card or not card["topic_id"]:
+        card["topic_id"] = slug.replace("_", "-")
+    if "label" not in card or not card["label"]:
+        card["label"] = "good"
+    if "raw_log_type" not in card or not card["raw_log_type"]:
+        card["raw_log_type"] = "jsonl"
+    return card
 
 
 class TreeInsightStore:
@@ -320,6 +341,13 @@ class TreeInsightStore:
         card["root_cause"] = sections.get("Description", "").strip()
         card["symptom"] = sections.get("Bad example", "").strip()
         card["fix"] = sections.get("Good example", "").strip()
+        card["topic_id"] = fm.get("topic_id", "")
+        card["label"] = fm.get("label", "good")
+        card["label_note"] = fm.get("label_note", "")
+        card["label_override"] = fm.get("label_override", None)
+        card["label_override_by"] = fm.get("label_override_by", None)
+        card["label_override_at"] = fm.get("label_override_at", None)
+        card["raw_log_type"] = fm.get("raw_log_type", "jsonl")
         return card
 
     def _find_item_path(self, card_id: str) -> tuple[str, Path] | None:
@@ -377,6 +405,7 @@ class TreeInsightStore:
         for score, card in scored[: max(1, int(k))]:
             enriched = dict(card)
             enriched["score"] = round(score, 4)
+            enriched["effective_label"] = card.get("label_override") or card.get("label", "good")
             results.append(enriched)
         return results
 
@@ -409,16 +438,22 @@ class TreeInsightStore:
         tdir = self.root / wtype
         tdir.mkdir(parents=True, exist_ok=True)
         (tdir / "raw").mkdir(exist_ok=True)
-        raw_rel = card.get("raw_log") or f"./raw/{card['id']}.jsonl"
-        card["raw_log"] = raw_rel
-        (tdir / "raw" / f"{card['id']}.jsonl").write_text(
-            json.dumps(
-                {k: v for k, v in card.items() if k not in {"wiki_type", "item_slug", "score"}},
-                ensure_ascii=False,
+        raw_log_type = card.get("raw_log_type", "jsonl")
+        if raw_log_type == "export":
+            ext = "txt"
+            raw_content = (card.get("raw_log_export_content") or "") + "\n"
+        else:
+            ext = "jsonl"
+            raw_content = (
+                json.dumps(
+                    {k: v for k, v in card.items() if k not in {"wiki_type", "item_slug", "score"}},
+                    ensure_ascii=False,
+                )
+                + "\n"
             )
-            + "\n",
-            encoding="utf-8",
-        )
+        raw_rel = f"./raw/{card['id']}.{ext}"
+        card["raw_log"] = raw_rel
+        (tdir / "raw" / f"{card['id']}.{ext}").write_text(raw_content, encoding="utf-8")
         path = tdir / f"{slug}.md"
         path.write_text(_render_item_md(card), encoding="utf-8")
         return path
@@ -495,6 +530,65 @@ class TreeInsightStore:
                 card["status"] = "not_triggered"
                 card["sticky_not_triggered"] = bool(sticky)
             self._write_card(wtype, md.stem, card)
+            self._rebuild_index(wtype)
+            return card
+
+    # ---- Topic API ----
+
+    def _topics_path(self) -> Path:
+        return self.root / "topics.json"
+
+    def _load_topics(self) -> list[dict[str, Any]]:
+        p = self._topics_path()
+        if not p.is_file():
+            return []
+        return list(json.loads(p.read_text(encoding="utf-8")).get("topics", []))
+
+    def _save_topics(self, topics: list[dict[str, Any]]) -> None:
+        self._topics_path().write_text(
+            json.dumps({"topics": topics}, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+
+    def create_topic(self, topic: dict[str, Any]) -> dict[str, Any]:
+        with self._lock:
+            topics = self._load_topics()
+            if any(t["id"] == topic["id"] for t in topics):
+                return topic  # 幂等：id 重复不报错
+            topics.append(topic)
+            self._save_topics(topics)
+        return topic
+
+    def list_topics(self) -> list[dict[str, Any]]:
+        return self._load_topics()
+
+    def list_examples(self, topic_id: str, label: str | None = None) -> list[dict[str, Any]]:
+        results = []
+        for card in self.load():
+            if card.get("topic_id") != topic_id:
+                continue
+            effective_label = card.get("label_override") or card.get("label", "good")
+            card["effective_label"] = effective_label
+            if label is not None and effective_label != label:
+                continue
+            results.append(card)
+        return results
+
+    def relabel(self, card_id: str, new_label: str, override_by: str) -> dict[str, Any] | None:
+        from datetime import datetime, timezone
+        found = self._find_item_path(card_id)
+        if not found:
+            return None
+        wtype, md = found
+        with self._lock:
+            card = self._item_to_card(wtype, md)
+            if not card:
+                return None
+            card["label_override"] = new_label
+            card["label_override_by"] = override_by
+            card["label_override_at"] = datetime.now(timezone.utc).isoformat()
+            # 只改 .md，不动 raw/ 目录
+            md.write_text(_render_item_md(card), encoding="utf-8")
             self._rebuild_index(wtype)
             return card
 
@@ -585,3 +679,17 @@ class TreeInsightStore:
             "fix": (top[0].get("rationale") if top else "") or "see hits",
         }
         return self.add(card, wiki_type="research")
+
+
+def migrate_card(card: dict[str, Any], slug: str) -> dict[str, Any]:
+    """为老 card 补齐缺失字段：topic_id / label / raw_log_type。
+
+    不会覆盖已有值。slug 用于生成 topic_id（把下划线替换为连字符）。
+    """
+    if "topic_id" not in card or not card["topic_id"]:
+        card["topic_id"] = slug.replace("_", "-")
+    if "label" not in card or not card["label"]:
+        card["label"] = "good"
+    if "raw_log_type" not in card or not card["raw_log_type"]:
+        card["raw_log_type"] = "jsonl"
+    return card

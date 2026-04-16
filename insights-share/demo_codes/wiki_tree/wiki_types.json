@@ -1,6 +1,7 @@
 {
   "types": [
     "database",
+    "general",
     "infra_cache",
     "infra_queue"
   ]

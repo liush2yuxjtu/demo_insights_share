@@ -158,6 +158,112 @@
     display: none;
   }
   .toast.show { display: block; }
+
+  /* ---- Tab 导航 ---- */
+  .tab-nav {
+    display: flex;
+    gap: 0;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 0 20px;
+  }
+  .tab-btn {
+    padding: 10px 18px;
+    font-size: 0.88em;
+    font-family: inherit;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    cursor: pointer;
+    color: var(--muted);
+    margin-bottom: -1px;
+  }
+  .tab-btn:hover { color: var(--fg); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ---- Topics 视图 ---- */
+  .topics-layout {
+    display: flex;
+    height: calc(100vh - 110px);
+    overflow: hidden;
+  }
+  .topics-sidebar {
+    width: 30%;
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 12px;
+    background: #fff;
+  }
+  .topics-sidebar h3 {
+    margin: 0 0 10px;
+    font-size: 0.9em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  .topic-item {
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.88em;
+    margin-bottom: 4px;
+    border: 1px solid transparent;
+  }
+  .topic-item:hover { background: #f6f8fa; border-color: var(--border); }
+  .topic-item.selected { background: #ddf4ff; border-color: var(--accent); color: var(--accent); font-weight: 600; }
+  .topic-item .topic-tags { margin-top: 4px; }
+  .topics-content {
+    width: 70%;
+    overflow-y: auto;
+    padding: 12px 16px;
+    background: var(--bg);
+  }
+  .topics-content h3 {
+    margin: 0 0 12px;
+    font-size: 0.95em;
+    color: var(--muted);
+  }
+  .examples-split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .examples-col h4 {
+    margin: 0 0 10px;
+    font-size: 0.88em;
+    font-weight: 700;
+    padding: 6px 10px;
+    border-radius: 6px;
+  }
+  .examples-col.good h4 { background: var(--ok-bg); color: var(--ok-fg); }
+  .examples-col.bad h4  { background: var(--fail-bg); color: var(--fail-fg); }
+  .example-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    position: relative;
+  }
+  .example-card .ex-id { font-size: 0.75em; color: var(--muted); font-family: "SF Mono", Menlo, monospace; margin-bottom: 4px; }
+  .example-card .ex-author { font-size: 0.82em; font-weight: 600; margin-bottom: 4px; }
+  .example-card .ex-note { font-size: 0.82em; color: var(--fg); margin-bottom: 6px; }
+  .example-card .ex-log-link { font-size: 0.78em; color: var(--accent); word-break: break-all; }
+  .override-badge {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    background: #ff8c00;
+    color: #fff;
+    font-size: 0.68em;
+    padding: 2px 6px;
+    border-radius: 8px;
+    white-space: nowrap;
+  }
+  .topics-empty { color: var(--muted); font-size: 0.88em; padding: 20px 0; }
 </style>
 </head>
 <body>
@@ -172,6 +278,12 @@
   <span class="lan-ip" id="lan-ip"></span>
 </header>
 
+<nav class="tab-nav">
+  <button class="tab-btn active" data-tab="board">卡片看板</button>
+  <button class="tab-btn" data-tab="topics">Topics</button>
+</nav>
+
+<div class="tab-panel active" id="panel-board">
 <section class="board">
   <div class="column" id="col-all">
     <h2>全部卡 <span class="count" id="count-all">0</span></h2>
@@ -186,6 +298,19 @@
     <div class="cards"></div>
   </div>
 </section>
+</div><!-- /panel-board -->
+
+<div class="tab-panel" id="panel-topics">
+  <div class="topics-layout">
+    <aside class="topics-sidebar">
+      <h3>Topic 列表</h3>
+      <div id="topics-list"><p class="topics-empty">加载中…</p></div>
+    </aside>
+    <main class="topics-content">
+      <div id="examples-area"><p class="topics-empty">← 点击左侧 Topic 查看示例</p></div>
+    </main>
+  </div>
+</div><!-- /panel-topics -->
 
 <div class="modal-backdrop" id="modal-backdrop">
   <div class="modal">
@@ -436,6 +561,108 @@ document.getElementById("research-input").addEventListener("keydown", e => {
 
 // 显示 LAN 入口
 document.getElementById("lan-ip").textContent = location.host;
+
+// ---- Tab 切换 ----
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+    btn.classList.add("active");
+    const panel = document.getElementById("panel-" + btn.dataset.tab);
+    if (panel) panel.classList.add("active");
+    if (btn.dataset.tab === "topics") loadTopics();
+  });
+});
+
+// ---- Topics 视图 ----
+let topicsList = [];
+let selectedTopicId = null;
+
+async function loadTopics() {
+  const listEl = document.getElementById("topics-list");
+  try {
+    const r = await fetch("/topics");
+    if (!r.ok) throw new Error("GET /topics 失败 " + r.status);
+    const j = await r.json();
+    topicsList = Array.isArray(j) ? j : (Array.isArray(j.topics) ? j.topics : []);
+    if (topicsList.length === 0) {
+      listEl.innerHTML = '<p class="topics-empty">暂无 Topic</p>';
+      return;
+    }
+    listEl.innerHTML = topicsList.map(t => `
+      <div class="topic-item" data-tid="${esc(t.id)}">
+        <div>${esc(t.title || t.id)}</div>
+        <div class="topic-tags">${(Array.isArray(t.tags) ? t.tags : []).map(x => `<span class="chip">${esc(x)}</span>`).join("")}</div>
+      </div>
+    `).join("");
+    listEl.querySelectorAll(".topic-item").forEach(el => {
+      el.addEventListener("click", () => selectTopic(el.dataset.tid));
+    });
+    // 若之前有选中则保持
+    if (selectedTopicId) selectTopic(selectedTopicId);
+  } catch (e) {
+    listEl.innerHTML = `<p class="topics-empty">加载失败：${esc(e.message)}</p>`;
+  }
+}
+
+async function selectTopic(tid) {
+  selectedTopicId = tid;
+  // 高亮列表项
+  document.querySelectorAll(".topic-item").forEach(el => {
+    el.classList.toggle("selected", el.dataset.tid === tid);
+  });
+  const areaEl = document.getElementById("examples-area");
+  const topic = topicsList.find(t => t.id === tid);
+  const titleText = topic ? esc(topic.title || topic.id) : esc(tid);
+  areaEl.innerHTML = `<h3>${titleText}</h3><p class="topics-empty">加载中…</p>`;
+  try {
+    const r = await fetch("/topics/" + encodeURIComponent(tid) + "/examples");
+    if (!r.ok) throw new Error("GET /topics/{id}/examples 失败 " + r.status);
+    const j = await r.json();
+    const examples = Array.isArray(j) ? j : (Array.isArray(j.examples) ? j.examples : []);
+    const goods = examples.filter(e => effectiveLabel(e) === "good");
+    const bads  = examples.filter(e => effectiveLabel(e) === "bad");
+    areaEl.innerHTML = `
+      <h3>${titleText} <span style="font-weight:400;font-size:0.85em;color:var(--muted)">（共 ${examples.length} 条）</span></h3>
+      <div class="examples-split">
+        <div class="examples-col good">
+          <h4>GOOD <span style="font-weight:400">(${goods.length})</span></h4>
+          ${goods.length ? goods.map(renderExample).join("") : '<p class="topics-empty">暂无 GOOD 示例</p>'}
+        </div>
+        <div class="examples-col bad">
+          <h4>BAD <span style="font-weight:400">(${bads.length})</span></h4>
+          ${bads.length ? bads.map(renderExample).join("") : '<p class="topics-empty">暂无 BAD 示例</p>'}
+        </div>
+      </div>
+    `;
+  } catch (e) {
+    areaEl.innerHTML = `<h3>${titleText}</h3><p class="topics-empty">加载失败：${esc(e.message)}</p>`;
+  }
+}
+
+function effectiveLabel(ex) {
+  return (ex.label_override || ex.label || "").toLowerCase();
+}
+
+function renderExample(ex) {
+  const overrideBadge = ex.label_override
+    ? `<span class="override-badge">admin override: ${esc(ex.label_override)} ← ${esc(ex.label)}</span>`
+    : "";
+  const logDisplay = ex.raw_log_path
+    ? `<a class="ex-log-link" href="${esc(ex.raw_log_path)}" target="_blank">${esc(ex.raw_log_path)}</a>`
+    : (ex.raw_log
+        ? `<span class="ex-log-link" title="${esc((ex.raw_log || "").slice(0, 200))}">[inline log · ${(ex.raw_log || "").length} 字符]</span>`
+        : '<span class="ex-log-link" style="color:var(--muted)">无日志</span>');
+  return `
+    <div class="example-card">
+      ${overrideBadge}
+      <div class="ex-id">${esc(ex.id)}</div>
+      <div class="ex-author">作者：${esc(ex.author || "-")}</div>
+      ${ex.label_note ? `<div class="ex-note">${esc(ex.label_note)}</div>` : ""}
+      <div>${logDisplay}</div>
+    </div>
+  `;
+}
 
 // 初次加载
 reload();

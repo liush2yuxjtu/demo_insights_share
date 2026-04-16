@@ -34,8 +34,9 @@ SKILL_BAK="${HOME}/.claude/skills/insights-wiki.human-bak.$$"
 SKILL_SERVER_BAK="${HOME}/.claude/skills/insights-wiki-server.human-bak.$$"
 CACHE_DIR="${HOME}/.cache/insights-wiki"
 CACHE_BAK="${HOME}/.cache/insights-wiki.human-bak.$$"
+COMMON_PROMPT_FILE="${EXAMPLES_DIR}/COMMON_PROMPT.txt"
 
-COMMON_PROMPT='请严格按顺序执行三步。第一步：运行 !pwd 打印当前工作目录。第二步：运行 !ls -la ~/.claude/skills/ 展示已安装的 skill 列表；如果 ~/.claude/skills/insights-wiki/SKILL.md 存在，再运行 !head -40 ~/.claude/skills/insights-wiki/SKILL.md 读取前 40 行；如果 ~/.cache/insights-wiki/manifest.json 存在，再运行 !cat ~/.cache/insights-wiki/manifest.json 查看缓存卡片 ID；若上述文件不存在也要明确说明该事实。第三步：回答 — 我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接（English restate: Our checkout API is timing out, postgres is rejecting new connections during the lunch spike），应该如何诊断与修复？请给出可执行的 SQL 与代码片段。如果第二步发现 ~/.cache/insights-wiki 中有相关卡片，请先读取与当前问题最相关的缓存卡片再作答，并明确引用卡片 ID；若缓存不存在或未命中，请明确写“未引用任何 LAN 卡片”。'
+COMMON_PROMPT=""
 
 WAIT_CLAUDE_READY=10
 WAIT_TRUST_CONFIRM=4
@@ -61,6 +62,11 @@ count_matches() {
   local count=""
   count="$(grep -F -c -- "${needle}" "${file}" 2>/dev/null || true)"
   printf '%s' "${count:-0}"
+}
+
+load_common_prompt() {
+  require_file "${COMMON_PROMPT_FILE}" "A/B COMMON_PROMPT"
+  COMMON_PROMPT="$(cat "${COMMON_PROMPT_FILE}")"
 }
 
 normalize_prompt_text() {
@@ -317,6 +323,19 @@ prepare_workspace_b() {
     log "✗ daemon 健康检查失败"
     exit 3
   fi
+  log "B 轮前置：注入 Topic + Seeds（alice good + bob bad）"
+  (cd "${CLONE_DIR}/insights-share/demo_codes" && "${PYTHON_BIN}" insights_cli.py topic-create postgres-pool-exhaustion \
+    --title "PostgreSQL 连接池耗尽" --tags postgres connection-pool 2>/dev/null || true)
+  (cd "${CLONE_DIR}/insights-share/demo_codes" && "${PYTHON_BIN}" insights_cli.py publish seeds/alice_pgpool.json)
+  (cd "${CLONE_DIR}/insights-share/demo_codes" && "${PYTHON_BIN}" insights_cli.py publish seeds/bob_pgpool_bad.json)
+
+  log "B 轮前置：同步预热缓存（消除 UserPromptSubmit & 竞态）"
+  "${PYTHON_BIN}" "${CLONE_DIR}/insights-share/demo_codes/hooks/insights_prefetch.py"
+  if [ ! -f "${CACHE_DIR}/manifest.json" ]; then
+    log "✗ B 轮缓存预热失败：${CACHE_DIR}/manifest.json 未生成"
+    exit 18
+  fi
+  log "B 轮前置：✓ 缓存预热完成：$(cat "${CACHE_DIR}/manifest.json")"
 }
 
 run_tmux_human() {
@@ -410,10 +429,12 @@ run_tmux_human() {
   fi
 
   local alice_count
+  local bob_count
   local skill_count
   local stop_error_count
   local interrupted_count
   alice_count="$(count_matches "alice-pgpool-2026-04-10" "${out}")"
+  bob_count="$(count_matches "bob-pgpool-bad-2026-04-12" "${out}")"
   skill_count="$(count_matches "Skill(insights-wiki)" "${out}")"
   stop_error_count="$(count_matches "Stop hook error" "${out}")"
   interrupted_count="$(count_matches "Interrupted" "${out}")"
@@ -421,7 +442,7 @@ run_tmux_human() {
   log "Step 9: 校验导出 prompt 与 COMMON_PROMPT"
   assert_export_prompt_matches_common "${round}" "${out}"
 
-  log "Step 10: 校验导出内容 alice=${alice_count} skill=${skill_count} stop_error=${stop_error_count} interrupted=${interrupted_count}"
+  log "Step 10: 校验导出内容 alice=${alice_count} bob=${bob_count} skill=${skill_count} stop_error=${stop_error_count} interrupted=${interrupted_count}"
   if [ "${stop_error_count}" -ne 0 ] || [ "${interrupted_count}" -ne 0 ]; then
     log "✗ ${round} human 导出包含 Stop hook 错误或中断痕迹"
     exit 9
@@ -436,6 +457,10 @@ run_tmux_human() {
       log "✗ B 轮导出未引用 alice-pgpool-2026-04-10"
       exit 11
     fi
+    if [ "${bob_count}" -lt 1 ]; then
+      log "✗ B 轮导出未引用 bob-pgpool-bad-2026-04-12"
+      exit 19
+    fi
   fi
 
   log "✓ ${out} 落盘成功 ($(wc -c < "${out}" | tr -d ' ') 字节)"
@@ -446,6 +471,7 @@ run_tmux_human() {
 backup_active_settings
 backup_active_skills
 backup_active_cache
+load_common_prompt
 prepare_workspace_a
 run_tmux_human without "${COMMON_PROMPT}" "${A_EXPORT}" "${A_SNAPSHOT}"
 

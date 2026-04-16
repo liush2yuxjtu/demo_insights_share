@@ -17,5 +17,12 @@
     "sessions are already stored in a separate datastore (e.g., dedicated Redis or Postgres)",
     "all keys carry TTL and application explicitly tolerates session loss",
     "Redis is used purely as a volatile cache with no durability expectations"
-  ]
+  ],
+  "topic_id": "redis-allkeys-lru-evicts-session",
+  "label": "bad",
+  "label_note": "allkeys-lru 在 session 数据上表现不佳",
+  "label_override": null,
+  "label_override_by": null,
+  "label_override_at": null,
+  "raw_log_type": "jsonl"
 }

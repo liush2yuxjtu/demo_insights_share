@@ -1,0 +1,151 @@
+▗ ▗   ▖ ▖  Claude Code v2.1.109
+           Opus 4.6 (1M context) · Claude Max
+  ▘▘ ▝▝    ~/projects/demo_insights_share
+
+  /remote-control is active · Code in CLI or at https://claude.ai/code/session_01Perng1pd2TddCjNCJqzCTS
+
+❯ /deep-research please reserach what skills we need to install from            
+https://github.com/affaan-m/everything-claude-code for install the skill        
+deep-research ?                                                                 
+
+⏺ Fetch(https://github.com/affaan-m/everything-claude-code)
+  ⎿  Received 866.5KB (200 OK)
+
+⏺ Fetch(https://raw.githubusercontent.com/affaan-m/everything-claude-code/main/R
+       EADME.md)
+  ⎿  Received 67KB (200 OK)
+
+⏺ Fetch(https://api.github.com/repos/affaan-m/everything-claude-code/contents/)
+  ⎿  Error: Request failed with status code 403
+
+⏺ Bash(cd /tmp && gh repo view affaan-m/everything-claude-code --json
+      name,description,url 2>/dev/null || echo "repo not accessible via gh")
+  ⎿  {
+       "description": "The agent harness performance optimization system. S
+     kills, instincts, memory, security, and research-first development for
+     … +4 lines (ctrl+o to expand)
+  ⎿  Shell cwd was reset to /Users/m1/projects/demo_insights_share
+
+⏺ Bash(gh api repos/affaan-m/everything-claude-code/contents/ --jq '.[].name'
+      2>/dev/null | head -50)
+  ⎿  .agents
+     .claude-plugin
+     .claude
+     … +47 lines (ctrl+o to expand)
+
+⏺ Bash(gh api repos/affaan-m/everything-claude-code/contents/ --jq '.[].name'
+      2>/dev/null | tail -30)
+  ⎿  agents
+     assets
+     commands
+     … +27 lines (ctrl+o to expand)
+
+⏺ Bash(gh api repos/affaan-m/everything-claude-code/contents/skills --jq
+      '.[].name' 2>/dev/null)
+  ⎿  accessibility
+     agent-eval
+     agent-harness-construction
+     … +45 lines (ctrl+o to expand)
+
+⏺ Bash(gh api
+      repos/affaan-m/everything-claude-code/contents/skills/deep-research --jq
+      '.[].name' 2>/dev/null)
+  ⎿  SKILL.md
+
+⏺ Bash(gh api repos/affaan-m/everything-claude-code/contents/skills/deep-researc
+      h/SKILL.md --jq '.content' 2>/dev/null | base64 -d)
+  ⎿  ---
+     name: deep-research
+     description: Multi-source deep research using firecrawl and exa MCPs.
+     … +63 lines (ctrl+o to expand)
+
+⏺ Bash(gh api
+      repos/affaan-m/everything-claude-code/contents/skills/exa-search/SKILL.md
+      --jq '.content' 2>/dev/null | base64 -d | head -30)
+  ⎿  ---
+     name: exa-search
+     description: Neural search via Exa MCP for web, code, and company rese
+     … +27 lines (ctrl+o to expand)
+
+⏺ Bash(gh api repos/affaan-m/everything-claude-code/contents/mcp-configs --jq
+      '.[].name' 2>/dev/null)
+  ⎿  mcp-servers.json
+
+⏺ Bash(gh api repos/affaan-m/everything-claude-code/contents/mcp-configs/mcp-ser
+      vers.json --jq '.content' 2>/dev/null | base64 -d | python3 -m json.tool
+      2>/dev/null |…)
+  ⎿          "firecrawl": {
+                 "command": "npx",
+                 "args": [
+     … +27 lines (ctrl+o to expand)
+
+⏺ Bash(gh api repos/affaan-m/everything-claude-code/contents/skills/documentatio
+      n-lookup/SKILL.md --jq '.content' 2>/dev/null | base64 -d | head -20)
+  ⎿  ---
+     name: documentation-lookup
+     description: Use up-to-date library and framework docs via Context7 MC
+     … +20 lines (ctrl+o to expand)
+
+⏺ ---
+  研究结论
+
+  我直接读取了 affaan-m/everything-claude-code 仓库的原始内容，以下是完整答案：
+
+  ---
+  deep-research Skill 本身不依赖其他 Skills
+
+  它的唯一依赖是 MCP 服务（非 skills）。
+
+  ---
+  必须配置的 MCP 服务（二选一，两者都装效果最佳）
+
+  ┌─────────┬────────────────────────────────────────────┬──────────────────┐
+  │  MCP    │                 提供的工具                 │   API Key 来源   │
+  │  服务   │                                            │                  │
+  ├─────────┼────────────────────────────────────────────┼──────────────────┤
+  │ firecra │ firecrawl_search、firecrawl_scrape、firecr │ https://firecraw │
+  │ wl      │ awl_crawl                                  │ l.dev            │
+  ├─────────┼────────────────────────────────────────────┼──────────────────┤
+  │ exa     │ web_search_exa、web_search_advanced_exa、c │ https://exa.ai   │
+  │         │ rawling_exa                                │                  │
+  └─────────┴────────────────────────────────────────────┴──────────────────┘
+
+  仓库 mcp-configs/mcp-servers.json 中的标准配置：
+
+  // ~/.claude.json 的 mcpServers 段落
+  "firecrawl": {
+    "command": "npx",
+    "args": ["-y", "firecrawl-mcp"],
+    "env": { "FIRECRAWL_API_KEY": "YOUR_FIRECRAWL_KEY_HERE" }
+  },
+  "exa-web-search": {
+    "command": "npx",
+    "args": ["-y", "exa-mcp-server"],
+    "env": { "EXA_API_KEY": "YOUR_EXA_API_KEY_HERE" }
+  }
+
+  ---
+  可选的配套 Skills（非必须，但推荐一并安装）
+
+  ┌──────────────────────┬───────────────────────────────────────────────────┐
+  │      Skill 名称      │                       作用                        │
+  ├──────────────────────┼───────────────────────────────────────────────────┤
+  │ exa-search           │ 封装了 Exa MCP                                    │
+  │                      │ 的最佳使用指南（代码搜索、公司调研等）            │
+  ├──────────────────────┼───────────────────────────────────────────────────┤
+  │ documentation-lookup │ 通过 Context7 MCP 查最新库文档（需配置 context7   │
+  │                      │ MCP）                                             │
+  ├──────────────────────┼───────────────────────────────────────────────────┤
+  │ search-first         │ 研究优先开发方法论，与 deep-research 互补         │
+  └──────────────────────┴───────────────────────────────────────────────────┘
+
+  ---
+  总结
+
+  安装 deep-research skill 只需两步：
+  1. 安装 skill 本体（skills/deep-research/SKILL.md）
+  2. 配置 firecrawl 和/或 exa MCP 服务并填入 API Key
+
+  无需安装任何其他 skill 作为前提依赖。
+
+✻ Brewed for 1m 17s

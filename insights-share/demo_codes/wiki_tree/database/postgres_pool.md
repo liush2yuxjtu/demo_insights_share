@@ -19,7 +19,14 @@
     "session pooling mode",
     "single-tenant DB"
   ],
-  "raw_log": "./raw/alice-pgpool-2026-04-10.jsonl"
+  "raw_log": "./raw/alice-pgpool-2026-04-10.jsonl",
+  "topic_id": "postgres-pool-exhaustion",
+  "label": "good",
+  "label_note": "在 PgBouncer transaction mode 下彻底解决",
+  "label_override": null,
+  "label_override_by": null,
+  "label_override_at": null,
+  "raw_log_type": "jsonl"
 }
 ---
 

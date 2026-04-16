@@ -17,5 +17,12 @@
     "tasks are strictly idempotent and must complete ASAP regardless of cost",
     "broker is RabbitMQ with native dead-letter exchange already configured",
     "downstream provides its own backpressure via 429 + Retry-After header that client already honors"
-  ]
+  ],
+  "topic_id": "celery-retry-storm",
+  "label": "good",
+  "label_note": "",
+  "label_override": null,
+  "label_override_by": null,
+  "label_override_at": null,
+  "raw_log_type": "jsonl"
 }

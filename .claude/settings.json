@@ -1,0 +1,6 @@
+{
+  "plansDirectory": ".claude/plans",
+  "env": {
+    "CLAUDE_CODE_ENABLE_AWAY_SUMMARY": "0"
+  }
+}

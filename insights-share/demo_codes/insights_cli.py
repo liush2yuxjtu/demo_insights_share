@@ -81,6 +81,80 @@ def cmd_publish(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_topic_create(args: argparse.Namespace) -> int:
+    url = f"{args.wiki.rstrip('/')}/topics"
+    payload = {
+        "id": args.topic_id,
+        "title": args.title,
+        "tags": args.tags or [],
+        "wiki_type": args.wiki_type,
+        "created_by": args.created_by or "cli",
+        "created_at": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
+    }
+    try:
+        resp = _http_post_json(url, payload)
+    except Exception as exc:
+        print(ui.color(f"topic-create failed: {exc}", "red"), file=sys.stderr)
+        return 1
+    print(ui.color(f"created topic: {resp.get('id', args.topic_id)}", "green"))
+    return 0
+
+
+def cmd_topic_list(args: argparse.Namespace) -> int:
+    url = f"{args.wiki.rstrip('/')}/topics"
+    try:
+        resp = _http_get(url)
+    except Exception as exc:
+        print(ui.color(f"topic-list failed: {exc}", "red"), file=sys.stderr)
+        return 1
+    topics = resp.get("topics") or []
+    if not topics:
+        print("(no topics)")
+        return 0
+    for t in topics:
+        print(f"  {ui.color(t['id'], 'cyan')}  {t.get('title','')}  [{t.get('wiki_type','')}]")
+    return 0
+
+
+def cmd_topic_show(args: argparse.Namespace) -> int:
+    url = f"{args.wiki.rstrip('/')}/topics/{args.topic_id}/examples"
+    try:
+        resp = _http_get(url)
+    except Exception as exc:
+        print(ui.color(f"topic-show failed: {exc}", "red"), file=sys.stderr)
+        return 1
+    examples = resp.get("examples") or []
+    good = [e for e in examples if (e.get("label_override") or e.get("label", "good")) == "good"]
+    bad  = [e for e in examples if (e.get("label_override") or e.get("label", "good")) == "bad"]
+    print(f"\nTopic: {ui.color(args.topic_id, 'cyan')}")
+    print(f"\n  GOOD ({len(good)}):")
+    for e in good:
+        override_note = ""
+        if e.get("label_override"):
+            override_note = f"  [admin override: {e['label_override']} ← {e['label']} by {e.get('label_override_by','')}]"
+        print(f"    - {e['id']}{override_note}")
+    print(f"\n  BAD ({len(bad)}):")
+    for e in bad:
+        override_note = ""
+        if e.get("label_override"):
+            override_note = f"  [admin override: {e['label_override']} ← {e['label']} by {e.get('label_override_by','')}]"
+        print(f"    - {e['id']}{override_note}")
+    print()
+    return 0
+
+
+def cmd_relabel(args: argparse.Namespace) -> int:
+    url = f"{args.wiki.rstrip('/')}/insights/{args.card_id}/relabel"
+    payload = {"label": args.to, "override_by": args.by}
+    try:
+        resp = _http_post_json(url, payload)
+    except Exception as exc:
+        print(ui.color(f"relabel failed: {exc}", "red"), file=sys.stderr)
+        return 1
+    print(ui.color(f"relabeled {resp.get('id', args.card_id)} → effective_label={resp.get('effective_label', args.to)}", "green"))
+    return 0
+
+
 def cmd_list(args: argparse.Namespace) -> int:
     url = f"{args.wiki.rstrip('/')}/insights"
     try:
@@ -314,6 +388,35 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_demo = sub.add_parser("demo", help="print how to run the end-to-end demo")
     p_demo.set_defaults(func=cmd_demo)
+
+    # topic-create
+    p_topic_create = sub.add_parser("topic-create", help="create a new Topic")
+    p_topic_create.add_argument("topic_id", help="unique slug, e.g. postgres-pool-exhaustion")
+    p_topic_create.add_argument("--title", default="", help="human-readable title")
+    p_topic_create.add_argument("--tags", nargs="*", default=[], help="tag list")
+    p_topic_create.add_argument("--wiki-type", default="general", help="wiki_type dir")
+    p_topic_create.add_argument("--created-by", default="cli", help="creator name")
+    p_topic_create.add_argument("--wiki", default=DEFAULT_WIKI)
+    p_topic_create.set_defaults(func=cmd_topic_create)
+
+    # topic-list
+    p_topic_list = sub.add_parser("topic-list", help="list all Topics")
+    p_topic_list.add_argument("--wiki", default=DEFAULT_WIKI)
+    p_topic_list.set_defaults(func=cmd_topic_list)
+
+    # topic-show
+    p_topic_show = sub.add_parser("topic-show", help="show all Examples under a Topic")
+    p_topic_show.add_argument("topic_id", help="topic slug")
+    p_topic_show.add_argument("--wiki", default=DEFAULT_WIKI)
+    p_topic_show.set_defaults(func=cmd_topic_show)
+
+    # relabel
+    p_relabel = sub.add_parser("relabel", help="admin: override the label of an Example")
+    p_relabel.add_argument("card_id", help="Example card id")
+    p_relabel.add_argument("--to", choices=["good", "bad"], required=True, help="new label")
+    p_relabel.add_argument("--by", default="admin", help="override_by (name)")
+    p_relabel.add_argument("--wiki", default=DEFAULT_WIKI)
+    p_relabel.set_defaults(func=cmd_relabel)
 
     return parser
 

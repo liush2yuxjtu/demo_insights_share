@@ -1,0 +1,15 @@
+{
+  "id": "bob-pgpool-bad-2026-04-12",
+  "topic_id": "postgres-pool-exhaustion",
+  "label": "bad",
+  "label_note": "直接把 pool size ×5 在我们 32 核机器上反而拖垮 IO",
+  "raw_log_type": "export",
+  "raw_log": "./raw/bob-pgpool-bad-2026-04-12.txt",
+  "author": "bob",
+  "title": "盲目增大连接池反而拖垮系统",
+  "context": "Bob 在排查 PostgreSQL 连接池耗尽问题时，看到活跃连接数接近 pool_size 上限，就直接把 pool_size 从 10 改成了 50。",
+  "symptom": "修改后系统反而更慢，事务延迟从 5ms 飙升到 200ms+，数据库 CPU 使用率从 30% 涨到 90%。",
+  "root_cause": "PgBouncer transaction mode 下，增大 pool_size 到 50 但机器只有 32 核，每个连接耗 CPU，连接越多上下文切换越频繁，反而拖垮 IO。",
+  "fix": "保持 pool_size=10 不变，通过减少单查询耗时（加索引、优化慢查询）来降低并发连接需求。",
+  "tags": ["postgres", "pgbouncer", "pool-size", "bad-practice"]
+}

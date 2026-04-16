@@ -9,5 +9,12 @@
   "fix": "Set idle_in_transaction_session_timeout=30s and bump pool size to 2x worker count",
   "confidence": 0.82,
   "applies_when": ["postgres>=13", "pgbouncer transaction mode"],
-  "do_not_apply_when": ["session pooling mode", "single-tenant DB"]
+  "do_not_apply_when": ["session pooling mode", "single-tenant DB"],
+  "topic_id": "postgres-pool-exhaustion",
+  "label": "good",
+  "label_note": "在 PgBouncer transaction mode 下彻底解决",
+  "label_override": null,
+  "label_override_by": null,
+  "label_override_at": null,
+  "raw_log_type": "jsonl"
 }

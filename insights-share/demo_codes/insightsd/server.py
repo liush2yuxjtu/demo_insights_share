@@ -87,6 +87,24 @@ class InsightHandler(BaseHTTPRequestHandler):
             hits = self.store.search(q, k=k)
             self._send_json(200, {"hits": hits})
             return
+        # GET /topics
+        if path == "/topics":
+            if not isinstance(self.store, TreeInsightStore):
+                self._send_json(400, {"error": "topics_not_supported", "detail": "tree mode only"})
+                return
+            self._send_json(200, {"topics": self.store.list_topics()})
+            return
+        # GET /topics/{topic_id}/examples?label=...
+        if path.startswith("/topics/") and path.endswith("/examples"):
+            if not isinstance(self.store, TreeInsightStore):
+                self._send_json(400, {"error": "topics_not_supported", "detail": "tree mode only"})
+                return
+            topic_id = path[len("/topics/"):-len("/examples")]
+            params = parse_qs(parsed.query)
+            label = (params.get("label") or [None])[0]
+            examples = self.store.list_examples(topic_id, label=label)
+            self._send_json(200, {"examples": examples})
+            return
         self._send_404()
 
     def do_POST(self) -> None:  # noqa: N802
@@ -178,6 +196,38 @@ class InsightHandler(BaseHTTPRequestHandler):
                 self._send_json(404, {"error": "not_found", "id": card_id})
                 return
             self._send_json(200, {"id": result.get("id"), "tags": result.get("tags")})
+            return
+
+        # POST /topics
+        if path == "/topics":
+            if not isinstance(self.store, TreeInsightStore):
+                self._send_json(400, {"error": "topics_not_supported", "detail": "tree mode only"})
+                return
+            body, err = self._read_json_body()
+            if err is not None or body is None:
+                self._send_json(400, {"error": "invalid_json", "detail": err})
+                return
+            topic = self.store.create_topic(body)
+            self._send_json(200, {"id": topic.get("id")})
+            return
+        # POST /insights/{id}/relabel
+        if path.startswith("/insights/") and path.endswith("/relabel"):
+            if not isinstance(self.store, TreeInsightStore):
+                self._send_json(400, {"error": "relabel_not_supported", "detail": "tree mode only"})
+                return
+            card_id = path[len("/insights/"):-len("/relabel")]
+            body, err = self._read_json_body()
+            if err is not None or body is None:
+                self._send_json(400, {"error": "invalid_json", "detail": err})
+                return
+            new_label = body.get("label", "")
+            override_by = body.get("override_by", "admin")
+            result = self.store.relabel(card_id, new_label, override_by)
+            if result is None:
+                self._send_json(404, {"error": "not_found", "detail": f"card {card_id!r} not found"})
+                return
+            effective_label = result.get("label_override") or result.get("label", "good")
+            self._send_json(200, {"id": card_id, "effective_label": effective_label})
             return
 
         self._send_404()

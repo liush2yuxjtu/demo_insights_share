@@ -1,0 +1,28 @@
+{
+  "topics": [
+    {
+      "id": "postgres-pool-exhaustion",
+      "title": "PostgreSQL 连接池耗尽",
+      "tags": ["postgres", "connection-pool", "latency"],
+      "created_by": "alice",
+      "created_at": "2026-04-10T08:00:00Z",
+      "wiki_type": "database"
+    },
+    {
+      "id": "celery-retry-storm",
+      "title": "Celery 重试风暴",
+      "tags": ["celery", "retry", "queue"],
+      "created_by": "alice",
+      "created_at": "2026-04-10T09:00:00Z",
+      "wiki_type": "queue"
+    },
+    {
+      "id": "redis-allkeys-lru-evicts-session",
+      "title": "Redis LRU 淘汰导致会话丢失",
+      "tags": ["redis", "lru", "session"],
+      "created_by": "carol",
+      "created_at": "2026-04-10T10:00:00Z",
+      "wiki_type": "cache"
+    }
+  ]
+}

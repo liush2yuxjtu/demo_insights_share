@@ -26,7 +26,11 @@
 
 ## Canonical Prompt
 
-以后 A / B 两边都应该复用同一份 prompt 文本。推荐固定为下面这一版：
+以后 A / B 两边都应该复用同一份 prompt 文本，并且只维护一个独立文件作为单一真源：
+
+- [examples/COMMON_PROMPT.txt](/Users/m1/projects/demo_insights_share/examples/COMMON_PROMPT.txt)
+
+推荐固定为下面这一版：
 
 ```text
 请严格按顺序执行三步。第一步：运行 !pwd 打印当前工作目录。第二步：运行 !ls -la ~/.claude/skills/ 展示已安装的 skill 列表；如果 ~/.claude/skills/insights-wiki/SKILL.md 存在，再运行 !head -40 ~/.claude/skills/insights-wiki/SKILL.md 读取前 40 行；如果 ~/.cache/insights-wiki/manifest.json 存在，再运行 !cat ~/.cache/insights-wiki/manifest.json 查看缓存卡片 ID；若上述文件不存在也要明确说明该事实。第三步：回答 — 我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接（English restate: Our checkout API is timing out, postgres is rejecting new connections during the lunch spike），应该如何诊断与修复？请给出可执行的 SQL 与代码片段。如果第二步发现 ~/.cache/insights-wiki 中有相关卡片，请先读取与当前问题最相关的缓存卡片再作答，并明确引用卡片 ID；若缓存不存在或未命中，请明确写“未引用任何 LAN 卡片”。
@@ -36,7 +40,7 @@
 
 - A 和 B 必须共用这一份文本。
 - 不能再拆成 `PROMPT_WITHOUT` / `PROMPT_WITH` 两个不同语义版本。
-- 最好只保留一个 `COMMON_PROMPT`，A/B 都引用它。
+- `examples/run_human_AB.sh` 应该从 [examples/COMMON_PROMPT.txt](/Users/m1/projects/demo_insights_share/examples/COMMON_PROMPT.txt) 读取 `COMMON_PROMPT`，而不是在脚本里内联维护第二份副本。
 - 为了防止全局残留缓存污染实验，录制前必须清空并隔离 `~/.cache/insights-wiki/`；A 不得残留缓存，B 由 `UserPromptSubmit` 预热后再生成缓存。
 
 ## Bad Version
@@ -129,16 +133,13 @@ echo "PASS: A/B prompts are identical"
 
 ## Current Known Risk
 
-当前录制脚本 [examples/run_human_AB.sh](/Users/m1/projects/demo_insights_share/examples/run_human_AB.sh) 里仍然定义了两个不同变量：
+如果 prompt 文本同时存在于多个地方，例如脚本内联一份、测试里再写一份、文档里再贴一份，就仍然有漂移风险。
 
-- `PROMPT_WITHOUT`
-- `PROMPT_WITH`
-
-只要这两个变量的文本不同，就应该视为违反本文件规则。
+因此实际执行时应以 [examples/COMMON_PROMPT.txt](/Users/m1/projects/demo_insights_share/examples/COMMON_PROMPT.txt) 为唯一真源，脚本只读取它，测试只校验它。
 
 ## Recommendation
 
-- 录制脚本改为只保留一个 `COMMON_PROMPT`
+- 录制脚本从 [examples/COMMON_PROMPT.txt](/Users/m1/projects/demo_insights_share/examples/COMMON_PROMPT.txt) 读取 `COMMON_PROMPT`
 - A / B export 回写到 `examples/` 之前，先跑上面的 prompt equality gate
 - gate 失败时，不允许覆盖现有 A/B 资产
 
