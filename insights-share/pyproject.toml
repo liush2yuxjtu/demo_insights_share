@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "insights-share"
+version = "1.0.0"
+description = "局域网 insights 共享 demo 的 CLI 与 HTTP daemon 发布包"
+readme = { file = "release/README.txt", content-type = "text/plain" }
+requires-python = ">=3.11"
+license = { text = "Proprietary" }
+authors = [
+  { name = "demo_insights_share contributors" }
+]
+dependencies = [
+  "claude-agent-sdk",
+  "python-dotenv",
+]
+keywords = ["insights", "wiki", "cli", "demo"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "License :: Other/Proprietary License",
+  "Environment :: Console",
+]
+
+[project.scripts]
+insights-share = "insights_cli:main"
+
+[tool.setuptools]
+package-dir = { "" = "demo_codes" }
+py-modules = ["_sdk_common", "adapter", "insights_cli", "search_agent", "ui"]
+packages = ["insightsd"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+insightsd = ["dashboard.html"]

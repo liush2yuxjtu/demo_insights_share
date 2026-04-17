@@ -1,0 +1,52 @@
+{
+  "mode": "verify",
+  "status": "passed",
+  "captured_at": "2026-04-16T16:32:09.006Z",
+  "base_url": "http://127.0.0.1:7821",
+  "video_href": "/artifacts/validation/artifacts/handout/runs/verify-2026-04-16T16-31-58-591Z/verify.webm",
+  "console_href": "/artifacts/validation/artifacts/handout/runs/verify-2026-04-16T16-31-58-591Z/console.log",
+  "screenshots": [
+    {
+      "id": "verify-step-1-handout",
+      "href": "/artifacts/validation/artifacts/handout/runs/verify-2026-04-16T16-31-58-591Z/verify-step-1-handout.png"
+    },
+    {
+      "id": "verify-step-2-dashboard-live",
+      "href": "/artifacts/validation/artifacts/handout/runs/verify-2026-04-16T16-31-58-591Z/verify-step-2-dashboard-live.png"
+    },
+    {
+      "id": "verify-step-3-demo",
+      "href": "/artifacts/validation/artifacts/handout/runs/verify-2026-04-16T16-31-58-591Z/verify-step-3-demo.png"
+    },
+    {
+      "id": "verify-step-4-cli",
+      "href": "/artifacts/validation/artifacts/handout/runs/verify-2026-04-16T16-31-58-591Z/verify-step-4-cli.png"
+    },
+    {
+      "id": "verify-step-5-handout-final",
+      "href": "/artifacts/validation/artifacts/handout/runs/verify-2026-04-16T16-31-58-591Z/verify-step-5-handout-final.png"
+    }
+  ],
+  "steps": {
+    "start_service": {
+      "status": "passed",
+      "screenshot": "/artifacts/validation/artifacts/handout/runs/verify-2026-04-16T16-31-58-591Z/verify-step-1-handout.png"
+    },
+    "dashboard_live": {
+      "status": "passed",
+      "screenshot": "/artifacts/validation/artifacts/handout/runs/verify-2026-04-16T16-31-58-591Z/verify-step-2-dashboard-live.png"
+    },
+    "run_demo": {
+      "status": "passed",
+      "screenshot": "/artifacts/validation/artifacts/handout/runs/verify-2026-04-16T16-31-58-591Z/verify-step-3-demo.png"
+    },
+    "cli_send": {
+      "status": "passed",
+      "screenshot": "/artifacts/validation/artifacts/handout/runs/verify-2026-04-16T16-31-58-591Z/verify-step-4-cli.png"
+    },
+    "run_validation": {
+      "status": "passed",
+      "screenshot": "/artifacts/validation/artifacts/handout/runs/verify-2026-04-16T16-31-58-591Z/verify-step-5-handout-final.png"
+    }
+  }
+}

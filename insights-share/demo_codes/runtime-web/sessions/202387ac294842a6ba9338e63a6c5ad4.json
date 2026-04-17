@@ -1,0 +1,27 @@
+{
+  "id": "202387ac294842a6ba9338e63a6c5ad4",
+  "kind": "validation",
+  "title": "Phase 0-5 验证流",
+  "status": "completed",
+  "started_at": "2026-04-16T16:32:05.398161+00:00",
+  "ended_at": "2026-04-16T16:32:05.766934+00:00",
+  "current_stage": "summary",
+  "progress": 1.0,
+  "headline_metrics": {
+    "snapshot": "phase5_tmux.txt",
+    "report": "wiki_structure.json",
+    "passed": 6,
+    "total": 6
+  },
+  "latest_message": "Phase 验证完成：6/6 通过",
+  "artifact_refs": [
+    {
+      "label": "验证报告",
+      "href": "/artifacts/validation/reports/final_report.html"
+    },
+    {
+      "label": "交付物证据",
+      "href": "/artifacts/validation/reports/deliverables/DELIVERABLES_SUMMARY.html"
+    }
+  ]
+}

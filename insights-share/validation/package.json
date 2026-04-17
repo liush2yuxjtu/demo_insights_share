@@ -1,0 +1,12 @@
+{
+  "name": "insights-share-validation",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "handout:record": "node scripts/handout_record.mjs",
+    "handout:verify": "node scripts/handout_verify.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.52.0"
+  }
+}

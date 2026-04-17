@@ -1,0 +1,6 @@
+dist/
+build/
+*.egg-info/
+.playwright-cli/
+validation/node_modules/
+validation/__pycache__/

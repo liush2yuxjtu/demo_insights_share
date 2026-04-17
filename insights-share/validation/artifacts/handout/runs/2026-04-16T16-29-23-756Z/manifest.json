@@ -1,0 +1,56 @@
+{
+  "mode": "record",
+  "status": "passed",
+  "captured_at": "2026-04-16T16:30:01.425Z",
+  "video_href": "/artifacts/validation/artifacts/handout/runs/2026-04-16T16-29-23-756Z/user-flow.mp4",
+  "console_href": "/artifacts/validation/artifacts/handout/runs/2026-04-16T16-29-23-756Z/console.log",
+  "screenshots": [
+    {
+      "id": "step-1-handout-cold-start",
+      "label": "step-1-handout-cold-start",
+      "href": "/artifacts/validation/artifacts/handout/runs/2026-04-16T16-29-23-756Z/step-1-handout-cold-start.png"
+    },
+    {
+      "id": "step-2-dashboard-demo",
+      "label": "step-2-dashboard-demo",
+      "href": "/artifacts/validation/artifacts/handout/runs/2026-04-16T16-29-23-756Z/step-2-dashboard-demo.png"
+    },
+    {
+      "id": "step-3-cli-send",
+      "label": "step-3-cli-send",
+      "href": "/artifacts/validation/artifacts/handout/runs/2026-04-16T16-29-23-756Z/step-3-cli-send.png"
+    },
+    {
+      "id": "step-4-dashboard-validation",
+      "label": "step-4-dashboard-validation",
+      "href": "/artifacts/validation/artifacts/handout/runs/2026-04-16T16-29-23-756Z/step-4-dashboard-validation.png"
+    },
+    {
+      "id": "step-5-handout-autofill",
+      "label": "step-5-handout-autofill",
+      "href": "/artifacts/validation/artifacts/handout/runs/2026-04-16T16-29-23-756Z/step-5-handout-autofill.png"
+    }
+  ],
+  "steps": {
+    "start_service": {
+      "status": "passed",
+      "screenshot": "/artifacts/validation/artifacts/handout/runs/2026-04-16T16-29-23-756Z/step-1-handout-cold-start.png"
+    },
+    "dashboard_live": {
+      "status": "passed",
+      "screenshot": "/artifacts/validation/artifacts/handout/runs/2026-04-16T16-29-23-756Z/step-2-dashboard-demo.png"
+    },
+    "run_demo": {
+      "status": "passed",
+      "screenshot": "/artifacts/validation/artifacts/handout/runs/2026-04-16T16-29-23-756Z/step-2-dashboard-demo.png"
+    },
+    "cli_send": {
+      "status": "passed",
+      "screenshot": "/artifacts/validation/artifacts/handout/runs/2026-04-16T16-29-23-756Z/step-3-cli-send.png"
+    },
+    "run_validation": {
+      "status": "passed",
+      "screenshot": "/artifacts/validation/artifacts/handout/runs/2026-04-16T16-29-23-756Z/step-5-handout-autofill.png"
+    }
+  }
+}

@@ -2,670 +2,127 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8" />
-<title>insights-share · 卡片看板</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<style>
-  :root {
-    --bg: #fafafa;
-    --fg: #1f2328;
-    --muted: #57606a;
-    --border: #d0d7de;
-    --accent: #0969da;
-    --ok-bg: #d4edda;
-    --ok-fg: #155724;
-    --fail-bg: #f8d7da;
-    --fail-fg: #721c24;
-    --col-bg: #ffffff;
-    --chip-bg: #ddf4ff;
-    --chip-fg: #0969da;
-  }
-  * { box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    color: var(--fg);
-    background: var(--bg);
-    margin: 0;
-    padding: 0;
-    line-height: 1.5;
-  }
-  header.toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    align-items: center;
-    background: #fff;
-    border-bottom: 1px solid var(--border);
-    padding: 12px 20px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-  }
-  header .title { font-weight: 700; font-size: 1.05em; margin-right: 12px; }
-  header input[type=text], header input[type=search] {
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 0.88em;
-    font-family: inherit;
-  }
-  header .research-input { width: 280px; }
-  header .search-input { width: 200px; }
-  header button {
-    border: 1px solid var(--border);
-    background: #f6f8fa;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 0.88em;
-    cursor: pointer;
-    font-family: inherit;
-  }
-  header button:hover { background: #eaeef2; }
-  header button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-  header button.primary:hover { background: #0860c7; }
-  header .lan-ip { margin-left: auto; color: var(--muted); font-size: 0.82em; font-family: "SF Mono", Menlo, monospace; }
-  .board {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    padding: 20px;
-  }
-  .column {
-    background: var(--col-bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px;
-    min-height: 400px;
-  }
-  .column h2 {
-    margin: 0 0 12px;
-    font-size: 0.95em;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 8px;
-  }
-  .column h2 .count { color: var(--accent); font-weight: 700; margin-left: 6px; }
-  .card {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 10px 12px;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-  }
-  .card h3 { margin: 0 0 6px; font-size: 0.95em; font-weight: 600; }
-  .card .meta { font-size: 0.78em; color: var(--muted); margin: 4px 0; }
-  .card .chips { margin: 6px 0; }
-  .chip {
-    display: inline-block;
-    background: var(--chip-bg);
-    color: var(--chip-fg);
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 0.72em;
-    margin: 2px 4px 2px 0;
-  }
-  .card .ops { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
-  .card .ops button {
-    border: 1px solid var(--border);
-    background: #f6f8fa;
-    border-radius: 4px;
-    padding: 3px 8px;
-    font-size: 0.75em;
-    cursor: pointer;
-    font-family: inherit;
-  }
-  .card .ops button:hover { background: #eaeef2; }
-  .card .ops button.danger { color: var(--fail-fg); }
-  .modal-backdrop {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-  }
-  .modal-backdrop.show { display: flex; }
-  .modal {
-    background: #fff;
-    border-radius: 8px;
-    padding: 20px 24px;
-    min-width: 360px;
-    max-width: 520px;
-  }
-  .modal h3 { margin: 0 0 12px; font-size: 1em; }
-  .modal label { display: block; font-size: 0.82em; color: var(--muted); margin: 8px 0 4px; }
-  .modal input, .modal textarea, .modal select {
-    width: 100%;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 6px 10px;
-    font-size: 0.88em;
-    font-family: inherit;
-  }
-  .modal textarea { min-height: 60px; resize: vertical; }
-  .modal .row { display: flex; gap: 8px; margin-top: 14px; justify-content: flex-end; }
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    background: #1f2328;
-    color: #fff;
-    padding: 10px 16px;
-    border-radius: 6px;
-    font-size: 0.85em;
-    z-index: 200;
-    display: none;
-  }
-  .toast.show { display: block; }
-
-  /* ---- Tab 导航 ---- */
-  .tab-nav {
-    display: flex;
-    gap: 0;
-    background: #fff;
-    border-bottom: 1px solid var(--border);
-    padding: 0 20px;
-  }
-  .tab-btn {
-    padding: 10px 18px;
-    font-size: 0.88em;
-    font-family: inherit;
-    border: none;
-    border-bottom: 2px solid transparent;
-    background: transparent;
-    cursor: pointer;
-    color: var(--muted);
-    margin-bottom: -1px;
-  }
-  .tab-btn:hover { color: var(--fg); }
-  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
-  .tab-panel { display: none; }
-  .tab-panel.active { display: block; }
-
-  /* ---- Topics 视图 ---- */
-  .topics-layout {
-    display: flex;
-    height: calc(100vh - 110px);
-    overflow: hidden;
-  }
-  .topics-sidebar {
-    width: 30%;
-    border-right: 1px solid var(--border);
-    overflow-y: auto;
-    padding: 12px;
-    background: #fff;
-  }
-  .topics-sidebar h3 {
-    margin: 0 0 10px;
-    font-size: 0.9em;
-    color: var(--muted);
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 8px;
-  }
-  .topic-item {
-    padding: 8px 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.88em;
-    margin-bottom: 4px;
-    border: 1px solid transparent;
-  }
-  .topic-item:hover { background: #f6f8fa; border-color: var(--border); }
-  .topic-item.selected { background: #ddf4ff; border-color: var(--accent); color: var(--accent); font-weight: 600; }
-  .topic-item .topic-tags { margin-top: 4px; }
-  .topics-content {
-    width: 70%;
-    overflow-y: auto;
-    padding: 12px 16px;
-    background: var(--bg);
-  }
-  .topics-content h3 {
-    margin: 0 0 12px;
-    font-size: 0.95em;
-    color: var(--muted);
-  }
-  .examples-split {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-  }
-  .examples-col h4 {
-    margin: 0 0 10px;
-    font-size: 0.88em;
-    font-weight: 700;
-    padding: 6px 10px;
-    border-radius: 6px;
-  }
-  .examples-col.good h4 { background: var(--ok-bg); color: var(--ok-fg); }
-  .examples-col.bad h4  { background: var(--fail-bg); color: var(--fail-fg); }
-  .example-card {
-    background: #fff;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 10px 12px;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
-    position: relative;
-  }
-  .example-card .ex-id { font-size: 0.75em; color: var(--muted); font-family: "SF Mono", Menlo, monospace; margin-bottom: 4px; }
-  .example-card .ex-author { font-size: 0.82em; font-weight: 600; margin-bottom: 4px; }
-  .example-card .ex-note { font-size: 0.82em; color: var(--fg); margin-bottom: 6px; }
-  .example-card .ex-log-link { font-size: 0.78em; color: var(--accent); word-break: break-all; }
-  .override-badge {
-    position: absolute;
-    top: 6px;
-    right: 8px;
-    background: #ff8c00;
-    color: #fff;
-    font-size: 0.68em;
-    padding: 2px 6px;
-    border-radius: 8px;
-    white-space: nowrap;
-  }
-  .topics-empty { color: var(--muted); font-size: 0.88em; padding: 20px 0; }
-</style>
+<title>insights-share · Web 控制台</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/static/runtime.css" />
 </head>
-<body>
-<header class="toolbar">
-  <span class="title">insights-share · 卡片看板</span>
-  <button class="primary" id="btn-new">+ 新增卡</button>
-  <input type="text" class="research-input" id="research-input" placeholder="research 输入：describe topic…" />
-  <button id="btn-research">research</button>
-  <input type="search" class="search-input" id="search-input" placeholder="关键词搜索…" />
-  <button id="btn-search">搜索</button>
-  <button id="btn-reload">刷新</button>
-  <span class="lan-ip" id="lan-ip"></span>
-</header>
-
-<nav class="tab-nav">
-  <button class="tab-btn active" data-tab="board">卡片看板</button>
-  <button class="tab-btn" data-tab="topics">Topics</button>
-</nav>
-
-<div class="tab-panel active" id="panel-board">
-<section class="board">
-  <div class="column" id="col-all">
-    <h2>全部卡 <span class="count" id="count-all">0</span></h2>
-    <div class="cards"></div>
-  </div>
-  <div class="column" id="col-triggered">
-    <h2>已触发 <span class="count" id="count-triggered">0</span></h2>
-    <div class="cards"></div>
-  </div>
-  <div class="column" id="col-untriggered">
-    <h2>未触发 <span class="count" id="count-untriggered">0</span></h2>
-    <div class="cards"></div>
-  </div>
-</section>
-</div><!-- /panel-board -->
-
-<div class="tab-panel" id="panel-topics">
-  <div class="topics-layout">
-    <aside class="topics-sidebar">
-      <h3>Topic 列表</h3>
-      <div id="topics-list"><p class="topics-empty">加载中…</p></div>
-    </aside>
-    <main class="topics-content">
-      <div id="examples-area"><p class="topics-empty">← 点击左侧 Topic 查看示例</p></div>
-    </main>
-  </div>
-</div><!-- /panel-topics -->
-
-<div class="modal-backdrop" id="modal-backdrop">
-  <div class="modal">
-    <h3 id="modal-title">新增卡</h3>
-    <label>标题 title</label>
-    <input type="text" id="m-title" />
-    <label>标签 tags（英文逗号分隔）</label>
-    <input type="text" id="m-tags" placeholder="例如：bug,fixed" />
-    <label>作者 author</label>
-    <input type="text" id="m-author" />
-    <label>wiki_type</label>
-    <input type="text" id="m-wiki-type" placeholder="general" />
-    <label>修复说明 fix</label>
-    <textarea id="m-fix"></textarea>
-    <div class="row">
-      <button id="m-cancel">取消</button>
-      <button class="primary" id="m-confirm">确认</button>
-    </div>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script>
-// ---- 全局状态 ----
-let allCards = [];
-let modalMode = "new"; // "new" | "edit"
-let editingId = null;
-
-// ---- 工具函数 ----
-function showToast(msg) {
-  const t = document.getElementById("toast");
-  t.textContent = msg;
-  t.classList.add("show");
-  setTimeout(() => t.classList.remove("show"), 2000);
-}
-function esc(s) {
-  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-}
-function parseTags(s) {
-  return String(s || "").split(",").map(x => x.trim()).filter(Boolean);
-}
-function isTriggered(card) {
-  const tags = Array.isArray(card.tags) ? card.tags : [];
-  if (tags.length === 0) return false;
-  if (tags.includes("not_triggered")) return false;
-  return true;
-}
-
-// ---- 渲染 ----
-function renderCard(card) {
-  const tags = Array.isArray(card.tags) ? card.tags : [];
-  const chips = tags.map(t => `<span class="chip">${esc(t)}</span>`).join("");
-  return `
-    <div class="card" data-id="${esc(card.id)}">
-      <h3>${esc(card.title || "(无标题)")}</h3>
-      <div class="chips">${chips}</div>
-      <div class="meta">作者：${esc(card.author || "-")} · 类型：${esc(card.wiki_type || "general")}</div>
-      <div class="ops">
-        <button class="op-edit">编辑</button>
-        <button class="op-tag">打标签</button>
-        <button class="op-delete danger">删除</button>
-      </div>
-    </div>
-  `;
-}
-function render() {
-  const colAll = document.querySelector("#col-all .cards");
-  const colTri = document.querySelector("#col-triggered .cards");
-  const colUn = document.querySelector("#col-untriggered .cards");
-  colAll.innerHTML = allCards.map(renderCard).join("");
-  const tri = allCards.filter(isTriggered);
-  const un = allCards.filter(c => !isTriggered(c));
-  colTri.innerHTML = tri.map(renderCard).join("");
-  colUn.innerHTML = un.map(renderCard).join("");
-  document.getElementById("count-all").textContent = allCards.length;
-  document.getElementById("count-triggered").textContent = tri.length;
-  document.getElementById("count-untriggered").textContent = un.length;
-  // 绑定每张卡的操作
-  document.querySelectorAll(".card").forEach(el => {
-    const id = el.dataset.id;
-    el.querySelector(".op-edit").onclick = () => openEdit(id);
-    el.querySelector(".op-tag").onclick = () => tagCard(id);
-    el.querySelector(".op-delete").onclick = () => deleteCard(id);
-  });
-}
-
-// ---- API 调用 ----
-async function reload() {
-  try {
-    const r = await fetch("/insights");
-    const j = await r.json();
-    allCards = Array.isArray(j.cards) ? j.cards : [];
-    render();
-  } catch (e) {
-    showToast("加载失败：" + e.message);
-  }
-}
-
-async function createCard(payload) {
-  const r = await fetch("/insights", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(payload),
-  });
-  if (!r.ok) throw new Error("创建失败 " + r.status);
-  return r.json();
-}
-
-async function editCard(id, payload) {
-  const r = await fetch(`/insights/${encodeURIComponent(id)}/edit`, {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(payload),
-  });
-  if (!r.ok) throw new Error("编辑失败 " + r.status);
-  return r.json();
-}
-
-async function deleteCard(id) {
-  if (!confirm(`确认删除卡片 ${id} ?`)) return;
-  try {
-    const r = await fetch(`/insights/${encodeURIComponent(id)}`, {method: "DELETE"});
-    if (!r.ok) throw new Error("删除失败 " + r.status);
-    showToast("已删除");
-    await reload();
-  } catch (e) {
-    showToast(e.message);
-  }
-}
-
-async function tagCard(id) {
-  const input = prompt("输入标签（英文逗号分隔）:", "");
-  if (input === null) return;
-  const tags = parseTags(input);
-  try {
-    const r = await fetch(`/insights/${encodeURIComponent(id)}/tag`, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({tags, sticky: true}),
-    });
-    if (!r.ok) throw new Error("打标签失败 " + r.status);
-    showToast("已更新标签");
-    await reload();
-  } catch (e) {
-    showToast(e.message);
-  }
-}
-
-async function runResearch() {
-  const q = document.getElementById("research-input").value.trim();
-  if (!q) { showToast("请输入 research 主题"); return; }
-  try {
-    const r = await fetch("/insights/research", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({query: q}),
-    });
-    if (!r.ok) throw new Error("research 失败 " + r.status);
-    showToast("research 已提交");
-    await reload();
-  } catch (e) {
-    showToast(e.message);
-  }
-}
-
-async function runSearch() {
-  const q = document.getElementById("search-input").value.trim();
-  if (!q) { await reload(); return; }
-  try {
-    const r = await fetch(`/search?q=${encodeURIComponent(q)}&k=10`);
-    const j = await r.json();
-    const hits = Array.isArray(j.hits) ? j.hits : [];
-    // 搜索结果直接覆盖 allCards 渲染，方便查看
-    allCards = hits;
-    render();
-    showToast(`搜索到 ${hits.length} 条`);
-  } catch (e) {
-    showToast(e.message);
-  }
-}
-
-// ---- modal ----
-function openNew() {
-  modalMode = "new";
-  editingId = null;
-  document.getElementById("modal-title").textContent = "新增卡";
-  document.getElementById("m-title").value = "";
-  document.getElementById("m-tags").value = "";
-  document.getElementById("m-author").value = "";
-  document.getElementById("m-wiki-type").value = "general";
-  document.getElementById("m-fix").value = "";
-  document.getElementById("modal-backdrop").classList.add("show");
-}
-function openEdit(id) {
-  const card = allCards.find(c => c.id === id);
-  if (!card) return;
-  modalMode = "edit";
-  editingId = id;
-  document.getElementById("modal-title").textContent = "编辑卡 " + id;
-  document.getElementById("m-title").value = card.title || "";
-  document.getElementById("m-tags").value = (Array.isArray(card.tags) ? card.tags : []).join(",");
-  document.getElementById("m-author").value = card.author || "";
-  document.getElementById("m-wiki-type").value = card.wiki_type || "general";
-  document.getElementById("m-fix").value = card.fix || "";
-  document.getElementById("modal-backdrop").classList.add("show");
-}
-function closeModal() {
-  document.getElementById("modal-backdrop").classList.remove("show");
-}
-async function confirmModal() {
-  const payload = {
-    title: document.getElementById("m-title").value.trim(),
-    tags: parseTags(document.getElementById("m-tags").value),
-    author: document.getElementById("m-author").value.trim(),
-    wiki_type: document.getElementById("m-wiki-type").value.trim() || "general",
-    fix: document.getElementById("m-fix").value.trim(),
-  };
-  if (!payload.title) { showToast("标题不能为空"); return; }
-  try {
-    if (modalMode === "new") {
-      await createCard(payload);
-      showToast("已创建");
-    } else {
-      await editCard(editingId, payload);
-      showToast("已更新");
-    }
-    closeModal();
-    await reload();
-  } catch (e) {
-    showToast(e.message);
-  }
-}
-
-// ---- 事件绑定 ----
-document.getElementById("btn-new").onclick = openNew;
-document.getElementById("btn-research").onclick = runResearch;
-document.getElementById("btn-search").onclick = runSearch;
-document.getElementById("btn-reload").onclick = reload;
-document.getElementById("m-cancel").onclick = closeModal;
-document.getElementById("m-confirm").onclick = confirmModal;
-document.getElementById("search-input").addEventListener("keydown", e => {
-  if (e.key === "Enter") runSearch();
-});
-document.getElementById("research-input").addEventListener("keydown", e => {
-  if (e.key === "Enter") runResearch();
-});
-
-// 显示 LAN 入口
-document.getElementById("lan-ip").textContent = location.host;
-
-// ---- Tab 切换 ----
-document.querySelectorAll(".tab-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
-    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
-    btn.classList.add("active");
-    const panel = document.getElementById("panel-" + btn.dataset.tab);
-    if (panel) panel.classList.add("active");
-    if (btn.dataset.tab === "topics") loadTopics();
-  });
-});
-
-// ---- Topics 视图 ----
-let topicsList = [];
-let selectedTopicId = null;
-
-async function loadTopics() {
-  const listEl = document.getElementById("topics-list");
-  try {
-    const r = await fetch("/topics");
-    if (!r.ok) throw new Error("GET /topics 失败 " + r.status);
-    const j = await r.json();
-    topicsList = Array.isArray(j) ? j : (Array.isArray(j.topics) ? j.topics : []);
-    if (topicsList.length === 0) {
-      listEl.innerHTML = '<p class="topics-empty">暂无 Topic</p>';
-      return;
-    }
-    listEl.innerHTML = topicsList.map(t => `
-      <div class="topic-item" data-tid="${esc(t.id)}">
-        <div>${esc(t.title || t.id)}</div>
-        <div class="topic-tags">${(Array.isArray(t.tags) ? t.tags : []).map(x => `<span class="chip">${esc(x)}</span>`).join("")}</div>
-      </div>
-    `).join("");
-    listEl.querySelectorAll(".topic-item").forEach(el => {
-      el.addEventListener("click", () => selectTopic(el.dataset.tid));
-    });
-    // 若之前有选中则保持
-    if (selectedTopicId) selectTopic(selectedTopicId);
-  } catch (e) {
-    listEl.innerHTML = `<p class="topics-empty">加载失败：${esc(e.message)}</p>`;
-  }
-}
-
-async function selectTopic(tid) {
-  selectedTopicId = tid;
-  // 高亮列表项
-  document.querySelectorAll(".topic-item").forEach(el => {
-    el.classList.toggle("selected", el.dataset.tid === tid);
-  });
-  const areaEl = document.getElementById("examples-area");
-  const topic = topicsList.find(t => t.id === tid);
-  const titleText = topic ? esc(topic.title || topic.id) : esc(tid);
-  areaEl.innerHTML = `<h3>${titleText}</h3><p class="topics-empty">加载中…</p>`;
-  try {
-    const r = await fetch("/topics/" + encodeURIComponent(tid) + "/examples");
-    if (!r.ok) throw new Error("GET /topics/{id}/examples 失败 " + r.status);
-    const j = await r.json();
-    const examples = Array.isArray(j) ? j : (Array.isArray(j.examples) ? j.examples : []);
-    const goods = examples.filter(e => effectiveLabel(e) === "good");
-    const bads  = examples.filter(e => effectiveLabel(e) === "bad");
-    areaEl.innerHTML = `
-      <h3>${titleText} <span style="font-weight:400;font-size:0.85em;color:var(--muted)">（共 ${examples.length} 条）</span></h3>
-      <div class="examples-split">
-        <div class="examples-col good">
-          <h4>GOOD <span style="font-weight:400">(${goods.length})</span></h4>
-          ${goods.length ? goods.map(renderExample).join("") : '<p class="topics-empty">暂无 GOOD 示例</p>'}
-        </div>
-        <div class="examples-col bad">
-          <h4>BAD <span style="font-weight:400">(${bads.length})</span></h4>
-          ${bads.length ? bads.map(renderExample).join("") : '<p class="topics-empty">暂无 BAD 示例</p>'}
+<body data-mode="dashboard">
+  <main class="web-shell">
+    <section class="web-hero">
+      <div class="web-hero-copy">
+        <div class="eyebrow">insights-share · Web 控制台</div>
+        <h1>把 Claude Code CLI 的静默知识流，变成可观看、可操作、可回放的在线现场。</h1>
+        <p class="web-copy">
+          这是给 PM、评审和操作者打开的入口页。你不需要读 tmux 和终端日志，也能看到当前 session、
+          关键指标、证据落点、Validation 状态，以及 Claude Code CLI 该怎么接入这套链路。
+        </p>
+        <div class="web-actions">
+          <button id="dashboard-run-demo" class="action-btn">运行 Demo</button>
+          <button id="dashboard-run-validation" class="action-btn secondary">运行 Validation</button>
+          <a class="ghost-link" href="/handout">现场验收页</a>
+          <a class="ghost-link" href="/pm-script">PM 讲解稿</a>
+          <a class="ghost-link" href="/cli">CLI 窗口</a>
+          <a class="ghost-link" href="/preview">纯 Preview</a>
+          <a class="ghost-link" href="/ops">纯 Ops</a>
         </div>
       </div>
-    `;
-  } catch (e) {
-    areaEl.innerHTML = `<h3>${titleText}</h3><p class="topics-empty">加载失败：${esc(e.message)}</p>`;
-  }
-}
 
-function effectiveLabel(ex) {
-  return (ex.label_override || ex.label || "").toLowerCase();
-}
+      <aside class="web-hero-side">
+        <div class="web-status-head">
+          <span id="dashboard-stream-state" class="state-pill">连接中</span>
+          <span id="dashboard-live-session" class="mono">等待 session</span>
+        </div>
+        <div id="dashboard-summary-grid" class="dashboard-summary-grid"></div>
+        <section class="cli-panel">
+          <div class="section-label">Claude Code CLI</div>
+          <p class="muted-copy">
+            在项目根目录执行这条命令，就能把 daemon 和这张 Web 控制台一起跑起来。
+          </p>
+          <pre id="dashboard-cli-command" class="cli-command"></pre>
+          <div class="cli-actions">
+            <button id="dashboard-copy-cli" class="ghost-btn">复制命令</button>
+            <span id="dashboard-copy-state" class="mono">未复制</span>
+          </div>
+        </section>
+      </aside>
+    </section>
 
-function renderExample(ex) {
-  const overrideBadge = ex.label_override
-    ? `<span class="override-badge">admin override: ${esc(ex.label_override)} ← ${esc(ex.label)}</span>`
-    : "";
-  const logDisplay = ex.raw_log_path
-    ? `<a class="ex-log-link" href="${esc(ex.raw_log_path)}" target="_blank">${esc(ex.raw_log_path)}</a>`
-    : (ex.raw_log
-        ? `<span class="ex-log-link" title="${esc((ex.raw_log || "").slice(0, 200))}">[inline log · ${(ex.raw_log || "").length} 字符]</span>`
-        : '<span class="ex-log-link" style="color:var(--muted)">无日志</span>');
-  return `
-    <div class="example-card">
-      ${overrideBadge}
-      <div class="ex-id">${esc(ex.id)}</div>
-      <div class="ex-author">作者：${esc(ex.author || "-")}</div>
-      ${ex.label_note ? `<div class="ex-note">${esc(ex.label_note)}</div>` : ""}
-      <div>${logDisplay}</div>
-    </div>
-  `;
-}
+    <section class="web-main-grid">
+      <section class="web-stage-panel">
+        <div class="section-label">现场主舞台</div>
+        <div class="stage-head">
+          <div>
+            <div id="dashboard-kind" class="stage-kind">DEMO</div>
+            <h2 id="dashboard-title">等待实时 session</h2>
+          </div>
+          <div class="stage-progress-wrap">
+            <div class="metric-label">进度</div>
+            <div id="dashboard-progress" class="metric-big">0%</div>
+          </div>
+        </div>
+        <div class="stage-rail">
+          <div id="dashboard-stage-name" class="stage-name">pending</div>
+          <div id="dashboard-status" class="stage-status">idle</div>
+          <div id="dashboard-timer" class="badge-inline">0 / 0</div>
+        </div>
+        <div id="dashboard-message" class="stage-message">
+          连接到 daemon 后，这里会显示当前主 session 的最新过程。
+        </div>
+        <div id="dashboard-metrics" class="metric-grid"></div>
 
-// 初次加载
-reload();
-</script>
+        <section class="dashboard-playback">
+          <div class="playback-bar">
+            <button id="dashboard-play" class="action-btn">播放回放</button>
+            <button id="dashboard-live" class="ghost-btn">回到实时</button>
+            <div id="dashboard-slider-label" class="mono">0 / 0</div>
+          </div>
+          <input id="dashboard-slider" type="range" min="0" max="0" value="0" />
+          <div id="dashboard-timeline" class="timeline-lane"></div>
+        </section>
+      </section>
+
+      <aside class="web-side-panel">
+        <div class="section-label">证据入口</div>
+        <div id="dashboard-artifacts" class="artifact-list"></div>
+        <div class="section-label space-top">最近 Session</div>
+        <div id="dashboard-session-strip" class="session-strip"></div>
+      </aside>
+    </section>
+
+    <section class="web-ops-grid">
+      <aside class="web-list-panel">
+        <div class="section-label">Session 队列</div>
+        <div id="dashboard-session-list" class="session-list"></div>
+      </aside>
+
+      <section class="web-event-panel">
+        <div class="section-label">当前事件</div>
+        <div id="dashboard-event-spotlight" class="event-spotlight">
+          选择 session 或拖动时间线后，这里会显示当前节点的 payload 与 metrics。
+        </div>
+        <div class="section-label space-top">事件列表</div>
+        <div id="dashboard-event-list" class="ops-timeline"></div>
+      </section>
+
+      <aside class="web-inspector-panel">
+        <div class="section-label">指标对比</div>
+        <select id="dashboard-compare-select"></select>
+        <div id="dashboard-compare" class="inspector-block">
+          选择对比对象后，这里会显示 headline metrics 的差异。
+        </div>
+
+        <div class="section-label space-top">Wiki / Topics</div>
+        <div class="subtabs">
+          <button class="subtab active" data-dashboard-subtab="wiki">Wiki</button>
+          <button class="subtab" data-dashboard-subtab="topics">Topics</button>
+        </div>
+        <div id="dashboard-wiki-panel" class="inspector-block live-panel"></div>
+        <div id="dashboard-topics-panel" class="inspector-block live-panel hidden"></div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="/static/runtime.js" defer></script>
 </body>
 </html>

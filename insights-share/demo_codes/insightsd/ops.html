@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>insights-share · Ops 模式</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/static/runtime.css" />
+</head>
+<body data-mode="ops">
+  <main class="ops-shell">
+    <header class="ops-header">
+      <div>
+        <div class="eyebrow">insights-share · Ops 模式</div>
+        <h1>实时运行台</h1>
+      </div>
+      <div class="ops-actions">
+        <button id="run-demo" class="action-btn">运行 Demo</button>
+        <button id="run-validation" class="action-btn secondary">运行 Validation</button>
+        <button id="stream-reconnect" class="ghost-btn">重连流</button>
+        <span id="ops-stream-state" class="state-pill">连接中</span>
+      </div>
+    </header>
+
+    <section class="ops-cli-panel">
+      <div class="section-label">Claude Code CLI</div>
+      <pre id="ops-cli-command" class="cli-command"></pre>
+      <div class="cli-actions">
+        <button id="ops-copy-cli" class="ghost-btn">复制命令</button>
+        <span id="ops-copy-state" class="mono">未复制</span>
+      </div>
+    </section>
+
+    <section class="ops-grid">
+      <aside class="ops-sidebar">
+        <div class="section-label">筛选</div>
+        <div class="filter-stack">
+          <select id="filter-kind">
+            <option value="">全部类型</option>
+            <option value="demo">demo</option>
+            <option value="validation">validation</option>
+          </select>
+          <select id="filter-status">
+            <option value="">全部状态</option>
+            <option value="running">running</option>
+            <option value="completed">completed</option>
+            <option value="failed">failed</option>
+          </select>
+          <input id="filter-q" type="search" placeholder="按标题或消息搜索" />
+        </div>
+        <div class="section-label space-top">Session 列表</div>
+        <div id="ops-sessions" class="session-list"></div>
+      </aside>
+
+      <section class="ops-center">
+        <div class="section-label">实时时间线</div>
+        <div id="ops-summary-bar" class="summary-bar"></div>
+        <div id="ops-timeline" class="ops-timeline"></div>
+      </section>
+
+      <aside class="ops-inspector">
+        <div class="section-label">检查器</div>
+        <div id="ops-session-detail" class="inspector-block">选择左侧 session 查看详情。</div>
+        <div class="section-label space-top">对比</div>
+        <select id="ops-compare-select"></select>
+        <div id="ops-compare" class="inspector-block">选择对比对象后，这里会显示 headline metrics 差异。</div>
+        <div class="section-label space-top">Wiki / Topics</div>
+        <div class="subtabs">
+          <button class="subtab active" data-subtab="wiki">Wiki</button>
+          <button class="subtab" data-subtab="topics">Topics</button>
+        </div>
+        <div id="ops-wiki-panel" class="inspector-block live-panel"></div>
+        <div id="ops-topics-panel" class="inspector-block live-panel hidden"></div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="/static/runtime.js" defer></script>
+</body>
+</html>

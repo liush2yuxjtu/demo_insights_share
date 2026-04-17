@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>insights-share · Claude Code CLI 窗口</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/static/cli.css" />
+</head>
+<body>
+  <main class="cli-shell">
+    <header class="cli-header">
+      <div class="header-brand">
+        <div class="window-lights" aria-hidden="true">
+          <span class="light light-close"></span>
+          <span class="light light-minimize"></span>
+          <span class="light light-expand"></span>
+        </div>
+        <div class="brand-copy">
+          <div class="eyebrow">insights-share · tmux only</div>
+          <h1>Claude Code CLI 窗口</h1>
+        </div>
+      </div>
+      <div class="header-strip">
+        <p class="header-copy">把本机 tmux pane 直接搬进浏览器，只保留直播、选择和输入。</p>
+        <div class="header-actions">
+          <span id="cli-connection" class="pill">连接中</span>
+          <span id="cli-input-badge" class="pill">输入检测中</span>
+          <span id="cli-pane-count" class="pill subtle">0 个 pane</span>
+          <button id="cli-sidebar-toggle" class="ghost-btn">切换 pane 列表</button>
+          <button id="cli-refresh" class="ghost-btn">刷新 pane</button>
+        </div>
+      </div>
+    </header>
+
+    <section class="cli-workspace">
+      <aside id="cli-sidebar" class="cli-sidebar">
+        <div class="sidebar-head">
+          <div>
+            <div class="section-label">tmux panes</div>
+            <p class="sidebar-copy">选一个本机 pane，浏览器只负责实时映射。</p>
+          </div>
+          <button id="cli-sidebar-close" class="ghost-btn sidebar-close">收起</button>
+        </div>
+
+        <div id="cli-pane-list" class="pane-list"></div>
+
+        <div class="sidebar-section">
+          <div class="section-label">当前 pane</div>
+          <div id="cli-target-meta" class="meta-box">等待 tmux pane。</div>
+        </div>
+
+        <details class="sidebar-note">
+          <summary>输入与直播说明</summary>
+          <p>默认每 1.2 秒抓取一次 <code>tmux capture-pane</code>。</p>
+          <p>发送输入仅对本机浏览器开放，局域网访问默认只读。</p>
+        </details>
+      </aside>
+
+      <section class="cli-main">
+        <section class="terminal-frame">
+          <div class="terminal-chrome">
+            <div class="window-lights small" aria-hidden="true">
+              <span class="light light-close"></span>
+              <span class="light light-minimize"></span>
+              <span class="light light-expand"></span>
+            </div>
+            <div class="terminal-title">
+              <span class="section-label">tmux 直播</span>
+              <strong id="cli-target-label">未选择 pane</strong>
+            </div>
+            <div class="terminal-runtime">
+              <span class="runtime-chip">本地 tmux</span>
+              <span id="cli-last-updated" class="mono">--</span>
+            </div>
+          </div>
+
+          <div class="terminal-toolbar">
+            <div class="terminal-stats">
+              <div class="stat-block">
+                <span class="section-label">pane</span>
+                <strong id="cli-pane-name">--</strong>
+              </div>
+              <div class="stat-block">
+                <span class="section-label">最近抓取</span>
+                <strong id="cli-capture-lines">0 行</strong>
+              </div>
+            </div>
+            <div class="terminal-actions">
+              <button id="cli-copy-screen" class="ghost-btn">复制屏幕</button>
+            </div>
+          </div>
+
+          <pre id="cli-screen" class="cli-screen">等待 tmux pane ...</pre>
+        </section>
+
+        <form id="cli-compose" class="cli-compose">
+          <div class="compose-head">
+            <label for="cli-input" class="section-label">发送到当前 pane</label>
+            <span id="cli-send-state" class="mono">空闲</span>
+          </div>
+          <div class="compose-body">
+            <textarea id="cli-input" placeholder="输入一条命令或提示词，按 Ctrl/Command + Enter 发送。"></textarea>
+            <div class="compose-actions">
+              <button id="cli-ctrl-c" type="button" class="ghost-btn danger">Ctrl+C</button>
+              <button id="cli-send" type="submit" class="action-btn">发送并回车</button>
+            </div>
+          </div>
+        </form>
+      </section>
+    </section>
+  </main>
+
+  <script src="/static/cli.js" defer></script>
+</body>
+</html>

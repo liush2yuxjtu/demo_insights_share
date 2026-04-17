@@ -50,14 +50,20 @@ if ! curl -fs http://127.0.0.1:7821/healthz >/dev/null 2>&1; then
   exit 1
 fi
 
+python -m insightsd.emitter --stage bootstrap --status ok --source run_demo.sh --message "demo daemon 已启动" >/dev/null 2>&1 || true
+
 for seed in seeds/*.json; do
   python insights_cli.py publish "$seed" >/dev/null
 done
+
+python -m insightsd.emitter --stage publish --status ok --source run_demo.sh --message "run_demo.sh 已完成 seed 加载" >/dev/null 2>&1 || true
 
 clear
 python insights_cli.py solve \
   "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike" \
   $NO_AI_FLAG
+
+python -m insightsd.emitter --stage summary --status completed --source run_demo.sh --message "run_demo.sh 执行完成" >/dev/null 2>&1 || true
 
 echo
 echo "demo finished"

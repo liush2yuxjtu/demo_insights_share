@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PM 讲解稿</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f5efe3;
+      --ink: #1b1f1a;
+      --muted: #5b655d;
+      --accent: #0d5c63;
+      --accent-soft: #d7ebe3;
+      --card: rgba(255,255,255,0.72);
+      --border: rgba(27,31,26,0.08);
+      --shadow: 0 24px 80px rgba(27,31,26,0.12);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Georgia, "PingFang SC", "Hiragino Sans GB", serif;
+      background:
+        radial-gradient(circle at top left, rgba(13,92,99,0.18), transparent 28%),
+        linear-gradient(180deg, #faf5ea 0%, var(--bg) 100%);
+      color: var(--ink);
+    }
+    main {
+      width: min(1120px, calc(100vw - 48px));
+      margin: 0 auto;
+      padding: 56px 0 80px;
+    }
+    .hero {
+      padding: 32px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      backdrop-filter: blur(16px);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+    }
+    .eyebrow {
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 12px;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(34px, 5vw, 60px);
+      line-height: 1.05;
+      max-width: 14ch;
+    }
+    .lead {
+      max-width: 760px;
+      margin: 20px 0 0;
+      font-size: 19px;
+      line-height: 1.7;
+      color: var(--muted);
+    }
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 24px;
+    }
+    .actions a {
+      text-decoration: none;
+      color: inherit;
+      border-radius: 999px;
+      padding: 12px 18px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.78);
+    }
+    .actions a.primary {
+      background: var(--accent);
+      color: white;
+      border-color: transparent;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+      margin-top: 28px;
+    }
+    .card {
+      border-radius: 24px;
+      padding: 24px;
+      border: 1px solid var(--border);
+      background: rgba(255,255,255,0.76);
+      box-shadow: 0 12px 40px rgba(27,31,26,0.08);
+    }
+    .card h2, .card h3 {
+      margin: 0 0 12px;
+      font-size: 24px;
+    }
+    .card p, .card li {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 16px;
+    }
+    ol, ul {
+      margin: 0;
+      padding-left: 20px;
+    }
+    .evidence {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 18px;
+      margin-top: 28px;
+    }
+    .video-shell video {
+      width: 100%;
+      border-radius: 18px;
+      background: #0f1210;
+      min-height: 320px;
+    }
+    .meta {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .footnote {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    @media (max-width: 860px) {
+      main { width: min(100vw - 24px, 1120px); padding-top: 28px; }
+      .hero { padding: 24px; }
+      .evidence { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div class="eyebrow">PM Script</div>
+      <h1>这段演示真正要讲的是：一个陌生用户，也能在你的 Mac 上把整套流程亲手跑通。</h1>
+      <p class="lead">
+        旧录像的问题，不是链路不通，而是视角不对。它录的是系统怎么自证；新的整屏录像录的是用户如何从冷启动开始，先拉起服务，再完成 Demo、CLI、Validation，并在最后回到 handout 看到自动回填的通过状态。
+      </p>
+      <div class="actions">
+        <a class="primary" href="/handout">打开现场验收页</a>
+        <a href="/dashboard">打开 Dashboard</a>
+        <a href="/artifacts/validation/latest/index.html" target="_blank" rel="noreferrer">打开最新验证报告</a>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>一句话价值主张</h2>
+        <p>它把“AI agent 会自己跑”这件事，翻译成 PM 和评审也能看懂的用户证据：服务能拉起、页面是活的、输入真的打进会话、结果最终能被验证。</p>
+      </article>
+      <article class="card">
+        <h2>为什么旧录像不够</h2>
+        <p>如果录像从 daemon 已启动之后才开始，评审会自然怀疑：是不是后台早就准备好了？新的录像开场先给终端，把“这是现场冷启动”这件事讲清楚，再进入浏览器操作。</p>
+      </article>
+      <article class="card">
+        <h2>三条最强证据</h2>
+        <ul>
+          <li>Dashboard 会新增现场刚触发的 session。</li>
+          <li>CLI 页发送的固定 prompt 会出现在 tmux pane。</li>
+          <li>Validation 会收敛成 `6/6 通过` 的闭环结果。</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="evidence">
+      <article class="card video-shell">
+        <h3>最新默认整屏录像</h3>
+        <div id="pm-video-shell">正在读取最新录像…</div>
+        <div id="pm-video-meta" class="meta"></div>
+      </article>
+      <article class="card">
+        <h3>用户完整流程分镜</h3>
+        <ol>
+          <li>终端执行启动命令，证明服务是现场拉起的。</li>
+          <li>进入 `/handout`，先理解这场验收为什么可信。</li>
+          <li>打开 Dashboard 点击 Demo，看新增 session。</li>
+          <li>进入 CLI 发送固定提示词，看网页真实驱动 tmux pane。</li>
+          <li>回到 Dashboard 跑 Validation，再回 handout 看 Step 3 / 4 / 5 自动变绿。</li>
+        </ol>
+      </article>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h3>如何现场讲这段视频</h3>
+        <p>第一句先讲“这不是预录好的后台状态，我现在先把服务拉起来”；第二句讲“Dashboard 上新增的 session 都是我刚点出来的”；第三句讲“CLI 那条中文 prompt 真的进了 tmux”；最后用 Validation 收尾，告诉评审这不是只会跑 demo，而是能被验收。</p>
+      </article>
+      <article class="card">
+        <h3>相关入口</h3>
+        <ul>
+          <li><a href="/handout">现场验收页</a></li>
+          <li><a href="/dashboard">Dashboard</a></li>
+          <li><a href="/cli">CLI</a></li>
+          <li><a href="/artifacts/validation/artifacts/handout/latest.json" target="_blank" rel="noreferrer">latest.json</a></li>
+        </ul>
+      </article>
+    </section>
+
+    <p class="footnote">如果你要把这段演示讲给更偏业务的观众，就把注意力放在“现场触发”“真实输入”“可验证闭环”这三件事上，少讲实现细节，多讲信任是怎么建立的。</p>
+  </main>
+  <script>
+    (async () => {
+      const shell = document.getElementById('pm-video-shell');
+      const meta = document.getElementById('pm-video-meta');
+      try {
+        const response = await fetch('/artifacts/validation/artifacts/handout/latest.json', { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error('latest.json 不存在');
+        }
+        const data = await response.json();
+        const videoHref = data.video_href;
+        const when = data.captured_at || '未知时间';
+        if (videoHref) {
+          shell.innerHTML = '<video controls preload="metadata" src="' + videoHref + '"></video>';
+        } else {
+          shell.innerHTML = '<p>最新索引存在，但还没有视频文件。</p>';
+        }
+        meta.textContent = '最近一次用户录像：' + when + '；状态：' + (data.status || 'unknown');
+      } catch (error) {
+        shell.innerHTML = '<p>当前还没有可展示的用户录像，请先运行 handout:record。</p>';
+        meta.textContent = String(error && error.message ? error.message : error);
+      }
+    })();
+  </script>
+</body>
+</html>

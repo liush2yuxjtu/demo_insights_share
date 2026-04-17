@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Handout Verification</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+  <link rel="stylesheet" href="/static/handout.css" />
+</head>
+<body data-mode="handout">
+  <main class="handout-shell">
+    <section class="handout-hero">
+      <div class="eyebrow">Handout Verification</div>
+      <h1>这不是一段自检录像，而是一位第一次坐到这台 Mac 前的用户，怎样把整套演示亲手跑起来。</h1>
+      <p>
+        先在终端冷启动 daemon，再通过 Dashboard、CLI、Validation 走完完整链路；
+        回到本页时，Step 3 / 4 / 5 会自动回填为通过，不需要再靠手动点“重新检查”证明页面是真的连着后端。
+      </p>
+      <div class="hero-actions">
+        <a class="action-btn" href="/dashboard">打开 Dashboard</a>
+        <a class="ghost-btn" href="/pm-script">打开 PM 讲解稿</a>
+        <a class="ghost-btn" href="/cli">打开 CLI</a>
+        <button id="handout-refresh-all" class="ghost-btn">刷新当前检查</button>
+      </div>
+      <div class="proof-strip">
+        <div class="proof-pill">先终端启动，再刷新进入本页</div>
+        <div class="proof-pill">Demo / CLI / Validation 自动回填</div>
+        <div class="proof-pill">最新默认资产始终指向用户整屏录像</div>
+      </div>
+    </section>
+
+    <section class="hero-grid">
+      <article class="info-card">
+        <div class="section-kicker">冷启动前置</div>
+        <h2>Step 1 不是页面内操作，而是先把服务拉起来。</h2>
+        <p>
+          当 daemon 还没启动时，`/handout` 本身就不可访问，所以这一步必须被明确讲出来：
+          先在终端执行下面这条命令，看到 `127.0.0.1:7821` 在线后，再刷新或重新打开本页。
+        </p>
+        <div id="handout-daemon-state" class="state-pill">检查中</div>
+        <pre id="handout-cli-command" class="cli-command"></pre>
+        <div class="inline-actions">
+          <button id="handout-copy-cli" class="ghost-btn">复制命令</button>
+          <span id="handout-copy-state" class="mono">未复制</span>
+        </div>
+      </article>
+      <article class="info-card accent-card">
+        <div class="section-kicker">基线说明</div>
+        <h2>页面会记住你刚进入 handout 时的基线。</h2>
+        <p>
+          后续新增的 `demo`、CLI prompt、`validation` 都会和这条基线比对，所以评审能看懂哪些结果是你现场刚触发的，而不是预先摆好的静态样板。
+        </p>
+        <div id="handout-baseline" class="baseline-note">等待建立基线。</div>
+        <div class="baseline-stats">
+          <div>
+            <span class="stat-label">Runner</span>
+            <strong id="handout-summary-runner">检查中</strong>
+          </div>
+          <div>
+            <span class="stat-label">最近 Session</span>
+            <strong id="handout-summary-sessions">检查中</strong>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="handout-grid">
+      <article class="step-card" data-step-id="start_service">
+        <div class="step-heading">
+          <span class="step-index">1</span>
+          <div>
+            <div class="section-kicker">启动服务</div>
+            <h2>先在终端启动 daemon</h2>
+          </div>
+          <div class="step-state" data-step-status>待检查</div>
+        </div>
+        <p data-step-signal>本步通过标准：`/healthz` 可达，本页显示“daemon 已连接”。</p>
+        <p data-step-failure>失败先看：确认终端里那条命令仍在运行，并且本机 `127.0.0.1` 没有走代理。</p>
+        <p data-step-why>说服价值：评审会先被“这真是在你这台机器上现拉起来”的事实说服，而不是先看 UI。</p>
+        <div class="inline-actions">
+          <button class="ghost-btn" data-action="check-step" data-step-id="start_service">重新检查</button>
+        </div>
+      </article>
+
+      <article class="step-card" data-step-id="dashboard_live">
+        <div class="step-heading">
+          <span class="step-index">2</span>
+          <div>
+            <div class="section-kicker">实时 Dashboard</div>
+            <h2>打开 Dashboard，先证明不是假数据</h2>
+          </div>
+          <div class="step-state" data-step-status>待检查</div>
+        </div>
+        <p data-step-signal>本步通过标准：`Runner=ON`，最近 Session 列表不是空壳。</p>
+        <p data-step-failure>失败先看：刷新 Dashboard；如果列表仍为空，检查 daemon 是否已成功加载现有 artifact。</p>
+        <p data-step-why>说服价值：让非技术评审先看到“页面是活的，而且连着真实运行状态”。</p>
+        <div class="inline-actions">
+          <a class="ghost-btn" href="/dashboard">去 Dashboard</a>
+          <button class="ghost-btn" data-action="check-step" data-step-id="dashboard_live">重新检查</button>
+        </div>
+      </article>
+
+      <article class="step-card" data-step-id="run_demo">
+        <div class="step-heading">
+          <span class="step-index">3</span>
+          <div>
+            <div class="section-kicker">Demo 触发</div>
+            <h2>在 Dashboard 点击“运行 Demo”</h2>
+          </div>
+          <div class="step-state" data-step-status>等待新 Demo</div>
+        </div>
+        <p data-step-signal>本步通过标准：基线之后新增一条已完成的 `demo` session，并且主舞台出现完成态。</p>
+        <p data-step-failure>失败先看：回到 Dashboard 确认按钮真的触发了请求；本页保持打开时会自动轮询并回填结果。</p>
+        <p data-step-why>说服价值：证明“现场点一下就会出结果”，不是静态截图或预录内容。</p>
+        <div class="inline-actions">
+          <a class="ghost-btn" href="/dashboard">去运行 Demo</a>
+          <button class="ghost-btn" data-action="check-step" data-step-id="run_demo">重新检查</button>
+        </div>
+      </article>
+
+      <article class="step-card" data-step-id="cli_send">
+        <div class="step-heading">
+          <span class="step-index">4</span>
+          <div>
+            <div class="section-kicker">CLI 真输入</div>
+            <h2>在 CLI 页发送固定提示词</h2>
+          </div>
+          <div class="step-state" data-step-status>等待 pane 回显</div>
+        </div>
+        <p data-step-signal>固定验证文本：`请只回复：CLI 输入链路已验证`。通过标准：页面已发送，tmux pane 出现这条 prompt。</p>
+        <p data-step-failure>失败先看：确认当前 pane 可写，`POST /api/cli/tmux/input` 返回 `202`，并且本页保持打开让自动轮询继续工作。</p>
+        <p data-step-why>说服价值：这是最直观的一步，能让人看到网页操作真的落到了 tmux / Claude 会话里。</p>
+        <div class="inline-actions">
+          <a class="ghost-btn" href="/cli">去 CLI</a>
+          <button class="ghost-btn" data-action="check-step" data-step-id="cli_send">重新检查</button>
+        </div>
+      </article>
+
+      <article class="step-card" data-step-id="run_validation">
+        <div class="step-heading">
+          <span class="step-index">5</span>
+          <div>
+            <div class="section-kicker">Validation 闭环</div>
+            <h2>回到 Dashboard 点击“运行 Validation”</h2>
+          </div>
+          <div class="step-state" data-step-status>等待验证完成</div>
+        </div>
+        <p data-step-signal>本步通过标准：基线之后新增一条 `validation` session，最终 `passed == total`，并看到 `6/6 通过`。</p>
+        <p data-step-failure>失败先看：先在 Dashboard 看 validation 是否还在跑；本页会持续轮询直到结果完成或你手动刷新。</p>
+        <p data-step-why>说服价值：告诉评审这套东西不是只会演示，还能把结果收敛成可验证报告。</p>
+        <div class="inline-actions">
+          <a class="ghost-btn" href="/dashboard">去运行 Validation</a>
+          <button class="ghost-btn" data-action="check-step" data-step-id="run_validation">重新检查</button>
+        </div>
+      </article>
+    </section>
+
+    <section class="anchor-panel">
+      <div class="section-kicker">三条核心证据</div>
+      <h2>评审如果时间很短，只看这三处也足够建立信任。</h2>
+      <div class="anchor-grid">
+        <article>
+          <h3>实时 Dashboard</h3>
+          <p>看得见 Runner 在线、会新增 session，说明页面连的是实时 daemon，不是静态样板。</p>
+          <a class="ghost-link" href="/dashboard">打开 Dashboard</a>
+        </article>
+        <article>
+          <h3>CLI 发送成功</h3>
+          <p>固定提示词真的进入 tmux pane，这是“网页驱动实际会话”的最强证据。</p>
+          <a class="ghost-link" href="/cli">打开 CLI</a>
+        </article>
+        <article>
+          <h3>Validation 报告</h3>
+          <p>最后能收敛成通过报告，说明这不是只会演示的 demo，而是一条能验收的工作流。</p>
+          <a class="ghost-link" href="/artifacts/validation/latest/index.html" target="_blank" rel="noreferrer">打开最新验证报告</a>
+        </article>
+      </div>
+    </section>
+
+    <section class="recording-panel">
+      <div class="recording-header">
+        <div>
+          <div class="section-kicker">最新默认录像</div>
+          <h2>默认展示的是“冷启动用户完整流程”整屏录像</h2>
+        </div>
+        <div class="inline-actions">
+          <a class="ghost-link" href="/pm-script">打开 PM 讲解稿</a>
+          <a class="ghost-link" href="/artifacts/validation/artifacts/handout/latest.json" target="_blank" rel="noreferrer">打开 latest.json</a>
+        </div>
+      </div>
+      <div id="handout-recording-summary" class="recording-summary">读取录制索引中…</div>
+      <div id="handout-recording-video" class="recording-video"></div>
+      <div id="handout-recording-steps" class="recording-steps"></div>
+    </section>
+  </main>
+  <script src="/static/handout.js" defer></script>
+</body>
+</html>

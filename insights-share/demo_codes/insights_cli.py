@@ -7,7 +7,9 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import importlib.metadata
 import json
+import os
 import sys
 import urllib.error
 import urllib.parse
@@ -17,6 +19,7 @@ from typing import Any
 
 import adapter
 import ui
+from insightsd.emitter import emit_from_env
 
 DEFAULT_WIKI = "http://127.0.0.1:7821"
 DEFAULT_LOCAL_CONTEXT = (
@@ -27,6 +30,20 @@ DEFAULT_PROBLEM = (
     "Our checkout API is timing out, postgres is rejecting new connections "
     "during the lunch spike"
 )
+
+
+def _resolve_version() -> str:
+    try:
+        return importlib.metadata.version("insights-share")
+    except importlib.metadata.PackageNotFoundError:
+        version_file = Path(__file__).resolve().parents[1] / "VERSION"
+        if version_file.is_file():
+            return version_file.read_text(encoding="utf-8").strip()
+    return "0.0.0+dev"
+
+
+def _env_truthy(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _http_get(url: str, timeout: float = 5.0) -> dict[str, Any]:
@@ -60,6 +77,8 @@ def cmd_serve(args: argparse.Namespace) -> int:
         port=args.port,
         store_path=Path(args.store),
         store_mode=args.store_mode,
+        runtime_dir=Path(args.runtime_dir) if args.runtime_dir else None,
+        enable_runners=bool(args.enable_runners),
     )
     return 0
 
@@ -77,6 +96,14 @@ def cmd_publish(args: argparse.Namespace) -> int:
         print(ui.color(f"publish failed: {exc}", "red"), file=sys.stderr)
         return 1
     cid = resp.get("id") or card.get("id", "?")
+    emit_from_env(
+        stage="publish",
+        status="ok",
+        source="insights_cli.publish",
+        message=f"已发布 {cid}",
+        payload={"card_id": cid},
+        metrics={"tag_count": len(card.get("tags") or [])},
+    )
     print(ui.color(f"published {cid}", "green"))
     return 0
 
@@ -192,16 +219,34 @@ def cmd_solve(args: argparse.Namespace) -> int:
 
     q = urllib.parse.urlencode({"q": problem, "k": 3})
     search_url = f"{wiki}/search?{q}"
+    emit_from_env(
+        stage="search",
+        status="running",
+        source="insights_cli.solve",
+        message=f"开始检索：{problem}",
+    )
 
     with ui.timer() as t:
         try:
             resp = _http_get(search_url)
         except urllib.error.URLError as exc:
+            emit_from_env(
+                stage="search",
+                status="failed",
+                source="insights_cli.solve",
+                message=f"检索失败：{exc}",
+            )
             print(ui.color(f"search failed: {exc}", "red"), file=sys.stderr)
             return 1
         hits = resp.get("hits") or []
 
     if not hits:
+        emit_from_env(
+            stage="search",
+            status="failed",
+            source="insights_cli.solve",
+            message="未命中任何卡片",
+        )
         _print_hits_empty(problem)
         return 1
 
@@ -209,12 +254,28 @@ def cmd_solve(args: argparse.Namespace) -> int:
     cid = card.get("id", "?")
     author = card.get("author", "?")
     score = card.get("score", 0.0)
+    emit_from_env(
+        stage="search",
+        status="ok",
+        source="insights_cli.solve",
+        message=f"命中 {cid}",
+        payload={"card_id": cid, "author": author},
+        metrics={"score": score},
+    )
     print(ui.color(f"hot-loaded {cid} from {author} (score={score})", "cyan"))
     print()
 
     if args.no_ai:
         confidence = card.get("confidence", 0)
         body = card.get("fix", "") or ""
+        emit_from_env(
+            stage="result",
+            status="ok",
+            source="insights_cli.solve",
+            message=body or "返回 no-ai 原始修复建议",
+            payload={"card_id": cid, "mode": "no_ai"},
+            metrics={"confidence": confidence, "fast_path_s": round(t.elapsed, 3)},
+        )
         print(ui.panel(body, f"raw (no-ai) confidence={confidence}", "yellow"))
         print()
         print(
@@ -225,11 +286,30 @@ def cmd_solve(args: argparse.Namespace) -> int:
 
     with ui.spinner("validating against your context..."):
         result = asyncio.run(adapter.adapt(card, problem, args.local_context))
+    emit_from_env(
+        stage="adapt",
+        status="ok",
+        source="insights_cli.solve",
+        message=result.diff_summary or "适配完成",
+        payload={"verdict": result.verdict, "card_id": cid},
+        metrics={"adapter_latency_s": round(result.latency_s, 3)},
+    )
 
     subtitle = (
         f"verdict={result.verdict} "
         f"confidence={result.confidence:.2f} "
         f"diff={result.diff_summary}"
+    )
+    emit_from_env(
+        stage="result",
+        status="ok",
+        source="insights_cli.solve",
+        message=result.adapted_insight,
+        payload={"verdict": result.verdict, "card_id": cid},
+        metrics={
+            "confidence": round(result.confidence, 3),
+            "fast_path_s": round(t.elapsed, 3),
+        },
     )
     print(ui.panel(result.adapted_insight, subtitle, "green"))
     print()
@@ -316,8 +396,28 @@ def cmd_demo(args: argparse.Namespace) -> int:  # noqa: ARG001
     return 0
 
 
+def cmd_version(args: argparse.Namespace) -> int:  # noqa: ARG001
+    print(_resolve_version())
+    return 0
+
+
+def cmd_emit_event(args: argparse.Namespace) -> int:
+    ok = emit_from_env(
+        stage=args.stage,
+        status=args.status,
+        source=args.source,
+        message=args.message,
+    )
+    return 0 if ok else 2
+
+
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="insights_cli", description="insights-share demo CLI")
+    parser = argparse.ArgumentParser(prog="insights-share", description="insights-share demo CLI")
+    parser.add_argument(
+        "--version",
+        action="version",
+        version=f"%(prog)s {_resolve_version()}",
+    )
     sub = parser.add_subparsers(dest="command", required=True)
 
     p_serve = sub.add_parser("serve", help="run the insightsd HTTP daemon")
@@ -329,6 +429,13 @@ def build_parser() -> argparse.ArgumentParser:
         choices=["flat", "tree"],
         default="flat",
         help="flat=single wiki.json (baseline), tree=wiki_tree 4-layer directory",
+    )
+    p_serve.add_argument("--runtime-dir", default="")
+    p_serve.add_argument(
+        "--enable-runners",
+        action="store_true",
+        default=_env_truthy("INSIGHTS_UI_ENABLE_RUNNERS"),
+        help="启用 /api/runs/* 页面触发能力",
     )
     p_serve.set_defaults(func=cmd_serve)
 
@@ -388,6 +495,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     p_demo = sub.add_parser("demo", help="print how to run the end-to-end demo")
     p_demo.set_defaults(func=cmd_demo)
+
+    p_version = sub.add_parser("version", help="print current release version")
+    p_version.set_defaults(func=cmd_version)
+
+    p_emit = sub.add_parser("emit-event", help="从当前环境变量向 daemon 发一条事件")
+    p_emit.add_argument("--stage", required=True)
+    p_emit.add_argument("--status", required=True)
+    p_emit.add_argument("--source", default="shell")
+    p_emit.add_argument("--message", required=True)
+    p_emit.set_defaults(func=cmd_emit_event)
 
     # topic-create
     p_topic_create = sub.add_parser("topic-create", help="create a new Topic")

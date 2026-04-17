@@ -87,6 +87,41 @@ def _card_tokens(card: dict[str, Any]) -> set[str]:
     return _tokenize(" ".join(parts))
 
 
+def search_cards(
+    cards: list[dict[str, Any]],
+    q: str,
+    *,
+    k: int = 3,
+    skip_not_triggered: bool = False,
+) -> list[dict[str, Any]]:
+    query_tokens = _tokenize(q or "")
+    if not query_tokens:
+        return []
+    scored: list[tuple[float, dict[str, Any]]] = []
+    for original in cards:
+        card = dict(original)
+        if skip_not_triggered and card.get("status") == "not_triggered":
+            continue
+        card_tokens = _card_tokens(card)
+        if not card_tokens:
+            continue
+        union = query_tokens | card_tokens
+        if not union:
+            continue
+        inter = query_tokens & card_tokens
+        score = len(inter) / len(union)
+        if score <= 0:
+            continue
+        scored.append((score, card))
+    scored.sort(key=lambda item: item[0], reverse=True)
+    results: list[dict[str, Any]] = []
+    for score, card in scored[: max(1, int(k))]:
+        enriched = dict(card)
+        enriched["score"] = round(score, 4)
+        results.append(enriched)
+    return results
+
+
 class InsightStore:
     def __init__(self, path: Path) -> None:
         self.path = Path(path)
@@ -148,30 +183,7 @@ class InsightStore:
         ]
 
     def search(self, q: str, k: int = 3) -> list[dict[str, Any]]:
-        query_tokens = _tokenize(q or "")
-        if not query_tokens:
-            return []
-        cards = self.load()
-        scored: list[tuple[float, dict[str, Any]]] = []
-        for card in cards:
-            card_tokens = _card_tokens(card)
-            if not card_tokens:
-                continue
-            union = query_tokens | card_tokens
-            if not union:
-                continue
-            inter = query_tokens & card_tokens
-            score = len(inter) / len(union)
-            if score <= 0:
-                continue
-            scored.append((score, card))
-        scored.sort(key=lambda item: item[0], reverse=True)
-        results: list[dict[str, Any]] = []
-        for score, card in scored[: max(1, int(k))]:
-            enriched = dict(card)
-            enriched["score"] = round(score, 4)
-            results.append(enriched)
-        return results
+        return search_cards(self.load(), q, k=k)
 
 
 _FRONTMATTER_OPEN = "---\n"
@@ -382,32 +394,13 @@ class TreeInsightStore:
         ]
 
     def search(self, q: str, k: int = 3) -> list[dict[str, Any]]:
-        query_tokens = _tokenize(q or "")
-        if not query_tokens:
-            return []
-        scored: list[tuple[float, dict[str, Any]]] = []
-        for card in self.load():
-            if card.get("status") == "not_triggered":
-                continue
-            card_tokens = _card_tokens(card)
-            if not card_tokens:
-                continue
-            union = query_tokens | card_tokens
-            inter = query_tokens & card_tokens
-            if not union or not inter:
-                continue
-            score = len(inter) / len(union)
-            if score <= 0:
-                continue
-            scored.append((score, card))
-        scored.sort(key=lambda item: item[0], reverse=True)
-        results: list[dict[str, Any]] = []
-        for score, card in scored[: max(1, int(k))]:
-            enriched = dict(card)
-            enriched["score"] = round(score, 4)
-            enriched["effective_label"] = card.get("label_override") or card.get("label", "good")
-            results.append(enriched)
-        return results
+        results = search_cards(self.load(), q, k=k, skip_not_triggered=True)
+        enriched: list[dict[str, Any]] = []
+        for card in results:
+            item = dict(card)
+            item["effective_label"] = item.get("label_override") or item.get("label", "good")
+            enriched.append(item)
+        return enriched
 
     # --- Phase 3 CRUD (write API) ---
 

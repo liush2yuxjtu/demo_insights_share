@@ -28,6 +28,7 @@ import sys
 from pathlib import Path
 
 from _sdk_common import env_summary, get_haiku_model
+from insightsd.emitter import emit_from_env
 
 from claude_agent_sdk import (  # noqa: E402
     AssistantMessage,
@@ -107,6 +108,13 @@ def _extract_hits(raw: str) -> dict:
 async def _run_async(query_text: str, wiki_tree: str) -> dict:
     wiki_tree_abs = str(Path(wiki_tree).resolve())
     prompt = PROMPT_TEMPLATE.format(wiki_tree=wiki_tree_abs, query=query_text)
+    emit_from_env(
+        stage="search",
+        status="running",
+        source="search_agent",
+        message=f"agentic search 开始：{query_text[:80]}",
+        payload={"wiki_tree": wiki_tree_abs},
+    )
 
     options = ClaudeAgentOptions(
         permission_mode="dontAsk",
@@ -139,7 +147,17 @@ async def _run_async(query_text: str, wiki_tree: str) -> dict:
     raw = "\n".join(collected).strip()
     if not raw:
         raise RuntimeError("search_agent: empty response from MiniMax")
-    return _extract_hits(raw)
+    hits = _extract_hits(raw)
+    top = (hits.get("hits") or [None])[0]
+    emit_from_env(
+        stage="search",
+        status="ok",
+        source="search_agent",
+        message=f"agentic search 命中 {top.get('item') if top else 'none'}",
+        payload=hits,
+        metrics={"score": top.get("score", 0) if top else 0},
+    )
+    return hits
 
 
 def run(query: str, wiki_tree_root: str) -> dict:

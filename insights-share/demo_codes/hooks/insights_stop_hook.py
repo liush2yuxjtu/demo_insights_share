@@ -91,12 +91,25 @@ def main() -> int:
     sys.path.insert(0, str(DEMO_CODES / "hooks"))
     import search_agent  # noqa: E402
     import insights_cache  # noqa: E402
+    from insightsd.emitter import emit_from_env  # noqa: E402
 
     sys.stderr.write(f"[insights_stop_hook] querying search_agent: {last_text[:120]!r}\n")
+    emit_from_env(
+        stage="hook",
+        status="running",
+        source="insights_stop_hook",
+        message=f"Stop hook 触发：{last_text[:80]}",
+    )
     try:
         hits = search_agent.run(query=last_text, wiki_tree_root=str(WIKI_TREE))
     except Exception as exc:  # noqa: BLE001
         sys.stderr.write(f"[insights_stop_hook] search_agent failed: {exc}\n")
+        emit_from_env(
+            stage="hook",
+            status="failed",
+            source="insights_stop_hook",
+            message=f"Stop hook 检索失败：{type(exc).__name__}",
+        )
         return 0
     top = (hits.get("hits") or [None])[0]
 
@@ -127,6 +140,14 @@ def main() -> int:
             sys.stderr.write(
                 f"[insights_stop_hook] cache persist failed: {exc}\n"
             )
+        emit_from_env(
+            stage="hook",
+            status="ok",
+            source="insights_stop_hook",
+            message=f"Stop hook 命中 {top.get('item')}",
+            payload={"top": top},
+            metrics={"score": top.get("score", 0)},
+        )
         # 注：Stop hook 的 hookSpecificOutput schema 不支持 additionalContext 字段，
         # 写 stdout 会导致 Claude Code 报 "Stop hook error: JSON validation failed"。
         # hint 注入改由 insights_prefetch.py 在 UserPromptSubmit 事件里处理，

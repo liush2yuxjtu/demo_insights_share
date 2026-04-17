@@ -1,0 +1,120 @@
+[2026-04-16T16:29:23.824Z] 启动整屏录制
+ffmpeg version 8.0.1 Copyright (c) 2000-2025 the FFmpeg developers
+  built with Apple clang version 17.0.0 (clang-1700.6.3.2)
+  configuration: --prefix=/opt/homebrew/Cellar/ffmpeg/8.0.1_2 --enable-shared --enable-pthreads --enable-version3 --cc=clang --host-cflags= --host-ldflags= --enable-ffplay --enable-gpl --enable-libsvtav1 --enable-libopus --enable-libx264 --enable-libmp3lame --enable-libdav1d --enable-libvpx --enable-libx265 --enable-videotoolbox --enable-audiotoolbox --enable-neon
+libavutil      60.  8.100 / 60.  8.100
+  libavcodec     62. 11.100 / 62. 11.100
+  libavformat    62.  3.100 / 62.  3.100
+  libavdevice    62.  1.100 / 62.  1.100
+  libavfilter    11.  4.100 / 11.  4.100
+  libswscale      9.  1.100 /  9.  1.100
+  libswresample   6.  1.100 /  6.  1.100
+objc[8940]: class `NSKVONotifying_AVCaptureScreenInput' not linked into application
+objc[8940]: class `NSKVONotifying_AVCaptureScreenInput' not linked into application
+objc[8940]: class `NSKVONotifying_AVCaptureScreenInput' not linked into application
+[AVFoundation indev @ 0x999020140] Configuration of video device failed, falling back to default.
+[avfoundation @ 0x998c0c000] Selected pixel format (yuv420p) is not supported by the input device.
+[avfoundation @ 0x998c0c000] Supported pixel formats:
+[avfoundation @ 0x998c0c000]   uyvy422
+[avfoundation @ 0x998c0c000]   yuyv422
+[avfoundation @ 0x998c0c000]   nv12
+[avfoundation @ 0x998c0c000]   0rgb
+[avfoundation @ 0x998c0c000]   bgr0
+[avfoundation @ 0x998c0c000] Overriding selected pixel format to use uyvy422 instead.
+[avfoundation @ 0x998c0c000] Stream #0: not enough frames to estimate rate; consider increasing probesize
+Input #0, avfoundation, from '1:none':
+  Duration: N/A, start: 12697.512667
+, bitrate: N/A
+  Stream #0:0: Video: rawvideo (UYVY / 0x59565955), uyvy422, 2880x1800, 1000k tbr, 1000k tbn, start 12697.512667
+Stream mapping:
+  Stream #0:0 -> #0:0 (rawvideo (native) -> h264 (libx264))
+Press [q] to stop, [?] for help
+[libx264 @ 0x9992e8a80] MB rate (20340000000) > level limit (16711680)
+[libx264 @ 0x9992e8a80] using cpu capabilities: ARMv8 NEON DotProd
+[libx264 @ 0x9992e8a80] profile High, level 6.2, 4:2:0, 8-bit
+[libx264 @ 0x9992e8a80] 264 - core 165 r3222 b35605a - H.264/MPEG-4 AVC codec - Copyleft 2003-2025 - http://www.videolan.org/x264.html - options: cabac=1 ref=3 deblock=1:0:0 analyse=0x3:0x113 me=hex subme=7 psy=1 psy_rd=1.00:0.00 mixed_ref=1 me_range=16 chroma_me=1 trellis=1 8x8dct=1 cqm=0 deadzone=21,11 fast_pskip=1 chroma_qp_offset=-2 threads=12 lookahead_threads=2 sliced_threads=0 nr=0 decimate=1 interlaced=0 bluray_compat=0 constrained_intra=0 bframes=3 b_pyramid=2 b_adapt=1 b_bias=0 direct=1 weightb=1 open_gop=0 weightp=2 keyint=250 keyint_min=25 scenecut=40 intra_refresh=0 rc_lookahead=40 rc=crf mbtree=1 crf=23.0 qcomp=0.60 qpmin=0 qpmax=69 qpstep=4 ip_ratio=1.40 aq=1:1.00
+Output #0, mp4, to '/Users/m1/projects/demo_insights_share/insights-share/validation/artifacts/handout/runs/2026-04-16T16-29-23-756Z/user-flow.mp4':
+  Metadata:
+    encoder         : Lavf62.3.100
+Stream #0:0: Video: h264 (avc1 / 0x31637661), yuv420p(tv, progressive), 2880x1800, q=2-31, 1000k fps, 1000k tbn
+    Metadata:
+      encoder         : Lavc62.11.100 libx264
+    Side data:
+      cpb: bitrate max/min/avg: 0/0/0 buffer size: 0 vbv_delay: N/A
+frame=    0 fps=0.0 q=0.0 size=       0KiB time=N/A bitrate=N/A speed=N/A elapsed=0:00:00.51
+[2026-04-16T16:29:25.332Z] 通过 Terminal 冷启动 daemon
+frame=    0 fps=0.0 q=0.0 size=       0KiB time=N/A bitrate=N/A speed=N/A elapsed=0:00:01.02    frame=    0 fps=0.0 q=0.0 size=       0KiB time=N/A bitrate=N/A speed=N/A elapsed=0:00:01.53    frame=    5 fps=2.5 q=29.0 size=     256KiB time=00:00:00.06 bitrate=31462.9kbits/s speed=0.0328x elapsed=0:00:02.03    frame=   21 fps=8.3 q=29.0 size=     256KiB time=00:00:00.60 bitrate=3495.9kbits/s speed=0.236x elapsed=0:00:02.54
+frame=   36 fps= 12 q=29.0 size=     256KiB time=00:00:01.10 bitrate=1906.8kbits/s speed=0.361x elapsed=0:00:03.04
+frame=   51 fps= 14 q=29.0 size=     256KiB time=00:00:01.60 bitrate=1311.0kbits/s speed=0.449x elapsed=0:00:03.56
+frame=   66 fps= 16 q=29.0 size=     512KiB time=00:00:02.10 bitrate=1997.5kbits/s speed=0.517x elapsed=0:00:04.06
+frame=   81 fps= 18 q=29.0 size=     512KiB time=00:00:02.60 bitrate=1613.3kbits/s speed=0.569x elapsed=0:00:04.56
+frame=   95 fps= 19 q=29.0 size=     512KiB time=00:00:03.06 bitrate=1367.8kbits/s speed=0.604x elapsed=0:00:05.07
+frame=  111 fps= 20 q=29.0 size=     512KiB time=00:00:03.60 bitrate=1165.2kbits/s speed=0.645x elapsed=0:00:05.58
+frame=  126 fps= 21 q=29.0 size=     512KiB time=00:00:04.10 bitrate=1023.1kbits/s speed=0.674x elapsed=0:00:06.08
+frame=  141 fps= 21 q=29.0 size=     512KiB time=00:00:04.60 bitrate= 911.9kbits/s speed=0.697x elapsed=0:00:06.59
+frame=  156 fps= 22 q=29.0 size=     512KiB time=00:00:05.13 bitrate= 817.1kbits/s speed=0.723x elapsed=0:00:07.10
+frame=  171 fps= 22 q=29.0 size=     512KiB time=00:00:05.63 bitrate= 744.6kbits/s speed=0.74x elapsed=0:00:07.60
+[2026-04-16T16:29:32.567Z] Terminal 自动化未在预期时间内拉起 daemon，改用同命令后台兜底启动
+frame=  186 fps= 23 q=29.0 size=     512KiB time=00:00:06.13 bitrate= 683.9kbits/s speed=0.755x elapsed=0:00:08.12
+frame=  202 fps= 23 q=29.0 size=     512KiB time=00:00:06.66 bitrate= 629.2kbits/s speed=0.772x elapsed=0:00:08.63
+frame=  217 fps= 24 q=29.0 size=     512KiB time=00:00:07.16 bitrate= 585.3kbits/s speed=0.784x elapsed=0:00:09.14
+frame=  233 fps= 24 q=29.0 size=     512KiB time=00:00:07.70 bitrate= 544.8kbits/s speed=0.798x elapsed=0:00:09.65
+[2026-04-16T16:29:34.600Z] daemon 已在线
+frame=  247 fps= 24 q=29.0 size=     512KiB time=00:00:08.16 bitrate= 513.6kbits/s speed=0.803x elapsed=0:00:10.16
+frame=  262 fps= 25 q=29.0 size=    1024KiB time=00:00:08.66 bitrate= 968.0kbits/s speed=0.812x elapsed=0:00:10.67
+frame=  274 fps= 25 q=29.0 size=    1024KiB time=00:00:09.06 bitrate= 925.3kbits/s speed=0.811x elapsed=0:00:11.18
+frame=  288 fps= 25 q=29.0 size=    1024KiB time=00:00:09.53 bitrate= 880.0kbits/s speed=0.815x elapsed=0:00:11.69
+frame=  300 fps= 25 q=29.0 size=    1024KiB time=00:00:09.93 bitrate= 844.5kbits/s speed=0.814x elapsed=0:00:12.19
+frame=  311 fps= 24 q=29.0 size=    1024KiB time=00:00:10.33 bitrate= 811.8kbits/s speed=0.813x elapsed=0:00:12.70
+frame=  316 fps= 24 q=29.0 size=    1024KiB time=00:00:10.50 bitrate= 799.0kbits/s speed=0.795x elapsed=0:00:13.20
+frame=  320 fps= 23 q=29.0 size=    1024KiB time=00:00:10.63 bitrate= 788.9kbits/s speed=0.775x elapsed=0:00:13.71
+[2026-04-16T16:29:38.356Z] 打开 /handout
+frame=  325 fps= 23 q=29.0 size=    1024KiB time=00:00:10.80 bitrate= 776.8kbits/s speed=0.759x elapsed=0:00:14.22
+frame=  330 fps= 22 q=29.0 size=    1024KiB time=00:00:10.96 bitrate= 765.0kbits/s speed=0.745x elapsed=0:00:14.72
+frame=  339 fps= 22 q=29.0 size=    1024KiB time=00:00:11.26 bitrate= 744.6kbits/s speed=0.74x elapsed=0:00:15.23
+frame=  349 fps= 22 q=29.0 size=    1024KiB time=00:00:11.63 bitrate= 721.1kbits/s speed=0.739x elapsed=0:00:15.74
+frame=  361 fps= 22 q=29.0 size=    1024KiB time=00:00:12.00 bitrate= 699.1kbits/s speed=0.738x elapsed=0:00:16.26
+frame=  369 fps= 22 q=29.0 size=    1280KiB time=00:00:12.26 bitrate= 854.8kbits/s speed=0.731x elapsed=0:00:16.77
+frame=  375 fps= 22 q=29.0 size=    1280KiB time=00:00:12.50 bitrate= 838.9kbits/s speed=0.723x elapsed=0:00:17.29
+frame=  384 fps= 22 q=29.0 size=    1280KiB time=00:00:12.76 bitrate= 821.4kbits/s speed=0.717x elapsed=0:00:17.79
+[2026-04-16T16:29:42.819Z] 进入 Dashboard 并触发 Demo
+frame=  393 fps= 21 q=29.0 size=    1280KiB time=00:00:13.06 bitrate= 802.5kbits/s speed=0.714x elapsed=0:00:18.29
+frame=  400 fps= 21 q=25.0 size=    1280KiB time=00:00:13.30 bitrate= 788.4kbits/s speed=0.707x elapsed=0:00:18.80
+frame=  403 fps= 21 q=24.0 size=    1280KiB time=00:00:13.43 bitrate= 780.6kbits/s speed=0.696x elapsed=0:00:19.30
+frame=  412 fps= 21 q=29.0 size=    1280KiB time=00:00:14.26 bitrate= 735.0kbits/s speed=0.72x elapsed=0:00:19.81
+frame=  421 fps= 21 q=27.0 size=    1536KiB time=00:00:15.00 bitrate= 838.9kbits/s speed=0.738x elapsed=0:00:20.32
+frame=  436 fps= 21 q=29.0 size=    1536KiB time=00:00:15.73 bitrate= 799.8kbits/s speed=0.755x elapsed=0:00:20.83
+frame=  447 fps= 21 q=29.0 size=    1536KiB time=00:00:16.26 bitrate= 773.6kbits/s speed=0.763x elapsed=0:00:21.33
+frame=  463 fps= 21 q=29.0 size=    1536KiB time=00:00:17.33 bitrate= 726.0kbits/s speed=0.794x elapsed=0:00:21.84
+frame=  475 fps= 21 q=25.0 size=    1536KiB time=00:00:17.96 bitrate= 700.4kbits/s speed=0.804x elapsed=0:00:22.35
+frame=  490 fps= 21 q=25.0 size=    1792KiB time=00:00:19.33 bitrate= 759.3kbits/s speed=0.846x elapsed=0:00:22.85
+frame=  514 fps= 22 q=29.0 size=    2304KiB time=00:00:20.56 bitrate= 917.7kbits/s speed=0.88x elapsed=0:00:23.36
+frame=  530 fps= 22 q=29.0 size=    2304KiB time=00:00:21.13 bitrate= 893.1kbits/s speed=0.885x elapsed=0:00:23.87
+[2026-04-16T16:29:48.682Z] 进入 CLI 页面发送固定提示词
+frame=  542 fps= 22 q=29.0 size=    2304KiB time=00:00:21.70 bitrate= 869.8kbits/s speed=0.89x elapsed=0:00:24.37
+frame=  556 fps= 22 q=29.0 size=    2304KiB time=00:00:22.16 bitrate= 851.5kbits/s speed=0.891x elapsed=0:00:24.87
+frame=  570 fps= 22 q=29.0 size=    2304KiB time=00:00:22.70 bitrate= 831.5kbits/s speed=0.894x elapsed=0:00:25.38
+frame=  586 fps= 23 q=29.0 size=    2304KiB time=00:00:23.23 bitrate= 812.4kbits/s speed=0.897x elapsed=0:00:25.89
+frame=  595 fps= 23 q=29.0 size=    2304KiB time=00:00:23.53 bitrate= 802.0kbits/s speed=0.892x elapsed=0:00:26.39
+frame=  601 fps= 22 q=28.0 size=    2304KiB time=00:00:23.73 bitrate= 795.3kbits/s speed=0.882x elapsed=0:00:26.89
+frame=  613 fps= 22 q=29.0 size=    2304KiB time=00:00:24.20 bitrate= 779.9kbits/s speed=0.883x elapsed=0:00:27.40
+frame=  625 fps= 22 q=29.0 size=    2560KiB time=00:00:24.73 bitrate= 847.9kbits/s speed=0.886x elapsed=0:00:27.90
+frame=  638 fps= 22 q=29.0 size=    2560KiB time=00:00:25.16 bitrate= 833.3kbits/s speed=0.886x elapsed=0:00:28.40
+[2026-04-16T16:29:53.060Z] 回到 Dashboard 触发 Validation
+frame=  650 fps= 22 q=29.0 size=    2560KiB time=00:00:25.56 bitrate= 820.3kbits/s speed=0.884x elapsed=0:00:28.91
+frame=  665 fps= 23 q=29.0 size=    2560KiB time=00:00:26.10 bitrate= 803.5kbits/s speed=0.887x elapsed=0:00:29.42
+frame=  683 fps= 23 q=29.0 size=    2560KiB time=00:00:26.73 bitrate= 784.5kbits/s speed=0.893x elapsed=0:00:29.92
+frame=  697 fps= 23 q=29.0 size=    2560KiB time=00:00:27.30 bitrate= 768.2kbits/s speed=0.897x elapsed=0:00:30.43
+frame=  718 fps= 23 q=29.0 size=    2560KiB time=00:00:28.23 bitrate= 742.8kbits/s speed=0.912x elapsed=0:00:30.94
+frame=  722 fps= 23 q=26.0 size=    2560KiB time=00:00:28.36 bitrate= 739.3kbits/s speed=0.902x elapsed=0:00:31.45
+frame=  734 fps= 23 q=27.0 size=    2816KiB time=00:00:28.76 bitrate= 801.9kbits/s speed= 0.9x elapsed=0:00:31.96
+frame=  747 fps= 23 q=29.0 size=    2816KiB time=00:00:29.26 bitrate= 788.2kbits/s speed=0.901x elapsed=0:00:32.46
+frame=  750 fps= 23 q=29.0 size=    2816KiB time=00:00:29.40 bitrate= 784.7kbits/s speed=0.892x elapsed=0:00:32.97
+[2026-04-16T16:29:57.531Z] 回到 handout 等待自动回填
+frame=  758 fps= 23 q=29.0 size=    3072KiB time=00:00:29.66 bitrate= 848.3kbits/s speed=0.886x elapsed=0:00:33.47
+frame=  768 fps= 23 q=29.0 size=    3072KiB time=00:00:30.00 bitrate= 838.9kbits/s speed=0.883x elapsed=0:00:33.97
+frame=  780 fps= 23 q=29.0 size=    3072KiB time=00:00:30.40 bitrate= 827.8kbits/s speed=0.882x elapsed=0:00:34.48
+frame=  796 fps= 23 q=29.0 size=    3072KiB time=00:00:30.93 bitrate= 813.6kbits/s speed=0.884x elapsed=0:00:35.00
+frame=  812 fps= 23 q=25.0 size=    3072KiB time=00:00:31.66 bitrate= 794.7kbits/s speed=0.892x elapsed=0:00:35.51
+frame=  831 fps= 23 q=27.0 size=    3072KiB time=00:00:32.50 bitrate= 774.3kbits/s speed=0.902x elapsed=0:00:36.01
+frame=  831 fps= 23 q=27.0 size=    3072KiB time=00:00:32.50 bitrate= 774.3kbits/s speed=0.89x elapsed=0:00:36.52

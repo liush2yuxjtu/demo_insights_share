@@ -1,0 +1,44 @@
+{
+  "id": "89b26caa00814a9eba53db5505c8acd3",
+  "kind": "demo",
+  "title": "Bob 午高峰 PostgreSQL 故障演示",
+  "status": "completed",
+  "started_at": "2026-04-16T16:25:25.153193+00:00",
+  "ended_at": "2026-04-16T16:25:25.224486+00:00",
+  "current_stage": "summary",
+  "progress": 1.0,
+  "headline_metrics": {
+    "published_count": 4,
+    "score": 0.0238,
+    "confidence": 0.82,
+    "fast_path_s": 0.068,
+    "slow_path_s": 62.0
+  },
+  "latest_message": "demo 完成，可进入历史回放",
+  "artifact_refs": [
+    {
+      "label": "PM 演示",
+      "href": "/artifacts/demo_docs/pm_walkthrough.md"
+    },
+    {
+      "label": "系统设计",
+      "href": "/artifacts/demo_docs/design.md"
+    },
+    {
+      "label": "Alice 种子卡",
+      "href": "/artifacts/demo_codes/seeds/alice_pgpool.json"
+    },
+    {
+      "label": "STAR 讲解",
+      "href": "/artifacts/demo_docs/pm_walkthrough_star.md"
+    },
+    {
+      "label": "终端快照",
+      "href": "/artifacts/demo_docs/terminal_snapshot.md"
+    },
+    {
+      "label": "验证总览",
+      "href": "/artifacts/validation/reports/final_report.html"
+    }
+  ]
+}
