@@ -1,0 +1,173 @@
+这是典型的连接池耗尽问题。分两部分诊断与修复：
+
+---
+
+## 诊断 SQL
+
+```sql
+-- 1. 当前连接数快照
+SELECT state, count(*), max(now() - state_change) as max_duration
+FROM pg_stat_activity 
+WHERE datname = current_database()
+GROUP BY state;
+
+-- 2. 找出最慢的查询（很可能在阻塞）
+SELECT pid, now() - query_start as duration, state, query
+FROM pg_stat_activity
+WHERE state != 'idle'
+ORDER BY duration DESC
+LIMIT 10;
+
+-- 3. 检查是否真的有锁等待
+SELECT blocked_locks.pid AS blocked_pid, blocking_locks.pid AS blocking_pid
+FROM pg_catalog.pg_locks blocked_locks
+JOIN pg_catalog.pg_locks blocking_locks ON blocking_locks.granted
+WHERE NOT blocked_locks.granted;
+
+-- 4. 连接来源统计（判断是不是连接池配置太小）
+SELECT application_name, count(*) FROM pg_stat_activity GROUP BY application_name;
+```
+
+---
+
+## 立即修复
+
+**1. 临时扩容连接数**
+```sql
+-- 看当前 max_connections
+SHOW max_connitions;
+
+-- 临时提高（需要 superuser）
+ALTER SYSTEM SET max_connections = 500;
+SELECT pg_reload_conf();
+-- 或重启生效
+```
+
+**2. 检查并修复耗尽连接的慢查询**
+```sql
+-- 杀掉卡住超过 5 分钟的非 idle 连接
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE state NOT IN ('idle', 'idle in transaction')
+  AND now() - state_change > interval '5 minutes'
+  AND pid <> pg_backend_pid();
+```
+
+---
+
+## 代码层修复
+
+**连接池配置（假设用 pgBouncer 或应用层池）**
+
+```python
+# 如果是应用层连接池（Python/Node/Java 等）
+# 典型配置问题：
+
+import psycopg2
+from psycopg2 import pool
+
+# 原来配置（太小）
+conn_pool = psycopg2.pool.SimpleConnectionPool(
+    minconn=1,
+    maxconn=10,      # ← 午餐高峰 10 个根本不够
+    ...
+)
+
+# 调大并添加超时
+conn_pool = psycopg2.pool.ThreadedConnectionPool(
+    minconn=5,
+    maxconn=50,      # 根据：(平均查询时间 × QPS) / 服务器核心数
+    max_connections=100,  # postgres 侧也要配合调高
+    command_timeout=30,   # ← 关键：单个查询超时
+    connection_timeout=10, # ← 关键：获取连接超时
+)
+```
+
+**Node.js (pg 库)**
+```javascript
+// 原来
+const pool = new Pool({ max: 10 });
+
+// 调大 + 超时
+const pool = new Pool({
+  max: 50,
+  connectionTimeoutMillis: 5000,   // 获取连接超时
+  statement_timeout: 30000,          // 查询超时
+  idleTimeoutMillis: 30000,
+});
+```
+
+**Go (pgxpool)**
+```go
+config, _ := pgxpool.ParseConfig(os.Getenv("DATABASE_URL"))
+config.MaxConns = 50           // 调大
+config.MinConns = 5            // 保活
+config.MaxConnLifetime = 30 * time.Minute
+config.MaxConnIdleTime = 5 * time.Minute
+config.HealthCheckPeriod = 30 * time.Second
+
+pool, _ := pgxpool.NewWithConfig(context.Background(), config)
+```
+
+---
+
+## 根本原因排查
+
+```sql
+-- 如果上面的查询发现大量 "idle in transaction"，是代码事务泄露
+SELECT pid, now() - query_start as duration, state, query
+FROM pg_stat_activity
+WHERE state = 'idle in transaction'
+  AND now() - state_change > interval '1 minute';
+```
+
+典型泄露代码（Python）：
+```python
+# 错误写法 - 事务没提交也没回滚
+def checkout():
+    conn = get_conn()  # 用完了没还
+    # 如果这里抛异常，conn 永远不会还到池里
+    if complicated_logic():
+        raise Exception("oops")
+    commit(conn)
+    return result
+```
+
+```python
+# 正确写法 - 保证还池
+def checkout():
+    conn = None
+    try:
+        conn = get_conn()
+        result = do_work(conn)
+        commit(conn)
+        return result
+    finally:
+        if conn:
+            conn.close()  # 或 pool.putconn(conn)
+```
+
+---
+
+## 预防措施
+
+```sql
+-- 设置连接超时警告（pg 13+）
+CREATE EXTENSION IF NOT EXISTS pg_stat_kcache();
+
+-- 在 pg_bouncer.ini 里配置
+[pgbouncer]
+max_db_connections=100
+default_pool_size=25
+query_timeout=30
+query_wait_timeout=30
+```
+
+**监控报警阈值（建议）**
+- 连接数 > max_connections 的 80% → 报警
+- 单查询超过 5 秒 → 报警
+- `idle in transaction` 超过 1 分钟 → 报警 + 自动杀
+
+---
+
+**总结：先跑诊断 SQL 确认是连接数还是慢查询，再调大连接池 + 加超时控制。**

@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent 自验：WITH vs WITHOUT 真并排对照（重做版）</title>
+<style>
+  :root { --bg:#0f172a; --bg2:#1e293b; --panel:#fff; --fg:#1f2937; --muted:#64748b;
+    --with:#10b981; --without:#ef4444; --border:#cbd5e1; --hi-bg:#ecfdf5; --lo-bg:#fef2f2;
+    --code-bg:#0f172a; --code-fg:#e2e8f0; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    margin:0; padding:24px; background:linear-gradient(180deg,#f8fafc,#e2e8f0);
+    color:var(--fg); line-height:1.7; }
+  h1 { font-size:24px; margin:0 0 8px; }
+  h2 { font-size:18px; margin:24px 0 12px; padding-bottom:6px; border-bottom:2px solid var(--border); }
+  .meta { font-size:13px; color:var(--muted); margin-bottom:16px; }
+  .verdict { background:#dcfce7; border-left:4px solid var(--with); padding:12px 16px; border-radius:6px; font-weight:600; margin:16px 0; }
+  .verdict.fail { background:#fee2e2; border-color:var(--without); }
+  .prompt-box { background:var(--panel); border:1px solid var(--border); border-radius:6px; padding:14px; font-family:monospace; font-size:13px; white-space:pre-wrap; margin:8px 0 16px; }
+  table { width:100%; border-collapse:collapse; background:var(--panel); border-radius:6px; overflow:hidden; box-shadow:0 1px 3px rgba(0,0,0,0.05); }
+  th,td { padding:10px 14px; text-align:left; border-bottom:1px solid var(--border); }
+  th { background:#f1f5f9; font-size:13px; }
+  td.hi { background:var(--hi-bg); font-weight:600; color:var(--with); }
+  td.lo { background:var(--lo-bg); color:var(--without); }
+  .grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px; }
+  .col { background:var(--code-bg); color:var(--code-fg); border-radius:6px; padding:0; overflow:hidden; }
+  .col-head { padding:10px 14px; font-weight:600; font-family:monospace; font-size:13px; }
+  .col.with .col-head { background:var(--with); color:#fff; }
+  .col.without .col-head { background:var(--without); color:#fff; }
+  pre { margin:0; padding:14px; font-family:'SF Mono','Menlo',monospace; font-size:12px;
+    line-height:1.55; white-space:pre-wrap; word-break:break-word; max-height:520px; overflow:auto; }
+  .sandbox-paths { font-family:monospace; font-size:12px; color:var(--muted); }
+  .badge { display:inline-block; padding:2px 8px; background:#e0e7ff; color:#3730a3; border-radius:10px; font-size:11px; }
+  ul { font-size:13px; }
+  code { background:#f1f5f9; padding:1px 5px; border-radius:3px; font-size:12px; }
+  .footer { margin-top:32px; padding-top:16px; border-top:1px solid var(--border); font-size:12px; color:var(--muted); }
+  @media (max-width:900px){ .grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<h1>Agent 自验：WITH vs WITHOUT 真并排对照 <span class="badge">redone</span></h1>
+<div class="meta">
+  生成时间：2026-04-18 19:49:53 ｜ 模型：MiniMax-M2.7-highspeed ｜ insightsd: 127.0.0.1:7823 ｜ 跑批耗时：见下方 meta
+</div>
+
+<div class="verdict ">✅ WITH 端显式引用 LAN 卡片，WITHOUT 端零引用 — skill+hook 真实生效</div>
+
+<h2>1. 实验设置</h2>
+<p><strong>同 prompt / 同 model / 仅 skill+hook 存在与否不同</strong>。两端 claude -p 同时启动，沙箱完全独立。</p>
+<div class="prompt-box">我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？请给出可执行的 SQL 与代码片段。</div>
+<table>
+  <tr><th>沙箱</th><th>路径</th><th>skill</th><th>hook</th></tr>
+  <tr><td><span class="badge" style="background:#dcfce7;color:#065f46">WITH</span></td>
+    <td class="sandbox-paths">/tmp/team_demo_with_SANDBOX/</td>
+    <td>insights-wiki ✅</td><td>UserPromptSubmit + Stop ✅（→ 7823）</td></tr>
+  <tr><td><span class="badge" style="background:#fee2e2;color:#991b1b">WITHOUT</span></td>
+    <td class="sandbox-paths">/tmp/team_demo_without_SANDBOX/</td>
+    <td>无</td><td>无</td></tr>
+</table>
+
+<h2>2. 真对照：卡片 ID 引用次数</h2>
+<table>
+  <tr><th>卡片 ID</th><th>WITH 引用次数</th><th>WITHOUT 引用次数</th></tr>
+  <tr><td><code>alice-pgpool-2026-04-10</code></td><td class='hi'>1</td><td class='lo'>0</td></tr><tr><td><code>bob-pgpool-bad-2026-04-12</code></td><td class='hi'>2</td><td class='lo'>0</td></tr><tr><td><code>carol-redis-eviction-2026-03-27</code></td><td class='hi'>1</td><td class='lo'>0</td></tr><tr><td><code>alice-celery-retry-2026-04-08</code></td><td class='hi'>0</td><td class='lo'>0</td></tr>
+  <tr style="font-weight:700;background:#fafafa">
+    <td>合计</td><td class="hi">4</td><td class="lo">0</td></tr>
+</table>
+
+<h2>3. 真对照：通用关键字</h2>
+<table>
+  <tr><th>关键字</th><th>WITH</th><th>WITHOUT</th></tr>
+  <tr><td>pg_stat_activity</td><td class='hi'>7</td><td class='lo'>5</td></tr><tr><td>idle in transaction</td><td class='hi'>1</td><td class='lo'>4</td></tr><tr><td>PgBouncer</td><td class='hi'>4</td><td class='lo'>2</td></tr><tr><td>max_connections</td><td class='hi'>7</td><td class='lo'>4</td></tr><tr><td>pg_terminate_backend</td><td class='hi'>1</td><td class='lo'>1</td></tr>
+</table>
+
+<h2>4. WITH 沙箱 cache manifest（前 12 张）</h2>
+<p>来源：<code>$WITH_HOME/.cache/insights-wiki/manifest.json</code> · 同步时间 <code>2026-04-18T19:47:38+0800</code></p>
+<ul>
+<li><code>alice-pgpool-2026-04-10</code></li><li><code>bob-pgpool-bad-2026-04-12</code></li><li><code>carol-redis-eviction-2026-03-27</code></li><li><code>alice-celery-retry-2026-04-08</code></li><li><code>m1-tdd_开发流程-2026-04-18</code></li><li><code>m1-任务前上下文准备-2026-04-18</code></li><li><code>m1-先执行再门控-2026-04-18</code></li><li><code>m1-删除前审计-2026-04-18</code></li><li><code>m1-外科式回滚-2026-04-18</code></li><li><code>m1-强制执行不问-2026-04-18</code></li><li><code>m1-懒惰信号检测-2026-04-18</code></li><li><code>m1-计划_批准流程-2026-04-18</code></li>
+<li><em>... 共 47 张</em></li>
+</ul>
+
+<h2>5. 两端原始输出（同字号 / 并排）</h2>
+<div class="grid">
+  <div class="col with">
+    <div class="col-head">WITH（skill + hook → LAN 卡）</div>
+    <pre># Checkout API 超时 &amp; PostgreSQL 连接拒绝诊断
+
+## 一、立即诊断（现在执行）
+
+### 1.1 PostgreSQL 连接状态
+
+```sql
+-- 当前活跃连接数 vs 最大允许连接数
+SELECT 
+  count(*) AS active_connections,
+  pg_setting(&#x27;max_connections&#x27;)::int AS max_connections,
+  count(*) * 100.0 / pg_setting(&#x27;max_connections&#x27;)::int AS usage_pct
+FROM pg_stat_activity
+WHERE state IS NOT NULL;
+
+-- 等待连接的进程（连接堆积）
+SELECT pid, usename, pg_blocking_pids(pid) AS blocked_by, wait_event_type, wait_event, query_start
+FROM pg_stat_activity
+WHERE wait_event_type = &#x27;Lock&#x27; OR wait_event_type = &#x27;Client&#x27;
+ORDER BY query_start;
+```
+
+### 1.2 慢查询诊断
+
+```sql
+-- 找出最慢的查询（可能是 checkout 阻塞原因）
+SELECT pid, now() - query_start AS duration, query, state
+FROM pg_stat_activity
+WHERE state != &#x27;idle&#x27; AND now() - query_start &gt; interval &#x27;5 seconds&#x27;
+ORDER BY duration DESC;
+
+-- 表锁等待（外键未索引会导致写入阻塞）
+SELECT blocked_locks.pid AS blocked_pid, blocking_locks.pid AS blocking_pid
+FROM pg_catalog.pg_locks blocked_locks
+JOIN pg_catalog.pg_locks blocking_locks 
+  ON blocking_locks.lockable_object = blocked_locks.lockable_object
+WHERE NOT blocked_locks.granted;
+```
+
+### 1.3 连接来源分析
+
+```sql
+-- 各应用的连接数（判断是否池化客户端配置有误）
+SELECT application_name, count(*) 
+FROM pg_stat_activity 
+GROUP BY application_name 
+ORDER BY count(*) DESC;
+```
+
+---
+
+## 二、常见根因与修复
+
+### 根因 A：PgBouncer / 连接池配置错误
+
+**症状**：连接数没到 max，但应用侧频繁连接拒绝
+
+```ini
+; pgbouncer.ini 检查项
+pool_mode = transaction          ; 必须是 transaction，不是 session
+max_client_conn = 1000
+default_pool_size = 20           ; 计算公式：max_connections / 应用数
+```
+
+**错误修复**（来自 bob-pgpool-bad-2026-04-12 的教训）：
+&gt; 盲目增大 `default_pool_size` 会导致数据库更卡 — PostgreSQL 是进程模型，每个连接都消耗内存。
+
+```python
+# 计算正确的 pool_size
+# 公式：default_pool_size = (max_connections - admin_connections) / 应用副本数
+
+# 假设 max_connections = 100, 应用有 4 个 pod
+pool_size = (100 - 3) // 4  # = 24，不是越大越好
+```
+
+### 根因 B：长事务阻塞 checkout
+
+**症状**：checkout 偶尔超时，但 DB 连接数不高
+
+```python
+# 确保 checkout 操作使用短事务 + 索引
+import asyncpg
+
+async def checkout_items(conn, user_id: int, item_ids: list[int]):
+    async with conn.transaction():
+        # 添加 NOWAIT 防止无限等待锁
+        async with conn.cursor(
+            &quot;SELECT * FROM inventory WHERE id = ANY($1) FOR UPDATE NOWAIT&quot;
+        ) as cur:
+            await cur.fetch(item_ids)
+        # ... 执行业务逻辑，超时自动回滚
+```
+
+### 根因 C：缺少连接池健康检查
+
+```python
+# FastAPI + asyncpg 连接管理
+from contextlib import asynccontextmanager
+import asyncpg
+
+@asynccontextmanager
+async def get_db_pool():
+    pool = await asyncpg.create_pool(
+        dsn=&quot;postgresql://user:pass@pg:5432/checkout&quot;,
+        min_size=5,
+        max_size=20,          # 不要超过 pgbouncer default_pool_size
+        command_timeout=5.0,  # 防止慢查询占满池
+        timeout=3.0,          # 连接获取超时
+    )
+    try:
+        yield pool
+    finally:
+        await pool.close()
+
+# 请求级超时保护
+async def checkout_with_timeout(pool, user_id, items, timeout=2.0):
+    async with asyncio.timeout(timeout):
+        async with pool.acquire() as conn:
+            return await do_checkout(conn, user_id, items)
+```
+
+---
+
+## 三、峰值前预防
+
+```sql
+-- 设置连接超时警告阈值（提前发邮件）
+CREATE OR REPLACE FUNCTION check_connections()
+RETURNS void AS $$
+DECLARE
+  cnt int;
+BEGIN
+  SELECT count(*) INTO cnt FROM pg_stat_activity;
+  IF cnt &gt; (pg_setting(&#x27;max_connections&#x27;)::int * 0.8) THEN
+    PERFORM pg_notify(&#x27;high_connections&#x27;, json_build_object(&#x27;count&#x27;, cnt)::text);
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 每分钟检查（可在 pg_cron 或外部监控调用）
+SELECT check_connections();
+```
+
+---
+
+## 四、快速止血 SOP
+
+| 步骤 | 命令/操作 | 预期效果 |
+|------|----------|---------|
+| 1 | `SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state=&#x27;idle in transaction&#x27; AND query_start &lt; now() - interval &#x27;5 minutes&#x27;;` | 释放僵尸事务 |
+| 2 | 临时调高 pgbouncer `default_pool_size` + 应用重启 | 撑过峰值 |
+| 3 | 开启 `pool_mode=transaction` 如果还是 session | 阻止连接泄漏 |
+| 4 | 5分钟后观察 `pg_stat_activity` 确认连接数下降 | 验证修复 |
+
+---
+
+## 五、参考卡片
+
+- `alice-pgpool-2026-04-10`：峰值突发流量下连接池耗尽的完整复盘
+- `bob-pgpool-bad-2026-04-12`：增大连接池反而拖垮系统的反面案例
+- `carol-redis-eviction-2026-03-27`：如果是 session 存储问题（Redis LRU 驱逐导致重复认证请求打到 DB）
+
+需要我针对某个具体环节深入展开吗？
+</pre>
+  </div>
+  <div class="col without">
+    <div class="col-head">WITHOUT（裸 claude）</div>
+    <pre>这是典型的连接池耗尽问题。分两部分诊断与修复：
+
+---
+
+## 诊断 SQL
+
+```sql
+-- 1. 当前连接数快照
+SELECT state, count(*), max(now() - state_change) as max_duration
+FROM pg_stat_activity 
+WHERE datname = current_database()
+GROUP BY state;
+
+-- 2. 找出最慢的查询（很可能在阻塞）
+SELECT pid, now() - query_start as duration, state, query
+FROM pg_stat_activity
+WHERE state != &#x27;idle&#x27;
+ORDER BY duration DESC
+LIMIT 10;
+
+-- 3. 检查是否真的有锁等待
+SELECT blocked_locks.pid AS blocked_pid, blocking_locks.pid AS blocking_pid
+FROM pg_catalog.pg_locks blocked_locks
+JOIN pg_catalog.pg_locks blocking_locks ON blocking_locks.granted
+WHERE NOT blocked_locks.granted;
+
+-- 4. 连接来源统计（判断是不是连接池配置太小）
+SELECT application_name, count(*) FROM pg_stat_activity GROUP BY application_name;
+```
+
+---
+
+## 立即修复
+
+**1. 临时扩容连接数**
+```sql
+-- 看当前 max_connections
+SHOW max_connitions;
+
+-- 临时提高（需要 superuser）
+ALTER SYSTEM SET max_connections = 500;
+SELECT pg_reload_conf();
+-- 或重启生效
+```
+
+**2. 检查并修复耗尽连接的慢查询**
+```sql
+-- 杀掉卡住超过 5 分钟的非 idle 连接
+SELECT pg_terminate_backend(pid)
+FROM pg_stat_activity
+WHERE state NOT IN (&#x27;idle&#x27;, &#x27;idle in transaction&#x27;)
+  AND now() - state_change &gt; interval &#x27;5 minutes&#x27;
+  AND pid &lt;&gt; pg_backend_pid();
+```
+
+---
+
+## 代码层修复
+
+**连接池配置（假设用 pgBouncer 或应用层池）**
+
+```python
+# 如果是应用层连接池（Python/Node/Java 等）
+# 典型配置问题：
+
+import psycopg2
+from psycopg2 import pool
+
+# 原来配置（太小）
+conn_pool = psycopg2.pool.SimpleConnectionPool(
+    minconn=1,
+    maxconn=10,      # ← 午餐高峰 10 个根本不够
+    ...
+)
+
+# 调大并添加超时
+conn_pool = psycopg2.pool.ThreadedConnectionPool(
+    minconn=5,
+    maxconn=50,      # 根据：(平均查询时间 × QPS) / 服务器核心数
+    max_connections=100,  # postgres 侧也要配合调高
+    command_timeout=30,   # ← 关键：单个查询超时
+    connection_timeout=10, # ← 关键：获取连接超时
+)
+```
+
+**Node.js (pg 库)**
+```javascript
+// 原来
+const pool = new Pool({ max: 10 });
+
+// 调大 + 超时
+const pool = new Pool({
+  max: 50,
+  connectionTimeoutMillis: 5000,   // 获取连接超时
+  statement_timeout: 30000,          // 查询超时
+  idleTimeoutMillis: 30000,
+});
+```
+
+**Go (pgxpool)**
+```go
+config, _ := pgxpool.ParseConfig(os.Getenv(&quot;DATABASE_URL&quot;))
+config.MaxConns = 50           // 调大
+config.MinConns = 5            // 保活
+config.MaxConnLifetime = 30 * time.Minute
+config.MaxConnIdleTime = 5 * time.Minute
+config.HealthCheckPeriod = 30 * time.Second
+
+pool, _ := pgxpool.NewWithConfig(context.Background(), config)
+```
+
+---
+
+## 根本原因排查
+
+```sql
+-- 如果上面的查询发现大量 &quot;idle in transaction&quot;，是代码事务泄露
+SELECT pid, now() - query_start as duration, state, query
+FROM pg_stat_activity
+WHERE state = &#x27;idle in transaction&#x27;
+  AND now() - state_change &gt; interval &#x27;1 minute&#x27;;
+```
+
+典型泄露代码（Python）：
+```python
+# 错误写法 - 事务没提交也没回滚
+def checkout():
+    conn = get_conn()  # 用完了没还
+    # 如果这里抛异常，conn 永远不会还到池里
+    if complicated_logic():
+        raise Exception(&quot;oops&quot;)
+    commit(conn)
+    return result
+```
+
+```python
+# 正确写法 - 保证还池
+def checkout():
+    conn = None
+    try:
+        conn = get_conn()
+        result = do_work(conn)
+        commit(conn)
+        return result
+    finally:
+        if conn:
+            conn.close()  # 或 pool.putconn(conn)
+```
+
+---
+
+## 预防措施
+
+```sql
+-- 设置连接超时警告（pg 13+）
+CREATE EXTENSION IF NOT EXISTS pg_stat_kcache();
+
+-- 在 pg_bouncer.ini 里配置
+[pgbouncer]
+max_db_connections=100
+default_pool_size=25
+query_timeout=30
+query_wait_timeout=30
+```
+
+**监控报警阈值（建议）**
+- 连接数 &gt; max_connections 的 80% → 报警
+- 单查询超过 5 秒 → 报警
+- `idle in transaction` 超过 1 分钟 → 报警 + 自动杀
+
+---
+
+**总结：先跑诊断 SQL 确认是连接数还是慢查询，再调大连接池 + 加超时控制。**
+</pre>
+  </div>
+</div>
+
+<h2>6. 跑批 meta</h2>
+<pre style="background:#1e293b;color:#e2e8f0;padding:12px;border-radius:6px;font-size:12px">START 1776512857 19:47:37
+WITHOUT exit=0
+WITH exit=0
+END 1776512885 elapsed=28s
+</pre>
+
+<div class="footer">
+  raw 输出：
+  <a href="agent-self-demo-redone.with.txt">with.txt</a> ｜
+  <a href="agent-self-demo-redone.without.txt">without.txt</a>
+  <br>由 demo-redo-publisher (post_demo_tasks team) 生成 · 任务 E
+</div>
+</body>
+</html>

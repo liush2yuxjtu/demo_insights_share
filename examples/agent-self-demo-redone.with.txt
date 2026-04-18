@@ -1,0 +1,163 @@
+# Checkout API 超时 & PostgreSQL 连接拒绝诊断
+
+## 一、立即诊断（现在执行）
+
+### 1.1 PostgreSQL 连接状态
+
+```sql
+-- 当前活跃连接数 vs 最大允许连接数
+SELECT 
+  count(*) AS active_connections,
+  pg_setting('max_connections')::int AS max_connections,
+  count(*) * 100.0 / pg_setting('max_connections')::int AS usage_pct
+FROM pg_stat_activity
+WHERE state IS NOT NULL;
+
+-- 等待连接的进程（连接堆积）
+SELECT pid, usename, pg_blocking_pids(pid) AS blocked_by, wait_event_type, wait_event, query_start
+FROM pg_stat_activity
+WHERE wait_event_type = 'Lock' OR wait_event_type = 'Client'
+ORDER BY query_start;
+```
+
+### 1.2 慢查询诊断
+
+```sql
+-- 找出最慢的查询（可能是 checkout 阻塞原因）
+SELECT pid, now() - query_start AS duration, query, state
+FROM pg_stat_activity
+WHERE state != 'idle' AND now() - query_start > interval '5 seconds'
+ORDER BY duration DESC;
+
+-- 表锁等待（外键未索引会导致写入阻塞）
+SELECT blocked_locks.pid AS blocked_pid, blocking_locks.pid AS blocking_pid
+FROM pg_catalog.pg_locks blocked_locks
+JOIN pg_catalog.pg_locks blocking_locks 
+  ON blocking_locks.lockable_object = blocked_locks.lockable_object
+WHERE NOT blocked_locks.granted;
+```
+
+### 1.3 连接来源分析
+
+```sql
+-- 各应用的连接数（判断是否池化客户端配置有误）
+SELECT application_name, count(*) 
+FROM pg_stat_activity 
+GROUP BY application_name 
+ORDER BY count(*) DESC;
+```
+
+---
+
+## 二、常见根因与修复
+
+### 根因 A：PgBouncer / 连接池配置错误
+
+**症状**：连接数没到 max，但应用侧频繁连接拒绝
+
+```ini
+; pgbouncer.ini 检查项
+pool_mode = transaction          ; 必须是 transaction，不是 session
+max_client_conn = 1000
+default_pool_size = 20           ; 计算公式：max_connections / 应用数
+```
+
+**错误修复**（来自 bob-pgpool-bad-2026-04-12 的教训）：
+> 盲目增大 `default_pool_size` 会导致数据库更卡 — PostgreSQL 是进程模型，每个连接都消耗内存。
+
+```python
+# 计算正确的 pool_size
+# 公式：default_pool_size = (max_connections - admin_connections) / 应用副本数
+
+# 假设 max_connections = 100, 应用有 4 个 pod
+pool_size = (100 - 3) // 4  # = 24，不是越大越好
+```
+
+### 根因 B：长事务阻塞 checkout
+
+**症状**：checkout 偶尔超时，但 DB 连接数不高
+
+```python
+# 确保 checkout 操作使用短事务 + 索引
+import asyncpg
+
+async def checkout_items(conn, user_id: int, item_ids: list[int]):
+    async with conn.transaction():
+        # 添加 NOWAIT 防止无限等待锁
+        async with conn.cursor(
+            "SELECT * FROM inventory WHERE id = ANY($1) FOR UPDATE NOWAIT"
+        ) as cur:
+            await cur.fetch(item_ids)
+        # ... 执行业务逻辑，超时自动回滚
+```
+
+### 根因 C：缺少连接池健康检查
+
+```python
+# FastAPI + asyncpg 连接管理
+from contextlib import asynccontextmanager
+import asyncpg
+
+@asynccontextmanager
+async def get_db_pool():
+    pool = await asyncpg.create_pool(
+        dsn="postgresql://user:pass@pg:5432/checkout",
+        min_size=5,
+        max_size=20,          # 不要超过 pgbouncer default_pool_size
+        command_timeout=5.0,  # 防止慢查询占满池
+        timeout=3.0,          # 连接获取超时
+    )
+    try:
+        yield pool
+    finally:
+        await pool.close()
+
+# 请求级超时保护
+async def checkout_with_timeout(pool, user_id, items, timeout=2.0):
+    async with asyncio.timeout(timeout):
+        async with pool.acquire() as conn:
+            return await do_checkout(conn, user_id, items)
+```
+
+---
+
+## 三、峰值前预防
+
+```sql
+-- 设置连接超时警告阈值（提前发邮件）
+CREATE OR REPLACE FUNCTION check_connections()
+RETURNS void AS $$
+DECLARE
+  cnt int;
+BEGIN
+  SELECT count(*) INTO cnt FROM pg_stat_activity;
+  IF cnt > (pg_setting('max_connections')::int * 0.8) THEN
+    PERFORM pg_notify('high_connections', json_build_object('count', cnt)::text);
+  END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+-- 每分钟检查（可在 pg_cron 或外部监控调用）
+SELECT check_connections();
+```
+
+---
+
+## 四、快速止血 SOP
+
+| 步骤 | 命令/操作 | 预期效果 |
+|------|----------|---------|
+| 1 | `SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE state='idle in transaction' AND query_start < now() - interval '5 minutes';` | 释放僵尸事务 |
+| 2 | 临时调高 pgbouncer `default_pool_size` + 应用重启 | 撑过峰值 |
+| 3 | 开启 `pool_mode=transaction` 如果还是 session | 阻止连接泄漏 |
+| 4 | 5分钟后观察 `pg_stat_activity` 确认连接数下降 | 验证修复 |
+
+---
+
+## 五、参考卡片
+
+- `alice-pgpool-2026-04-10`：峰值突发流量下连接池耗尽的完整复盘
+- `bob-pgpool-bad-2026-04-12`：增大连接池反而拖垮系统的反面案例
+- `carol-redis-eviction-2026-03-27`：如果是 session 存储问题（Redis LRU 驱逐导致重复认证请求打到 DB）
+
+需要我针对某个具体环节深入展开吗？
