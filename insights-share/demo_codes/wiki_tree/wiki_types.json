@@ -3,6 +3,10 @@
     "database",
     "general",
     "infra_cache",
-    "infra_queue"
+    "infra_queue",
+    "agent_workflow",
+    "tooling",
+    "shell_env",
+    "docs_rules"
   ]
 }
