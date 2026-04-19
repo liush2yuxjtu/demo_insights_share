@@ -1,0 +1,60 @@
+bash start.codex.sh
+
+demo_insights_share on  main [?]
+❯ bash start.codex.sh
+[start.codex] 隔离副本：/tmp/start-codex.qqo3xP/demo_codes
+[start.codex] 日志文件：/Users/m1/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_codex.latest.txt
+[start.codex] 当前模式：手动
+
+第1步：确认自己在隔离副本里
+命令：pwd && printf '\n' && ls -la
+业务意义：先确认你看到的是临时副本，不会污染正式仓库。
+你会看到：当前路径和文件列表，证明这是可控的演示环境。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+你的选择：
+固定命令：pwd && printf '\n' && ls -la
+/tmp/start-codex.qqo3xP/demo_codes
+
+total 208
+drwxr-xr-x@ 19 m1  staff    608 Apr 17 10:25 .
+drwx------@  8 m1  wheel    256 Apr 17 11:39 ..
+drwxr-xr-x@  5 m1  staff    160 Apr 14 09:52 .claude
+-rw-r--r--@  1 m1  staff    544 Apr 15 13:37 .env
+-rw-r--r--@  1 m1  staff    283 Apr 13 17:03 .env.example
+-rw-r--r--@  1 m1  staff     50 Apr 17 10:20 .gitignore
+-rw-r--r--@  1 m1  staff   1009 Apr 13 18:28 _sdk_common.py
+-rw-r--r--@  1 m1  staff   4040 Apr 13 17:03 adapter.py
+drwxr-xr-x@  6 m1  staff    192 Apr 17 10:20 hooks
+-rw-r--r--@  1 m1  staff  19439 Apr 17 10:20 insights_cli.py
+drwxr-xr-x@ 22 m1  staff    704 Apr 17 10:20 insightsd
+-rw-r--r--@  1 m1  staff     31 Apr 13 17:03 requirements.txt
+-rwxr-xr-x@  1 m1  staff   1782 Apr 17 10:20 run_demo.sh
+-rw-r--r--@  1 m1  staff   6203 Apr 17 10:20 search_agent.py
+drwxr-xr-x@  6 m1  staff    192 Apr 15 18:34 seeds
+-rw-r--r--@  1 m1  staff  34254 Apr 17 10:20 standalone_runtime_preview.html
+-rw-r--r--@  1 m1  staff   3413 Apr 13 17:03 ui.py
+-rw-r--r--@  1 m1  staff   5311 Apr 17 10:25 wiki.json
+drwxr-xr-x@  8 m1  staff    256 Apr 15 18:47 wiki_tree
+这一步完成：确认自己在隔离副本里
+
+第2步：确认 demo CLI 可以运行
+命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py version
+业务意义：先看 CLI 版本，最快证明可执行文件和 Python 运行时是通的。
+你会看到：版本号输出，说明工具链已经准备好。
+你的选择：q
+你选择了退出，脚本会收尾并关闭临时服务。
+
+结果摘要：
+RESULT healthz=fail
+RESULT publish_good=fail
+RESULT publish_bad=fail
+RESULT solve=fail
+RESULT install=fail
+RESULT cache=fail
+日志文件：/Users/m1/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_codex.latest.txt
+隔离副本：/tmp/start-codex.qqo3xP/demo_codes
+
+demo_insights_share on  main [?] took 2m10s
+❯
+
+

@@ -1,0 +1,166 @@
+================ sandbox self-check ================
+cwd  : /tmp/demo-sandbox-20260418-190948.V39Iy6/workdir
+HOME : /tmp/demo-sandbox-20260418-190948.V39Iy6/home
+----- project-level skills ($cwd/.claude/skills/) -----
+insights-wiki
+----- user-level skills ($HOME/.claude/skills/) -----
+insights-wiki
+====================================================
+期望: 两边都只有 insights-wiki，看不到你全局的其他 skill。
+按回车进入 claude…
+╭─── Claude Code v2.1.112 ─────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting started                                        │
+│                    Welcome back!                   │ Run /init to create a CLAUDE.md file with instructions for Cla… │
+│                                                    │ ─────────────────────────────────────────────────────────────── │
+│                       ▐▛███▜▌                      │ Recent activity                                                 │
+│                      ▝▜█████▛▘                     │ No recent activity                                              │
+│                        ▘▘ ▝▝                       │                                                                 │
+│                                                    │                                                                 │
+│     MiniMax-M2.7-highspeed · API Usage Billing     │                                                                 │
+│ /…/tmp/demo-sandbox-20260418-190948.V39Iy6/workdir │                                                                 │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+❯ 我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？请给出可执行的 SQL 与代码片段。
+
+⏺ 这是典型的 PostgreSQL 连接池耗尽 + 阻塞查询叠加问题。结合 alice-pgpool-2026-04-10 的实战卡片（pool exhaustion under
+  burst traffic），给出诊断与修复方案：
+
+  ---
+  一、诊断 SQL（立即执行）
+
+  1. 当前连接状态全景
+
+  SELECT
+    state,
+    count(*) AS connections,
+    max(now() - state_change interval) AS longest_in_state
+  FROM pg_stat_activity
+  WHERE datname = current_database()
+  GROUP BY state;
+
+  关键看：若大量连接处于 idle in transaction，说明有事务泄漏。若 active 很多且持续时间长，说明查询慢。
+
+  2. 找最慢/阻塞的查询
+
+  SELECT
+    pid,
+    now() - query_start AS duration,
+    state,
+    wait_event_type,
+    wait_event,
+    left(query, 200) AS query_preview,
+    pg_blocking_pids(pid) AS blocked_by
+  FROM pg_stat_activity
+  WHERE state != 'idle'
+    AND pid != pg_backend_pid()
+  ORDER BY duration DESC
+  LIMIT 20;
+
+  典型病因：
+  - wait_event = 'Lock' → 锁等待，事务没提交
+  - state = 'idle in transaction' → 泄漏的连接，代码没 close 事务
+
+  3. 连接数是否触及上限
+
+  SELECT
+    setting::int AS max_connections,
+    (SELECT count(*) FROM pg_stat_activity) AS current_connections,
+    setting::int - (SELECT count(*) FROM pg_stat_activity) AS available
+  FROM pg_settings
+  WHERE name = 'max_connections';
+
+  若 available < 20%，基本可确认 pool exhaustion。
+
+  ---
+  二、代码修复（Python/FastAPI + SQLAlchemy 为例）
+
+  修复 1：关闭事务泄漏（最常见根因）
+
+  # 错误写法 - 事务泄漏
+  @app.get("/checkout")
+  def checkout():
+      with engine.connect() as conn:
+          result = conn.execute(sql.text("SELECT ..."))
+          # 异常时 conn 不会归还，连接泄露
+          if result.scalar() > 0:
+              raise ValueError("库存不足")
+      return {"ok": True}
+
+  # 正确写法 - 用 context manager + 显式 rollback
+  from contextlib import contextmanager
+
+  @contextmanager
+  def safe_transaction(conn):
+      tx = conn.begin()
+      try:
+          yield tx
+          tx.commit()
+      except Exception:
+          tx.rollback()
+          raise
+      finally:
+          tx.close()  # 确保释放
+
+  @app.get("/checkout")
+  def checkout():
+      with engine.connect() as conn:
+          with safe_transaction(conn) as tx:
+              result = conn.execute(sql.text("SELECT ..."))
+              # ...
+      return {"ok": True}
+
+  修复 2：配置连接池大小（参考 alice-pgpool-2026-04-10）
+
+  from sqlalchemy import create_engine
+
+  engine = create_engine(
+      "postgresql://user:pass@host/db",
+      pool_size=10,          # 正常时保持的连接数
+      max_overflow=5,        # 突发时最多借用的额外连接
+      pool_timeout=5,        # 获取连接的超时（秒），超时后快速失败而不是阻塞
+      pool_pre_ping=True,   # 拿连接前先 ping，防止拿到断开的连接
+  )
+
+  经验值：午餐高峰预估 QPS → pool_size = QPS * 0.5，max_overflow = pool_size * 0.3。
+
+  修复 3：对高频 checkout 加乐观锁（减少锁等待）
+
+  -- 给 orders 表加版本号，避免长时间的 FOR UPDATE 锁
+  ALTER TABLE orders ADD COLUMN version int DEFAULT 0;
+
+  -- checkout 时先检查版本，不满足则重试
+  UPDATE orders
+  SET version = version + 1, status = 'locked'
+  WHERE order_id = :id AND version = :expected_version
+  RETURNING *;
+
+  修复 4：设置语句级超时（最后防线）
+
+  -- 对 checkout 相关语句设置 2 秒超时
+  SET statement_timeout = '2000ms';
+
+  -- 或在连接字符串指定默认超时
+  -- ?connect_timeout=5&statement_timeout=2000
+
+  ---
+  三、验证修复
+
+  -- 修复后观察：idle in transaction 应在 30s 内归零
+  SELECT count(*) FROM pg_stat_activity
+  WHERE state = 'idle in transaction'
+    AND now() - state_change > interval '30 seconds';
+
+  如果 idle in transaction 持续 > 0，说明修复不彻底或仍有泄漏。
+
+  ---
+  优先级顺序：修复 1（事务泄漏）→ 修复 2（pool size）→ 修复 3（减少锁冲突）→ 修复 4（超时防线）。大多数
+  lunch高峰超时问题根因都在修复 1。
+
+✻ Crunched for 40s
+
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+❯ 
+────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+  ? for shortcuts
+
+

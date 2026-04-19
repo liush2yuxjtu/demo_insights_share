@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>start.claude.sh / start.codex.sh 闭环验收报告</title>
+<style>
+  :root {
+    --bg: #0b1020; --card: #121831; --ink: #e6ecff; --muted: #9aa3b8;
+    --ok: #30d158; --fail: #ff453a; --accent: #5ac8fa; --warn: #ffd60a;
+    --mono: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+         line-height: 1.6; }
+  header { padding: 32px 40px 20px; border-bottom: 1px solid #1e2747; }
+  header h1 { margin: 0 0 6px; font-size: 26px; }
+  header .subtitle { color: var(--muted); font-size: 14px; }
+  .badges { margin-top: 14px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .badge { padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600;
+           background: #1b2550; border: 1px solid #2a3876; }
+  .badge.ok { background: rgba(48,209,88,.12); border-color: var(--ok); color: var(--ok); }
+  main { padding: 24px 40px 60px; }
+  section { background: var(--card); border: 1px solid #1e2747; border-radius: 14px;
+             padding: 22px 26px; margin-bottom: 22px; }
+  section h2 { margin: 0 0 14px; font-size: 18px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #1e2747;
+            vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px;
+        text-transform: uppercase; letter-spacing: 0.5px; }
+  td code { font-family: var(--mono); color: var(--accent); font-size: 12px; }
+  .ok { color: var(--ok); font-weight: 700; }
+  .fail { color: var(--fail); font-weight: 700; }
+  details { margin-top: 10px; border: 1px solid #1e2747; border-radius: 10px; overflow: hidden; }
+  details[open] summary { background: #1a2344; }
+  summary { cursor: pointer; padding: 10px 14px; background: #151c38;
+             font-size: 13px; color: var(--accent); user-select: none; }
+  pre { margin: 0; padding: 16px 18px; font-family: var(--mono); font-size: 11.5px;
+         line-height: 1.45; color: #cdd6f4; background: #0a1028;
+         max-height: 480px; overflow: auto; white-space: pre; }
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+  .kv { display: grid; grid-template-columns: 150px 1fr; gap: 6px 14px; font-size: 13px; }
+  .kv dt { color: var(--muted); }
+  .kv dd { margin: 0; }
+  ol.steps { padding-left: 20px; font-size: 13px; color: #c9d1ee; }
+  ol.steps li { margin: 6px 0; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 10px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>start.claude.sh / start.codex.sh 闭环验收报告</h1>
+  <div class="subtitle">验收时间 2026-04-17 · 验证方式 tmux + --auto-approve + 手动交互 · 6 项 RESULT 全通过</div>
+  <div class="badges">
+    <span class="badge ok">Claude smoke PASS · 3m15s</span>
+    <span class="badge ok">Codex smoke PASS · 1m13s</span>
+    <span class="badge ok">手动交互闭环 PASS</span>
+    <span class="badge ok">healthz / publish×2 / solve / install / cache 全 ok</span>
+  </div>
+</header>
+<main>
+  <section>
+    <h2>一、本次验收做了什么</h2>
+    <ol class="steps">
+      <li>确认 <code>start.claude.sh</code> 与 <code>start.codex.sh</code> 存在并可执行，两者 source 同一份 <code>insights-share/validation/start_demo_driver.sh</code>。</li>
+      <li>用 <code>tmux new-session -d</code> 启动隔离 shell，在里面以 <code>--auto-approve</code> 跑完整 10 步真实闭环，分别保存到 <code>tmux_claude_smoke.txt</code> 与 <code>tmux_codex_smoke.txt</code>。</li>
+      <li>验证背后真用 <code>claude -p</code> 和 <code>codex exec</code>：Claude 模式每步后台预取教练卡，Codex 模式一次性生成 10 张讲解卡。</li>
+      <li>手动模式（不加 --auto-approve）再启动一次，确认脚本停在"你的选择："；发 Enter 进入下一步；发 q 优雅退出。</li>
+      <li>所有原始 tmux 日志、交互捕获都保存在 <code>insights-share/validation/reports/deliverables/</code>，可直接截图给 PM/VC。</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>二、结果矩阵</h2>
+    <table>
+      <thead><tr><th>项目</th><th>期望</th><th>实际 Claude</th><th>实际 Codex</th></tr></thead>
+      <tbody>
+        <tr><td>健康检查 healthz</td><td>ok</td><td class="ok">ok</td><td class="ok">ok</td></tr>
+        <tr><td>发布 good 案例</td><td>ok</td><td class="ok">ok</td><td class="ok">ok</td></tr>
+        <tr><td>发布 bad 案例</td><td>ok</td><td class="ok">ok</td><td class="ok">ok</td></tr>
+        <tr><td>solve 求解</td><td>ok (命中 alice-pgpool)</td><td class="ok">ok</td><td class="ok">ok</td></tr>
+        <tr><td>wiki-install</td><td>ok (cached=2)</td><td class="ok">ok</td><td class="ok">ok</td></tr>
+        <tr><td>缓存文件落盘</td><td>2 张卡片 + config</td><td class="ok">ok</td><td class="ok">ok</td></tr>
+        <tr><td>脚本退出码</td><td>__SCRIPT_DONE__:0</td><td class="ok">0</td><td class="ok">0</td></tr>
+        <tr><td>耗时</td><td>&lt; 10 分钟</td><td class="ok">3m15s</td><td class="ok">1m13s</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>三、10 步真实闭环（PM/VC 视角）</h2>
+    <table>
+      <thead><tr><th>步骤</th><th>标题</th><th>固定命令（片段）</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>确认自己在隔离副本里</td><td><code>pwd &amp;&amp; ls -la</code></td></tr>
+        <tr><td>2</td><td>确认 demo CLI 可以运行</td><td><code>insights_cli.py version</code></td></tr>
+        <tr><td>3</td><td>启动本地 wiki 服务</td><td><code>insights_cli.py serve --port 17821</code></td></tr>
+        <tr><td>4</td><td>确认健康检查通过</td><td><code>curl /healthz</code></td></tr>
+        <tr><td>5</td><td>查看初始 wiki 列表</td><td><code>insights_cli.py list</code></td></tr>
+        <tr><td>6</td><td>发布 Alice good 案例</td><td><code>publish seeds/alice_pgpool.json</code></td></tr>
+        <tr><td>7</td><td>发布 Bob bad 案例</td><td><code>publish seeds/bob_pgpool_bad.json</code></td></tr>
+        <tr><td>8</td><td>用真实事故做一次 solve</td><td><code>solve "checkout timing out..." --no-ai</code></td></tr>
+        <tr><td>9</td><td>安装 wiki 到本机缓存</td><td><code>wiki-install --server http://127.0.0.1:17821</code></td></tr>
+        <tr><td>10</td><td>确认缓存文件已落盘</td><td><code>ls ~/.cache/insights-wiki</code></td></tr>
+      </tbody>
+    </table>
+    <p class="hint">每一步先由 Claude/Codex 在后台生成 4-6 行中文讲解（为什么重要 / 会看到什么 / 看到什么算成功），再打印固定命令，最后打印原始输出。面向完全不会写代码的 PM / VC。</p>
+  </section>
+
+  <section>
+    <h2>四、手动交互闭环验证</h2>
+    <dl class="kv">
+      <dt>启动命令</dt><dd><code>bash start.codex.sh</code>（不加 --auto-approve）</dd>
+      <dt>期望</dt><dd>先显示第 1 步讲解 + "你的选择："，阻塞等待用户输入</dd>
+      <dt>实际（T+75s）</dt><dd><span class="ok">✓</span> 停在 "你的选择："，未继续</dd>
+      <dt>操作</dt><dd>发送 Enter</dd>
+      <dt>期望</dt><dd>执行 pwd &amp;&amp; ls -la → 显示 "这一步完成" → 停在第 2 步 "你的选择："</dd>
+      <dt>实际</dt><dd><span class="ok">✓</span> 按预期执行并停在第 2 步</dd>
+      <dt>操作</dt><dd>发送 q</dd>
+      <dt>期望</dt><dd>打印 "你选择了退出，脚本会收尾并关闭临时服务" + 结果摘要 + 退出</dd>
+      <dt>实际</dt><dd><span class="ok">✓</span> 收到退出提示、结果摘要（step 2 未完成所以 RESULT 均 fail）、tmux 优雅退出</dd>
+    </dl>
+  </section>
+
+  <section>
+    <h2>五、背后真 Claude/Codex 调用验证</h2>
+    <div class="grid-2">
+      <div>
+        <h3 style="font-size:14px;color:var(--accent);">Claude 模式</h3>
+        <pre>cat prompt.txt | claude -p \
+  --no-session-persistence \
+  --permission-mode bypassPermissions \
+  --tools ""</pre>
+      </div>
+      <div>
+        <h3 style="font-size:14px;color:var(--accent);">Codex 模式</h3>
+        <pre>cat prompt.txt | codex exec \
+  -m gpt-5.4-mini \
+  -C ${RUN_DIR} \
+  --sandbox danger-full-access \
+  --dangerously-bypass-approvals-and-sandbox \
+  --ephemeral --color never \
+  -o note.txt</pre>
+      </div>
+    </div>
+    <p class="hint">Claude 每步并行 prefetch 下一步的教练卡；Codex 用一次 exec 生成全部 10 段，按 ===STEP N=== 分块提取。两种模式都只请求 AI 生成 "PM/VC 能看懂的中文讲解"，不让 AI 执行命令（--tools "" / 禁止工具调用）。</p>
+  </section>
+
+  <section>
+    <h2>六、原始证据</h2>
+    <details><summary>tmux_claude_smoke.txt（Claude 全流程 tmux pane）</summary>
+<pre>cd /Users/m1/projects/demo_insights_share
+bash start.claude.sh --auto-approve; printf &#x27;\n__SCRIPT_DONE__:%s\n&#x27; $?
+
+demo_insights_share on  main [?]
+❯ cd /Users/m1/projects/demo_insights_share
+bash start.claude.sh --auto-approve; printf &#x27;\n__SCRIPT_DONE__:%s\n&#x27; $?
+
+demo_insights_share on  main [?]
+❯ bash start.claude.sh --auto-approve; printf &#x27;\n__SCRIPT_DONE__:%s\n&#x27; $?
+[start.claude] 隔离副本：/tmp/start-claude.jzMU5h/demo_codes
+[start.claude] 日志文件：/Users/m1/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_claude.latest.txt
+[start.claude] 当前模式：自动
+
+第1步：确认自己在隔离副本里
+这一步最重要，因为我们要在一个临时的、完全隔离的副本里演示，保证待会儿所有操作都不会碰到真正的正式仓库，也不会误删、误改任何生产代码。
+你马上会看到屏幕上打印出当前所在的文件夹路径，以及这个文件夹下的文件列表。
+如果路径里包含 demo 或临时目录的字样，并且能看到熟悉的项目文件（比如 README、insights-share 目录），就说明我们正站在安全的沙盒里，可以放心往下走。
+反过来，如果路径指向的是正式仓库或你的家目录根部，就要立刻停下来，不要继续演示。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：pwd &amp;&amp; printf &#x27;\n&#x27; &amp;&amp; ls -la
+/tmp/start-claude.jzMU5h/demo_codes
+
+total 208
+drwxr-xr-x@ 19 m1  staff    608 Apr 17 10:25 .
+drwx------@  7 m1  wheel    224 Apr 17 11:30 ..
+drwxr-xr-x@  5 m1  staff    160 Apr 14 09:52 .claude
+-rw-r--r--@  1 m1  staff    544 Apr 15 13:37 .env
+-rw-r--r--@  1 m1  staff    283 Apr 13 17:03 .env.example
+-rw-r--r--@  1 m1  staff     50 Apr 17 10:20 .gitignore
+-rw-r--r--@  1 m1  staff   1009 Apr 13 18:28 _sdk_common.py
+-rw-r--r--@  1 m1  staff   4040 Apr 13 17:03 adapter.py
+drwxr-xr-x@  6 m1  staff    192 Apr 17 10:20 hooks
+-rw-r--r--@  1 m1  staff  19439 Apr 17 10:20 insights_cli.py
+drwxr-xr-x@ 22 m1  staff    704 Apr 17 10:20 insightsd
+-rw-r--r--@  1 m1  staff     31 Apr 13 17:03 requirements.txt
+-rwxr-xr-x@  1 m1  staff   1782 Apr 17 10:20 run_demo.sh
+-rw-r--r--@  1 m1  staff   6203 Apr 17 10:20 search_agent.py
+drwxr-xr-x@  6 m1  staff    192 Apr 15 18:34 seeds
+-rw-r--r--@  1 m1  staff  34254 Apr 17 10:20 standalone_runtime_preview.html
+-rw-r--r--@  1 m1  staff   3413 Apr 13 17:03 ui.py
+-rw-r--r--@  1 m1  staff   5311 Apr 17 10:25 wiki.json
+drwxr-xr-x@  8 m1  staff    256 Apr 15 18:47 wiki_tree
+这一步完成：确认自己在隔离副本里
+
+第2步：确认 demo CLI 可以运行
+这一步重要，是因为它像&quot;按一下电源键看亮不亮&quot;，在走完整闭环之前，先确认命令行工具本身能被正常调起来，避免后面花时间找错地方。
+接下来屏幕上会打印一行版本号文字，类似 insights_cli v0.x 这样的短字符串，一闪而过没有花哨界面。
+只要能看到一行版本号，没有红色报错或 Python 崩溃堆栈，就说明可执行文件和运行环境彻底打通，后续发布案例、求解问题、本地安装才有基础。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py version
+0.0.0+dev
+这一步完成：确认 demo CLI 可以运行
+
+第3步：启动本地 wiki 服务
+这一步是整条演示链路的起点，没有它，后面的案例发布、搜索求解、本地安装都无从谈起，相当于先把&quot;店铺&quot;开起来才能迎客。接下来屏幕上会看到一条后台启动命令被执行，系统打印出一个进程号（PID），并把运行日志默默写到一个临时文件里
+，界面不会有花哨输出，就是安静地把服务挂在本机 17821 端口上。只要看到一个纯数字的 PID 被打印出来、没有红色报错，就说明 wiki 服务已经在后台跑起来了，这一步就算成功。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：mkdir -p ./runtime-start &amp;&amp; &quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py serve --host 127.0.0.1 --port 17821 --store ./runtime-start/wiki_tree --store-mode
+ tree &gt;/tmp/start_claude_daemon.17821.log 2&gt;&amp;1 &amp; echo $! &gt; .start_demo_daemon.pid &amp;&amp; cat .start_demo_daemon.pid
+99909
+这一步完成：启动本地 wiki 服务
+
+第4步：确认服务健康检查通过
+这一步是给整套演示做&quot;体检&quot;，只有服务真正活着，后面发布案例、提问求解、本地安装才有意义，否则后续每一条命令都会失败，观众会看到一连串报错。
+接下来屏幕上会出现一段重复最多十次的探测过程，系统会反复敲门问服务器&quot;你还好吗&quot;，直到拿到一次 OK 的回应，或者十次都没人应门才放弃。
+只要看到最后返回一行简短的 ok 或者 healthy 字样，并且命令没有抛出红色报错，就说明服务已经稳稳站住，可以放心往下走。
+如果十次都失败，会直接退出并提示异常，那时需要先回看日志再继续，不要强行推进。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：for attempt in 1 2 3 4 5 6 7 8 9 10; do curl -fsS &quot;http://127.0.0.1:17821/healthz&quot; &amp;&amp; exit 0; sleep 1; done; exit 1
+{&quot;ok&quot;: true}这一步完成：确认服务健康检查通过
+
+第5步：查看初始 wiki 列表
+这一步之所以重要，是因为演示要先建立一个干净的基线：在任何人上传案例之前，先让观众亲眼确认 wiki 里确实是空的，这样后面发布案例时，大家才能真切感受到&quot;从无到有&quot;的变化，而不是怀疑表格里本来就有数据。
+接下来屏幕上会出现一条命令行的查询结果，内容是一个空列表，或者是一张没有任何案例条目的表格，旁边可能显示总数为 0。
+只要看到的是&quot;空&quot;——没有任何案例、没有任何标题、没有任何 good/bad 标注——就说明这一步成功了，演示基线已经建立好。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py list --wiki &quot;http://127.0.0.1:17821&quot;
+(no insights yet)
+这一步完成：查看初始 wiki 列表
+
+第6步：发布 Alice 的 good 案例
+这一步的意义是给系统塞进第一条&quot;正确答案&quot;，没有它后面的智能求解就像没读过书的学生凭空猜，有了它系统才能命中真实发生过的成功经验。
+屏幕上马上会出现一条发布记录，Wiki 服务返回新案例的 ID 和标题（Alice 关于 pgpool 的踩坑实录），原本&quot;暂无案例&quot;的状态变成列表里多了一条 good 标记。
+只要 ID 被正常打印出来、没有红色报错或 connection refused 之类的字样，就说明案例已经成功入库，可以继续走下一步。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py publish seeds/alice_pgpool.json --wiki &quot;http://127.0.0.1:17821&quot;
+published alice-pgpool-2026-04-10
+这一步完成：发布 Alice 的 good 案例
+
+第7步：发布 Bob 的 bad 案例
+这一步把一条反面案例也放进 wiki，证明这个知识库不是只收&quot;成功故事&quot;，同样会把&quot;踩过的坑&quot;沉淀下来，这样后来人一搜就能同时看到正例和反例，避免重蹈覆辙。
+马上你会看到终端执行一条 publish 命令，把 Bob 的 pgpool bad 案例上传到本地 wiki 服务，屏幕会打印一行类似 published bob-pgpool-xxxx 的确认文字。
+只要最后一行出现 published 开头的 id，没有红色报错或 Traceback，就说明这条 bad 案例已经成功入库，wiki 里现在同时存在 Alice 的正例和 Bob 的反例。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py publish seeds/bob_pgpool_bad.json --wiki &quot;http://127.0.0.1:17821&quot;
+published bob-pgpool-bad-2026-04-12
+这一步完成：发布 Bob 的 bad 案例
+
+第8步：用真实事故问题做一次 solve
+这一步是整个演示最像真实使用场景的环节：PM 把一段线上事故描述丢进来，系统会自动去刚才发布的 wiki 里找相关经验，看它能否把沉淀下来的案例真正变成可复用的答案。
+接下来屏幕上会打印出这次提问的原文，然后列出系统命中的一到两条案例（刚才发布的 pgpool 相关记录应当出现），并给出一段综合后的处置建议，全程不调用外部大模型，纯靠本地经验库。
+只要你能看到命中记录里有 bob-pgpool-bad-2026-04-12 这条被引用、并且给出了关于连接池/postgres 的具体建议文字，就说明经验复用的闭环已经跑通，这一步就算成功。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py solve &quot;Our checkout API is timing out, postgres is rejecting new connections during the lunch spike&quot; --wiki &quot;h
+ttp://127.0.0.1:17821&quot; --no-ai
+                          DEMO: Bob hits prod incident
+
+restate: Our checkout API is timing out, postgres is rejecting new connections during the lunch spike
+
+hot-loaded alice-pgpool-2026-04-10 from alice (score=0.0625)
+
++------------------------------------------------------------------------------+
+| Set idle_in_transaction_session_timeout=30s and bump pool size to 2x worker count |
++------------------------------------------------------------------------------+
+| raw (no-ai) confidence=0.82                                                  |
++------------------------------------------------------------------------------+
+
+fast path: 0.0s (no-ai)   slow path baseline: ~62s
+这一步完成：用真实事故问题做一次 solve
+
+第9步：安装 insights-wiki 到本机缓存
+这一步模拟一位同事回家路上顺手把局域网里的经验库装到自己笔记本，让他下次不连网也能查到刚才 Alice 上传的那条救命案例，是整条&quot;发布→分发→复用&quot;闭环的收尾动作。
+屏幕上马上会看到脚本连到本地 127.0.0.1:17821 的小服务，逐条拉取案例清单，再把每一条写进本机缓存目录，滚动打印文件名和条目数量。
+当最后出现一行类似 installed ok 或 cached N items 的汇总，并且全程没有红色报错堆栈，就代表这位同事的&quot;个人离线 wiki&quot;已经成功建好。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py wiki-install --server &quot;http://127.0.0.1:17821&quot;
+install ok server=http://127.0.0.1:17821 cached=2 cards
+这一步完成：安装 insights-wiki 到本机缓存
+
+第10步：确认缓存文件已经落地
+这一步重要是因为前面所有服务启动、案例发布、问题求解的动作，最终都要沉淀成本地真实文件，才算真的把知识装进了这台机器，而不是一闪而过的内存数据。
+马上屏幕上会出现一个本地目录的清单，里面会列出 insights-wiki 缓存文件夹下的内容，包括文件大小、修改时间，以及若干个已经落盘的卡片文件名。
+只要这个清单不是空的，能看到两个或以上文件名（对应上一步摘要里的 cached=2 cards），就说明闭环走通了，可以直接截图给 PM 作为成功证据。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：ls -la ~/.cache/insights-wiki &amp;&amp; printf &#x27;\n&#x27; &amp;&amp; find ~/.cache/insights-wiki -maxdepth 1 -type f | sort
+total 24
+drwxr-xr-x@  5 m1  staff  160 Apr 17 11:32 .
+drwxr-xr-x  17 m1  staff  544 Apr 17 11:32 ..
+-rw-r--r--@  1 m1  staff  224 Apr 17 11:32 alice-pgpool-2026-04-10.json
+-rw-r--r--@  1 m1  staff  212 Apr 17 11:32 bob-pgpool-bad-2026-04-12.json
+-rw-r--r--@  1 m1  staff   92 Apr 17 11:32 config.json
+
+/Users/m1/.cache/insights-wiki/alice-pgpool-2026-04-10.json
+/Users/m1/.cache/insights-wiki/bob-pgpool-bad-2026-04-12.json
+/Users/m1/.cache/insights-wiki/config.json
+这一步完成：确认缓存文件已经落地
+
+我们已跑完 insights-share CLI 的真实闭环演示，healthz、publish good/bad、solve、install、cache 六个关键步骤全部成功。
+业务价值：一条命令即可把团队实战案例沉淀为可复用的 good/bad 经验，让新人上手和跨团队复制最佳实践的成本显著下降。
+成功证据：六项状态码全部等于 1，说明健康检查、双向发布、求解、安装与缓存链路端到端打通，产出的制品可直接被下游消费。
+下一步建议：接入更多真实话题语料并把 CLI 嵌入日常工作流，配套做一轮 A/B 效果度量，为商业化与规模化推广积累数据。
+接下来可输入 1 重新执行 solve，输入 2 查看日志目录，输入 3 查看缓存目录，输入 q 退出。
+
+结果摘要：
+RESULT healthz=ok
+RESULT publish_good=ok
+RESULT publish_bad=ok
+RESULT solve=ok
+RESULT install=ok
+RESULT cache=ok
+日志文件：/Users/m1/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_claude.latest.txt
+隔离副本：/tmp/start-claude.jzMU5h/demo_codes
+
+__SCRIPT_DONE__:0
+
+demo_insights_share on  main [?] took 3m15s
+❯
+</pre></details>
+    <details><summary>tmux_codex_smoke.txt（Codex 全流程 tmux pane）</summary>
+<pre>bash start.codex.sh --auto-approve; printf &#x27;\n__SCRIPT_DONE__:%s\n&#x27; $?
+
+demo_insights_share on  main [?]
+❯ bash start.codex.sh --auto-approve; printf &#x27;\n__SCRIPT_DONE__:%s\n&#x27; $?
+[start.codex] 隔离副本：/tmp/start-codex.oeNQcw/demo_codes
+[start.codex] 日志文件：/Users/m1/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_codex.latest.txt
+[start.codex] 当前模式：自动
+
+第1步：确认自己在隔离副本里
+业务意义：先确认你看到的是临时副本，不会污染正式仓库。
+命令：pwd &amp;&amp; printf &#x27;\n&#x27; &amp;&amp; ls -la
+你要看什么：当前目录和文件列表是否符合临时演示环境。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：pwd &amp;&amp; printf &#x27;\n&#x27; &amp;&amp; ls -la
+/tmp/start-codex.oeNQcw/demo_codes
+
+total 208
+drwxr-xr-x@ 19 m1  staff    608 Apr 17 10:25 .
+drwx------@  8 m1  wheel    256 Apr 17 11:36 ..
+drwxr-xr-x@  5 m1  staff    160 Apr 14 09:52 .claude
+-rw-r--r--@  1 m1  staff    544 Apr 15 13:37 .env
+-rw-r--r--@  1 m1  staff    283 Apr 13 17:03 .env.example
+-rw-r--r--@  1 m1  staff     50 Apr 17 10:20 .gitignore
+-rw-r--r--@  1 m1  staff   1009 Apr 13 18:28 _sdk_common.py
+-rw-r--r--@  1 m1  staff   4040 Apr 13 17:03 adapter.py
+drwxr-xr-x@  6 m1  staff    192 Apr 17 10:20 hooks
+-rw-r--r--@  1 m1  staff  19439 Apr 17 10:20 insights_cli.py
+drwxr-xr-x@ 22 m1  staff    704 Apr 17 10:20 insightsd
+-rw-r--r--@  1 m1  staff     31 Apr 13 17:03 requirements.txt
+-rwxr-xr-x@  1 m1  staff   1782 Apr 17 10:20 run_demo.sh
+-rw-r--r--@  1 m1  staff   6203 Apr 17 10:20 search_agent.py
+drwxr-xr-x@  6 m1  staff    192 Apr 15 18:34 seeds
+-rw-r--r--@  1 m1  staff  34254 Apr 17 10:20 standalone_runtime_preview.html
+-rw-r--r--@  1 m1  staff   3413 Apr 13 17:03 ui.py
+-rw-r--r--@  1 m1  staff   5311 Apr 17 10:25 wiki.json
+drwxr-xr-x@  8 m1  staff    256 Apr 15 18:47 wiki_tree
+这一步完成：确认自己在隔离副本里
+
+第2步：确认 demo CLI 可以运行
+业务意义：先看 CLI 版本，最快证明可执行文件和 Python 运行时是通的。
+命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py version
+你要看什么：版本号能正常输出，就说明基础运行链路没问题。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py version
+0.0.0+dev
+这一步完成：确认 demo CLI 可以运行
+
+第3步：启动本地 wiki 服务
+业务意义：没有服务端就没有后续发布、搜索和安装，所以它是整条链路的起点。
+命令：mkdir -p ./runtime-start &amp;&amp; &quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py serve --host 127.0.0.1 --port 17821 --store ./runtime-start/wiki_tree --store-mode tre
+e &gt;/tmp/start_codex_daemon.17821.log 2&gt;&amp;1 &amp; echo $! &gt; .start_demo_daemon.pid &amp;&amp; cat .start_demo_daemon.pid
+你要看什么：进程号被写出，表示服务已在后台启动。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：mkdir -p ./runtime-start &amp;&amp; &quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py serve --host 127.0.0.1 --port 17821 --store ./runtime-start/wiki_tree --store-mode
+ tree &gt;/tmp/start_codex_daemon.17821.log 2&gt;&amp;1 &amp; echo $! &gt; .start_demo_daemon.pid &amp;&amp; cat .start_demo_daemon.pid
+7775
+这一步完成：启动本地 wiki 服务
+
+第4步：确认服务健康检查通过
+业务意义：健康检查通过，后面所有 HTTP 命令才有意义。
+命令：for attempt in 1 2 3 4 5 6 7 8 9 10; do curl -fsS &quot;http://127.0.0.1:17821/healthz&quot; &amp;&amp; exit 0; sleep 1; done; exit 1
+你要看什么：healthz 返回成功，说明服务已经可以对外响应。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：for attempt in 1 2 3 4 5 6 7 8 9 10; do curl -fsS &quot;http://127.0.0.1:17821/healthz&quot; &amp;&amp; exit 0; sleep 1; done; exit 1
+{&quot;ok&quot;: true}这一步完成：确认服务健康检查通过
+
+第5步：查看初始 wiki 列表
+业务意义：先看空表，PM 才能直观看到“发布前”和“发布后”的差异。
+命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py list --wiki &quot;http://127.0.0.1:17821&quot;
+你要看什么：初始列表内容尽量少，方便后面展示新增效果。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py list --wiki &quot;http://127.0.0.1:17821&quot;
+(no insights yet)
+这一步完成：查看初始 wiki 列表
+
+第6步：发布 Alice 的 good 案例
+业务意义：先放入一个 good 实战案例，让 solve 有正确经验可命中。
+命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py publish seeds/alice_pgpool.json --wiki &quot;http://127.0.0.1:17821&quot;
+你要看什么：发布成功后，wiki 里会多出一条正向案例。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py publish seeds/alice_pgpool.json --wiki &quot;http://127.0.0.1:17821&quot;
+published alice-pgpool-2026-04-10
+这一步完成：发布 Alice 的 good 案例
+
+第7步：发布 Bob 的 bad 案例
+业务意义：再放入一个 bad 案例，展示 wiki 同时能容纳反例。
+命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py publish seeds/bob_pgpool_bad.json --wiki &quot;http://127.0.0.1:17821&quot;
+你要看什么：发布成功后，正例和反例会一起出现在知识库里。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py publish seeds/bob_pgpool_bad.json --wiki &quot;http://127.0.0.1:17821&quot;
+published bob-pgpool-bad-2026-04-12
+这一步完成：发布 Bob 的 bad 案例
+
+第8步：用真实事故问题做一次 solve
+业务意义：这一步最像真实使用场景，用户问问题，系统热加载经验并直接给出答案。
+命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py solve &quot;Our checkout API is timing out, postgres is rejecting new connections during the lunch spike&quot; --wiki &quot;http:
+//127.0.0.1:17821&quot; --no-ai
+你要看什么：系统应结合已发布案例，输出可理解的处理建议。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py solve &quot;Our checkout API is timing out, postgres is rejecting new connections during the lunch spike&quot; --wiki &quot;h
+ttp://127.0.0.1:17821&quot; --no-ai
+                          DEMO: Bob hits prod incident
+
+restate: Our checkout API is timing out, postgres is rejecting new connections during the lunch spike
+
+hot-loaded alice-pgpool-2026-04-10 from alice (score=0.0625)
+
++------------------------------------------------------------------------------+
+| Set idle_in_transaction_session_timeout=30s and bump pool size to 2x worker count |
++------------------------------------------------------------------------------+
+| raw (no-ai) confidence=0.82                                                  |
++------------------------------------------------------------------------------+
+
+fast path: 0.0s (no-ai)   slow path baseline: ~62s
+这一步完成：用真实事故问题做一次 solve
+
+第9步：安装 insights-wiki 到本机缓存
+业务意义：安装步骤会把服务端内容写入本机缓存，模拟普通用户接入 LAN wiki。
+命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py wiki-install --server &quot;http://127.0.0.1:17821&quot;
+你要看什么：安装完成后，本机缓存会出现可复用的数据。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py wiki-install --server &quot;http://127.0.0.1:17821&quot;
+install ok server=http://127.0.0.1:17821 cached=2 cards
+这一步完成：安装 insights-wiki 到本机缓存
+
+第10步：确认缓存文件已经落地
+业务意义：最后确认缓存文件真的落盘，给 PM 一个可以截图的成功证据。
+命令：ls -la ~/.cache/insights-wiki &amp;&amp; printf &#x27;\n&#x27; &amp;&amp; find ~/.cache/insights-wiki -maxdepth 1 -type f | sort
+你要看什么：缓存目录和文件列表都出现，说明安装闭环已完成。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：ls -la ~/.cache/insights-wiki &amp;&amp; printf &#x27;\n&#x27; &amp;&amp; find ~/.cache/insights-wiki -maxdepth 1 -type f | sort
+total 24
+drwxr-xr-x@  5 m1  staff  160 Apr 17 11:36 .
+drwxr-xr-x  17 m1  staff  544 Apr 17 11:36 ..
+-rw-r--r--@  1 m1  staff  224 Apr 17 11:36 alice-pgpool-2026-04-10.json
+-rw-r--r--@  1 m1  staff  212 Apr 17 11:36 bob-pgpool-bad-2026-04-12.json
+-rw-r--r--@  1 m1  staff   92 Apr 17 11:36 config.json
+
+/Users/m1/.cache/insights-wiki/alice-pgpool-2026-04-10.json
+/Users/m1/.cache/insights-wiki/bob-pgpool-bad-2026-04-12.json
+/Users/m1/.cache/insights-wiki/config.json
+这一步完成：确认缓存文件已经落地
+
+这是一条完整闭环：先启动服务，再发布案例，再用真实问题求解，最后完成本机安装与缓存落地。
+整个演示只展示业务结果，不要求 PM 或 VC 会写代码。
+你可以把这 10 步直接当成现场讲解卡片逐步演示。
+核心价值是把“知识库可用”变成“能看见、能验证、能截图”的结果。
+接下来可输入 1 重新执行 solve，输入 2 查看日志目录，输入 3 查看缓存目录，输入 q 退出。
+
+结果摘要：
+RESULT healthz=ok
+RESULT publish_good=ok
+RESULT publish_bad=ok
+RESULT solve=ok
+RESULT install=ok
+RESULT cache=ok
+日志文件：/Users/m1/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_codex.latest.txt
+隔离副本：/tmp/start-codex.oeNQcw/demo_codes
+
+__SCRIPT_DONE__:0
+
+demo_insights_share on  main [?] took 1m13s
+❯
+</pre></details>
+    <details><summary>tmux_wait_test_capture.txt（手动交互闭环 tmux pane）</summary>
+<pre>bash start.codex.sh
+
+demo_insights_share on  main [?]
+❯ bash start.codex.sh
+[start.codex] 隔离副本：/tmp/start-codex.qqo3xP/demo_codes
+[start.codex] 日志文件：/Users/m1/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_codex.latest.txt
+[start.codex] 当前模式：手动
+
+第1步：确认自己在隔离副本里
+命令：pwd &amp;&amp; printf &#x27;\n&#x27; &amp;&amp; ls -la
+业务意义：先确认你看到的是临时副本，不会污染正式仓库。
+你会看到：当前路径和文件列表，证明这是可控的演示环境。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+你的选择：
+固定命令：pwd &amp;&amp; printf &#x27;\n&#x27; &amp;&amp; ls -la
+/tmp/start-codex.qqo3xP/demo_codes
+
+total 208
+drwxr-xr-x@ 19 m1  staff    608 Apr 17 10:25 .
+drwx------@  8 m1  wheel    256 Apr 17 11:39 ..
+drwxr-xr-x@  5 m1  staff    160 Apr 14 09:52 .claude
+-rw-r--r--@  1 m1  staff    544 Apr 15 13:37 .env
+-rw-r--r--@  1 m1  staff    283 Apr 13 17:03 .env.example
+-rw-r--r--@  1 m1  staff     50 Apr 17 10:20 .gitignore
+-rw-r--r--@  1 m1  staff   1009 Apr 13 18:28 _sdk_common.py
+-rw-r--r--@  1 m1  staff   4040 Apr 13 17:03 adapter.py
+drwxr-xr-x@  6 m1  staff    192 Apr 17 10:20 hooks
+-rw-r--r--@  1 m1  staff  19439 Apr 17 10:20 insights_cli.py
+drwxr-xr-x@ 22 m1  staff    704 Apr 17 10:20 insightsd
+-rw-r--r--@  1 m1  staff     31 Apr 13 17:03 requirements.txt
+-rwxr-xr-x@  1 m1  staff   1782 Apr 17 10:20 run_demo.sh
+-rw-r--r--@  1 m1  staff   6203 Apr 17 10:20 search_agent.py
+drwxr-xr-x@  6 m1  staff    192 Apr 15 18:34 seeds
+-rw-r--r--@  1 m1  staff  34254 Apr 17 10:20 standalone_runtime_preview.html
+-rw-r--r--@  1 m1  staff   3413 Apr 13 17:03 ui.py
+-rw-r--r--@  1 m1  staff   5311 Apr 17 10:25 wiki.json
+drwxr-xr-x@  8 m1  staff    256 Apr 15 18:47 wiki_tree
+这一步完成：确认自己在隔离副本里
+
+第2步：确认 demo CLI 可以运行
+命令：&quot;/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python&quot; insights_cli.py version
+业务意义：先看 CLI 版本，最快证明可执行文件和 Python 运行时是通的。
+你会看到：版本号输出，说明工具链已经准备好。
+你的选择：q
+你选择了退出，脚本会收尾并关闭临时服务。
+
+结果摘要：
+RESULT healthz=fail
+RESULT publish_good=fail
+RESULT publish_bad=fail
+RESULT solve=fail
+RESULT install=fail
+RESULT cache=fail
+日志文件：/Users/m1/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_codex.latest.txt
+隔离副本：/tmp/start-codex.qqo3xP/demo_codes
+
+demo_insights_share on  main [?] took 2m10s
+❯
+
+
+</pre></details>
+  </section>
+
+  <section>
+    <h2>七、文件清单</h2>
+    <pre>/Users/m1/projects/demo_insights_share/
+├── start.claude.sh                                 # 入口：source driver + START_PROVIDER=claude
+├── start.codex.sh                                  # 入口：source driver + START_PROVIDER=codex
+└── insights-share/validation/
+    ├── start_demo_driver.sh                        # 共享驱动（10 步 + 教练卡 + 交互）
+    ├── run_start_tmux_smoke.sh                     # 一键 tmux 双 provider 自动化冒烟
+    ├── test_start_scripts.py                       # 入口文件存在性 + 关键字断言
+    └── reports/deliverables/
+        ├── tmux_claude_smoke.txt                   # 本次 Claude smoke 证据（177 行）
+        ├── tmux_codex_smoke.txt                    # 本次 Codex smoke 证据（173 行）
+        ├── tmux_wait_test_capture.txt              # 本次手动闭环证据（60 行）
+        └── start_{claude,codex}.latest.txt         # 脚本自身 tee 的完整日志</pre>
+  </section>
+
+  <section>
+    <h2>八、PM/VC 实际操作说明</h2>
+    <dl class="kv">
+      <dt>安装前提</dt><dd>已装 tmux、claude CLI、codex CLI，<code>insights-share/demo_codes/.venv</code> 存在</dd>
+      <dt>教学模式</dt><dd><code>bash start.claude.sh</code> 或 <code>bash start.codex.sh</code>，每步按回车</dd>
+      <dt>演示模式</dt><dd><code>bash start.claude.sh --auto-approve</code>，一口气跑完</dd>
+      <dt>查看日志</dt><dd>交互时输入 <code>log</code>，或结束后打开 <code>insights-share/validation/reports/deliverables/start_*.latest.txt</code></dd>
+      <dt>紧急退出</dt><dd>任意提示下输入 <code>q</code>，脚本会自动 kill 后台服务、还原缓存、清理 /tmp 副本</dd>
+      <dt>复用闭环</dt><dd>结束后在交互菜单输入 <code>1</code> 重跑 solve、<code>2</code> 看日志目录、<code>3</code> 看缓存目录</dd>
+    </dl>
+  </section>
+</main>
+</body>
+</html>

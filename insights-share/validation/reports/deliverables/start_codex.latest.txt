@@ -1,0 +1,4 @@
+[start.codex] 隔离副本：/tmp/start-codex.VXQ4Yk/demo_codes
+[start.codex] 日志文件：/Users/m1/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_codex.latest.txt
+[start.codex] 当前模式：手动
+
