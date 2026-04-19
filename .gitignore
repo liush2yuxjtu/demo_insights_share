@@ -1,3 +1,6 @@
 .DS_Store
 .claude/worktrees/
+.claude/scheduled_tasks.lock
+.claude/skills/register-windows
 .codex/
+.env
