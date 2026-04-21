@@ -14,6 +14,7 @@ authors = [
 ]
 dependencies = [
   "claude-agent-sdk",
+  "cryptography",
   "python-dotenv",
 ]
 keywords = ["insights", "wiki", "cli", "demo"]

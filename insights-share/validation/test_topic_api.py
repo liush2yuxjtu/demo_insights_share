@@ -142,6 +142,8 @@ class TestTopicAPI:
         status, body = http_post(host, port, f"/insights/{card_id}/relabel", payload)
         assert status == 200
         assert body.get("effective_label") == "bad"
+        assert body.get("signature_status") == "verified"
+        assert body.get("signature_key_id")
 
     def test_search_and_list_can_filter_team_namespace(self, httpd: tuple[ThreadingHTTPServer, str, int], store: TreeInsightStore) -> None:
         _, host, port = httpd
@@ -167,6 +169,16 @@ class TestTopicAPI:
         status, body = http_get(host, port, "/insights?team=beta")
         assert status == 200
         assert [card["id"] for card in body["cards"]] == ["team-beta-card"]
+        assert body["cards"][0]["signature_status"] == "verified"
+
+    def test_signing_public_keys_endpoint_returns_ed25519_bundle(self, httpd: tuple[ThreadingHTTPServer, str, int]) -> None:
+        _, host, port = httpd
+        status, body = http_get(host, port, "/signing/public-keys")
+        assert status == 200
+        assert len(body.get("keys") or []) == 1
+        key = body["keys"][0]
+        assert key["algorithm"] == "ed25519"
+        assert "BEGIN PUBLIC KEY" in key["public_key_pem"]
 
     def test_relabel_nonexistent_card_returns_404(self, httpd: tuple[ThreadingHTTPServer, str, int], store: TreeInsightStore) -> None:
         _, host, port = httpd

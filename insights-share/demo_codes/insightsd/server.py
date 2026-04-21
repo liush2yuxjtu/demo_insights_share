@@ -135,7 +135,20 @@ class InsightHandler(BaseHTTPRequestHandler):
             self._send_file(artifact)
             return
         if path == "/healthz":
-            self._send_json(200, {"ok": True})
+            payload: dict[str, Any] = {"ok": True}
+            if isinstance(self.store, TreeInsightStore):
+                keys = self.store.signatures.export_public_keys_payload().get("keys") or []
+                payload["signing"] = {
+                    "enabled": True,
+                    "key_ids": [item.get("key_id") for item in keys if isinstance(item, dict)],
+                }
+            self._send_json(200, payload)
+            return
+        if path == "/signing/public-keys":
+            if not isinstance(self.store, TreeInsightStore):
+                self._send_json(400, {"error": "signing_not_supported", "detail": "tree mode only"})
+                return
+            self._send_json(200, self.store.signatures.export_public_keys_payload())
             return
         if path == "/api/system/summary":
             self._send_json(200, self.runtime.system_summary())
@@ -370,7 +383,14 @@ class InsightHandler(BaseHTTPRequestHandler):
             except ValueError as exc:
                 self._send_json(400, {"error": "invalid_card", "detail": str(exc)})
                 return
-            self._send_json(200, {"id": saved.get("id")})
+            self._send_json(
+                200,
+                {
+                    "id": saved.get("id"),
+                    "signature_status": saved.get("signature_status"),
+                    "signature_key_id": saved.get("signature_key_id"),
+                },
+            )
             return
 
         # POST /insights/merge → merge source into target
@@ -472,7 +492,15 @@ class InsightHandler(BaseHTTPRequestHandler):
                 self._send_json(404, {"error": "not_found", "detail": f"card {card_id!r} not found"})
                 return
             effective_label = result.get("label_override") or result.get("label", "good")
-            self._send_json(200, {"id": card_id, "effective_label": effective_label})
+            self._send_json(
+                200,
+                {
+                    "id": card_id,
+                    "effective_label": effective_label,
+                    "signature_status": result.get("signature_status"),
+                    "signature_key_id": result.get("signature_key_id"),
+                },
+            )
             return
 
         self._send_404()

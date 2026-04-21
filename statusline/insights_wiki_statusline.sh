@@ -2,7 +2,7 @@
 # insights-wiki statusline badge 渲染器
 #
 # 契约（proposal/proposal_statusline.md）：
-#   - 输出单行 badge：[wiki ✓ N/today] / [wiki … N/today] / [wiki ✗ N/today] / [wiki ⚠ stale]
+#   - 输出单行 badge：[wiki ✓ N/today] / [wiki … N/today] / [wiki ✗ N/today] / [wiki ⚠ stale] / [wiki 🔒 sig-fail]
 #   - 渲染耗时 < 100 ms
 #   - daemon 探活短超时 300 ms + 本地 60 s TTL 缓存
 #   - skill 装配性：ls ~/.claude/skills/insights-wiki/SKILL.md
@@ -41,12 +41,14 @@ if [[ -t 1 && -z "${WIKI_STATUSLINE_NO_COLOR:-}" ]]; then
   C_WAIT=$'\033[33m'
   C_FAIL=$'\033[31m'
   C_WARN=$'\033[33m'
+  C_LOCK=$'\033[31m'
   C_RESET=$'\033[0m'
 else
   C_OK=""
   C_WAIT=""
   C_FAIL=""
   C_WARN=""
+  C_LOCK=""
   C_RESET=""
 fi
 
@@ -106,7 +108,24 @@ fi
 
 # ---- stale 判定（manifest.last_sync_at 超过 TTL）----
 stale=0
+sig_fail=0
 if [[ -r "${MANIFEST_JSON}" ]]; then
+  sig_fail="$(
+    python3 - "${MANIFEST_JSON}" <<'PY' 2>/dev/null || echo 0
+import json
+import sys
+from pathlib import Path
+
+try:
+    payload = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+except Exception:
+    print(0)
+    raise SystemExit(0)
+
+failures = ((payload.get("signature") or {}).get("failures") or [])
+print(1 if isinstance(failures, list) and len(failures) > 0 else 0)
+PY
+  )"
   stale="$(
     python3 - "${MANIFEST_JSON}" "${STALE_TTL_SECONDS}" <<'PY' 2>/dev/null || echo 0
 import datetime as dt
@@ -155,6 +174,9 @@ if (( skill_ok == 0 || daemon_ok == 0 )); then
 elif (( in_flight == 1 )); then
   symbol="…"
   color="${C_WAIT}"
+elif (( sig_fail == 1 )); then
+  symbol="🔒"
+  color="${C_LOCK}"
 elif (( stale == 1 )); then
   symbol="⚠"
   color="${C_WARN}"
@@ -165,6 +187,8 @@ fi
 
 if [[ "${symbol}" == "⚠" ]]; then
   printf '%s[wiki ⚠ stale]%s\n' "${color}" "${C_RESET}"
+elif [[ "${symbol}" == "🔒" ]]; then
+  printf '%s[wiki 🔒 sig-fail]%s\n' "${color}" "${C_RESET}"
 else
   printf '%s[wiki %s %s/today]%s\n' "${color}" "${symbol}" "${count}" "${C_RESET}"
 fi

@@ -89,3 +89,34 @@ def test_statusline_shows_stale_badge_when_manifest_is_expired(tmp_path: Path) -
     )
 
     assert _run_statusline(home, ttl_seconds=60) == "[wiki ⚠ stale]"
+
+
+def test_statusline_shows_sig_fail_badge_when_manifest_records_signature_failure(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    (home / ".claude" / "skills" / "insights-wiki").mkdir(parents=True)
+    (home / ".claude" / "skills" / "insights-wiki" / "SKILL.md").write_text("ok", encoding="utf-8")
+    cache_dir = home / ".cache" / "insights-wiki"
+    cache_dir.mkdir(parents=True)
+    (cache_dir / ".health_cache").write_text("ok", encoding="utf-8")
+    _write_json(
+        cache_dir / "today_count.json",
+        {
+            "date": datetime.now().date().isoformat(),
+            "count": 1,
+            "last_card_id": "tampered-card",
+            "last_trigger_at": datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%S%z"),
+        },
+    )
+    _write_json(
+        cache_dir / "manifest.json",
+        {
+            "last_sync_at": datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%S%z"),
+            "cards": ["tampered-card"],
+            "signature": {
+                "failures": ["tampered-card"],
+                "last_status": "invalid",
+            },
+        },
+    )
+
+    assert _run_statusline(home) == "[wiki 🔒 sig-fail]"

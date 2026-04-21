@@ -13,6 +13,8 @@ import threading
 from pathlib import Path
 from typing import Any
 
+from .signing import CardSignatureService, sha256_hex
+
 _TOKEN_RE = re.compile(r"[^\w]+", re.UNICODE)
 
 _STOPWORDS = frozenset(
@@ -249,6 +251,20 @@ def _render_item_md(card: dict[str, Any]) -> str:
             return "(none)"
         return "\n".join(f"- {x}" for x in items)
 
+    description = (
+        card.get("description")
+        or "\n\n".join(
+            part.strip()
+            for part in [
+                str(card.get("context") or "").strip(),
+                str(card.get("root_cause") or "").strip(),
+            ]
+            if part and part.strip()
+        )
+    ).strip()
+    bad_example = (card.get("bad_example") or card.get("symptom") or "").strip()
+    good_example = (card.get("good_example") or card.get("fix") or "").strip()
+
     fm = {
         "id": card["id"],
         "title": card.get("title", ""),
@@ -268,6 +284,12 @@ def _render_item_md(card: dict[str, Any]) -> str:
     fm["label_override_by"] = card.get("label_override_by", None)
     fm["label_override_at"] = card.get("label_override_at", None)
     fm["raw_log_type"] = card.get("raw_log_type", "jsonl")
+    fm["raw_log_sha256"] = card.get("raw_log_sha256", "")
+    fm["signature_algorithm"] = card.get("signature_algorithm")
+    fm["signature_schema"] = card.get("signature_schema")
+    fm["signature_key_id"] = card.get("signature_key_id")
+    fm["signature"] = card.get("signature")
+    fm["signature_signed_at"] = card.get("signature_signed_at")
     return "\n".join(
         [
             "---",
@@ -284,17 +306,15 @@ def _render_item_md(card: dict[str, Any]) -> str:
             "",
             "## Description",
             "",
-            card.get("context", "") or "",
-            "",
-            card.get("root_cause", "") or "",
+            description,
             "",
             "## Bad example",
             "",
-            card.get("symptom", "") or "",
+            bad_example,
             "",
             "## Good example",
             "",
-            card.get("fix", "") or "",
+            good_example,
             "",
             "## Applies when",
             "",
@@ -340,6 +360,7 @@ class TreeInsightStore:
     def __init__(self, root: Path) -> None:
         self.root = Path(root)
         self._lock = threading.Lock()
+        self.signatures = CardSignatureService()
 
     def _load_types(self) -> list[str]:
         f = self.root / "wiki_types.json"
@@ -373,10 +394,16 @@ class TreeInsightStore:
         card: dict[str, Any] = dict(fm)
         card["wiki_type"] = wtype
         card["item_slug"] = md_path.stem
-        card["context"] = sections.get("Description", "").split("\n\n", 1)[0].strip()
-        card["root_cause"] = sections.get("Description", "").strip()
-        card["symptom"] = sections.get("Bad example", "").strip()
-        card["fix"] = sections.get("Good example", "").strip()
+        description = sections.get("Description", "").strip()
+        bad_example = sections.get("Bad example", "").strip()
+        good_example = sections.get("Good example", "").strip()
+        card["description"] = description
+        card["bad_example"] = bad_example
+        card["good_example"] = good_example
+        card["context"] = description.split("\n\n", 1)[0].strip()
+        card["root_cause"] = description
+        card["symptom"] = bad_example
+        card["fix"] = good_example
         card["topic_id"] = fm.get("topic_id", "")
         card["label"] = fm.get("label", "good")
         card["label_note"] = fm.get("label_note", "")
@@ -384,7 +411,24 @@ class TreeInsightStore:
         card["label_override_by"] = fm.get("label_override_by", None)
         card["label_override_at"] = fm.get("label_override_at", None)
         card["raw_log_type"] = fm.get("raw_log_type", "jsonl")
+        card["raw_log_sha256"] = fm.get("raw_log_sha256", "")
+        card["signature_algorithm"] = fm.get("signature_algorithm")
+        card["signature_schema"] = fm.get("signature_schema")
+        card["signature_key_id"] = fm.get("signature_key_id")
+        card["signature"] = fm.get("signature")
+        card["signature_signed_at"] = fm.get("signature_signed_at")
         card["team"] = _normalize_team(fm.get("team"))
+        raw_rel = str(card.get("raw_log") or "").strip()
+        raw_bytes = None
+        if raw_rel.startswith("./"):
+            raw_path = (md_path.parent / raw_rel[2:]).resolve()
+            try:
+                raw_bytes = raw_path.read_bytes()
+            except OSError:
+                raw_bytes = None
+        verify = self.signatures.verify_card(card, raw_log_bytes=raw_bytes)
+        card["signature_status"] = verify.status
+        card["signature_error"] = verify.error
         return card
 
     def _find_item_path(self, card_id: str) -> tuple[str, Path] | None:
@@ -415,12 +459,21 @@ class TreeInsightStore:
                 "wiki_type": c.get("wiki_type"),
                 "status": c.get("status", "active"),
                 "team": _normalize_team(c.get("team")),
+                "signature_status": c.get("signature_status", "legacy-unsigned"),
+                "signature_error": c.get("signature_error"),
+                "signature_key_id": c.get("signature_key_id"),
+                "signature_signed_at": c.get("signature_signed_at"),
             }
             for c in self.load(team=team)
         ]
 
     def search(self, q: str, k: int = 3, team: str | None = None) -> list[dict[str, Any]]:
-        results = search_cards(self.load(team=team), q, k=k, skip_not_triggered=True)
+        cards = [
+            card
+            for card in self.load(team=team)
+            if card.get("signature_status") != "invalid"
+        ]
+        results = search_cards(cards, q, k=k, skip_not_triggered=True)
         enriched: list[dict[str, Any]] = []
         for card in results:
             item = dict(card)
@@ -460,7 +513,7 @@ class TreeInsightStore:
         raw_log_type = card.get("raw_log_type", "jsonl")
         if raw_log_type == "export":
             ext = "txt"
-            raw_content = (card.get("raw_log_export_content") or "") + "\n"
+            raw_content = ((card.get("raw_log_export_content") or "") + "\n").encode("utf-8")
         else:
             ext = "jsonl"
             raw_content = (
@@ -469,12 +522,43 @@ class TreeInsightStore:
                     ensure_ascii=False,
                 )
                 + "\n"
-            )
+            ).encode("utf-8")
         raw_rel = f"./raw/{card['id']}.{ext}"
-        card["raw_log"] = raw_rel
-        (tdir / "raw" / f"{card['id']}.{ext}").write_text(raw_content, encoding="utf-8")
+        signed_card = dict(card)
+        signed_card["title"] = signed_card.get("title", "")
+        signed_card["author"] = signed_card.get("author", "")
+        signed_card["team"] = _normalize_team(signed_card.get("team"))
+        signed_card["confidence"] = float(signed_card.get("confidence", 0.5))
+        signed_card["tags"] = list(signed_card.get("tags") or [])
+        signed_card["status"] = signed_card.get("status", "active")
+        signed_card["applies_when"] = list(signed_card.get("applies_when") or [])
+        signed_card["do_not_apply_when"] = list(signed_card.get("do_not_apply_when") or [])
+        signed_card["topic_id"] = signed_card.get("topic_id", "")
+        signed_card["label"] = signed_card.get("label", "good")
+        signed_card["label_note"] = signed_card.get("label_note", "")
+        signed_card["label_override"] = signed_card.get("label_override", None)
+        signed_card["label_override_by"] = signed_card.get("label_override_by", None)
+        signed_card["label_override_at"] = signed_card.get("label_override_at", None)
+        signed_card["raw_log_type"] = signed_card.get("raw_log_type", "jsonl")
+        signed_card["raw_log"] = raw_rel
+        signed_card["raw_log_sha256"] = sha256_hex(raw_content)
+        signed_card["description"] = (
+            signed_card.get("description")
+            or "\n\n".join(
+                part.strip()
+                for part in [
+                    str(signed_card.get("context") or "").strip(),
+                    str(signed_card.get("root_cause") or "").strip(),
+                ]
+                if part and part.strip()
+            )
+        ).strip()
+        signed_card["bad_example"] = (signed_card.get("bad_example") or signed_card.get("symptom") or "").strip()
+        signed_card["good_example"] = (signed_card.get("good_example") or signed_card.get("fix") or "").strip()
+        signed_card = self.signatures.sign_card(signed_card)
+        (tdir / "raw" / f"{card['id']}.{ext}").write_bytes(raw_content)
         path = tdir / f"{slug}.md"
-        path.write_text(_render_item_md(card), encoding="utf-8")
+        path.write_text(_render_item_md(signed_card), encoding="utf-8")
         return path
 
     def add(self, card: dict[str, Any], wiki_type: str = "general") -> dict[str, Any]:
@@ -503,7 +587,7 @@ class TreeInsightStore:
             types.add(wtype)
             self._save_types(sorted(types))
             self._rebuild_index(wtype)
-            return card
+            return self._item_to_card(wtype, self.root / wtype / f"{slug}.md") or card
 
     def delete(self, card_id: str) -> bool:
         found = self._find_item_path(card_id)
@@ -627,10 +711,9 @@ class TreeInsightStore:
             card["label_override"] = new_label
             card["label_override_by"] = override_by
             card["label_override_at"] = datetime.now(timezone.utc).isoformat()
-            # 只改 .md，不动 raw/ 目录
-            md.write_text(_render_item_md(card), encoding="utf-8")
+            self._write_card(wtype, md.stem, card)
             self._rebuild_index(wtype)
-            return card
+            return self._item_to_card(wtype, md)
 
     def merge(self, source_id: str, target_id: str) -> dict[str, Any] | None:
         src = self._find_item_path(source_id)
@@ -719,17 +802,3 @@ class TreeInsightStore:
             "fix": (top[0].get("rationale") if top else "") or "see hits",
         }
         return self.add(card, wiki_type="research")
-
-
-def migrate_card(card: dict[str, Any], slug: str) -> dict[str, Any]:
-    """为老 card 补齐缺失字段：topic_id / label / raw_log_type。
-
-    不会覆盖已有值。slug 用于生成 topic_id（把下划线替换为连字符）。
-    """
-    if "topic_id" not in card or not card["topic_id"]:
-        card["topic_id"] = slug.replace("_", "-")
-    if "label" not in card or not card["label"]:
-        card["label"] = "good"
-    if "raw_log_type" not in card or not card["raw_log_type"]:
-        card["raw_log_type"] = "jsonl"
-    return card

@@ -31,6 +31,7 @@ DEFAULT_PROBLEM = (
     "during the lunch spike"
 )
 CONFIG_PATH = Path.home() / ".cache" / "insights-wiki" / "config.json"
+TRUSTED_KEYS_PATH = Path.home() / ".cache" / "insights-wiki" / "trusted_keys.json"
 
 
 def _resolve_version() -> str:
@@ -143,6 +144,9 @@ def cmd_publish(args: argparse.Namespace) -> int:
         print(ui.color(f"publish failed: {exc}", "red"), file=sys.stderr)
         return 1
     cid = resp.get("id") or card.get("id", "?")
+    signature_note = ""
+    if resp.get("signature_key_id"):
+        signature_note = f" signed_by={resp['signature_key_id']}"
     emit_from_env(
         stage="publish",
         status="ok",
@@ -151,7 +155,7 @@ def cmd_publish(args: argparse.Namespace) -> int:
         payload={"card_id": cid},
         metrics={"tag_count": len(card.get("tags") or [])},
     )
-    print(ui.color(f"published {cid}", "green"))
+    print(ui.color(f"published {cid}{signature_note}", "green"))
     return 0
 
 
@@ -236,7 +240,16 @@ def cmd_relabel(args: argparse.Namespace) -> int:
     except Exception as exc:
         print(ui.color(f"relabel failed: {exc}", "red"), file=sys.stderr)
         return 1
-    print(ui.color(f"relabeled {resp.get('id', args.card_id)} → effective_label={resp.get('effective_label', args.to)}", "green"))
+    signature_note = ""
+    if resp.get("signature_key_id"):
+        signature_note = f" signed_by={resp['signature_key_id']}"
+    print(
+        ui.color(
+            f"relabeled {resp.get('id', args.card_id)} → "
+            f"effective_label={resp.get('effective_label', args.to)}{signature_note}",
+            "green",
+        )
+    )
     return 0
 
 
@@ -447,6 +460,14 @@ def cmd_wiki_install(args: argparse.Namespace) -> int:
     (cfg_dir / "config.json").write_text(
         json.dumps(cfg, ensure_ascii=False, indent=2), encoding="utf-8"
     )
+    try:
+        key_payload = _http_get(f"{server}/signing/public-keys")
+    except urllib.error.URLError:
+        key_payload = {"keys": [], "updated_at": None}
+    TRUSTED_KEYS_PATH.write_text(
+        json.dumps(key_payload, ensure_ascii=False, indent=2),
+        encoding="utf-8",
+    )
     cards = _http_get(_with_query(f"{server}/insights", team=team)).get("cards") or []
     for c in cards:
         cid = c.get("id")
@@ -455,7 +476,13 @@ def cmd_wiki_install(args: argparse.Namespace) -> int:
                 json.dumps(c, ensure_ascii=False), encoding="utf-8"
             )
     team_note = f" team={team}" if team else ""
-    print(ui.color(f"install ok server={server}{team_note} cached={len(cards)} cards", "green"))
+    print(
+        ui.color(
+            f"install ok server={server}{team_note} cached={len(cards)} cards "
+            f"trusted_keys={len(key_payload.get('keys') or [])}",
+            "green",
+        )
+    )
     return 0
 
 

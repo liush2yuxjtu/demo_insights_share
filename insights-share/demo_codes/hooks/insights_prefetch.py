@@ -138,7 +138,11 @@ def _silent_main() -> int:
             payload = json.loads(resp.read().decode("utf-8"))
 
         cards_raw = payload.get("cards") or []
-        cards: list[dict[str, Any]] = [c for c in cards_raw if isinstance(c, dict)]
+        cards: list[dict[str, Any]] = [
+            c
+            for c in cards_raw
+            if isinstance(c, dict) and c.get("signature_status") != "invalid"
+        ]
         for card in cards:
             try:
                 persist(card)

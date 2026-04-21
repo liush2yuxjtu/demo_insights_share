@@ -99,6 +99,8 @@ class TestTopicStore:
         assert found is not None
         assert found["topic_id"] == "test-topic-xy"
         assert found["label"] == "good"
+        assert found["signature_status"] == "verified"
+        assert found["signature_key_id"]
 
     def test_list_examples_by_label_filters_correctly(self, store: TreeInsightStore) -> None:
         """list_examples(topic_id, label=...) 能正确过滤 good/bad."""
@@ -194,6 +196,7 @@ class TestTopicStore:
         assert result["label_override_by"] == "admin"
         assert result["label_override_at"] is not None
         assert result["raw_log"] == orig_raw_log  # raw_log 未变
+        assert result["signature_status"] == "verified"
 
     def test_effective_label_in_search_results(self, store: TreeInsightStore) -> None:
         """search 返回的卡片包含 effective_label 字段."""
@@ -204,6 +207,31 @@ class TestTopicStore:
             # effective_label = label_override or label
             expected = hit.get("label_override") or hit.get("label", "good")
             assert hit["effective_label"] == expected
+
+    def test_search_skips_invalid_signature_cards(self, tmp_path: Path) -> None:
+        store = TreeInsightStore(tmp_path / "wiki_tree")
+        (tmp_path / "wiki_tree").mkdir(parents=True)
+
+        base_card = {
+            "title": "Pool Exhaustion",
+            "author": "tester",
+            "confidence": 0.7,
+            "tags": ["postgres", "pool"],
+            "topic_id": "pool-topic",
+            "label": "good",
+            "raw_log_type": "jsonl",
+            "context": "postgres pool exhausted",
+            "symptom": "connections rejected",
+            "fix": "use pgbouncer",
+        }
+        store.add({"id": "signed-card", **base_card}, wiki_type="general")
+
+        card_path = tmp_path / "wiki_tree" / "general" / "signed_card.md"
+        text = card_path.read_text(encoding="utf-8")
+        card_path.write_text(text.replace("use pgbouncer", "tampered fix"), encoding="utf-8")
+
+        hits = store.search("postgres pool", k=5)
+        assert [card["id"] for card in hits] == []
 
     def test_search_can_filter_team_namespace(self, tmp_path: Path) -> None:
         store = TreeInsightStore(tmp_path / "wiki_tree")

@@ -42,11 +42,11 @@ def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
 
 def _load_manifest() -> dict[str, Any]:
     if not MANIFEST_PATH.is_file():
-        return {"last_sync_at": None, "cards": []}
+        return {"last_sync_at": None, "cards": [], "signature": {"failures": []}}
     try:
         return json.loads(MANIFEST_PATH.read_text(encoding="utf-8"))
     except (json.JSONDecodeError, OSError):
-        return {"last_sync_at": None, "cards": []}
+        return {"last_sync_at": None, "cards": [], "signature": {"failures": []}}
 
 
 def _now_iso() -> str:
@@ -96,6 +96,17 @@ def persist(card: dict[str, Any]) -> Path:
         cards.append(card_id)
     manifest["cards"] = cards
     manifest["last_sync_at"] = _now_iso()
+    signature_meta = manifest.get("signature") or {}
+    failures = [item for item in signature_meta.get("failures") or [] if item != card_id]
+    signature_status = str(card.get("signature_status") or "legacy-unsigned")
+    if signature_status == "invalid":
+        failures.append(card_id)
+    manifest["signature"] = {
+        "failures": failures,
+        "last_status": signature_status,
+        "last_card_id": card_id,
+        "updated_at": _now_iso(),
+    }
     _atomic_write_json(MANIFEST_PATH, manifest)
 
     return card_path
