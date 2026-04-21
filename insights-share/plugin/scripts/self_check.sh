@@ -62,7 +62,7 @@ else
 fi
 
 # commands
-for c in wiki-install wiki-search; do
+for c in wiki-install wiki-search wiki-publish wiki-review; do
   if [ -f "$PLUGIN_DIR/commands/$c.md" ]; then
     say "command /$c: OK"
   else
@@ -71,9 +71,35 @@ for c in wiki-install wiki-search; do
   fi
 done
 
+# agents (M2+)
+for a in wiki-curator insight-validator; do
+  if [ -f "$PLUGIN_DIR/agents/$a.md" ]; then
+    say "agent $a: OK"
+  else
+    say "agent $a: MISSING"
+    fail_count=$((fail_count+1))
+  fi
+done
+
+# manifest declares agents + 4 commands (M2 contract)
+if [ -f "$MANIFEST" ]; then
+  if /usr/bin/python3 - "$MANIFEST" <<'PY' >/dev/null 2>&1
+import json, sys
+m = json.load(open(sys.argv[1]))
+assert len(m["entry"].get("agents", [])) == 2, "agents count"
+assert len(m["entry"].get("commands", [])) == 4, "commands count"
+PY
+  then
+    say "manifest M2 contract (agents=2, commands=4): OK"
+  else
+    say "manifest M2 contract: FAIL"
+    fail_count=$((fail_count+1))
+  fi
+fi
+
 if [ "$fail_count" -gt 0 ]; then
-  say "plugin M1 self-check: FAIL ($fail_count missing)"
+  say "plugin self-check: FAIL ($fail_count missing)"
   exit 1
 fi
-say "plugin M1 self-check: ALL GREEN"
+say "plugin self-check: ALL GREEN"
 exit 0
