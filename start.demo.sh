@@ -5,10 +5,10 @@
 #   /tmp/demo-sandbox-<ts>.XXXX/
 #     home/
 #       .claude/
-#         skills/insights-wiki/        ← cp 进来（完全独立副本）
+#         skills/insights-share/        ← cp 进来（完全独立副本）
 #         .credentials.json → symlink 到真实 auth（只为能登录）
 #         settings.json     → symlink 到真实 settings（只为继承偏好）
-#       .cache/                        ← insights-wiki skill 写缓存的地方
+#       .cache/                        ← insights-share skill 写缓存的地方
 #     guide.log                        ← 左 pane tail -f
 #     .env                             ← 右 pane source 的环境文件
 #
@@ -26,10 +26,10 @@ SANDBOX_CLAUDE="$SANDBOX_HOME/.claude"
 SANDBOX_WORKDIR="$SANDBOX/workdir"   # claude 的 cwd — 只有项目级 skill，不放别的
 GUIDE_LOG="$SANDBOX/guide.log"
 ENV_FILE="$SANDBOX/.env"
-SKILL_NAME="insights-wiki"
+SKILL_NAME="insights-share"
 SKILL_SRC="$REPO_ROOT/insights-share/demo_codes/.claude/skills/$SKILL_NAME"
 DEMO_CODES="$REPO_ROOT/insights-share/demo_codes"
-DEMO_SETTINGS="$DEMO_CODES/.claude/settings.json"   # 注册 insights-wiki hook
+DEMO_SETTINGS="$DEMO_CODES/.claude/settings.json"   # 注册 insights-share hook
 DEMO_VENV_PY="$DEMO_CODES/.venv/bin/python"
 DAEMON_PORT="7821"
 DAEMON_LOG="$SANDBOX/insightsd.log"
@@ -86,20 +86,20 @@ else
   2) 或先执行 claude 订阅登录（让 ~/.claude/.credentials.json 存在）"
 fi
 
-# ── Stage 2: 写 settings.json（含 insights-wiki hook），订阅再软链 credentials ──
+# ── Stage 2: 写 settings.json（含 insights-share hook），订阅再软链 credentials ──
 # 不 symlink 用户全局 settings.json —— 全局里注册的是 continuous-learning 等
 # 其他用户 hook，在沙箱 HOME 下 claude 解析路径时找不到脚本，会报
 # 　Stop hook error: evaluate-session.sh: No such file or directory
-# 更关键：insights-wiki 的触发是 **hook 驱动**（UserPromptSubmit + Stop），
+# 更关键：insights-share 的触发是 **hook 驱动**（UserPromptSubmit + Stop），
 # 必须用 demo_codes/.claude/settings.json 这份注册，skill 才会被 claude 真正"用上"。
 # user-level + project-level 各放一份，两条加载路径都能找到。
 cp "$DEMO_SETTINGS" "$SANDBOX_CLAUDE/settings.json"
 cp "$DEMO_SETTINGS" "$SANDBOX_WORKDIR/.claude/settings.json"
 if [ "$AUTH_MODE" = "subscription" ]; then
   ln -s "$HOME/.claude/.credentials.json" "$SANDBOX_CLAUDE/.credentials.json"
-  step 2 "装入 insights-wiki hook + 订阅 credentials . done"
+  step 2 "装入 insights-share hook + 订阅 credentials . done"
 else
-  step 2 "装入 insights-wiki hook（走 MiniMax）....... done"
+  step 2 "装入 insights-share hook（走 MiniMax）....... done"
 fi
 
 # ── Stage 3: 拷贝 skill 到沙箱（双位置：user-level + project-level）─────────
@@ -155,7 +155,7 @@ EOF
 chmod 600 "$ENV_FILE"
 
 # ── Stage 5: 启动 insightsd daemon（如未在跑）──────────
-# insights-wiki skill 的 hook 硬编码访问 http://127.0.0.1:7821。
+# insights-share skill 的 hook 硬编码访问 http://127.0.0.1:7821。
 # daemon 离线时 Stop hook 会报错并挂在 claude 输出里，demo 观感差。
 # 策略：7821 已 LISTEN → 复用（不动）；否则用 demo_codes/.venv 后台启动，
 # PID 写进沙箱文件；cleanup 只 kill 我们自己起的 daemon。
@@ -256,16 +256,16 @@ ls "$SANDBOX_HOME/.claude/skills/" 2>/dev/null || echo "(none)"
 echo "----- repo *.sh (\\\$REPO_ROOT/*.sh) -----"
 ls "$REPO_ROOT"/*.sh 2>/dev/null | xargs -n1 basename 2>/dev/null || echo "(none)"
 echo "----- plugin statusline badge preview -----"
-INSIGHTS_WIKI_URL=http://127.0.0.1:7821 WIKI_STATUSLINE_NO_COLOR=1 \
-  bash "$REPO_ROOT/insights-share/plugin/statusline/insights_wiki_statusline.sh" \
+INSIGHTS_SHARE_URL=http://127.0.0.1:7821 SHARE_STATUSLINE_NO_COLOR=1 \
+  bash "$REPO_ROOT/plugins/insights-share/statusline/insights_share_statusline.sh" \
   || echo "(statusline exit non-zero)"
-echo "----- plugin M4 self-check (insights-share/plugin/) -----"
-bash "$REPO_ROOT/insights-share/plugin/scripts/self_check.sh" \
+echo "----- plugin M5 self-check (plugins/insights-share/) -----"
+bash "$REPO_ROOT/plugins/insights-share/scripts/self_check.sh" \
   || echo "(plugin self-check exit non-zero)"
 echo "===================================================="
-echo "期望: 两边都只有 insights-wiki，看不到你全局的其他 skill。"
-echo "期望: statusline 显示 [wiki ✓ 0/today]；若缓存签名失配则显示 [wiki 🔒 sig-fail]。"
-echo "期望: plugin M4 self-check 显示 5 个命令 + 2 个 agent + 签名/发布脚本 全 OK。"
+echo "期望: 两边都只有 insights-share，看不到你全局的其他 skill。"
+echo "期望: statusline 显示 [share ✓ 0/today]；若缓存签名失配则显示 [share 🔒 sig-fail]。"
+echo "期望: plugin M5 self-check 显示 5 个命令 + 2 个 agent + 签名/发布脚本 全 OK。"
 printf "按回车进入 claude…"
 read _
 HOME="$SANDBOX_HOME" exec claude
