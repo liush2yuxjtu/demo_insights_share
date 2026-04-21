@@ -1,0 +1,58 @@
+=== start.demo.sh statusline feature self-verify ===
+# 日期: 2026-04-21
+# rule: docs/rules/start-demo-verify.md
+# proposal: proposal/proposal_statusline.md
+#
+--- (1) sandbox settings.json jq . ---
+{
+  "statusLine": {
+    "type": "command",
+    "command": "/Users/m1/projects/demo_insights_share/statusline/insights_wiki_statusline.sh"
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python /Users/m1/projects/demo_insights_share/insights-share/demo_codes/hooks/insights_stop_hook.py"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python /Users/m1/projects/demo_insights_share/insights-share/demo_codes/hooks/insights_prefetch.py 2>/dev/null"
+          }
+        ]
+      }
+    ]
+  }
+}
+--- (2) sandbox self-check block (复刻 RIGHT_SH) ---
+cwd  : /tmp/start-demo-smoke-26767/workdir
+HOME : /tmp/start-demo-smoke-26767/home
+----- project-level skills ($cwd/.claude/skills/) -----
+insights-wiki
+----- user-level skills ($HOME/.claude/skills/) -----
+insights-wiki
+----- repo *.sh ($REPO_ROOT/*.sh) -----
+start.claude.sh
+start.codex.sh
+start.demo.sh
+----- statusline badge preview -----
+[wiki ✓ 0/today]
+====================================================
+期望: 两边都只有 insights-wiki
+期望: statusline 显示 [wiki ✓ 0/today]（daemon up + skill 装好）
+
+--- (3) bump +3 后 statusline ---
+[wiki ✓ 3/today]
+
+--- (4) WIKI_STATUSLINE=off 验证 A 侧零特征 ---
+(empty)
