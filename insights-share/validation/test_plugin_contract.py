@@ -5,7 +5,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PLUGIN_DIR = ROOT / "plugin"
+REPO_ROOT = ROOT.parents[0]
+PLUGIN_DIR = REPO_ROOT / "plugins" / "insights-share"
 MANIFEST = PLUGIN_DIR / ".claude-plugin" / "plugin.json"
 MARKETPLACE = PLUGIN_DIR / ".claude-plugin" / "marketplace.json"
 README = PLUGIN_DIR / "README.md"
@@ -18,26 +19,35 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def test_plugin_manifest_declares_m4_release() -> None:
+def test_plugin_manifest_declares_m5_release() -> None:
     manifest = json.loads(_read(MANIFEST))
     commands = manifest["entry"]["commands"]
 
+    assert manifest["name"] == "insights-share"
     assert commands == [
-        "commands/wiki-install.md",
-        "commands/wiki-search.md",
-        "commands/wiki-publish.md",
-        "commands/wiki-review.md",
-        "commands/wiki-diff.md",
+        "commands/share-install.md",
+        "commands/share-search.md",
+        "commands/share-publish.md",
+        "commands/share-review.md",
+        "commands/share-diff.md",
     ]
-    assert len(manifest["entry"]["agents"]) == 2
-    assert manifest["version"] == "0.4.0-m4"
-    assert manifest["milestones"]["current"] == "M4_SIGN_MARKETPLACE"
-    assert "M4_SIGN_MARKETPLACE" in manifest["milestones"]["completed"]
+    assert manifest["entry"]["agents"] == [
+        "agents/share-curator.md",
+        "agents/share-validator.md",
+    ]
+    assert manifest["entry"]["statusline"] == "statusline/insights_share_statusline.sh"
+    assert manifest["entry"]["skills"] == [
+        "skills/insights-share/SKILL.md",
+        "skills/insights-share-server/SKILL.md",
+    ]
+    assert manifest["version"] == "0.5.0-m5"
+    assert manifest["milestones"]["current"] == "M5_RENAME"
+    assert "M5_RENAME" in manifest["milestones"]["completed"]
     assert manifest["milestones"]["pending"] == []
 
 
-def test_wiki_diff_command_exists() -> None:
-    command = PLUGIN_DIR / "commands" / "wiki-diff.md"
+def test_share_diff_command_exists() -> None:
+    command = PLUGIN_DIR / "commands" / "share-diff.md"
 
     assert command.is_file()
     text = _read(command)
@@ -45,13 +55,16 @@ def test_wiki_diff_command_exists() -> None:
     assert "只写 diff" in text
 
 
-def test_self_check_tracks_full_m4_contract() -> None:
+def test_self_check_tracks_full_m5_contract() -> None:
     script = _read(SELF_CHECK)
 
-    assert "wiki-diff" in script
+    assert "share-diff" in script
     assert "mcp wiki-server" in script
     assert "marketplace publish script" in script
-    assert "commands=5, mcp>=7" in script
+    assert "insights_share_statusline.sh" in script
+    assert 'm["name"] == "insights-share"' in script
+    assert 'm["version"] == "0.5.0-m5"' in script
+    assert 'm["milestones"]["current"] == "M5_RENAME"' in script
 
 
 def test_mcp_contract_exists_and_covers_team_queries() -> None:
@@ -69,18 +82,21 @@ def test_mcp_contract_exists_and_covers_team_queries() -> None:
     assert payload["capabilities"]["signed_cards"] is True
 
 
-def test_marketplace_and_readme_align_with_current_m4_release() -> None:
+def test_marketplace_and_readme_align_with_current_m5_release() -> None:
     manifest = json.loads(_read(MANIFEST))
     marketplace = json.loads(_read(MARKETPLACE))
     readme = _read(README)
 
     plugin = marketplace["plugins"][0]
-    assert plugin["version"] == manifest["version"] == "0.4.0-m4"
-    assert manifest["milestones"]["current"] == "M4_SIGN_MARKETPLACE"
-    assert "M4_SIGN_MARKETPLACE" in readme
-    assert "/wiki-diff" in readme
-    assert "[wiki ⚠ stale]" in readme
-    assert "[wiki 🔒 sig-fail]" in readme
+    assert marketplace["name"] == "insights-share"
+    assert plugin["name"] == "insights-share"
+    assert plugin["version"] == manifest["version"] == "0.5.0-m5"
+    assert "subdir=plugins/insights-share" in plugin["source"]
+    assert manifest["milestones"]["current"] == "M5_RENAME"
+    assert "M5_RENAME" in readme
+    assert "/share-diff" in readme
+    assert "[share ⚠ stale]" in readme
+    assert "[share 🔒 sig-fail]" in readme
     assert "team namespace" in readme
     assert "publish_marketplace.py" in readme
 

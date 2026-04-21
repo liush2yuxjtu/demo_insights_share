@@ -8,8 +8,9 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
-STATUSLINE = ROOT / "plugin" / "statusline" / "insights_wiki_statusline.sh"
-ROOT_STATUSLINE = ROOT.parents[0] / "statusline" / "insights_wiki_statusline.sh"
+REPO_ROOT = ROOT.parents[0]
+STATUSLINE = REPO_ROOT / "plugins" / "insights-share" / "statusline" / "insights_share_statusline.sh"
+ROOT_STATUSLINE = REPO_ROOT / "statusline" / "insights_share_statusline.sh"
 
 
 def _write_json(path: Path, payload: dict) -> None:
@@ -20,11 +21,11 @@ def _write_json(path: Path, payload: dict) -> None:
 def _run_statusline(home: Path, *, ttl_seconds: int = 86400) -> str:
     env = os.environ.copy()
     env["HOME"] = str(home)
-    env["WIKI_STATUSLINE_NO_COLOR"] = "1"
-    env["WIKI_STATUSLINE_STALE_TTL_SECONDS"] = str(ttl_seconds)
+    env["SHARE_STATUSLINE_NO_COLOR"] = "1"
+    env["SHARE_STATUSLINE_STALE_TTL_SECONDS"] = str(ttl_seconds)
     completed = subprocess.run(
         ["bash", str(STATUSLINE)],
-        cwd=ROOT.parents[1],
+        cwd=REPO_ROOT,
         capture_output=True,
         text=True,
         check=True,
@@ -39,9 +40,9 @@ def test_root_and_plugin_statusline_scripts_stay_identical() -> None:
 
 def test_statusline_shows_green_badge_when_cache_is_fresh(tmp_path: Path) -> None:
     home = tmp_path / "home"
-    (home / ".claude" / "skills" / "insights-wiki").mkdir(parents=True)
-    (home / ".claude" / "skills" / "insights-wiki" / "SKILL.md").write_text("ok", encoding="utf-8")
-    cache_dir = home / ".cache" / "insights-wiki"
+    (home / ".claude" / "skills" / "insights-share").mkdir(parents=True)
+    (home / ".claude" / "skills" / "insights-share" / "SKILL.md").write_text("ok", encoding="utf-8")
+    cache_dir = home / ".cache" / "insights-share"
     cache_dir.mkdir(parents=True)
     (cache_dir / ".health_cache").write_text("ok", encoding="utf-8")
     _write_json(
@@ -61,14 +62,14 @@ def test_statusline_shows_green_badge_when_cache_is_fresh(tmp_path: Path) -> Non
         },
     )
 
-    assert _run_statusline(home) == "[wiki ✓ 4/today]"
+    assert _run_statusline(home) == "[share ✓ 4/today]"
 
 
 def test_statusline_shows_stale_badge_when_manifest_is_expired(tmp_path: Path) -> None:
     home = tmp_path / "home"
-    (home / ".claude" / "skills" / "insights-wiki").mkdir(parents=True)
-    (home / ".claude" / "skills" / "insights-wiki" / "SKILL.md").write_text("ok", encoding="utf-8")
-    cache_dir = home / ".cache" / "insights-wiki"
+    (home / ".claude" / "skills" / "insights-share").mkdir(parents=True)
+    (home / ".claude" / "skills" / "insights-share" / "SKILL.md").write_text("ok", encoding="utf-8")
+    cache_dir = home / ".cache" / "insights-share"
     cache_dir.mkdir(parents=True)
     (cache_dir / ".health_cache").write_text("ok", encoding="utf-8")
     _write_json(
@@ -88,14 +89,14 @@ def test_statusline_shows_stale_badge_when_manifest_is_expired(tmp_path: Path) -
         },
     )
 
-    assert _run_statusline(home, ttl_seconds=60) == "[wiki ⚠ stale]"
+    assert _run_statusline(home, ttl_seconds=60) == "[share ⚠ stale]"
 
 
 def test_statusline_shows_sig_fail_badge_when_manifest_records_signature_failure(tmp_path: Path) -> None:
     home = tmp_path / "home"
-    (home / ".claude" / "skills" / "insights-wiki").mkdir(parents=True)
-    (home / ".claude" / "skills" / "insights-wiki" / "SKILL.md").write_text("ok", encoding="utf-8")
-    cache_dir = home / ".cache" / "insights-wiki"
+    (home / ".claude" / "skills" / "insights-share").mkdir(parents=True)
+    (home / ".claude" / "skills" / "insights-share" / "SKILL.md").write_text("ok", encoding="utf-8")
+    cache_dir = home / ".cache" / "insights-share"
     cache_dir.mkdir(parents=True)
     (cache_dir / ".health_cache").write_text("ok", encoding="utf-8")
     _write_json(
@@ -119,4 +120,4 @@ def test_statusline_shows_sig_fail_badge_when_manifest_records_signature_failure
         },
     )
 
-    assert _run_statusline(home) == "[wiki 🔒 sig-fail]"
+    assert _run_statusline(home) == "[share 🔒 sig-fail]"
