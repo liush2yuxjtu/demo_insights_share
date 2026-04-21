@@ -17,3 +17,6 @@ __pycache__/
 # editor/tool backups
 *.bak-*
 *.swp
+
+# validation deps (playwright 等)
+insights-share/validation/node_modules/
