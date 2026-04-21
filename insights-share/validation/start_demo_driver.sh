@@ -9,7 +9,7 @@ WORKDIR=""
 RUN_DIR=""
 ENV_FILE=""
 PYTHON_BIN="${SOURCE_DIR}/.venv/bin/python"
-CACHE_DIR="${HOME}/.cache/insights-wiki"
+CACHE_DIR="${HOME}/.cache/insights-share"
 CACHE_BACKUP=""
 DAEMON_PID=""
 AUTO_APPROVE=0
@@ -35,7 +35,7 @@ STEP_TITLES=(
   "发布 Alice 的 good 案例"
   "发布 Bob 的 bad 案例"
   "用真实事故问题做一次 solve"
-  "安装 insights-wiki 到本机缓存"
+  "安装 insights-share 到本机缓存"
   "确认缓存文件已经落地"
 )
 
@@ -49,7 +49,7 @@ STEP_COMMANDS=(
   "\"${PYTHON_BIN}\" insights_cli.py publish seeds/bob_pgpool_bad.json --wiki \"http://127.0.0.1:${PORT}\""
   "\"${PYTHON_BIN}\" insights_cli.py solve \"Our checkout API is timing out, postgres is rejecting new connections during the lunch spike\" --wiki \"http://127.0.0.1:${PORT}\" --no-ai"
   "\"${PYTHON_BIN}\" insights_cli.py wiki-install --server \"http://127.0.0.1:${PORT}\""
-  "ls -la ~/.cache/insights-wiki && printf '\n' && find ~/.cache/insights-wiki -maxdepth 1 -type f | sort"
+  "ls -la ~/.cache/insights-share && printf '\n' && find ~/.cache/insights-share -maxdepth 1 -type f | sort"
 )
 
 STEP_WHYS=(

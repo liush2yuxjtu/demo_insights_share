@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # ================================================================
-# without_reproduce.sh — A/B 对照 · WITHOUT 版（无 insights-wiki skill）
+# without_reproduce.sh — A/B 对照 · WITHOUT 版（无 insights-share skill）
 # ----------------------------------------------------------------
 # 流程：
-#   1. 重置 /tmp/demo_insights_A，并清理 ~/.claude/skills/insights-wiki（若存在则暂存到 .bak）
+#   1. 重置 /tmp/demo_insights_A，并清理 ~/.claude/skills/insights-share（若存在则暂存到 .bak）
 #   2. tmux new-session 启动纯净 shell
 #   3. 通过 tmux send-keys 执行 claude -p
 #      prompt 内要求 Claude 先跑 !pwd、列出顶层 filetree，再答技术问题
@@ -17,8 +17,8 @@ set -u
 
 REPO_ROOT="/Users/m1/projects/demo_insights_share"
 DELIV="${REPO_ROOT}/insights-share/validation/reports/deliverables"
-SKILL_DST="${HOME}/.claude/skills/insights-wiki"
-SKILL_SERVER_DST="${HOME}/.claude/skills/insights-wiki-server"
+SKILL_DST="${HOME}/.claude/skills/insights-share"
+SKILL_SERVER_DST="${HOME}/.claude/skills/insights-share-server"
 WORKSPACE_A="/tmp/demo_insights_A"
 SESSION="insights_without_repro"
 RAW="${WORKSPACE_A}/A_without.raw"
@@ -50,7 +50,7 @@ if [ -d "${SKILL_SERVER_DST}" ]; then
   log "Step 0b: 发现已有 ${SKILL_SERVER_DST}，移动到 .bak.$$"
   mv "${SKILL_SERVER_DST}" "${SKILL_SERVER_DST}.bak.$$"
 fi
-log "Step 0c: 清理完成，~/.claude/skills/ 中不存在 insights-wiki*"
+log "Step 0c: 清理完成，~/.claude/skills/ 中不存在 insights-share*"
 
 # ---------- Step 1: 写 prompt 文件 + wrapper 脚本 ----------
 log "Step 1a: 写 prompt 文件 ${PROMPT_FILE}"
@@ -97,14 +97,14 @@ else
   printf '[会话超时] claude -p 在 %d 秒内未输出任何内容\n' "${WAIT_SEC}" > "${LOG}"
 fi
 {
-  printf '# Claude Export — WITHOUT 版（无 insights-wiki skill）\n\n'
+  printf '# Claude Export — WITHOUT 版（无 insights-share skill）\n\n'
   printf '## 元信息\n\n'
   printf -- '- 时间：%s\n' "$(date '+%Y-%m-%d %H:%M:%S')"
   printf -- '- 模式：A/B 对照 · WITHOUT 轮\n'
   printf -- '- tmux 会话：%s\n' "${SESSION}"
   printf -- '- 工作目录：%s\n' "${WORKSPACE_A}"
   printf -- '- 日志：%s\n' "${LOG}"
-  printf -- '- skill 状态：~/.claude/skills/ 下无 insights-wiki* 目录\n'
+  printf -- '- skill 状态：~/.claude/skills/ 下无 insights-share* 目录\n'
   printf -- '- prompt：\n\n'
   printf '```\n%s\n```\n\n' "${PROMPT}"
   printf '## Claude 原始输出\n\n'

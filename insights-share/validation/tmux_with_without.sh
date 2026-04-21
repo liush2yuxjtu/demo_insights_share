@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # WITH/WITHOUT tmux 对照实验
-# - WITHOUT 轮：纯净 claude 会话（无 insights-wiki skill）
-# - WITH 轮：先把 insights-wiki skill 拷到 ~/.claude/skills/，再启会话
+# - WITHOUT 轮：纯净 claude 会话（无 insights-share skill）
+# - WITH 轮：先把 insights-share skill 拷到 ~/.claude/skills/，再启会话
 # 两轮都通过 tmux send-keys 发起 claude -p，60 秒后用 sed 去 ANSI 落盘
 set -u
 
 REPO_ROOT="/Users/m1/projects/demo_insights_share"
 DELIV="${REPO_ROOT}/insights-share/validation/reports/deliverables"
-SKILL_SRC="${REPO_ROOT}/insights-share/demo_codes/.claude/skills/insights-wiki"
-SKILL_DST="${HOME}/.claude/skills/insights-wiki"
+SKILL_SRC="${REPO_ROOT}/insights-share/demo_codes/.claude/skills/insights-share"
+SKILL_DST="${HOME}/.claude/skills/insights-share"
 PROMPT='Our checkout API is timing out, postgres is rejecting new connections during the lunch spike'
 WAIT_SEC=60
 
@@ -73,7 +73,7 @@ if [ ! -f "${SKILL_SRC}/SKILL.md" ]; then
   log "[warn] ${SKILL_SRC}/SKILL.md 不存在，Team A 尚未完成 skill 化"
   log "[warn] 跳过 WITH 轮，写占位文件"
   cat > "${DELIV}/claude_export_WITH.txt" <<'EOF'
-[等待 Team A] insights-share/demo_codes/.claude/skills/insights-wiki/SKILL.md 不存在
+[等待 Team A] insights-share/demo_codes/.claude/skills/insights-share/SKILL.md 不存在
 [等待 Team A] WITH 轮被跳过，待 skill 就绪后由 Team C 补跑
 EOF
 else

@@ -16,11 +16,11 @@ set -eu
 
 SANDBOX="${1:?需要 SANDBOX 路径}"
 LOG="${2:?需要 guide.log 路径}"
-SKILL_NAME="${3:-insights-wiki}"
+SKILL_NAME="${3:-insights-share}"
 SANDBOX_HOME="${4:?需要 SANDBOX_HOME 路径（用于沙箱隔离检测）}"
 
 SKILL_DIR="$SANDBOX_HOME/.claude/skills/$SKILL_NAME"
-CACHE_DIR="$SANDBOX_HOME/.cache/insights-wiki"
+CACHE_DIR="$SANDBOX_HOME/.cache/insights-share"
 
 # 每阶段最多等多少秒（避免某个信号永远不来时左边卡死）
 STAGE_TIMEOUT=120
@@ -63,7 +63,7 @@ wait_for_file() {
 sleep 1
 card "📖 欢迎进入 insights-share demo（左边讲解 / 右边 Claude）" \
   "这个 demo 会带你亲眼看完一条完整链路：" \
-  "  1. 确认 insights-wiki skill 已经装好" \
+  "  1. 确认 insights-share skill 已经装好" \
   "  2. 在右边 Claude 会话提一个真实 postgres 超时问题" \
   "  3. 观察 skill 静默触发，拉回 LAN wiki 卡片" \
   "  4. 对比有无 skill 时的答案差异" \
@@ -77,7 +77,7 @@ card "📖 欢迎进入 insights-share demo（左边讲解 / 右边 Claude）" \
 sleep 3
 
 # ── Stage 1: 确认 skill 已装 ──────────────────────────
-card "📖 第 1 步：确认 insights-wiki skill 已经装好" \
+card "📖 第 1 步：确认 insights-share skill 已经装好" \
   "skill 是一种把团队经验写成文件的方式，Claude 会自动读它。" \
   "我们刚刚已经帮你把 skill 放到：" \
   "  $SKILL_DIR" \
@@ -86,7 +86,7 @@ card "📖 第 1 步：确认 insights-wiki skill 已经装好" \
   "" \
   "    请列出我本地的 skill" \
   "" \
-  "输出里出现 insights-wiki 就说明装好了。"
+  "输出里出现 insights-share 就说明装好了。"
 
 if wait_for_file "$SKILL_DIR/SKILL.md" 30; then
   ok "检测到 $SKILL_DIR/SKILL.md — skill 已装好"
@@ -103,7 +103,7 @@ card "📖 第 2 步：在右边向 Claude 提一个真实 postgres 问题" \
   "    我们的 checkout API 正在超时，postgres 在午餐高峰拒绝" \
   "    新连接，应该如何诊断与修复？请给出可执行的 SQL 与代码片段。" \
   "" \
-  "如果 skill 生效，Claude 会静默后台调用 insights-wiki 去查 LAN wiki，" \
+  "如果 skill 生效，Claude 会静默后台调用 insights-share 去查 LAN wiki，" \
   "拉回别人之前遇到同类问题时沉淀下来的卡片。" \
   "整个过程不会弹任何确认窗口。"
 

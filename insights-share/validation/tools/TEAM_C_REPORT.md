@@ -7,7 +7,7 @@
 | `insights-share/validation/tools/claude_session_export.py` | jsonl → 易读 txt 导出工具，支持 `--session-id` |
 | `insights-share/validation/tmux_with_without.sh` | tmux 双轮对照脚本（先 WITHOUT、后 WITH） |
 | `insights-share/validation/reports/deliverables/claude_export_WITHOUT.txt` | 无 skill 的 claude -p 回答（3018 字节） |
-| `insights-share/validation/reports/deliverables/claude_export_WITH.txt` | 装载 insights-wiki skill 后的回答（1962 字节） |
+| `insights-share/validation/reports/deliverables/claude_export_WITH.txt` | 装载 insights-share skill 后的回答（1962 字节） |
 | `insights-share/validation/reports/deliverables/diff.md` | 体量、关键词、定性三维差异分析 |
 
 ## 执行流程
@@ -16,13 +16,13 @@
 2. 写 `claude_session_export.py`：按 mtime 取最新 jsonl 或 `--session-id` 指定，提取 `message.role in (user, assistant)`，去 ANSI、textwrap 至 120 列
 3. 写 `tmux_with_without.sh`：
    - 固定 prompt: `Our checkout API is timing out, postgres is rejecting new connections during the lunch spike`
-   - WITHOUT 轮先把 `~/.claude/skills/insights-wiki` 临时移除
+   - WITHOUT 轮先把 `~/.claude/skills/insights-share` 临时移除
    - 通过 `tmux send-keys` 启 `claude -p`，每 5 秒探测 `tee` 文件大小并读 `__DONE__` 哨兵
    - 60 秒后用 `sed -E 's/\x1b\[[0-9;]*[A-Za-z]//g'` 去 ANSI 落盘
-   - WITH 轮拷 `demo_codes/.claude/skills/insights-wiki` 到 `~/.claude/skills/`
+   - WITH 轮拷 `demo_codes/.claude/skills/insights-share` 到 `~/.claude/skills/`
    - 两轮均 `tmux kill-session` 清理
 4. 软依赖处理：先确认 `SKILL.md` 是否存在；不存在就跳过 WITH 轮并写占位文件。本次 Team A 已交付，两轮均完整执行
-5. 跑后清理：删除 `~/.claude/skills/insights-wiki.bak.*` 残留备份
+5. 跑后清理：删除 `~/.claude/skills/insights-share.bak.*` 残留备份
 
 ## 关键结果
 

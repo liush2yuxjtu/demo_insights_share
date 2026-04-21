@@ -1,12 +1,12 @@
 #!/usr/bin/env bash
 # ================================================================
-# with_reproduce.sh — A/B 对照 · WITH 版（安装 insights-wiki skill）
+# with_reproduce.sh — A/B 对照 · WITH 版（安装 insights-share skill）
 # ----------------------------------------------------------------
 # 本脚本必须"从零开始"：
-#   1. 重置 /tmp/demo_insights_B，并清空 ~/.claude/skills/insights-wiki*（确保干净环境）
+#   1. 重置 /tmp/demo_insights_B，并清空 ~/.claude/skills/insights-share*（确保干净环境）
 #   2. git clone --depth 1 从 github 拉取 demo_insights_share 仓库
 #      （关键：不从本地 filetree 复制，保证真实 setup 流程）
-#   3. 从 cloned 目录把 insights-wiki / insights-wiki-server skill
+#   3. 从 cloned 目录把 insights-share / insights-share-server skill
 #      复制到 ~/.claude/skills/
 #   4. 打印 first-setup-guide，并在隔离目录里启动 daemon
 #   5. tmux new-session 启动纯净 shell
@@ -25,8 +25,8 @@ DELIV="${REPO_ROOT}/insights-share/validation/reports/deliverables"
 GITHUB_URL="https://github.com/liush2yuxjtu/demo_insights_share.git"
 WORKSPACE_B="/tmp/demo_insights_B"
 CLONE_DIR="${WORKSPACE_B}/isw-clone"
-SKILL_DST="${HOME}/.claude/skills/insights-wiki"
-SKILL_SERVER_DST="${HOME}/.claude/skills/insights-wiki-server"
+SKILL_DST="${HOME}/.claude/skills/insights-share"
+SKILL_SERVER_DST="${HOME}/.claude/skills/insights-share-server"
 SESSION="insights_with_repro"
 RAW="${WORKSPACE_B}/B_with.raw"
 LOG="${WORKSPACE_B}/B_with.log"
@@ -38,7 +38,7 @@ WAIT_SEC=240
 
 # 核心 prompt：要求 Claude 先自检环境（pwd + skill 列表 + filetree）再答技术问题
 # 单行化，避免 tmux send-keys 截断
-PROMPT='请严格按顺序执行三步。第一步：运行 !pwd 打印当前工作目录。第二步：运行 !ls -la ~/.claude/skills/ 展示已安装的 skill 列表，并用 !head -40 ~/.claude/skills/insights-wiki/SKILL.md 读取 insights-wiki 的 SKILL.md 前 40 行。第三步：回答 — 我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？请给出可执行的 SQL 与代码片段；如果你有 insights-wiki 注入的 LAN 实战卡片，请在回答里明确引用。'
+PROMPT='请严格按顺序执行三步。第一步：运行 !pwd 打印当前工作目录。第二步：运行 !ls -la ~/.claude/skills/ 展示已安装的 skill 列表，并用 !head -40 ~/.claude/skills/insights-share/SKILL.md 读取 insights-share 的 SKILL.md 前 40 行。第三步：回答 — 我们的 checkout API 正在超时，postgres 在午餐高峰拒绝新连接，应该如何诊断与修复？请给出可执行的 SQL 与代码片段；如果你有 insights-share 注入的 LAN 实战卡片，请在回答里明确引用。'
 
 mkdir -p "${DELIV}"
 log() { printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*"; }
@@ -51,7 +51,7 @@ cd "${WORKSPACE_B}"
 log "Step 0: 工作目录已重置 → ${WORKSPACE_B}"
 
 # ---------- Step 0: 清理 skill 环境 ----------
-log "Step 0a: 清理 ~/.claude/skills/insights-wiki*（若存在）"
+log "Step 0a: 清理 ~/.claude/skills/insights-share*（若存在）"
 if [ -d "${SKILL_DST}" ]; then
   mv "${SKILL_DST}" "${SKILL_DST}.bak.$$"
   log "  已暂存 ${SKILL_DST} → .bak.$$"
@@ -71,22 +71,22 @@ fi
 log "  clone 完成，HEAD=$(cd ${CLONE_DIR} && git rev-parse --short HEAD)"
 
 # 断言 skill 在 cloned 目录里存在
-CLONED_SKILL="${CLONE_DIR}/insights-share/demo_codes/.claude/skills/insights-wiki"
-CLONED_SKILL_SERVER="${CLONE_DIR}/insights-share/demo_codes/.claude/skills/insights-wiki-server"
+CLONED_SKILL="${CLONE_DIR}/insights-share/demo_codes/.claude/skills/insights-share"
+CLONED_SKILL_SERVER="${CLONE_DIR}/insights-share/demo_codes/.claude/skills/insights-share-server"
 if [ ! -f "${CLONED_SKILL}/SKILL.md" ]; then
-  log "[fatal] cloned 目录内缺失 insights-wiki/SKILL.md，github 仓库未推送 skill？"
+  log "[fatal] cloned 目录内缺失 insights-share/SKILL.md，github 仓库未推送 skill？"
   exit 3
 fi
 log "  cloned skill SKILL.md 存在 → $(wc -c < "${CLONED_SKILL}/SKILL.md" | tr -d ' ') 字节"
 
 # ---------- Step 2: 安装 skill 到 ~/.claude/skills/ ----------
-log "Step 2a: 安装 insights-wiki skill → ${SKILL_DST}"
+log "Step 2a: 安装 insights-share skill → ${SKILL_DST}"
 mkdir -p "${SKILL_DST}"
 cp -r "${CLONED_SKILL}/." "${SKILL_DST}/"
 log "  拷贝完成 → $(ls -1 "${SKILL_DST}" | wc -l | tr -d ' ') 个文件"
 
 if [ -f "${CLONED_SKILL_SERVER}/SKILL.md" ]; then
-  log "Step 2b: 安装 insights-wiki-server skill → ${SKILL_SERVER_DST}"
+  log "Step 2b: 安装 insights-share-server skill → ${SKILL_SERVER_DST}"
   mkdir -p "${SKILL_SERVER_DST}"
   cp -r "${CLONED_SKILL_SERVER}/." "${SKILL_SERVER_DST}/"
 fi
@@ -96,7 +96,7 @@ log "Step 3: 打印 first-setup-guide"
 cat <<EOF
 
 ============================================================
-  insights-wiki First-Setup Guide
+  insights-share First-Setup Guide
 ============================================================
   1. skill 已安装：
      - ${SKILL_DST}
@@ -111,7 +111,7 @@ cat <<EOF
      直接用 claude -p 提问或在 Claude Code 里写代码，
      Stop hook 会自动把 top hit 以 additionalContext 注入下一轮
   5. 查看命中缓存：
-     ls ~/.cache/insights-wiki/
+     ls ~/.cache/insights-share/
 ============================================================
 EOF
 
@@ -170,7 +170,7 @@ else
   printf '[会话超时] claude -p 在 %d 秒内未输出任何内容\n' "${WAIT_SEC}" > "${LOG}"
 fi
 {
-  printf '# Claude Export — WITH 版（安装 insights-wiki skill）\n\n'
+  printf '# Claude Export — WITH 版（安装 insights-share skill）\n\n'
   printf '## 元信息\n\n'
   printf -- '- 时间：%s\n' "$(date '+%Y-%m-%d %H:%M:%S')"
   printf -- '- 模式：A/B 对照 · WITH 轮（从零 setup）\n'

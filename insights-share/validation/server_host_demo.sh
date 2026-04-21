@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# server_host_demo.sh — 演示管理员用 insights-wiki-server skill 启动 LAN daemon
+# server_host_demo.sh — 演示管理员用 insights-share-server skill 启动 LAN daemon
 # 单轮 tmux + claude -p，200s 轮询 __DONE__，去 ANSI 落盘
 # 注：claude -p 启动时 prefetch hook 会跑 ~110s，所以 WAIT_SEC 必须 ≥180
 set -u
 
 REPO_ROOT="/Users/m1/projects/demo_insights_share"
 DELIV="${REPO_ROOT}/insights-share/validation/reports/deliverables"
-SKILL_SRC="${REPO_ROOT}/insights-share/demo_codes/.claude/skills/insights-wiki-server"
-SKILL_DST="${HOME}/.claude/skills/insights-wiki-server"
+SKILL_SRC="${REPO_ROOT}/insights-share/demo_codes/.claude/skills/insights-share-server"
+SKILL_DST="${HOME}/.claude/skills/insights-share-server"
 PROMPT='启动 insights wiki 服务器并监听局域网 7821 端口，然后告诉我怎么关闭'
 WAIT_SEC=200
 
 mkdir -p "${DELIV}"
 log() { printf '[%s] %s\n' "$(date +%H:%M:%S)" "$*"; }
 
-# 预置：把 insights-wiki-server skill 拷到 ~/.claude/skills/
+# 预置：把 insights-share-server skill 拷到 ~/.claude/skills/
 if [ ! -f "${SKILL_SRC}/SKILL.md" ]; then
   log "[fatal] ${SKILL_SRC}/SKILL.md 不存在，Track C-2 未完成"
   exit 2
