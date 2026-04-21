@@ -1,0 +1,113 @@
+#!/usr/bin/env bash
+# insights-wiki statusline badge 渲染器
+#
+# 契约（proposal/proposal_statusline.md）：
+#   - 输出单行 badge：[wiki ✓ N/today] / [wiki … N/today] / [wiki ✗ N/today]
+#   - 渲染耗时 < 100 ms
+#   - daemon 探活短超时 300 ms + 本地 60 s TTL 缓存
+#   - skill 装配性：ls ~/.claude/skills/insights-wiki/SKILL.md
+#   - 计数：~/.cache/insights-wiki/today_count.json
+#   - A/B 开关：WIKI_STATUSLINE=off 时输出空串（保持 A 侧零特征）
+#   - badge 本体 ≤ 20 字符（不含 ANSI 色）
+#
+# 环境变量：
+#   INSIGHTS_WIKI_URL     daemon base url，默认 http://127.0.0.1:7821
+#   WIKI_STATUSLINE       "off" 时整条链路禁用（用于 A 侧录制）
+#   WIKI_STATUSLINE_NO_COLOR  非空时禁用 ANSI 色（兼容纯日志场景）
+
+set -u
+umask 077
+
+if [[ "${WIKI_STATUSLINE:-}" == "off" ]]; then
+  exit 0
+fi
+
+WIKI_URL="${INSIGHTS_WIKI_URL:-http://127.0.0.1:7821}"
+CACHE_DIR="${HOME}/.cache/insights-wiki"
+TODAY_JSON="${CACHE_DIR}/today_count.json"
+HEALTH_CACHE="${CACHE_DIR}/.health_cache"
+IN_FLIGHT_FLAG="${CACHE_DIR}/.in_flight"
+SKILL_MARK="${HOME}/.claude/skills/insights-wiki/SKILL.md"
+
+mkdir -p "${CACHE_DIR}" 2>/dev/null || true
+
+# ---- 色彩 ----
+if [[ -t 1 && -z "${WIKI_STATUSLINE_NO_COLOR:-}" ]]; then
+  C_OK=$'\033[32m'
+  C_WAIT=$'\033[33m'
+  C_FAIL=$'\033[31m'
+  C_RESET=$'\033[0m'
+else
+  C_OK=""
+  C_WAIT=""
+  C_FAIL=""
+  C_RESET=""
+fi
+
+# ---- 计数读取 ----
+count=0
+if [[ -r "${TODAY_JSON}" ]]; then
+  today=$(date +%F)
+  stored_date=$(sed -n 's/.*"date"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "${TODAY_JSON}" | head -n1)
+  stored_count=$(sed -n 's/.*"count"[[:space:]]*:[[:space:]]*\([0-9]*\).*/\1/p' "${TODAY_JSON}" | head -n1)
+  if [[ "${stored_date}" == "${today}" && -n "${stored_count}" ]]; then
+    count="${stored_count}"
+  fi
+fi
+
+# ---- in-flight 检测（flag 文件 mtime < 3s 视为 …）----
+in_flight=0
+if [[ -f "${IN_FLIGHT_FLAG}" ]]; then
+  now_epoch=$(date +%s)
+  flag_epoch=$(stat -f '%m' "${IN_FLIGHT_FLAG}" 2>/dev/null || stat -c '%Y' "${IN_FLIGHT_FLAG}" 2>/dev/null || echo 0)
+  if (( now_epoch - flag_epoch < 3 )); then
+    in_flight=1
+  fi
+fi
+
+# ---- skill 装配性 ----
+skill_ok=0
+[[ -r "${SKILL_MARK}" ]] && skill_ok=1
+
+# ---- daemon 探活（60s TTL 缓存）----
+daemon_ok=0
+cache_valid=0
+if [[ -r "${HEALTH_CACHE}" ]]; then
+  cache_epoch=$(stat -f '%m' "${HEALTH_CACHE}" 2>/dev/null || stat -c '%Y' "${HEALTH_CACHE}" 2>/dev/null || echo 0)
+  now_epoch=$(date +%s)
+  if (( now_epoch - cache_epoch < 60 )); then
+    cache_valid=1
+    cached=$(cat "${HEALTH_CACHE}" 2>/dev/null)
+    [[ "${cached}" == "ok" ]] && daemon_ok=1
+  fi
+fi
+
+if (( cache_valid == 0 )); then
+  probe_status=$(curl -s --max-time 0.3 -o /dev/null -w '%{http_code}' \
+    "${WIKI_URL}/healthz" 2>/dev/null || echo "000")
+  # 兼容旧端点 /health（proposal 两种写法）
+  if [[ "${probe_status}" != "200" ]]; then
+    probe_status=$(curl -s --max-time 0.3 -o /dev/null -w '%{http_code}' \
+      "${WIKI_URL}/health" 2>/dev/null || echo "000")
+  fi
+  if [[ "${probe_status}" == "200" ]]; then
+    daemon_ok=1
+    printf 'ok' > "${HEALTH_CACHE}" 2>/dev/null || true
+  else
+    printf 'fail' > "${HEALTH_CACHE}" 2>/dev/null || true
+  fi
+fi
+
+# ---- 状态决策 ----
+if (( skill_ok == 0 || daemon_ok == 0 )); then
+  symbol="✗"
+  color="${C_FAIL}"
+elif (( in_flight == 1 )); then
+  symbol="…"
+  color="${C_WAIT}"
+else
+  symbol="✓"
+  color="${C_OK}"
+fi
+
+printf '%s[wiki %s %s/today]%s\n' "${color}" "${symbol}" "${count}" "${C_RESET}"
