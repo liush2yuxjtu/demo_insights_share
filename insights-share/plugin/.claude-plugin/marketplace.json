@@ -1,0 +1,15 @@
+{
+  "marketplace_version": 1,
+  "name": "insights-share internal",
+  "description": "demo_insights_share 团队内网 plugin registry（M1 MVP）",
+  "plugins": [
+    {
+      "name": "insights-wiki",
+      "source": "git+ssh://internal/insights-share.git#subdir=insights-share/plugin",
+      "version": "0.1.0-m1",
+      "manifest": ".claude-plugin/plugin.json",
+      "channels": ["stable", "dev"]
+    }
+  ],
+  "notes": "M1 阶段 source 可为本地路径 (file://…/insights-share/plugin)；M4 切换到内网 git registry。"
+}

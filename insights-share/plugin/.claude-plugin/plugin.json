@@ -1,0 +1,35 @@
+{
+  "name": "insights-wiki",
+  "version": "0.1.0-m1",
+  "description": "局域网 insights-share：topic 中心 Good/Bad 并列卡片的静默回灌 + 管理面板。M1 MVP：skills + prefetch hook + statusline + 2 条 slash 命令。",
+  "author": {
+    "name": "demo_insights_share Team A",
+    "origin": "internal"
+  },
+  "homepage": "insights-share/plugin/README.md",
+  "entry": {
+    "skills": [
+      "skills/insights-wiki/SKILL.md",
+      "skills/insights-wiki-server/SKILL.md"
+    ],
+    "commands": [
+      "commands/wiki-install.md",
+      "commands/wiki-search.md"
+    ],
+    "hooks": {
+      "UserPromptSubmit": "hooks/user-prompt-submit.sh"
+    },
+    "statusline": "statusline/insights_wiki_statusline.sh"
+  },
+  "milestones": {
+    "current": "M1_MVP",
+    "design_doc": "proposal/proposal_plugin_design.md",
+    "pending": ["M2_AGENTS", "M3_MCP_NAMESPACE_TTL", "M4_SIGN_MARKETPLACE"]
+  },
+  "requires": {
+    "claude_code": ">=0.1.0",
+    "daemon": {
+      "insightsd": "http://127.0.0.1:7821"
+    }
+  }
+}
