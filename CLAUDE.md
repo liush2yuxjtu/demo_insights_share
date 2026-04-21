@@ -15,6 +15,7 @@
 | tmux 嵌套必 unset $TMUX | 在 register-session 注册的 tmux 里再起 tmux 时，仅加 `-L` 独立 socket 不够；tmux 靠 `$TMUX` 环境变量判断 nested，必须用 `TMUX= tmux ...` 或 `unset TMUX`，否则报 `sessions should be nested with care` 或后续 `can't find pane` | 在 live_demo 等已注册 tmux 里运行 start.demo.sh / start.codex.sh / 任何内部再启 tmux 的脚本时 | [tmux-nested.md](docs/rules/tmux-nested.md) |
 | 编辑即原子 commit | 每次 Write/Edit/文件移动/文件删除完成后立即按单一关注点执行原子 git commit，禁止合并多个无关变更 | 任何 Write/Edit 或文件 move/rm 后 | [atomic-commits.md](docs/rules/atomic-commits.md) |
 | start bootstrap 指令 | 用户对本项目 Claude Code CLI 发送裸消息 `start` 时，按固定流程读四文件 + proposal/INDEX.md + 全部 proposal_*.md，列待办，逐条实现，每步 self-verify，最后给 PASS/FAIL | 用户发送 `start` 时 | [start-bootstrap.md](docs/rules/start-bootstrap.md) |
+| CLAUDE.md 改动必跑状态灯 | 每次编辑 CLAUDE.md 后必须跑 `claudefast -p "what would happen if we say to claude code CLI in this project 'start'"`；响应提到 bootstrap/proposal/self-verify = PASS，否则 refine 措辞重跑直到 PASS，连续 5 次失败上抛 | 任何 CLAUDE.md 编辑后 | [meta-self-verify.md](docs/rules/meta-self-verify.md) |
 
 ## 设计文档索引
 
