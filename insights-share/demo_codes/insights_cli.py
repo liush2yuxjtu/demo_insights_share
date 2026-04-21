@@ -30,6 +30,7 @@ DEFAULT_PROBLEM = (
     "Our checkout API is timing out, postgres is rejecting new connections "
     "during the lunch spike"
 )
+CONFIG_PATH = Path.home() / ".cache" / "insights-wiki" / "config.json"
 
 
 def _resolve_version() -> str:
@@ -69,6 +70,49 @@ def _http_delete(url: str, timeout: float = 5.0) -> dict[str, Any]:
         return json.loads(resp.read().decode("utf-8"))
 
 
+def _load_install_config() -> dict[str, Any]:
+    if not CONFIG_PATH.is_file():
+        return {}
+    try:
+        data = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _resolve_wiki_url(value: str) -> str:
+    cfg = _load_install_config()
+    if value and value != DEFAULT_WIKI:
+        return value
+    cfg_url = cfg.get("server_url")
+    if isinstance(cfg_url, str) and cfg_url.strip():
+        return cfg_url.strip()
+    return value or DEFAULT_WIKI
+
+
+def _resolve_team(value: str | None) -> str | None:
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    env_team = os.environ.get("INSIGHTS_WIKI_TEAM", "").strip()
+    if env_team:
+        return env_team
+    cfg_team = _load_install_config().get("team")
+    if isinstance(cfg_team, str) and cfg_team.strip():
+        return cfg_team.strip()
+    return None
+
+
+def _with_query(url: str, **params: Any) -> str:
+    query = {
+        key: value
+        for key, value in params.items()
+        if value not in (None, "", [], ())
+    }
+    if not query:
+        return url
+    return f"{url}?{urllib.parse.urlencode(query, doseq=True)}"
+
+
 def cmd_serve(args: argparse.Namespace) -> int:
     from insightsd.server import run
 
@@ -89,7 +133,10 @@ def cmd_publish(args: argparse.Namespace) -> int:
         print(ui.color(f"file not found: {path}", "red"), file=sys.stderr)
         return 2
     card = json.loads(path.read_text(encoding="utf-8"))
-    url = f"{args.wiki.rstrip('/')}/insights"
+    team = _resolve_team(args.team)
+    if team and not card.get("team"):
+        card["team"] = team
+    url = f"{_resolve_wiki_url(args.wiki).rstrip('/')}/insights"
     try:
         resp = _http_post_json(url, card)
     except urllib.error.URLError as exc:
@@ -109,12 +156,13 @@ def cmd_publish(args: argparse.Namespace) -> int:
 
 
 def cmd_topic_create(args: argparse.Namespace) -> int:
-    url = f"{args.wiki.rstrip('/')}/topics"
+    url = f"{_resolve_wiki_url(args.wiki).rstrip('/')}/topics"
     payload = {
         "id": args.topic_id,
         "title": args.title,
         "tags": args.tags or [],
         "wiki_type": args.wiki_type,
+        "team": _resolve_team(args.team),
         "created_by": args.created_by or "cli",
         "created_at": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(),
     }
@@ -128,7 +176,10 @@ def cmd_topic_create(args: argparse.Namespace) -> int:
 
 
 def cmd_topic_list(args: argparse.Namespace) -> int:
-    url = f"{args.wiki.rstrip('/')}/topics"
+    url = _with_query(
+        f"{_resolve_wiki_url(args.wiki).rstrip('/')}/topics",
+        team=_resolve_team(args.team),
+    )
     try:
         resp = _http_get(url)
     except Exception as exc:
@@ -139,12 +190,19 @@ def cmd_topic_list(args: argparse.Namespace) -> int:
         print("(no topics)")
         return 0
     for t in topics:
-        print(f"  {ui.color(t['id'], 'cyan')}  {t.get('title','')}  [{t.get('wiki_type','')}]")
+        team_note = f" team={t['team']}" if t.get("team") else ""
+        print(
+            f"  {ui.color(t['id'], 'cyan')}  {t.get('title','')}  "
+            f"[{t.get('wiki_type','')}]{team_note}"
+        )
     return 0
 
 
 def cmd_topic_show(args: argparse.Namespace) -> int:
-    url = f"{args.wiki.rstrip('/')}/topics/{args.topic_id}/examples"
+    url = _with_query(
+        f"{_resolve_wiki_url(args.wiki).rstrip('/')}/topics/{args.topic_id}/examples",
+        team=_resolve_team(args.team),
+    )
     try:
         resp = _http_get(url)
     except Exception as exc:
@@ -183,7 +241,10 @@ def cmd_relabel(args: argparse.Namespace) -> int:
 
 
 def cmd_list(args: argparse.Namespace) -> int:
-    url = f"{args.wiki.rstrip('/')}/insights"
+    url = _with_query(
+        f"{_resolve_wiki_url(args.wiki).rstrip('/')}/insights",
+        team=_resolve_team(args.team),
+    )
     try:
         resp = _http_get(url)
     except urllib.error.URLError as exc:
@@ -201,7 +262,8 @@ def cmd_list(args: argparse.Namespace) -> int:
         title = str(c.get("title", ""))[:40]
         author = str(c.get("author", ""))[:12]
         tags = ",".join(c.get("tags") or [])
-        print(f"{cid:<28}  {title:<40}  {author:<12}  {tags}")
+        team_suffix = f" team={c['team']}" if c.get("team") else ""
+        print(f"{cid:<28}  {title:<40}  {author:<12}  {tags}{team_suffix}")
     return 0
 
 
@@ -211,13 +273,17 @@ def _print_hits_empty(problem: str) -> None:
 
 def cmd_solve(args: argparse.Namespace) -> int:
     problem: str = args.problem
-    wiki = args.wiki.rstrip("/")
+    wiki = _resolve_wiki_url(args.wiki).rstrip("/")
+    team = _resolve_team(args.team)
     print(ui.banner("DEMO: Bob hits prod incident"))
     print()
     print(ui.color(f"restate: {problem}", "dim"))
     print()
 
-    q = urllib.parse.urlencode({"q": problem, "k": 3})
+    query_payload: dict[str, Any] = {"q": problem, "k": 3}
+    if team:
+        query_payload["team"] = team
+    q = urllib.parse.urlencode(query_payload)
     search_url = f"{wiki}/search?{q}"
     emit_from_env(
         stage="search",
@@ -365,6 +431,7 @@ def cmd_wiki_install(args: argparse.Namespace) -> int:
     from datetime import datetime
 
     server = args.server.rstrip("/")
+    team = _resolve_team(args.team)
     try:
         _http_get(f"{server}/healthz")
     except urllib.error.URLError as exc:
@@ -372,18 +439,23 @@ def cmd_wiki_install(args: argparse.Namespace) -> int:
         return 2
     cfg_dir = Path.home() / ".cache" / "insights-wiki"
     cfg_dir.mkdir(parents=True, exist_ok=True)
-    cfg = {"server_url": server, "installed_at": datetime.now().isoformat()}
+    cfg = {
+        "server_url": server,
+        "team": team,
+        "installed_at": datetime.now().isoformat(),
+    }
     (cfg_dir / "config.json").write_text(
         json.dumps(cfg, ensure_ascii=False, indent=2), encoding="utf-8"
     )
-    cards = _http_get(f"{server}/insights").get("cards") or []
+    cards = _http_get(_with_query(f"{server}/insights", team=team)).get("cards") or []
     for c in cards:
         cid = c.get("id")
         if cid:
             (cfg_dir / f"{cid}.json").write_text(
                 json.dumps(c, ensure_ascii=False), encoding="utf-8"
             )
-    print(ui.color(f"install ok server={server} cached={len(cards)} cards", "green"))
+    team_note = f" team={team}" if team else ""
+    print(ui.color(f"install ok server={server}{team_note} cached={len(cards)} cards", "green"))
     return 0
 
 
@@ -442,15 +514,18 @@ def build_parser() -> argparse.ArgumentParser:
     p_pub = sub.add_parser("publish", help="POST a JSON card file to /insights")
     p_pub.add_argument("file")
     p_pub.add_argument("--wiki", default=DEFAULT_WIKI)
+    p_pub.add_argument("--team", default="")
     p_pub.set_defaults(func=cmd_publish)
 
     p_list = sub.add_parser("list", help="GET /insights and print a table")
     p_list.add_argument("--wiki", default=DEFAULT_WIKI)
+    p_list.add_argument("--team", default="")
     p_list.set_defaults(func=cmd_list)
 
     p_solve = sub.add_parser("solve", help="search + adapt for a problem")
     p_solve.add_argument("problem", nargs="?", default=DEFAULT_PROBLEM)
     p_solve.add_argument("--wiki", default=DEFAULT_WIKI)
+    p_solve.add_argument("--team", default="")
     p_solve.add_argument("--no-ai", action="store_true", help="skip the AI adapter step")
     p_solve.add_argument("--local-context", default=DEFAULT_LOCAL_CONTEXT)
     p_solve.set_defaults(func=cmd_solve)
@@ -491,6 +566,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--server", required=True,
         help="LAN server URL, e.g. http://192.168.22.42:7821"
     )
+    p_inst.add_argument("--team", default="")
     p_inst.set_defaults(func=cmd_wiki_install)
 
     p_demo = sub.add_parser("demo", help="print how to run the end-to-end demo")
@@ -512,6 +588,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_topic_create.add_argument("--title", default="", help="human-readable title")
     p_topic_create.add_argument("--tags", nargs="*", default=[], help="tag list")
     p_topic_create.add_argument("--wiki-type", default="general", help="wiki_type dir")
+    p_topic_create.add_argument("--team", default="", help="logical team namespace")
     p_topic_create.add_argument("--created-by", default="cli", help="creator name")
     p_topic_create.add_argument("--wiki", default=DEFAULT_WIKI)
     p_topic_create.set_defaults(func=cmd_topic_create)
@@ -519,12 +596,14 @@ def build_parser() -> argparse.ArgumentParser:
     # topic-list
     p_topic_list = sub.add_parser("topic-list", help="list all Topics")
     p_topic_list.add_argument("--wiki", default=DEFAULT_WIKI)
+    p_topic_list.add_argument("--team", default="", help="only list one team namespace")
     p_topic_list.set_defaults(func=cmd_topic_list)
 
     # topic-show
     p_topic_show = sub.add_parser("topic-show", help="show all Examples under a Topic")
     p_topic_show.add_argument("topic_id", help="topic slug")
     p_topic_show.add_argument("--wiki", default=DEFAULT_WIKI)
+    p_topic_show.add_argument("--team", default="", help="only show one team namespace")
     p_topic_show.set_defaults(func=cmd_topic_show)
 
     # relabel

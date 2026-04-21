@@ -100,6 +100,32 @@ class TestTopicAPI:
         _, body2 = http_get(host, port, "/topics")
         assert any(t["id"] == "new-topic-api" for t in body2["topics"])
 
+    def test_topics_can_filter_team_namespace(self, httpd: tuple[ThreadingHTTPServer, str, int], store: TreeInsightStore) -> None:
+        _, host, port = httpd
+        store.create_topic(
+            {
+                "id": "shared-topic",
+                "title": "Alpha Topic",
+                "tags": ["alpha"],
+                "team": "alpha",
+                "created_by": "tester",
+            }
+        )
+        store.create_topic(
+            {
+                "id": "shared-topic",
+                "title": "Beta Topic",
+                "tags": ["beta"],
+                "team": "beta",
+                "created_by": "tester",
+            }
+        )
+
+        status, body = http_get(host, port, "/topics?team=alpha")
+        assert status == 200
+        assert any(topic["id"] == "shared-topic" and topic["team"] == "alpha" for topic in body["topics"])
+        assert all(topic.get("team") != "beta" for topic in body["topics"])
+
     def test_get_topics_topic_id_examples_without_label_filter(self, httpd: tuple[ThreadingHTTPServer, str, int], store: TreeInsightStore) -> None:
         """GET /topics/{id}/examples 返回该 topic 下所有卡片."""
         _, host, port = httpd
@@ -116,6 +142,31 @@ class TestTopicAPI:
         status, body = http_post(host, port, f"/insights/{card_id}/relabel", payload)
         assert status == 200
         assert body.get("effective_label") == "bad"
+
+    def test_search_and_list_can_filter_team_namespace(self, httpd: tuple[ThreadingHTTPServer, str, int], store: TreeInsightStore) -> None:
+        _, host, port = httpd
+        base_card = {
+            "title": "Pool Exhaustion",
+            "author": "tester",
+            "confidence": 0.8,
+            "tags": ["postgres", "pool"],
+            "topic_id": "team-topic",
+            "label": "good",
+            "raw_log_type": "jsonl",
+            "context": "postgres pool exhausted",
+            "symptom": "connections rejected",
+            "fix": "use pgbouncer",
+        }
+        store.add({"id": "team-alpha-card", "team": "alpha", **base_card}, wiki_type="general")
+        store.add({"id": "team-beta-card", "team": "beta", **base_card}, wiki_type="general")
+
+        status, body = http_get(host, port, "/search?q=pool&team=alpha")
+        assert status == 200
+        assert [hit["id"] for hit in body["hits"]] == ["team-alpha-card"]
+
+        status, body = http_get(host, port, "/insights?team=beta")
+        assert status == 200
+        assert [card["id"] for card in body["cards"]] == ["team-beta-card"]
 
     def test_relabel_nonexistent_card_returns_404(self, httpd: tuple[ThreadingHTTPServer, str, int], store: TreeInsightStore) -> None:
         _, host, port = httpd

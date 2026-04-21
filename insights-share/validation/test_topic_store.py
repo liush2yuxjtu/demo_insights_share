@@ -52,6 +52,30 @@ class TestTopicStore:
         topics = store.list_topics()
         assert sum(1 for t in topics if t["id"] == "dup-topic") == 1
 
+    def test_topic_same_id_can_coexist_across_teams(self, store: TreeInsightStore) -> None:
+        topic_alpha = {
+            "id": "shared-topic",
+            "title": "Alpha Topic",
+            "tags": ["alpha"],
+            "team": "alpha",
+            "created_by": "tester",
+        }
+        topic_beta = {
+            "id": "shared-topic",
+            "title": "Beta Topic",
+            "tags": ["beta"],
+            "team": "beta",
+            "created_by": "tester",
+        }
+        store.create_topic(topic_alpha)
+        store.create_topic(topic_beta)
+
+        alpha_topics = store.list_topics(team="alpha")
+        beta_topics = store.list_topics(team="beta")
+
+        assert len([t for t in alpha_topics if t["id"] == "shared-topic"]) == 1
+        assert len([t for t in beta_topics if t["id"] == "shared-topic"]) == 1
+
     def test_publish_example_with_topic_id_persists_label(self, store: TreeInsightStore) -> None:
         """add card 带 topic_id 时，label 字段被正确写入 md."""
         card = {
@@ -127,6 +151,35 @@ class TestTopicStore:
         assert good_examples[0]["effective_label"] == "good"
         assert bad_examples[0]["effective_label"] == "bad"
 
+    def test_list_examples_can_filter_team_namespace(self, store: TreeInsightStore) -> None:
+        topic = {
+            "id": "team-topic",
+            "title": "Team Topic",
+            "tags": ["team"],
+            "created_by": "tester",
+        }
+        store.create_topic(topic)
+        base_card = {
+            "title": "Namespace Card",
+            "author": "tester",
+            "confidence": 0.8,
+            "tags": ["team"],
+            "topic_id": "team-topic",
+            "label": "good",
+            "raw_log_type": "jsonl",
+            "context": "ctx",
+            "symptom": "sym",
+            "fix": "fix",
+        }
+        store.add({"id": "team-alpha-card", "team": "alpha", **base_card}, wiki_type="general")
+        store.add({"id": "team-beta-card", "team": "beta", **base_card}, wiki_type="general")
+
+        alpha_examples = store.list_examples("team-topic", team="alpha")
+        beta_examples = store.list_examples("team-topic", team="beta")
+
+        assert [card["id"] for card in alpha_examples] == ["team-alpha-card"]
+        assert [card["id"] for card in beta_examples] == ["team-beta-card"]
+
     def test_relabel_sets_override_fields_preserves_raw_log(self, store: TreeInsightStore) -> None:
         """relabel 只修改 override 字段，不碰 raw_log."""
         card_id = "alice-pgpool-2026-04-10"
@@ -151,6 +204,31 @@ class TestTopicStore:
             # effective_label = label_override or label
             expected = hit.get("label_override") or hit.get("label", "good")
             assert hit["effective_label"] == expected
+
+    def test_search_can_filter_team_namespace(self, tmp_path: Path) -> None:
+        store = TreeInsightStore(tmp_path / "wiki_tree")
+        (tmp_path / "wiki_tree").mkdir(parents=True)
+
+        base_card = {
+            "title": "Pool Exhaustion",
+            "author": "tester",
+            "confidence": 0.7,
+            "tags": ["postgres", "pool"],
+            "topic_id": "pool-topic",
+            "label": "good",
+            "raw_log_type": "jsonl",
+            "context": "postgres pool exhausted",
+            "symptom": "connections rejected",
+            "fix": "use pgbouncer",
+        }
+        store.add({"id": "alpha-pool-card", "team": "alpha", **base_card}, wiki_type="general")
+        store.add({"id": "beta-pool-card", "team": "beta", **base_card}, wiki_type="general")
+
+        alpha_hits = store.search("postgres pool", team="alpha")
+        beta_hits = store.search("postgres pool", team="beta")
+
+        assert [card["id"] for card in alpha_hits] == ["alpha-pool-card"]
+        assert [card["id"] for card in beta_hits] == ["beta-pool-card"]
 
     def test_raw_log_txt_written_for_export_type(self, tmp_path: Path) -> None:
         """raw_log_type=export 时 raw 目录写入 .txt，内容为 raw_log_export_content."""

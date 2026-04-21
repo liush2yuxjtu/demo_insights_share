@@ -71,6 +71,19 @@ def _tokenize(text: str) -> set[str]:
     }
 
 
+def _normalize_team(value: Any) -> str | None:
+    if not isinstance(value, str):
+        return None
+    team = value.strip()
+    return team or None
+
+
+def _team_matches(record: dict[str, Any], team: str | None) -> bool:
+    if team is None:
+        return True
+    return _normalize_team(record.get("team")) == team
+
+
 def _card_tokens(card: dict[str, Any]) -> set[str]:
     parts: list[str] = [str(card.get("title", ""))]
     tags = card.get("tags") or []
@@ -170,20 +183,26 @@ class InsightStore:
             self._save_unlocked(cards)
             return card
 
-    def list_all(self) -> list[dict[str, Any]]:
+    def list_all(self, team: str | None = None) -> list[dict[str, Any]]:
         cards = self.load()
+        if team is not None:
+            cards = [card for card in cards if _team_matches(card, team)]
         return [
             {
                 "id": c.get("id"),
                 "title": c.get("title"),
                 "tags": c.get("tags") or [],
                 "author": c.get("author"),
+                "team": _normalize_team(c.get("team")),
             }
             for c in cards
         ]
 
-    def search(self, q: str, k: int = 3) -> list[dict[str, Any]]:
-        return search_cards(self.load(), q, k=k)
+    def search(self, q: str, k: int = 3, team: str | None = None) -> list[dict[str, Any]]:
+        cards = self.load()
+        if team is not None:
+            cards = [card for card in cards if _team_matches(card, team)]
+        return search_cards(cards, q, k=k)
 
 
 _FRONTMATTER_OPEN = "---\n"
@@ -234,6 +253,7 @@ def _render_item_md(card: dict[str, Any]) -> str:
         "id": card["id"],
         "title": card.get("title", ""),
         "author": card.get("author", ""),
+        "team": _normalize_team(card.get("team")),
         "confidence": float(card.get("confidence", 0.5)),
         "tags": list(card.get("tags") or []),
         "status": card.get("status", "active"),
@@ -256,7 +276,11 @@ def _render_item_md(card: dict[str, Any]) -> str:
             "",
             f"# {card.get('title','')}",
             "",
-            f"> author: {card.get('author','?')} · confidence: {card.get('confidence','?')}",
+            (
+                f"> author: {card.get('author','?')} · "
+                f"team: {_normalize_team(card.get('team')) or 'shared'} · "
+                f"confidence: {card.get('confidence','?')}"
+            ),
             "",
             "## Description",
             "",
@@ -360,6 +384,7 @@ class TreeInsightStore:
         card["label_override_by"] = fm.get("label_override_by", None)
         card["label_override_at"] = fm.get("label_override_at", None)
         card["raw_log_type"] = fm.get("raw_log_type", "jsonl")
+        card["team"] = _normalize_team(fm.get("team"))
         return card
 
     def _find_item_path(self, card_id: str) -> tuple[str, Path] | None:
@@ -372,15 +397,15 @@ class TreeInsightStore:
 
     # --- read API (shared interface with InsightStore) ---
 
-    def load(self) -> list[dict[str, Any]]:
+    def load(self, team: str | None = None) -> list[dict[str, Any]]:
         cards: list[dict[str, Any]] = []
         for wtype, md in self._iter_item_files():
             card = self._item_to_card(wtype, md)
-            if card:
+            if card and _team_matches(card, team):
                 cards.append(card)
         return cards
 
-    def list_all(self) -> list[dict[str, Any]]:
+    def list_all(self, team: str | None = None) -> list[dict[str, Any]]:
         return [
             {
                 "id": c.get("id"),
@@ -389,12 +414,13 @@ class TreeInsightStore:
                 "author": c.get("author"),
                 "wiki_type": c.get("wiki_type"),
                 "status": c.get("status", "active"),
+                "team": _normalize_team(c.get("team")),
             }
-            for c in self.load()
+            for c in self.load(team=team)
         ]
 
-    def search(self, q: str, k: int = 3) -> list[dict[str, Any]]:
-        results = search_cards(self.load(), q, k=k, skip_not_triggered=True)
+    def search(self, q: str, k: int = 3, team: str | None = None) -> list[dict[str, Any]]:
+        results = search_cards(self.load(team=team), q, k=k, skip_not_triggered=True)
         enriched: list[dict[str, Any]] = []
         for card in results:
             item = dict(card)
@@ -454,6 +480,11 @@ class TreeInsightStore:
     def add(self, card: dict[str, Any], wiki_type: str = "general") -> dict[str, Any]:
         if not isinstance(card, dict) or not card.get("id"):
             raise ValueError("card must be a dict with non-empty 'id'")
+        team = _normalize_team(card.get("team") or card.get("team_namespace"))
+        if team is None:
+            card.pop("team", None)
+        else:
+            card["team"] = team
         with self._lock:
             existing = None
             for wtype, md in self._iter_item_files():
@@ -535,7 +566,10 @@ class TreeInsightStore:
         p = self._topics_path()
         if not p.is_file():
             return []
-        return list(json.loads(p.read_text(encoding="utf-8")).get("topics", []))
+        topics = list(json.loads(p.read_text(encoding="utf-8")).get("topics", []))
+        for topic in topics:
+            topic["team"] = _normalize_team(topic.get("team"))
+        return topics
 
     def _save_topics(self, topics: list[dict[str, Any]]) -> None:
         self._topics_path().write_text(
@@ -544,20 +578,33 @@ class TreeInsightStore:
         )
 
     def create_topic(self, topic: dict[str, Any]) -> dict[str, Any]:
+        topic = dict(topic)
+        topic["team"] = _normalize_team(topic.get("team"))
         with self._lock:
             topics = self._load_topics()
-            if any(t["id"] == topic["id"] for t in topics):
+            if any(
+                t["id"] == topic["id"] and _normalize_team(t.get("team")) == topic.get("team")
+                for t in topics
+            ):
                 return topic  # 幂等：id 重复不报错
             topics.append(topic)
             self._save_topics(topics)
         return topic
 
-    def list_topics(self) -> list[dict[str, Any]]:
-        return self._load_topics()
+    def list_topics(self, team: str | None = None) -> list[dict[str, Any]]:
+        topics = self._load_topics()
+        if team is None:
+            return topics
+        return [topic for topic in topics if _team_matches(topic, team)]
 
-    def list_examples(self, topic_id: str, label: str | None = None) -> list[dict[str, Any]]:
+    def list_examples(
+        self,
+        topic_id: str,
+        label: str | None = None,
+        team: str | None = None,
+    ) -> list[dict[str, Any]]:
         results = []
-        for card in self.load():
+        for card in self.load(team=team):
             if card.get("topic_id") != topic_id:
                 continue
             effective_label = card.get("label_override") or card.get("label", "good")

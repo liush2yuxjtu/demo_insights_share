@@ -19,8 +19,10 @@ Claude 收不到 additionalContext。
 from __future__ import annotations
 
 import json
+import os
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -29,6 +31,7 @@ DEMO_CODES = Path(__file__).resolve().parent.parent
 DEFAULT_WIKI = "http://127.0.0.1:7821"
 TIMEOUT_SECONDS = 2.0
 TOP_K = 3
+CACHE_CONFIG = Path.home() / ".cache" / "insights-wiki" / "config.json"
 
 
 def _score_card(card: dict[str, Any], prompt_tokens: set[str]) -> int:
@@ -60,6 +63,26 @@ def _format_card(card: dict[str, Any]) -> str:
     if tag_str:
         bits.append(f"  · tags:{tag_str}")
     return "\n".join(bits)
+
+
+def _load_install_config() -> dict[str, Any]:
+    if not CACHE_CONFIG.is_file():
+        return {}
+    try:
+        data = json.loads(CACHE_CONFIG.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _resolve_team() -> str | None:
+    env_team = os.environ.get("INSIGHTS_WIKI_TEAM", "").strip()
+    if env_team:
+        return env_team
+    cfg_team = _load_install_config().get("team")
+    if isinstance(cfg_team, str) and cfg_team.strip():
+        return cfg_team.strip()
+    return None
 
 
 def _build_context(prompt: str, cards: list[dict[str, Any]]) -> str:
@@ -107,7 +130,10 @@ def _silent_main() -> int:
         except ImportError:
             _bump_today = None
 
+        team = _resolve_team()
         url = f"{DEFAULT_WIKI}/insights"
+        if team:
+            url = f"{url}?{urllib.parse.urlencode({'team': team})}"
         with urllib.request.urlopen(url, timeout=TIMEOUT_SECONDS) as resp:
             payload = json.loads(resp.read().decode("utf-8"))
 

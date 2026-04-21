@@ -234,16 +234,21 @@ class InsightHandler(BaseHTTPRequestHandler):
                 self.runtime.unsubscribe(subscriber)
             return
         if path == "/insights":
-            self._send_json(200, {"cards": self.store.list_all()})
+            params = parse_qs(parsed.query)
+            team = (params.get("team") or [None])[0]
+            team = team.strip() if isinstance(team, str) and team.strip() else None
+            self._send_json(200, {"cards": self.store.list_all(team=team)})
             return
         if path == "/search":
             params = parse_qs(parsed.query)
             q = (params.get("q") or [""])[0]
+            team = (params.get("team") or [None])[0]
+            team = team.strip() if isinstance(team, str) and team.strip() else None
             try:
                 k = int((params.get("k") or ["3"])[0])
             except ValueError:
                 k = 3
-            hits = self.store.search(q, k=k)
+            hits = self.store.search(q, k=k, team=team)
             self._send_json(200, {"hits": hits})
             return
         # GET /topics
@@ -251,7 +256,10 @@ class InsightHandler(BaseHTTPRequestHandler):
             if not isinstance(self.store, TreeInsightStore):
                 self._send_json(400, {"error": "topics_not_supported", "detail": "tree mode only"})
                 return
-            self._send_json(200, {"topics": self.store.list_topics()})
+            params = parse_qs(parsed.query)
+            team = (params.get("team") or [None])[0]
+            team = team.strip() if isinstance(team, str) and team.strip() else None
+            self._send_json(200, {"topics": self.store.list_topics(team=team)})
             return
         # GET /topics/{topic_id}/examples?label=...
         if path.startswith("/topics/") and path.endswith("/examples"):
@@ -261,7 +269,9 @@ class InsightHandler(BaseHTTPRequestHandler):
             topic_id = path[len("/topics/"):-len("/examples")]
             params = parse_qs(parsed.query)
             label = (params.get("label") or [None])[0]
-            examples = self.store.list_examples(topic_id, label=label)
+            team = (params.get("team") or [None])[0]
+            team = team.strip() if isinstance(team, str) and team.strip() else None
+            examples = self.store.list_examples(topic_id, label=label, team=team)
             self._send_json(200, {"examples": examples})
             return
         self._send_404()
