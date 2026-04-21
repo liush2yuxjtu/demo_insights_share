@@ -8,3 +8,12 @@
 # smoke-test 自动重跑产物
 insights-share/validation/reports/deliverables/start_codex.latest.txt
 insights-share/validation/reports/deliverables/start_demo.latest.txt
+
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+
+# editor/tool backups
+*.bak-*
+*.swp
