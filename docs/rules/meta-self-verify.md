@@ -1,54 +1,80 @@
-# Meta Self-Verify: CLAUDE.md 修改必跑状态灯
+# Meta Self-Verify: CLAUDE.md 修改必跑 Agent-Judge 状态灯
 
 ## 规则
 
-每次编辑 `CLAUDE.md`（新增规则 / 修改规则 / 删除规则）后，必须立即跑一条 `claudefast` 探针作为**状态灯**，确认新规则已被 CLI 实际采纳，再判定改动是否收尾。
+每次编辑 `CLAUDE.md`（新增 / 修改 / 删除规则）后，必须跑 **agent-judge 双探针循环**，由另一个 agent 评判响应，而不是硬编码关键词匹配。收敛后才算改动收尾。
 
-## 触发条件
+## 两档探针
 
-- 任何对 `CLAUDE.md` 的 Write / Edit 操作完成后
-- 任何对 `docs/rules/*.md` 的改动若直接被 `CLAUDE.md` 索引，也跑一次
+| 档位 | 命令 | 成本 | 可靠性 | 用途 |
+|------|------|------|--------|------|
+| fast | `claudefast -p "<q>"` | 低 | 中 | loop 内反复跑 probe + judge |
+| reliable | `claude -p "<q>"` | 高 | 高 | fast 循环连续失败时最后托底 |
 
-## 状态灯命令
+原则: **能 fast 就 fast；只有 fast 收敛不了才升级 reliable**。
 
-```bash
+## 探针 A：状态灯 probe
+
+```
 claudefast -p "what would happen if we say to claude code CLI in this project 'start'"
 ```
 
-## 判定
+## 探针 B：agent-judge
 
-| 响应特征 | 状态 | 含义 |
-|---------|------|------|
-| 提到 bootstrap / 读 proposal.md / 读 proposal/INDEX.md / self-verify / 按 proposal 实现 | `PASS` | CLAUDE.md 已被正确加载并生效 |
-| 回答 "start 不是内置命令" / 当普通消息处理 / 只列出 start_*.txt 文件 | `FAIL` | 规则未落地，需 debug 索引或文件路径 |
-| 部分关键词命中 (<3 个) | `PARTIAL` | 规则生效但描述不够硬，需 refine 措辞 |
-
-## 失败处理
-
-`FAIL` / `PARTIAL` → 走调试循环：
-
-1. 检查 `CLAUDE.md` 表格行语法（符合 `claude-md-format.md`）
-2. 检查 `docs/rules/<file>.md` 链接是否 404
-3. 检查规则描述是否含关键触发词 (`start` / `bootstrap` / `proposal`)
-4. refine 措辞 → 重新 Edit → 再跑状态灯，直到 `PASS`
-5. 连续 5 次失败 → 上抛给用户，不得沉默收尾
-
-## 状态灯输出存档
-
-每次跑完把响应追加到 `insights-share/validation/reports/meta_verify.log`（append-only），字段：
+拿到 A 的响应后，交给独立 claudefast 实例当裁判：
 
 ```
-[ISO8601 timestamp] [CLAUDE.md hash] [PASS|PARTIAL|FAIL] [hits/total]
-<response 前 200 字>
----
+claudefast -p "
+你是规则落地裁判。请判断下面这段响应是否体现了 CLAUDE.md 里 'start bootstrap 指令' 规则的意图（bootstrap 读四文件 + proposal/INDEX.md + 逐条实现 + self-verify + PASS/FAIL 收尾）。
+
+响应:
+<<<
+{probe_response}
+>>>
+
+只输出合法 JSON，schema:
+{
+  \"verdict\": \"PASS\" | \"REFINE\" | \"FAIL\",
+  \"reason\": \"一句话说明\",
+  \"suggested_patch\": \"若 REFINE，给出 CLAUDE.md 行改动建议；否则空串\"
+}
+"
 ```
 
-## 为什么
+## 三种判决
 
-CLAUDE.md 是 agent 行为的唯一声明入口。光写不验 = 把规则留在磁盘上但从没进过 CLI 的实际推理路径。状态灯把"规则是否被 CLI 读到"变成**可观测信号**，消除"我以为加了但没生效"这类静默失败。
+| verdict | 动作 |
+|---------|------|
+| `PASS` | 收尾，写 log，结束 |
+| `REFINE` | 按 `suggested_patch` 改 CLAUDE.md → 原子 commit → 下一轮 fast 循环 |
+| `FAIL` | 跳出 fast 循环，直接升级 reliable 档位跑一次托底评判 |
+
+## 升级策略
+
+- fast loop 最多 `MAX_FAST = 5` 轮
+- 连续 2 轮 `REFINE` 但 `verdict` 未进展（suggested_patch 相似 / hits 不增）→ 判定停滞，强制升级 reliable
+- reliable 档位只跑 **一次** `claude -p` 判决，结果作为最终裁决
+- reliable 仍判 `FAIL` → 上抛用户，不得沉默收尾
+
+## 为什么用 agent-judge 而不是 grep 关键词
+
+- 规则措辞会演进，硬编码 `["bootstrap", "proposal"]` 这类 list 会随规则改名而腐烂
+- CLI 响应可能用同义词（"引导" / "启动" / "读文档后实现"），关键词匹配误判 FAIL
+- agent-judge 读原始意图，容忍措辞漂移，精度高于 substring match
+- 成本差距由两档探针吸收：95% 场景 claudefast 已够，保留 claude -p 做 tie-breaker
+
+## 状态灯存档
+
+每一轮写一行到 `insights-share/validation/reports/meta_verify.log`：
+
+```
+[ISO8601] [CLAUDE.md short-hash] [tier=fast|reliable] [iter=N] [verdict] [reason]
+```
+
+PASS / FAIL 终局各单独落一条 `--- terminal ---` 分隔符。
 
 ## 非目标
 
-- 不测试规则"对不对"，只测试"有没有被 CLI 读到并理解"
 - 不替代人工 code review
-- 不要求 100% 自动化过 gate，允许人工 override（override 必须写日志 reason）
+- 不判规则"设计得好不好"，只判"CLI 推理路径有没有真正吃到这条规则"
+- 不强制 100% 通过 gate，允许用户 `--override` 跳过（必须写 log reason）
