@@ -1,0 +1,11 @@
+# Tier 3 manifest (2026-04-21 snapshot)
+
+## 3a — node_modules untracked
+- insights-share/validation/node_modules/   (.gitignore 新增，索引无追踪文件)
+
+## 3b — validation artifacts rotation
+- dir state: only `handout/` exists (等价 latest)
+- rotation no-op this run. 后续批次再归档。
+
+## 3c — worktree prune
+- 留给人工：.claude/worktrees/minimax0416_dev 需 `git worktree list` + 手动 remove
