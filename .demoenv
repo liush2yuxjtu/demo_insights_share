@@ -1,0 +1,19 @@
+# insights-share demo shell aliases
+#
+# 用法：在本目录执行
+#   source .demoenv
+# 之后可用：
+#   demo   →  bash start.demo.sh
+#   codex  →  bash start.codex.sh
+#   claude →  bash start.claude.sh   # 注意：会 shadow 全局 claude CLI，慎用
+#
+# 每开新终端需重新 source；或写到 ~/.zshrc：
+#   [ -f /Users/m1/projects/demo_insights_share/.demoenv ] && source /Users/m1/projects/demo_insights_share/.demoenv
+
+_DEMO_REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+
+alias demo="bash '${_DEMO_REPO_ROOT}/start.demo.sh'"
+alias demo.codex="bash '${_DEMO_REPO_ROOT}/start.codex.sh'"
+alias demo.claude="bash '${_DEMO_REPO_ROOT}/start.claude.sh'"
+
+unset _DEMO_REPO_ROOT
