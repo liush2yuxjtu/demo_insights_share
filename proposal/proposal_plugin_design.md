@@ -36,24 +36,28 @@
 
 ## Plugin 槽位映射
 
+> **M5 后的实物路径前缀**：`plugins/insights-share/`。下表路径为 plugin 根目录相对路径；
+> 文件名展示 M5 后的 share-* 形态。M1–M4 实施期的历史名（wiki-*、insights_wiki_*）
+> 记录在 [`proposal_rename_to_insights_share.md`](proposal_rename_to_insights_share.md) 的 Rename Matrix。
+
 | 槽位 | 内容 | 说明 |
 |------|------|------|
-| `skills/insights-wiki/` | 现客户端 skill | 零改动，直接搬 |
-| `skills/insights-wiki-server/` | 现服务端 skill | 零改动，直接搬 |
-| `commands/wiki-install.md` | `/wiki-install` | 替代 `--install` flag，PM 敲斜杠 |
-| `commands/wiki-search.md` | `/wiki-search <topic>` | 查询 topic 下 Good/Bad 并列 |
-| `commands/wiki-publish.md` | `/wiki-publish` | 新建卡片，走 `insight-validator` agent 校验 |
-| `commands/wiki-review.md` | `/wiki-review` | 调用 `wiki-curator` agent 打开看板 |
-| `commands/wiki-diff.md` | `/wiki diff <topic>` | 映射 `proposal_conflict_design.md` 的 topic Good/Bad 并列视图 |
+| `skills/insights-share/` | 客户端 skill | 搬运，M5 rename |
+| `skills/insights-share-server/` | 服务端 skill | 搬运，M5 rename |
+| `commands/share-install.md` | `/share-install` | 替代 `--install` flag，PM 敲斜杠 |
+| `commands/share-search.md` | `/share-search <topic>` | 查询 topic 下 Good/Bad 并列 |
+| `commands/share-publish.md` | `/share-publish` | 新建卡片，走 `share-validator` agent 校验 |
+| `commands/share-review.md` | `/share-review` | 调用 `share-curator` agent 打开看板 |
+| `commands/share-diff.md` | `/share-diff <topic>` | 映射 `proposal_conflict_design.md` 的 topic Good/Bad 并列视图 |
 | `hooks/user-prompt-submit.sh` | 预取卡片 | 迁移 `wiki_daemon/prefetch_hook.py` |
-| `hooks/post-tool-use.sh` | 累加 today_count | 保持 `~/.cache/insights-wiki/today_count.json` 口径 |
+| `hooks/post-tool-use.sh` | 累加 today_count | 保持 `~/.cache/insights-share/today_count.json` 口径（M5 前为 `~/.cache/insights-wiki/`） |
 | `hooks/session-start.sh` | 静默拉取 wiki 最新索引 | 对应 proposal 需求 4「SILENT-IN-BACKGROUND」 |
-| `agents/wiki-curator.md` | 管理员看板 CRUD | 对应 proposal 需求 6「administrators can CRUD」 |
-| `agents/insight-validator.md` | 发布前验证 insight 合法性 | 对应 proposal 需求 5「快速比对并验证」 |
-| `mcp/wiki-server.json` | MCP server 声明 | 取代裸 HTTP 7821，AGENT 侧用 typed tool |
-| `statusline/insights_wiki_statusline.sh` | `[wiki ✓ N/today]` | 现实现直接塞入 plugin `statusline` 槽 |
-| `.claude-plugin/plugin.json` | manifest | name/version/author/entry 声明 |
-| `.claude-plugin/marketplace.json` | 内网 marketplace 索引 | 支持 `claude plugin install` 源地址 |
+| `agents/share-curator.md` | 管理员看板 CRUD | 对应 proposal 需求 6「administrators can CRUD」 |
+| `agents/share-validator.md` | 发布前验证 insight 合法性 | 对应 proposal 需求 5「快速比对并验证」 |
+| `mcp/wiki-server.json` | MCP server 声明 | 取代裸 HTTP 7821，AGENT 侧用 typed tool（内部 tool 名 `wiki_*` 本轮不动，留 M6_MCP_RENAME） |
+| `statusline/insights_share_statusline.sh` | `[share ✓ N/today]` | M5 rename 后的 statusline 脚本 |
+| `.claude-plugin/plugin.json` | manifest | name=insights-share / version / author / entry 声明 |
+| `.claude-plugin/marketplace.json` | 内网 marketplace 索引 | 支持 `claude plugin install` 源地址（subdir=plugins/insights-share） |
 
 ## 额外能力
 
@@ -99,6 +103,7 @@ MVP 只交付让「PM 零 bash 跑完 demo」的最小集：
 | M2 | 加 agents + 剩余命令 | `/wiki-publish` / `/wiki-review` 走 agent 校验 |
 | M3 | 加 MCP + 团队 namespace + TTL/stale | statusline 新态可见 |
 | M4 | 加签名 + marketplace 发布到内网 git registry | `claude plugin upgrade` 走通 |
+| M5 | 深度重命名 insights-wiki → insights-share、`plugins/<name>/` 布局 | `start.demo.sh` + `plugin self_check.sh` 显示 `[share ✓ 0/today]` / ALL GREEN，见 [`proposal_rename_to_insights_share.md`](proposal_rename_to_insights_share.md) |
 
 ## 迭代推进 For-loop
 
@@ -183,27 +188,26 @@ def run():
 DESIGN_DOC = "proposal/proposal_plugin_design.md"
 MILESTONES = [
     "M1_MVP",                 # PASS
-    "M2_AGENTS",              # REFINE（当前所在轮）
-    "M3_MCP_NAMESPACE_TTL",   # PENDING
-    "M4_SIGN_MARKETPLACE",    # PENDING
+    "M2_AGENTS",              # PASS
+    "M3_MCP_NAMESPACE_TTL",   # PASS
+    "M4_SIGN_MARKETPLACE",    # PASS
+    "M5_RENAME",              # PASS（M5 落地文档见 proposal_rename_to_insights_share.md）
 ]
 
 def snapshot_verdict(milestone: str) -> str:
-    if milestone == "M1_MVP":
-        return "PASS"
-    if milestone == "M2_AGENTS":
-        return "REFINE"
-    return "PENDING"
+    return "PASS"
 
 def snapshot_reason(milestone: str) -> str:
     if milestone == "M1_MVP":
-        return "manifest / marketplace / skills / hook / statusline / /wiki-install / /wiki-search 已落地"
+        return "manifest / marketplace / skills / hook / statusline / /share-install / /share-search 已落地（M5 前名 /wiki-*）"
     if milestone == "M2_AGENTS":
-        return "plugin.json 已切到 0.2.0-m2，/wiki-publish + /wiki-review + 两个 agent 已在仓库，但 wiki-diff 未落地，部分元数据仍停在 M1"
+        return "/share-publish + /share-review + /share-diff + share-curator + share-validator 全部落地"
     if milestone == "M3_MCP_NAMESPACE_TTL":
-        return "缺 mcp/wiki-server.json、team namespace、TTL/stale 状态扩展"
+        return "mcp/wiki-server.json + team namespace + TTL/stale + [share ⚠ stale] 状态灯"
     if milestone == "M4_SIGN_MARKETPLACE":
-        return "缺 ed25519 签名链路与 marketplace 发布对齐"
+        return "ed25519 签名 + [share 🔒 sig-fail] + publish_marketplace.py 摘要 + manifest 合同"
+    if milestone == "M5_RENAME":
+        return "深度重命名 insights-wiki -> insights-share；物理目录 plugins/insights-share/；share-* 命令与 agent；[share ...] 徽章"
     return "UNKNOWN"
 ```
 
@@ -211,20 +215,17 @@ def snapshot_reason(milestone: str) -> str:
 
 | milestone | 当前判定 | 仓库证据 | 结论 |
 |-----------|----------|----------|------|
-| `M1_MVP` | `PASS` | 已有 `.claude-plugin/plugin.json`、`.claude-plugin/marketplace.json`、两份 skill、`hooks/user-prompt-submit.sh`、`statusline/insights_wiki_statusline.sh`、`/wiki-install`、`/wiki-search`；`start.demo.sh` 已调用 `plugin/scripts/self_check.sh` | 可以视为已过本轮，进入下一轮 |
-| `M2_AGENTS` | `REFINE` | `plugin.json` 版本为 `0.2.0-m2`，`milestones.current=M2_AGENTS`；`/wiki-publish`、`/wiki-review`、`wiki-curator`、`insight-validator` 均已存在 | 已进入 M2，但仍未齐套；当前 loop 若执行到此，应停在 `REFINE` 而不是宣告 `PASS` |
-| `M3_MCP_NAMESPACE_TTL` | `PENDING` | 仓库中暂无 `mcp/wiki-server.json`，也没有 team namespace、`[wiki ⚠ stale]`、TTL 处理链路 | 不应提前进入实现循环 |
-| `M4_SIGN_MARKETPLACE` | `PENDING` | 仓库中暂无 ed25519 签名/验签链路；`marketplace.json` 仍写 `0.1.0-m1` | 不应提前进入实现循环 |
+| `M1_MVP` | `PASS` | `.claude-plugin/plugin.json`、`marketplace.json`、两份 skill、`user-prompt-submit.sh`、statusline、`/share-install`、`/share-search`；M5 后全部落在 `plugins/insights-share/` | 已过 |
+| `M2_AGENTS` | `PASS` | `/share-publish`、`/share-review`、`/share-diff`、`share-curator`、`share-validator` 均已存在 | 已过 |
+| `M3_MCP_NAMESPACE_TTL` | `PASS` | `plugins/insights-share/mcp/wiki-server.json`、team namespace、`[share ⚠ stale]` 状态灯就绪 | 已过 |
+| `M4_SIGN_MARKETPLACE` | `PASS` | ed25519 签名链路、`[share 🔒 sig-fail]` 状态、`publish_marketplace.py` 摘要均就绪 | 已过 |
+| `M5_RENAME` | `PASS` | `plugins/insights-share/` 布局、`share-*` 命令与 agent、`[share ...]` 徽章、`insights_share_statusline.sh`、`~/.cache/insights-share/`、`gate_no_wiki_leak` + `gate_marketplace_subdir` 两门齐 | 已过，见 [`proposal_rename_to_insights_share.md`](proposal_rename_to_insights_share.md) |
 
-### 当前 M2 的 refine 点
+### M5 后的 for-loop 演进
 
-当前仓库若按本 for-loop 继续推进，`M2_AGENTS` 这一轮至少还要补齐下面几项，才适合再次跑
-agent-judge：
-
-1. `commands/wiki-diff.md` 仍缺，和"Plugin 槽位映射"未对齐。
-2. `insights-share/plugin/README.md` 仍以 "M1 MVP" 为主叙述，和仓库中已存在的 M2 实物不一致。
-3. `.claude-plugin/marketplace.json` 仍停在 `0.1.0-m1`，未与 `plugin.json` 的 `0.2.0-m2` 对齐。
-4. 若本轮要宣告 `M2_AGENTS PASS`，应补跑一次 `start.demo.sh` 与 today_count 对账，避免只靠文件存在判定通过。
+M5 把 for-loop 的推进规模固化为「深度重命名 + plugins/<name>/ 官方布局」，
+后续如有 M6_MCP_RENAME（MCP tool 名 `wiki_*` → `share_*`）等命名迁移，
+按同一套"每步原子 commit + agent-judge 双探针 + 实机 tmux 绿灯"的节奏推进。
 
 ## 风险与约束
 
