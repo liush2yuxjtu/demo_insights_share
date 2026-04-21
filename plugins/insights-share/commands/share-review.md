@@ -1,30 +1,30 @@
 ---
-name: wiki-review
+name: share-review
 description: 管理员入口：列 topic 下并列 Good/Bad 卡片，支持 label_override、archive、open kanban。委托 wiki-curator agent 执行。非管理员会话不触发。
 allowed-tools: Read, Bash, Grep
 ---
 
-# /wiki-review
+# /share-review
 
 管理员 review 入口。委托 `wiki-curator` agent 完成看板操作。
 
 ## 使用
 
 ```
-/wiki-review                               # 列当前全部 topic 概览
-/wiki-review <topic-id>                    # 列某 topic 下全部并列 Good/Bad 卡片
-/wiki-review <topic-id> --team team-a      # 只看某团队 namespace
-/wiki-review <topic-id> --kanban           # 打开 kanban dashboard（走 insights-wiki-server --ui）
-/wiki-review <card-id> --override <good|bad>
-/wiki-review <card-id> --archive
+/share-review                               # 列当前全部 topic 概览
+/share-review <topic-id>                    # 列某 topic 下全部并列 Good/Bad 卡片
+/share-review <topic-id> --team team-a      # 只看某团队 namespace
+/share-review <topic-id> --kanban           # 打开 kanban dashboard（走 insights-share-server --ui）
+/share-review <card-id> --override <good|bad>
+/share-review <card-id> --archive
 ```
 
 示例：
 
-- `/wiki-review postgres-pool-exhaustion`
-- `/wiki-review postgres-pool-exhaustion --team team-a`
-- `/wiki-review alice-pgpool-2026-04-10 --override bad`
-- `/wiki-review --kanban`
+- `/share-review postgres-pool-exhaustion`
+- `/share-review postgres-pool-exhaustion --team team-a`
+- `/share-review alice-pgpool-2026-04-10 --override bad`
+- `/share-review --kanban`
 
 ## 流程
 
@@ -37,7 +37,7 @@ allowed-tools: Read, Bash, Grep
 
 ## Good/Bad 并列展示
 
-`/wiki-review <topic>` 输出必须是**并列**视图，不合并不排序挑最优。推荐 CLI
+`/share-review <topic>` 输出必须是**并列**视图，不合并不排序挑最优。推荐 CLI
 格式：
 
 ```
@@ -54,7 +54,7 @@ topic: postgres-pool-exhaustion
 ## 权限
 
 - 仅管理员会话触发；非管理员 prompt 一律返回"本命令仅对管理员可见"
-- M2 阶段管理员判定：环境变量 `INSIGHTS_WIKI_ROLE=admin` 或 sandbox 标记
+- M2 阶段管理员判定：环境变量 `INSIGHTS_SHARE_ROLE=admin` 或 sandbox 标记
 - M4 引入签名 + auth 后走 daemon-issued token
 
 ## 和 M4 的边界
@@ -63,5 +63,5 @@ topic: postgres-pool-exhaustion
 
 ## 参考
 
-- proposal/proposal_plugin_design.md §"Plugin 槽位映射" commands/wiki-review.md 行
+- proposal/proposal_plugin_design.md §"Plugin 槽位映射" commands/share-review.md 行
 - proposal/proposal_conflict_design.md §"核心思路"（并列视图）

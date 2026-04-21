@@ -1,10 +1,10 @@
 ---
-name: wiki-publish
+name: share-publish
 description: 发布一条新 insight 卡片到 LAN wiki。走 insight-validator agent 做发布前校验；支持 --dry-run 不落盘，仅输出校验报告。
 allowed-tools: Read, Bash, Grep
 ---
 
-# /wiki-publish
+# /share-publish
 
 把一张 insight 卡片发到 LAN `insightsd`。发布前先跑 `insight-validator`
 agent；校验通过才调 daemon `POST /insights`。
@@ -12,16 +12,16 @@ agent；校验通过才调 daemon `POST /insights`。
 ## 使用
 
 ```
-/wiki-publish <card-path-or-json>              # 正式发布
-/wiki-publish <card-path-or-json> --dry-run    # 仅跑校验，不调 daemon
-/wiki-publish <card-path-or-json> --team team-a
+/share-publish <card-path-or-json>              # 正式发布
+/share-publish <card-path-or-json> --dry-run    # 仅跑校验，不调 daemon
+/share-publish <card-path-or-json> --team team-a
 ```
 
 示例：
 
-- `/wiki-publish wiki_tree/database/alice-pgpool-2026-04-21.md`
-- `/wiki-publish wiki_tree/frontend/carol-next-streaming-2026-04-21.md --dry-run`
-- `/wiki-publish wiki_tree/database/postgres_pool.md --team team-a`
+- `/share-publish wiki_tree/database/alice-pgpool-2026-04-21.md`
+- `/share-publish wiki_tree/frontend/carol-next-streaming-2026-04-21.md --dry-run`
+- `/share-publish wiki_tree/database/postgres_pool.md --team team-a`
 
 ## 流程
 
@@ -38,7 +38,7 @@ agent；校验通过才调 daemon `POST /insights`。
 
 - 不调 daemon `POST`
 - 不动磁盘 `wiki_tree/`
-- 不改 `~/.cache/insights-wiki/today_count.json`
+- 不改 `~/.cache/insights-share/today_count.json`
 - 仅输出 validator 报告
 
 目的：PM 演示场景零风险（对齐 proposal_plugin_design.md §"额外能力" `--dry-run`
@@ -58,5 +58,5 @@ agent；校验通过才调 daemon `POST /insights`。
 
 ## 参考
 
-- proposal/proposal_plugin_design.md §"Plugin 槽位映射" commands/wiki-publish.md 行
+- proposal/proposal_plugin_design.md §"Plugin 槽位映射" commands/share-publish.md 行
 - proposal/proposal_plugin_design.md §"额外能力" `--dry-run` 行

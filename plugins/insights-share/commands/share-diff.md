@@ -1,27 +1,27 @@
 ---
-name: wiki-diff
+name: share-diff
 description: 按 topic 查看并列 Good/Bad 决策差异，只展示 diff 和适用场景，不挑最优、不做冲突裁决。
 allowed-tools: Read, Bash, Grep
 ---
 
-# /wiki-diff
+# /share-diff
 
 把某个 topic 下的并列决策整理成 PM 和工程师都能快速扫读的 diff 视图。
 
 ## 使用
 
 ```
-/wiki-diff <topic-id>
-/wiki-diff <topic-id> --label good
-/wiki-diff <topic-id> --label bad
-/wiki-diff <topic-id> --team team-a
+/share-diff <topic-id>
+/share-diff <topic-id> --label good
+/share-diff <topic-id> --label bad
+/share-diff <topic-id> --team team-a
 ```
 
 示例：
 
-- `/wiki-diff postgres-pool-exhaustion`
-- `/wiki-diff postgres-pool-exhaustion --label bad`
-- `/wiki-diff postgres-pool-exhaustion --team team-a`
+- `/share-diff postgres-pool-exhaustion`
+- `/share-diff postgres-pool-exhaustion --label bad`
+- `/share-diff postgres-pool-exhaustion --team team-a`
 
 ## 做什么
 
@@ -59,5 +59,5 @@ BAD
 
 ## 参考
 
-- proposal/proposal_plugin_design.md §"Plugin 槽位映射" commands/wiki-diff.md 行
+- proposal/proposal_plugin_design.md §"Plugin 槽位映射" commands/share-diff.md 行
 - proposal/proposal_conflict_design.md §"核心思路"（并列共存，不挑最优）

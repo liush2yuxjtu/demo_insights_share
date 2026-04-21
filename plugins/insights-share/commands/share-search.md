@@ -1,23 +1,23 @@
 ---
-name: wiki-search
+name: share-search
 description: 在 LAN insightsd 中按关键词检索 topic 下并列的 Good/Bad 卡片，展示 top-k 命中。不挑最优、不合并。
 allowed-tools: Bash, Read
 ---
 
-# /wiki-search
+# /share-search
 
 按关键词查询 LAN wiki，展示同一 topic 下**并列**的 Good/Bad 卡片，由用户自行根据 `applies_when` / `do_not_apply_when` 匹配场景。
 
 ## 使用
 
 ```
-/wiki-search <查询词>
+/share-search <查询词>
 ```
 
 示例：
 
-- `/wiki-search postgres pool`
-- `/wiki-search redis eviction`
+- `/share-search postgres pool`
+- `/share-search redis eviction`
 
 ## 做什么
 
@@ -25,7 +25,7 @@ allowed-tools: Bash, Read
 2. 按 **topic** 分组展示结果，每 topic 下 Good/Bad 并列
 3. 每张卡片输出：`id / author / label / applies_when / summary`
 4. **不合并、不排序挑最优、不做冲突检测**（依据 `proposal/proposal_conflict_design.md`）
-5. 若命中为 0，输出空结果并提示可触发 `/wiki-publish`（M2 提供）
+5. 若命中为 0，输出空结果并提示可触发 `/share-publish`（M2 提供）
 
 ## 输出契约
 
@@ -40,5 +40,5 @@ M1 只做一次性查询。M2 `insight-validator` agent 上线后，本命令将
 
 ## 参考
 
-- proposal/proposal_plugin_design.md §"Plugin 槽位映射" commands/wiki-search.md 行
+- proposal/proposal_plugin_design.md §"Plugin 槽位映射" commands/share-search.md 行
 - proposal/proposal_conflict_design.md §"核心思路"（并列共存，不挑最优）
