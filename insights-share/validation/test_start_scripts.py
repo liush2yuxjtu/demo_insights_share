@@ -37,12 +37,12 @@ def test_start_scripts_exist_and_are_shell_scripts() -> None:
     assert _read(START_DRIVER).startswith("#!/usr/bin/env bash")
 
 
-def test_start_demo_script_surfaces_plugin_m3_checks() -> None:
+def test_start_demo_script_surfaces_plugin_m4_checks() -> None:
     script = _read(START_DEMO)
 
     assert 'plugin/statusline/insights_wiki_statusline.sh' in script
-    assert 'plugin M3 self-check' in script
-    assert '5 个命令 + 2 个 agent + 1 个 mcp config 全 OK' in script
+    assert 'plugin M4 self-check' in script
+    assert '5 个命令 + 2 个 agent + 签名/发布脚本 全 OK' in script
 
 
 def test_start_claude_script_wraps_shared_driver() -> None:
