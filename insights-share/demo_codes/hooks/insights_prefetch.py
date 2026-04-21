@@ -99,6 +99,14 @@ def _silent_main() -> int:
         sys.path.insert(0, str(DEMO_CODES / "hooks"))
         from insights_cache import persist  # noqa: E402
 
+        wiki_daemon_dir = DEMO_CODES.parent / "wiki_daemon"
+        if wiki_daemon_dir.is_dir():
+            sys.path.insert(0, str(wiki_daemon_dir))
+        try:
+            from today_count import bump as _bump_today  # noqa: E402
+        except ImportError:
+            _bump_today = None
+
         url = f"{DEFAULT_WIKI}/insights"
         with urllib.request.urlopen(url, timeout=TIMEOUT_SECONDS) as resp:
             payload = json.loads(resp.read().decode("utf-8"))
@@ -121,6 +129,29 @@ def _silent_main() -> int:
                 }
             }
             sys.stdout.write(json.dumps(out, ensure_ascii=False))
+            # 命中卡片：递增 today_count.json，给 statusline badge 用
+            if _bump_today is not None:
+                prompt_tokens = {
+                    t
+                    for t in prompt.lower().replace("-", " ").replace("_", " ").split()
+                    if len(t) >= 3
+                }
+                top_card: dict[str, Any] | None = None
+                for card in cards:
+                    if _score_card(card, prompt_tokens) > 0:
+                        top_card = card
+                        break
+                if top_card is None and cards:
+                    top_card = cards[0]
+                card_id = None
+                if isinstance(top_card, dict):
+                    cid = top_card.get("id")
+                    if isinstance(cid, str):
+                        card_id = cid
+                try:
+                    _bump_today(card_id=card_id)
+                except Exception:
+                    pass
     except (
         urllib.error.URLError,
         urllib.error.HTTPError,
