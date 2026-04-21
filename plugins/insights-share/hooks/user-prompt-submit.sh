@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# insights-wiki plugin :: UserPromptSubmit hook
+# insights-share plugin :: UserPromptSubmit hook
 #
 # 迁移自 insights-share/demo_codes/hooks/insights_prefetch.py。
 # 保留 today_count 口径：一次 UserPromptSubmit → 触发一次 prefetch。
@@ -16,10 +16,10 @@
 set -u
 
 # 允许 plugin install 时注入绝对仓库根；fallback 用 hook 脚本自身相对路径
-REPO_ROOT="${INSIGHTS_WIKI_REPO_ROOT:-}"
+REPO_ROOT="${INSIGHTS_SHARE_REPO_ROOT:-}"
 if [ -z "$REPO_ROOT" ]; then
   HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  # hooks/user-prompt-submit.sh → plugin/ → insights-share/ → repo root
+  # hooks/user-prompt-submit.sh → plugins/insights-share/ → plugins/ → repo root
   REPO_ROOT="$(cd "$HOOK_DIR/../../.." && pwd)"
 fi
 
