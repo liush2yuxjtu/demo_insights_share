@@ -4,3 +4,7 @@
 .claude/skills/register-windows
 .codex/
 .env
+
+# smoke-test 自动重跑产物
+insights-share/validation/reports/deliverables/start_codex.latest.txt
+insights-share/validation/reports/deliverables/start_demo.latest.txt
