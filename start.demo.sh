@@ -259,9 +259,13 @@ echo "----- statusline badge preview -----"
 INSIGHTS_WIKI_URL=http://127.0.0.1:7821 WIKI_STATUSLINE_NO_COLOR=1 \
   bash "$REPO_ROOT/statusline/insights_wiki_statusline.sh" \
   || echo "(statusline exit non-zero)"
+echo "----- plugin M1 self-check (insights-share/plugin/) -----"
+bash "$REPO_ROOT/insights-share/plugin/scripts/self_check.sh" \
+  || echo "(plugin self-check exit non-zero)"
 echo "===================================================="
 echo "期望: 两边都只有 insights-wiki，看不到你全局的其他 skill。"
 echo "期望: statusline 显示 [wiki ✓ 0/today]（daemon up + skill 装好）"
+echo "期望: plugin M1 self-check 六行全 OK。"
 printf "按回车进入 claude…"
 read _
 HOME="$SANDBOX_HOME" exec claude
