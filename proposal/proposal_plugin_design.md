@@ -100,6 +100,132 @@ MVP 只交付让「PM 零 bash 跑完 demo」的最小集：
 | M3 | 加 MCP + 团队 namespace + TTL/stale | statusline 新态可见 |
 | M4 | 加签名 + marketplace 发布到内网 git registry | `claude plugin upgrade` 走通 |
 
+## 迭代推进 For-loop
+
+下面这段不是运行时代码，而是实现阶段的**推进契约**。作用是把本设计文档中的
+milestone 变成可重复执行的闭环：读设计 → 列交付项 → 实现 → 四门自检 →
+agent-judge 判决 → 进入下一轮或停止。
+
+### 原版伪码
+
+```python
+# ---- 常量 ----
+DESIGN_DOC = "proposal/proposal_plugin_design.md"
+MILESTONES = ["M1_MVP", "M2_AGENTS", "M3_MCP_NAMESPACE_TTL", "M4_SIGN_MARKETPLACE"]
+MAX_RETRY_PER_MILESTONE = 3
+DEMO_SURFACE = "start.demo.sh"
+
+# ---- 每轮契约 ----
+def iteration(milestone: str) -> Verdict:
+    # 1. 载入 design doc 对应节
+    spec = load_section(DESIGN_DOC, milestone)
+    assert spec is not None, f"design doc 缺 {milestone} 节，停"
+
+    # 2. 列 milestone 所有交付项（来自 "Plugin 槽位映射" + "MVP 范围" + "迁移路径"）
+    deliverables = parse_deliverables(spec)
+
+    # 3. 实现
+    for d in deliverables:
+        implement(d)
+        atomic_commit(scope=d.single_concern)
+
+    # 4. self-verify 四门
+    gates = [
+        gate_design_alignment(spec, deliverables),
+        gate_start_demo_green(DEMO_SURFACE),
+        gate_today_count_parity(),
+        gate_claude_md_format(),
+    ]
+    for g in gates:
+        if g.status != "PASS":
+            return Verdict(FAIL, reason=g.reason, gate=g.name)
+
+    # 5. agent-judge 双探针
+    probe   = claudefast_probe(f"读 {DESIGN_DOC} {milestone} 节，交付是否齐？")
+    verdict = claudefast_judge(probe_output=probe)
+    return verdict
+
+# ---- 主 for-loop ----
+def run():
+    for milestone in MILESTONES:
+        retries = 0
+        while True:
+            v = iteration(milestone)
+            if v.verdict == "PASS":
+                log(f"[{milestone}] PASS 进下一轮")
+                break
+            if v.verdict == "REFINE" and retries < MAX_RETRY_PER_MILESTONE:
+                retries += 1
+                log(f"[{milestone}] REFINE #{retries}: {v.reason}")
+                continue
+            escalate_to_claude_p(milestone, v)
+            abort(f"[{milestone}] 未通过，停止推进")
+    final_report()
+```
+
+### 执行解释
+
+| 环节 | 约束 |
+|------|------|
+| `load_section()` | milestone 在本设计文档里必须有专属定义；没有就停止，不允许"边做边猜" |
+| `parse_deliverables()` | 只从本文档显式列出的槽位、MVP 范围、迁移路径中抽取，不额外扩 scope |
+| `atomic_commit()` | 对齐项目规则：每个 deliverable 按单一关注点立即提交 |
+| `gate_design_alignment()` | 实物文件、命名、命令、agent、hook、statusline 必须与本文档一致 |
+| `gate_start_demo_green()` | `start.demo.sh` 是 human-last-visible surface，新增 feature 后必须可跑 |
+| `gate_today_count_parity()` | 任何 hook / statusline / plugin 包装改动都不得破坏 `today_count` 口径 |
+| `gate_claude_md_format()` | 仅当本轮同时修改 `CLAUDE.md` / `AGENTS.md` 时启用；纯 proposal 更新记为 `N/A` |
+| `claudefast_probe + judge` | 用 agent-judge 判断"交付是否真的齐"，而不是靠 grep 文件名收尾 |
+
+### 当前进度标注（2026-04-21 仓库快照）
+
+```python
+# ---- 当前快照 ----
+DESIGN_DOC = "proposal/proposal_plugin_design.md"
+MILESTONES = [
+    "M1_MVP",                 # PASS
+    "M2_AGENTS",              # REFINE（当前所在轮）
+    "M3_MCP_NAMESPACE_TTL",   # PENDING
+    "M4_SIGN_MARKETPLACE",    # PENDING
+]
+
+def snapshot_verdict(milestone: str) -> str:
+    if milestone == "M1_MVP":
+        return "PASS"
+    if milestone == "M2_AGENTS":
+        return "REFINE"
+    return "PENDING"
+
+def snapshot_reason(milestone: str) -> str:
+    if milestone == "M1_MVP":
+        return "manifest / marketplace / skills / hook / statusline / /wiki-install / /wiki-search 已落地"
+    if milestone == "M2_AGENTS":
+        return "plugin.json 已切到 0.2.0-m2，/wiki-publish + /wiki-review + 两个 agent 已在仓库，但 wiki-diff 未落地，部分元数据仍停在 M1"
+    if milestone == "M3_MCP_NAMESPACE_TTL":
+        return "缺 mcp/wiki-server.json、team namespace、TTL/stale 状态扩展"
+    if milestone == "M4_SIGN_MARKETPLACE":
+        return "缺 ed25519 签名链路与 marketplace 发布对齐"
+    return "UNKNOWN"
+```
+
+### 里程碑快照表
+
+| milestone | 当前判定 | 仓库证据 | 结论 |
+|-----------|----------|----------|------|
+| `M1_MVP` | `PASS` | 已有 `.claude-plugin/plugin.json`、`.claude-plugin/marketplace.json`、两份 skill、`hooks/user-prompt-submit.sh`、`statusline/insights_wiki_statusline.sh`、`/wiki-install`、`/wiki-search`；`start.demo.sh` 已调用 `plugin/scripts/self_check.sh` | 可以视为已过本轮，进入下一轮 |
+| `M2_AGENTS` | `REFINE` | `plugin.json` 版本为 `0.2.0-m2`，`milestones.current=M2_AGENTS`；`/wiki-publish`、`/wiki-review`、`wiki-curator`、`insight-validator` 均已存在 | 已进入 M2，但仍未齐套；当前 loop 若执行到此，应停在 `REFINE` 而不是宣告 `PASS` |
+| `M3_MCP_NAMESPACE_TTL` | `PENDING` | 仓库中暂无 `mcp/wiki-server.json`，也没有 team namespace、`[wiki ⚠ stale]`、TTL 处理链路 | 不应提前进入实现循环 |
+| `M4_SIGN_MARKETPLACE` | `PENDING` | 仓库中暂无 ed25519 签名/验签链路；`marketplace.json` 仍写 `0.1.0-m1` | 不应提前进入实现循环 |
+
+### 当前 M2 的 refine 点
+
+当前仓库若按本 for-loop 继续推进，`M2_AGENTS` 这一轮至少还要补齐下面几项，才适合再次跑
+agent-judge：
+
+1. `commands/wiki-diff.md` 仍缺，和"Plugin 槽位映射"未对齐。
+2. `insights-share/plugin/README.md` 仍以 "M1 MVP" 为主叙述，和仓库中已存在的 M2 实物不一致。
+3. `.claude-plugin/marketplace.json` 仍停在 `0.1.0-m1`，未与 `plugin.json` 的 `0.2.0-m2` 对齐。
+4. 若本轮要宣告 `M2_AGENTS PASS`，应补跑一次 `start.demo.sh` 与 today_count 对账，避免只靠文件存在判定通过。
+
 ## 风险与约束
 
 | 风险 | 对策 |
