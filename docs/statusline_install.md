@@ -1,15 +1,15 @@
-# insights-wiki Statusline 装配
+# insights-share Statusline 装配
 
 > 契约来源：[proposal/proposal_statusline.md](../proposal/proposal_statusline.md)
 > 交付物：
-> - `statusline/insights_wiki_statusline.sh`
+> - `statusline/insights_share_statusline.sh`
 > - `insights-share/wiki_daemon/today_count.py`
 > - 本文档
 
 ## 原理
 
-1. `today_count.py` 负责写计数到 `~/.cache/insights-wiki/today_count.json`，被 UserPromptSubmit 钩子每次命中卡片时调用。
-2. `insights_wiki_statusline.sh` 每次 Claude Code 渲染 statusline 时执行：读计数、探活 daemon、查 skill 文件，输出一行 `[wiki ✓|…|✗ N/today]`。
+1. `today_count.py` 负责写计数到 `~/.cache/insights-share/today_count.json`，被 UserPromptSubmit 钩子每次命中卡片时调用。
+2. `insights_wiki_statusline.sh` 每次 Claude Code 渲染 statusline 时执行：读计数、探活 daemon、查 skill 文件，输出一行 `[share ✓|…|✗ N/today]`。
 3. 可选 `.in_flight` 标记文件由 hook 在 prefetch 开始时 `touch`，结束时 `rm`；statusline 读其 mtime < 3s 作为 `…` 态。
 
 ## 装配步骤
@@ -29,7 +29,7 @@ insights-share/demo_codes/.venv/bin/python \
 
 ```bash
 # 项目仓库 clone 后脚本已就位
-chmod +x statusline/insights_wiki_statusline.sh
+chmod +x statusline/insights_share_statusline.sh
 ```
 
 ### 3. 配置 Claude Code `settings.json`
@@ -40,7 +40,7 @@ chmod +x statusline/insights_wiki_statusline.sh
 {
   "statusLine": {
     "type": "command",
-    "command": "/Users/m1/projects/demo_insights_share/statusline/insights_wiki_statusline.sh"
+    "command": "/Users/m1/projects/demo_insights_share/statusline/insights_share_statusline.sh"
   }
 }
 ```
@@ -51,7 +51,7 @@ chmod +x statusline/insights_wiki_statusline.sh
 {
   "statusLine": {
     "type": "command",
-    "command": "bash -c 'printf \"%s  \" \"$(cat)\"; /abs/path/statusline/insights_wiki_statusline.sh'"
+    "command": "bash -c 'printf \"%s  \" \"$(cat)\"; /abs/path/statusline/insights_share_statusline.sh'"
   }
 }
 ```
@@ -77,14 +77,14 @@ bump(card_id=first_matched_card.get("id"))
 
 ```python
 from pathlib import Path
-Path.home().joinpath(".cache/insights-wiki/.in_flight").touch()
+Path.home().joinpath(".cache/insights-share/.in_flight").touch()
 ```
 
 在 hook 结束时：
 
 ```python
 try:
-    Path.home().joinpath(".cache/insights-wiki/.in_flight").unlink()
+    Path.home().joinpath(".cache/insights-share/.in_flight").unlink()
 except FileNotFoundError:
     pass
 ```
@@ -94,7 +94,7 @@ except FileNotFoundError:
 A 侧录制时必须**完全禁用** statusline，避免 B 特征泄漏：
 
 ```bash
-WIKI_STATUSLINE=off ~/path/to/statusline/insights_wiki_statusline.sh
+SHARE_STATUSLINE=off ~/path/to/statusline/insights_share_statusline.sh
 # 输出为空串，退出码 0
 ```
 
@@ -102,9 +102,9 @@ WIKI_STATUSLINE=off ~/path/to/statusline/insights_wiki_statusline.sh
 
 ```bash
 # A 段
-export WIKI_STATUSLINE=off
+export SHARE_STATUSLINE=off
 # … 录制 A …
-unset WIKI_STATUSLINE
+unset SHARE_STATUSLINE
 # B 段正常
 ```
 
@@ -112,33 +112,33 @@ unset WIKI_STATUSLINE
 
 | 变量 | 默认 | 作用 |
 |------|------|------|
-| `INSIGHTS_WIKI_URL` | `http://127.0.0.1:7821` | daemon base url |
-| `WIKI_STATUSLINE` | *unset* | `off` 时输出空串，整条链路禁用 |
-| `WIKI_STATUSLINE_NO_COLOR` | *unset* | 非空时禁用 ANSI 色 |
+| `INSIGHTS_SHARE_URL` | `http://127.0.0.1:7821` | daemon base url |
+| `SHARE_STATUSLINE` | *unset* | `off` 时输出空串，整条链路禁用 |
+| `SHARE_STATUSLINE_NO_COLOR` | *unset* | 非空时禁用 ANSI 色 |
 
 ## 自检
 
 ```bash
 # 走 off 开关（A 侧）
-WIKI_STATUSLINE=off statusline/insights_wiki_statusline.sh; echo "(exit=$?)"
+SHARE_STATUSLINE=off statusline/insights_share_statusline.sh; echo "(exit=$?)"
 
 # 走正常渲染
-WIKI_STATUSLINE_NO_COLOR=1 statusline/insights_wiki_statusline.sh
+SHARE_STATUSLINE_NO_COLOR=1 statusline/insights_share_statusline.sh
 
 # 手工 bump 3 次，statusline 数字应递增
 /usr/bin/python3 insights-share/wiki_daemon/today_count.py reset
 for i in 1 2 3; do
   /usr/bin/python3 insights-share/wiki_daemon/today_count.py bump --card-id demo-$i
-  WIKI_STATUSLINE_NO_COLOR=1 statusline/insights_wiki_statusline.sh
+  SHARE_STATUSLINE_NO_COLOR=1 statusline/insights_share_statusline.sh
 done
 ```
 
 期望输出形如：
 
 ```
-[wiki ✓ 1/today]
-[wiki ✓ 2/today]
-[wiki ✓ 3/today]
+[share ✓ 1/today]
+[share ✓ 2/today]
+[share ✓ 3/today]
 ```
 
 （`✓` 依赖 daemon 可达；若 daemon 未启动会退化为 `✗ 3/today`。）
@@ -148,10 +148,10 @@ done
 | 症状 | 原因 | 修复 |
 |------|------|------|
 | 一直 `✗ 0/today` | daemon 没跑或端口不对 | `curl http://127.0.0.1:7821/healthz` 直接探活 |
-| daemon up 但 `✗` | skill 未装 | `ls ~/.claude/skills/insights-wiki/SKILL.md` |
+| daemon up 但 `✗` | skill 未装 | `ls ~/.claude/skills/insights-share/SKILL.md` |
 | 数字不增 | hook 没调 bump / A/B 开关被锁 off | `python3 today_count.py read` 看原始 record |
 | 卡死 > 300ms | 网络抖动 | 60s TTL 缓存会在下次渲染用缓存 |
-| A/B 验证漂移 | A 侧没 export `WIKI_STATUSLINE=off` | 检查 `examples/run_human_AB.sh` |
+| A/B 验证漂移 | A 侧没 export `SHARE_STATUSLINE=off` | 检查 `examples/run_human_AB.sh` |
 
 ## 日切行为
 

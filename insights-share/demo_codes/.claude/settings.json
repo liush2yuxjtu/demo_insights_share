@@ -1,7 +1,7 @@
 {
   "statusLine": {
     "type": "command",
-    "command": "/Users/m1/projects/demo_insights_share/statusline/insights_wiki_statusline.sh"
+    "command": "/Users/m1/projects/demo_insights_share/statusline/insights_share_statusline.sh"
   },
   "hooks": {
     "Stop": [
