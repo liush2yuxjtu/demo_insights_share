@@ -16,6 +16,7 @@
 | 编辑即原子 commit | 每次 Write/Edit/文件移动/文件删除完成后立即按单一关注点执行原子 git commit，禁止合并多个无关变更 | 任何 Write/Edit 或文件 move/rm 后 | [atomic-commits.md](docs/rules/atomic-commits.md) |
 | start bootstrap 指令 | 用户对本项目 Claude Code CLI 发送裸消息 `start` 时，按固定流程读四文件 + proposal/INDEX.md + 全部 proposal_*.md，列待办，逐条实现，每步 self-verify，最后给 PASS/FAIL | 用户发送 `start` 时 | [start-bootstrap.md](docs/rules/start-bootstrap.md) |
 | CLAUDE.md 改动必跑 agent-judge 状态灯 | 每次编辑 CLAUDE.md 后跑 agent-judge 双探针循环：`claudefast -p` 发 probe + 另一条 `claudefast -p` 当裁判输出 PASS/REFINE/FAIL JSON；fast 最多 5 轮，连续停滞或 FAIL 升级 `claude -p` 托底；禁止硬编码关键词匹配 | 任何 CLAUDE.md 编辑后 | [meta-self-verify.md](docs/rules/meta-self-verify.md) |
+| feature 必在 start.demo.sh self-verify | `start.demo.sh` 是 human-last-visible surface；新增/修改任何 feature 必须同步更新 `start.demo.sh`，并在 tmux 里跑一次完整 `start.demo.sh` 做实机 debug，日志全绿后才算交付 | 任何 feature 新增/修改完成时 | [start-demo-verify.md](docs/rules/start-demo-verify.md) |
 
 ## 设计文档索引
 
