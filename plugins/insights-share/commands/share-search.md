@@ -36,7 +36,7 @@ allowed-tools: Bash, Read
 
 ## 和 M2+ 的边界
 
-M1 只做一次性查询。M2 `insight-validator` agent 上线后，本命令将联动 agent 对命中卡片做发布前合法性校验（不影响展示，仅附加 badge）。
+M1 只做一次性查询。M2 `share-validator` agent 上线后，本命令将联动 agent 对命中卡片做发布前合法性校验（不影响展示，仅附加 badge）。
 
 ## 参考
 

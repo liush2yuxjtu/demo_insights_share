@@ -1,12 +1,12 @@
 ---
 name: share-review
-description: 管理员入口：列 topic 下并列 Good/Bad 卡片，支持 label_override、archive、open kanban。委托 wiki-curator agent 执行。非管理员会话不触发。
+description: 管理员入口：列 topic 下并列 Good/Bad 卡片，支持 label_override、archive、open kanban。委托 share-curator agent 执行。非管理员会话不触发。
 allowed-tools: Read, Bash, Grep
 ---
 
 # /share-review
 
-管理员 review 入口。委托 `wiki-curator` agent 完成看板操作。
+管理员 review 入口。委托 `share-curator` agent 完成看板操作。
 
 ## 使用
 
@@ -29,7 +29,7 @@ allowed-tools: Read, Bash, Grep
 ## 流程
 
 1. 解析子命令（list / override / archive / open_kanban）
-2. 调 `wiki-curator` agent 拿 JSON 结果
+2. 调 `share-curator` agent 拿 JSON 结果
 3. 对写操作（override / archive）：
    - 先打印 before/after
    - **二次确认**（AskUserQuestion 式）才发 daemon 请求

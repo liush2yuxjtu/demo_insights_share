@@ -27,7 +27,7 @@ allowed-tools: Bash, Read
 
 ## 和 M2+ 的边界
 
-M1 只负责"校验装好了"。M2 引入 `insight-validator` agent 后，本命令会追加发布前 dry-run 校验流；M4 引入 ed25519 签名后追加签名校验。
+M1 只负责"校验装好了"。M2 引入 `share-validator` agent 后，本命令会追加发布前 dry-run 校验流；M4 引入 ed25519 签名后追加签名校验。
 
 ## 参考
 

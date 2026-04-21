@@ -1,12 +1,12 @@
 ---
 name: share-publish
-description: 发布一条新 insight 卡片到 LAN wiki。走 insight-validator agent 做发布前校验；支持 --dry-run 不落盘，仅输出校验报告。
+description: 发布一条新 insight 卡片到 LAN wiki。走 share-validator agent 做发布前校验；支持 --dry-run 不落盘，仅输出校验报告。
 allowed-tools: Read, Bash, Grep
 ---
 
 # /share-publish
 
-把一张 insight 卡片发到 LAN `insightsd`。发布前先跑 `insight-validator`
+把一张 insight 卡片发到 LAN `insightsd`。发布前先跑 `share-validator`
 agent；校验通过才调 daemon `POST /insights`。
 
 ## 使用
@@ -26,7 +26,7 @@ agent；校验通过才调 daemon `POST /insights`。
 ## 流程
 
 1. **读卡片**：支持磁盘路径或内联 JSON
-2. **调 `insight-validator` agent**：拿 `{verdict, checks[], next}`
+2. **调 `share-validator` agent**：拿 `{verdict, checks[], next}`
 3. **分流**：
    - `verdict == REJECT` → 打印 checks，拒绝发布，给出修正建议（`next` 字段），退出非零
    - `verdict == WARN`  → 如 `--dry-run`，仅打印警告；否则发布 + 附带 warnings
@@ -50,7 +50,7 @@ agent；校验通过才调 daemon `POST /insights`。
   「已有另一方向」而 REJECT
 - 尊重 `proposal_wiki_card.md`：卡片落盘路径 `wiki_tree/{wiki_type}/{slug}.md`
 - 若指定 `--team <name>`，写入卡片 JSON 的 `team` 字段，走逻辑 team namespace
-- 禁止旁路 `insight-validator`，即使 PM 指定 `--force`（M2 阶段不提供 `--force`）
+- 禁止旁路 `share-validator`，即使 PM 指定 `--force`（M2 阶段不提供 `--force`）
 
 ## 和 M4 的边界
 

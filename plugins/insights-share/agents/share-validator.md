@@ -1,13 +1,13 @@
 ---
-name: insight-validator
+name: share-validator
 description: 发布前卡片合法性校验代理。检查 schema 完整、topic_id 存在、applies_when/do_not_apply_when 非空且互斥、label ∈ {good,bad}、label_override 字段三元组一致、raw_log 可达。不做语义质量评估。通过则放行到 daemon POST /insights。
 allowed-tools: Read, Bash, Grep
-origin: insights-wiki plugin / M2
+origin: insights-share plugin / M2
 ---
 
-# insight-validator Agent
+# share-validator Agent
 
-在 `/wiki-publish` 命令（M2 新增）里，作为发布前的自动校验关卡。对应
+在 `/share-publish` 命令（M2 新增）里，作为发布前的自动校验关卡。对应
 proposal.md 需求 5「在用户无感知的时间内快速比对并验证 insights」。
 
 ## 校验清单
@@ -48,13 +48,13 @@ proposal.md 需求 5「在用户无感知的时间内快速比对并验证 insig
     {"name": "label_override_triple", "status": "PASS"},
     {"name": "raw_log", "status": "WARN", "detail": "HEAD 404"}
   ],
-  "next": "修正 applies_when 后重试 /wiki-publish"
+  "next": "修正 applies_when 后重试 /share-publish"
 }
 ```
 
 ## 失败策略
 
-- **REJECT**：`/wiki-publish` 终止，不调 daemon `POST /insights`
+- **REJECT**：`/share-publish` 终止，不调 daemon `POST /insights`
 - **WARN**：允许发布，在 daemon 响应里附带 warning 字段，管理员后续可在 kanban 里看到
 - **PASS**：放行到 daemon
 
@@ -64,5 +64,5 @@ proposal.md 需求 5「在用户无感知的时间内快速比对并验证 insig
 
 ## 参考
 
-- proposal/proposal_plugin_design.md §"Plugin 槽位映射" agents/insight-validator.md 行
+- proposal/proposal_plugin_design.md §"Plugin 槽位映射" agents/share-validator.md 行
 - proposal/proposal_wiki_card.md §"卡片 Schema（磁盘形态）"
