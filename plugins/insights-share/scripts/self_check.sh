@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# plugin M4 self-check :: 在 start.demo.sh 的 sandbox self-check 段被调用。
-# 设计依据：proposal/proposal_plugin_design.md §"验证" 节。
+# plugin M5 self-check :: 在 start.demo.sh 的 sandbox self-check 段被调用。
+# 设计依据：proposal/proposal_rename_to_insights_share.md §"验证门禁"。
 # 输出契约：每行一个组件一条 "OK"/"MISSING"/"PARSE-FAIL"，非零退出仅当有任一 MISSING。
 
 set -u
@@ -16,7 +16,7 @@ say() { printf '%s\n' "$*"; }
 # manifest
 MANIFEST="$PLUGIN_DIR/.claude-plugin/plugin.json"
 if [ -f "$MANIFEST" ]; then
-  if NAME_VER="$(python3 -c 'import json,sys
+  if NAME_VER="$(/usr/bin/python3 -c 'import json,sys
 m=json.load(open(sys.argv[1]))
 print(m["name"]+" v"+m["version"])' "$MANIFEST" 2>/dev/null)"; then
     say "manifest: OK ($NAME_VER)"
@@ -38,7 +38,7 @@ else
 fi
 
 # skills
-for s in insights-wiki insights-wiki-server; do
+for s in insights-share insights-share-server; do
   if [ -f "$PLUGIN_DIR/skills/$s/SKILL.md" ]; then
     say "skill $s: OK"
   else
@@ -56,7 +56,7 @@ else
 fi
 
 # statusline
-if [ -x "$PLUGIN_DIR/statusline/insights_wiki_statusline.sh" ]; then
+if [ -x "$PLUGIN_DIR/statusline/insights_share_statusline.sh" ]; then
   say "plugin statusline: OK"
 else
   say "plugin statusline: MISSING"
@@ -64,7 +64,7 @@ else
 fi
 
 # commands
-for c in wiki-install wiki-search wiki-publish wiki-review wiki-diff; do
+for c in share-install share-search share-publish share-review share-diff; do
   if [ -f "$PLUGIN_DIR/commands/$c.md" ]; then
     say "command /$c: OK"
   else
@@ -74,7 +74,7 @@ for c in wiki-install wiki-search wiki-publish wiki-review wiki-diff; do
 done
 
 # agents (M2+)
-for a in wiki-curator insight-validator; do
+for a in share-curator share-validator; do
   if [ -f "$PLUGIN_DIR/agents/$a.md" ]; then
     say "agent $a: OK"
   else
@@ -85,7 +85,7 @@ done
 
 # mcp
 if [ -f "$MCP_CONFIG" ]; then
-  if NAME_TOOLS="$(python3 -c 'import json,sys
+  if NAME_TOOLS="$(/usr/bin/python3 -c 'import json,sys
 cfg=json.load(open(sys.argv[1]))
 print(cfg["name"]+" tools="+str(len(cfg.get("tools", []))))' "$MCP_CONFIG" 2>/dev/null)"; then
     say "mcp wiki-server: OK ($NAME_TOOLS)"
@@ -111,25 +111,33 @@ else
   fail_count=$((fail_count+1))
 fi
 
-# manifest declares agents + 5 commands + M4 milestone
+# manifest declares M5 rename contract
 if [ -f "$MANIFEST" ]; then
   if /usr/bin/python3 - "$MANIFEST" "$MCP_CONFIG" <<'PY' >/dev/null 2>&1
 import json, sys
 m = json.load(open(sys.argv[1]))
 cfg = json.load(open(sys.argv[2]))
-assert m["version"] == "0.4.0-m4", "version"
-assert m["milestones"]["current"] == "M4_SIGN_MARKETPLACE", "milestone current"
-assert "M4_SIGN_MARKETPLACE" in m["milestones"].get("completed", []), "m4 completed"
+assert m["name"] == "insights-share", "name"
+assert m["version"] == "0.5.0-m5", "version"
+assert m["milestones"]["current"] == "M5_RENAME", "milestone current"
+assert "M5_RENAME" in m["milestones"].get("completed", []), "m5 completed"
 assert m["milestones"].get("pending", []) == [], "pending"
 assert len(m["entry"].get("agents", [])) == 2, "agents count"
 assert len(m["entry"].get("commands", [])) == 5, "commands count"
+assert all(c.startswith("commands/share-") for c in m["entry"]["commands"]), "commands prefix"
+assert all(a.startswith("agents/share-") for a in m["entry"]["agents"]), "agents prefix"
+assert m["entry"]["statusline"] == "statusline/insights_share_statusline.sh", "statusline path"
+assert m["entry"]["skills"] == [
+    "skills/insights-share/SKILL.md",
+    "skills/insights-share-server/SKILL.md",
+], "skills paths"
 assert len(cfg.get("tools", [])) >= 7, "mcp tools"
 assert cfg.get("capabilities", {}).get("signed_cards") is True, "signed cards"
 PY
   then
-    say "manifest M4 contract (agents=2, commands=5, mcp>=7, signed_cards): OK"
+    say "manifest M5 contract (name=insights-share, ver=0.5.0-m5, share-* cmds/agents, mcp>=7, signed_cards): OK"
   else
-    say "manifest M4 contract: FAIL"
+    say "manifest M5 contract: FAIL"
     fail_count=$((fail_count+1))
   fi
 fi
