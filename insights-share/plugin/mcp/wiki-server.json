@@ -9,7 +9,8 @@
   "capabilities": {
     "team_namespace": true,
     "cache_first": true,
-    "parallel_good_bad_view": true
+    "parallel_good_bad_view": true,
+    "signed_cards": true
   },
   "tools": [
     {
@@ -45,6 +46,14 @@
         "method": "GET",
         "path": "/topics/{topic_id}/examples",
         "query": ["label", "team"]
+      }
+    },
+    {
+      "name": "wiki_public_keys",
+      "description": "获取 wiki server 当前用于卡片签名的公钥集合",
+      "request": {
+        "method": "GET",
+        "path": "/signing/public-keys"
       }
     },
     {

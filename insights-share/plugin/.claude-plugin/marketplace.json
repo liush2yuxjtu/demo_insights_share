@@ -1,15 +1,15 @@
 {
   "marketplace_version": 1,
   "name": "insights-share internal",
-  "description": "demo_insights_share 团队内网 plugin registry（当前稳定版：M3 team namespace + stale badge + wiki MCP contract）",
+  "description": "demo_insights_share 团队内网 plugin registry（当前稳定版：M4 card signing + sig-fail badge + marketplace publish summary）",
   "plugins": [
     {
       "name": "insights-wiki",
       "source": "git+ssh://internal/insights-share.git#subdir=insights-share/plugin",
-      "version": "0.3.0-m3",
+      "version": "0.4.0-m4",
       "manifest": ".claude-plugin/plugin.json",
       "channels": ["stable", "dev"]
     }
   ],
-  "notes": "当前 registry 对齐 plugin 0.3.0-m3；本地开发仍可用 file://…/insights-share/plugin。M4 再追加 ed25519 签名与正式发布链路。"
+  "notes": "当前 registry 对齐 plugin 0.4.0-m4；`scripts/publish_marketplace.py` 会在发布前校验 manifest/marketplace/MCP 并生成 checksums 摘要。"
 }

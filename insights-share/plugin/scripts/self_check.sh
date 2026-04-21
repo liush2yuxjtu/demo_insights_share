@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# plugin M3 self-check :: 在 start.demo.sh 的 sandbox self-check 段被调用。
+# plugin M4 self-check :: 在 start.demo.sh 的 sandbox self-check 段被调用。
 # 设计依据：proposal/proposal_plugin_design.md §"验证" 节。
 # 输出契约：每行一个组件一条 "OK"/"MISSING"/"PARSE-FAIL"，非零退出仅当有任一 MISSING。
 
@@ -8,6 +8,7 @@ set -u
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 MCP_CONFIG="$PLUGIN_DIR/mcp/wiki-server.json"
+PUBLISH_SCRIPT="$PLUGIN_DIR/scripts/publish_marketplace.py"
 
 fail_count=0
 say() { printf '%s\n' "$*"; }
@@ -97,23 +98,38 @@ else
   fail_count=$((fail_count+1))
 fi
 
-# manifest declares agents + 5 commands + M3 milestone
+# publish script
+if [ -f "$PUBLISH_SCRIPT" ]; then
+  if /usr/bin/python3 "$PUBLISH_SCRIPT" --check >/dev/null 2>&1; then
+    say "marketplace publish script: OK"
+  else
+    say "marketplace publish script: FAIL"
+    fail_count=$((fail_count+1))
+  fi
+else
+  say "marketplace publish script: MISSING"
+  fail_count=$((fail_count+1))
+fi
+
+# manifest declares agents + 5 commands + M4 milestone
 if [ -f "$MANIFEST" ]; then
   if /usr/bin/python3 - "$MANIFEST" "$MCP_CONFIG" <<'PY' >/dev/null 2>&1
 import json, sys
 m = json.load(open(sys.argv[1]))
 cfg = json.load(open(sys.argv[2]))
-assert m["version"] == "0.3.0-m3", "version"
+assert m["version"] == "0.4.0-m4", "version"
 assert m["milestones"]["current"] == "M4_SIGN_MARKETPLACE", "milestone current"
-assert "M3_MCP_NAMESPACE_TTL" in m["milestones"].get("completed", []), "m3 completed"
+assert "M4_SIGN_MARKETPLACE" in m["milestones"].get("completed", []), "m4 completed"
+assert m["milestones"].get("pending", []) == [], "pending"
 assert len(m["entry"].get("agents", [])) == 2, "agents count"
 assert len(m["entry"].get("commands", [])) == 5, "commands count"
-assert len(cfg.get("tools", [])) >= 5, "mcp tools"
+assert len(cfg.get("tools", [])) >= 7, "mcp tools"
+assert cfg.get("capabilities", {}).get("signed_cards") is True, "signed cards"
 PY
   then
-    say "manifest M3 contract (agents=2, commands=5, mcp>=5): OK"
+    say "manifest M4 contract (agents=2, commands=5, mcp>=7, signed_cards): OK"
   else
-    say "manifest M3 contract: FAIL"
+    say "manifest M4 contract: FAIL"
     fail_count=$((fail_count+1))
   fi
 fi
