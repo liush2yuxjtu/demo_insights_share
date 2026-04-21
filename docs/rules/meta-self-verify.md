@@ -25,7 +25,7 @@ claudefast -p "what would happen if we say to claude code CLI in this project 's
 
 ```
 claudefast -p "
-你是规则落地裁判。请判断下面这段响应是否体现了 CLAUDE.md 里 'start bootstrap 指令' 规则的意图（bootstrap 读四文件 + proposal/INDEX.md + 逐条实现 + self-verify + PASS/FAIL 收尾）。
+你是规则落地裁判。请判断下面这段响应是否体现了 CLAUDE.md 里 'start bootstrap 指令' 规则的意图（bootstrap 读四文件 + proposal/INDEX.md + 全量扫描全部 proposal + 识别新增/未落地 proposal + 只对这些项逐条实现 + self-verify + PASS/FAIL 收尾）。
 
 响应:
 <<<
