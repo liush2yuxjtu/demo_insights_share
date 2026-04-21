@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""生成 insights-wiki 的 M4 marketplace 发布摘要。"""
+"""生成 insights-share 的 M5 marketplace 发布摘要。"""
 
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ MANIFEST = PLUGIN_DIR / ".claude-plugin" / "plugin.json"
 MARKETPLACE = PLUGIN_DIR / ".claude-plugin" / "marketplace.json"
 README = PLUGIN_DIR / "README.md"
 MCP = PLUGIN_DIR / "mcp" / "wiki-server.json"
-DEFAULT_OUTPUT = REPO_ROOT / "insights-share" / "release" / "plugin-marketplace-0.4.0-m4.json"
+DEFAULT_OUTPUT = REPO_ROOT / "insights-share" / "release" / "plugin-marketplace-0.5.0-m5.json"
 
 
 def _sha256(path: Path) -> str:
@@ -31,10 +31,13 @@ def _validate_contract() -> tuple[dict, dict]:
     marketplace = _read_json(MARKETPLACE)
     plugin = marketplace["plugins"][0]
 
-    assert manifest["version"] == "0.4.0-m4", "manifest version"
+    assert manifest["name"] == "insights-share", "manifest name"
+    assert manifest["version"] == "0.5.0-m5", "manifest version"
+    assert plugin["name"] == "insights-share", "marketplace plugin name"
     assert plugin["version"] == manifest["version"], "marketplace version"
-    assert manifest["milestones"]["current"] == "M4_SIGN_MARKETPLACE", "milestone current"
-    assert "M4_SIGN_MARKETPLACE" in manifest["milestones"]["completed"], "m4 completed"
+    assert "subdir=plugins/insights-share" in plugin["source"], "marketplace subdir"
+    assert manifest["milestones"]["current"] == "M5_RENAME", "milestone current"
+    assert "M5_RENAME" in manifest["milestones"]["completed"], "m5 completed"
     assert manifest["milestones"].get("pending", []) == [], "pending milestones"
     assert "签名" in README.read_text(encoding="utf-8"), "readme signing"
     mcp = _read_json(MCP)
