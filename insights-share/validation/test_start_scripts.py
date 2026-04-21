@@ -5,8 +5,10 @@ import subprocess
 
 
 ROOT = Path(__file__).resolve().parents[2]
+START_DEMO = ROOT / "start.demo.sh"
 START_CLAUDE = ROOT / "start.claude.sh"
 START_CODEX = ROOT / "start.codex.sh"
+START_DRIVER = ROOT / "insights-share/validation/start_demo_driver.sh"
 
 
 def _read(path: Path) -> str:
@@ -25,50 +27,58 @@ def _run_dry(script: Path) -> str:
 
 
 def test_start_scripts_exist_and_are_shell_scripts() -> None:
+    assert START_DEMO.is_file()
     assert START_CLAUDE.is_file()
     assert START_CODEX.is_file()
+    assert START_DRIVER.is_file()
+    assert _read(START_DEMO).startswith("#!/usr/bin/env bash")
     assert _read(START_CLAUDE).startswith("#!/usr/bin/env bash")
     assert _read(START_CODEX).startswith("#!/usr/bin/env bash")
+    assert _read(START_DRIVER).startswith("#!/usr/bin/env bash")
 
 
-def test_start_claude_script_uses_real_claude_p_flow() -> None:
+def test_start_demo_script_surfaces_plugin_m2_checks() -> None:
+    script = _read(START_DEMO)
+
+    assert 'plugin/statusline/insights_wiki_statusline.sh' in script
+    assert 'plugin M2 self-check' in script
+    assert '5 个命令 + 2 个 agent 全 OK' in script
+
+
+def test_start_claude_script_wraps_shared_driver() -> None:
     script = _read(START_CLAUDE)
 
-    assert 'LOG_FILE="${LOG_DIR}/start_claude.latest.txt"' in script
-    assert 'PORT="${PORT:-17821}"' in script
-    assert 'mktemp -d "/tmp/start-claude.XXXXXX"' in script
-    assert 'rsync -a \\' in script
-    assert '"${SOURCE_DIR}/" "${WORKDIR}/demo_codes/"' in script
-    assert "--exclude '.venv'" in script
-    assert 'source "${ENV_FILE}"' in script
-    assert "printf '%s\\n' \"${PROMPT}\" | claude -p \\" in script
-    assert '--permission-mode bypassPermissions \\' in script
-    assert 'insights_cli.py serve --host 127.0.0.1 --port ${PORT} --store ./wiki_tree --store-mode tree' in script
-    assert 'insights_cli.py publish seeds/alice_pgpool.json' in script
-    assert 'insights_cli.py publish seeds/bob_pgpool_bad.json' in script
-    assert 'insights_cli.py solve "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike" --wiki "http://127.0.0.1:${PORT}" --no-ai' in script
-    assert 'insights_cli.py wiki-install --server "http://127.0.0.1:${PORT}"' in script
-    assert 'cleanup() {' in script
+    assert 'START_PROVIDER="claude"' in script
+    assert 'source "$(cd "$(dirname "$0")" && pwd)/insights-share/validation/start_demo_driver.sh"' in script
+    assert 'main "$@"' in script
+    assert "main_loop" in script
 
 
-def test_start_codex_script_uses_real_codex_exec_flow() -> None:
+def test_start_codex_script_wraps_shared_driver() -> None:
     script = _read(START_CODEX)
 
-    assert 'LOG_FILE="${LOG_DIR}/start_codex.latest.txt"' in script
+    assert 'START_PROVIDER="codex"' in script
+    assert 'source "$(cd "$(dirname "$0")" && pwd)/insights-share/validation/start_demo_driver.sh"' in script
+    assert 'main "$@"' in script
+    assert "main_loop" in script
+
+
+def test_shared_start_driver_contains_real_demo_flow() -> None:
+    script = _read(START_DRIVER)
+
+    assert 'LOG_FILE="${LOG_DIR}/start_${START_PROVIDER}.latest.txt"' in script
     assert 'PORT="${PORT:-17821}"' in script
-    assert 'mktemp -d "/tmp/start-codex.XXXXXX"' in script
+    assert 'WORKDIR="$(mktemp -d "/tmp/start-${START_PROVIDER}.XXXXXX")"' in script
     assert 'rsync -a \\' in script
-    assert '"${SOURCE_DIR}/" "${WORKDIR}/demo_codes/"' in script
+    assert '"${SOURCE_DIR}/" "${RUN_DIR}/"' in script
     assert "--exclude '.venv'" in script
-    assert 'source "${ENV_FILE}"' in script
-    assert "printf '%s\\n' \"${PROMPT}\" | codex --dangerously-bypass-approvals-and-sandbox exec \\" in script
-    assert '-C "${RUN_DIR}" \\' in script
-    assert 'insights_cli.py serve --host 127.0.0.1 --port ${PORT} --store ./wiki_tree --store-mode tree' in script
-    assert 'insights_cli.py publish seeds/alice_pgpool.json' in script
-    assert 'insights_cli.py publish seeds/bob_pgpool_bad.json' in script
-    assert 'insights_cli.py solve "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike" --wiki "http://127.0.0.1:${PORT}" --no-ai' in script
-    assert 'insights_cli.py wiki-install --server "http://127.0.0.1:${PORT}"' in script
-    assert 'cleanup() {' in script
+    assert 'insights_cli.py serve --host 127.0.0.1 --port ${PORT}' in script
+    assert "./runtime-start/wiki_tree" in script
+    assert "publish seeds/alice_pgpool.json" in script
+    assert "publish seeds/bob_pgpool_bad.json" in script
+    assert "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike" in script
+    assert "wiki-install --server" in script
+    assert "cleanup() {" in script
 
 
 def test_start_scripts_support_dry_run() -> None:
@@ -79,11 +89,9 @@ def test_start_scripts_support_dry_run() -> None:
     assert "DRY RUN" in codex_out
     assert "start_claude.latest.txt" in claude_out
     assert "start_codex.latest.txt" in codex_out
-    assert "serve --host 127.0.0.1 --port 17821 --store ./wiki_tree --store-mode tree" in claude_out
-    assert "serve --host 127.0.0.1 --port 17821 --store ./wiki_tree --store-mode tree" in codex_out
-    assert "publish seeds/alice_pgpool.json" in claude_out
-    assert "publish seeds/alice_pgpool.json" in codex_out
-    assert "wiki-install --server http://127.0.0.1:17821" in claude_out
-    assert "wiki-install --server http://127.0.0.1:17821" in codex_out
-    assert "claude -p" in claude_out
-    assert "codex --dangerously-bypass-approvals-and-sandbox exec" in codex_out
+    assert "provider=claude" in claude_out
+    assert "provider=codex" in codex_out
+    assert "隔离目录=/tmp/start-claude.XXXXXX/demo_codes" in claude_out
+    assert "隔离目录=/tmp/start-codex.XXXXXX/demo_codes" in codex_out
+    assert "固定步骤数=10" in claude_out
+    assert "固定步骤数=10" in codex_out
