@@ -18,6 +18,7 @@
 | CLAUDE.md 改动必跑 agent-judge 状态灯 | 每次编辑 CLAUDE.md 后跑 agent-judge 双探针循环：`claudefast -p` 发 probe + 另一条 `claudefast -p` 当裁判输出 PASS/REFINE/FAIL JSON；fast 最多 5 轮，连续停滞或 FAIL 升级 `claude -p` 托底；禁止硬编码关键词匹配 | 任何 CLAUDE.md 编辑后 | [meta-self-verify.md](docs/rules/meta-self-verify.md) |
 | feature 必在 start.demo.sh self-verify | `start.demo.sh` 是 human-last-visible surface；新增/修改任何 feature 必须同步更新 `start.demo.sh`，并在 tmux 里跑一次完整 `start.demo.sh` 做实机 debug，日志全绿后才算交付 | 任何 feature 新增/修改完成时 | [start-demo-verify.md](docs/rules/start-demo-verify.md) |
 | start.demo.sh 缺 tmux session 时必走 register-session | self-verify 触发时若 `~/.claude/live_terminal/CURRENT` 空/失效，agent 不得让用户手动贴日志，必须先跑项目级 skill `.claude/skills/register-session/register-session.sh <name>` 建/绑 session，再在其中跑 `start.demo.sh` 并按 live-terminal 契约读日志 | 跑 `start.demo.sh` self-verify 前发现未注册 tmux session 时 | [start-demo-register-fallback.md](docs/rules/start-demo-register-fallback.md) |
+| /self-verify-loop 统一自验收入口 | 编排 tier_meta（`meta-self-verify` 双探针）+ tier_demo（`start-demo-verify` tmux 实机）的 for-loop pipeline；支持 `claude-md` / `feature` / `all` / `--override` / `--auto-patch` / `--max-fast N`；判决落 `insights-share/validation/reports/self_verify_loop.log` | CLAUDE.md / start.demo.sh / proposal 改动后需要统一自验收时 | [self-verify-loop.md](docs/rules/self-verify-loop.md) |
 
 ## 设计文档索引
 
