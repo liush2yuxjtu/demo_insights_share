@@ -6,3 +6,5 @@
 [2026-04-21T03:03:39Z] [7b17d9f] [tier=reliable] [iter=1] [REFINE] 命中 (b) 更新 start.demo.sh + (c) tmux 实机 self-verify；缺 (a) human-last-visible 定位，probe 措辞精简
 [2026-04-21T03:03:39Z] [7b17d9f] [tier=override] [iter=1] [PASS]   CLAUDE.md 行已含 "start.demo.sh 是 human-last-visible surface"，suggested_patch 与现状等价；判定 override PASS，reason=probe 响应精简非规则缺陷
 --- terminal ---
+[2026-04-21T05:21:50Z] [CLAUDE.md:7e5d7af] [tier=fast] [iter=1] [PASS] 响应已覆盖全量扫描 proposal、识别新增/未落地项、只实现这些项、self-verify 与 PASS/FAIL 收尾
+--- terminal PASS @ fast iter=1 ---
