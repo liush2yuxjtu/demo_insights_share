@@ -237,5 +237,20 @@ class TestReadJsonlTolerant(unittest.TestCase):
             self.assertEqual(recs, [{"a": 1}, {"b": 2}])
 
 
+class TestVerdictSaysShip(unittest.TestCase):
+    def test_negation_not_ship_ready(self):
+        from subagent import verdict_says_ship
+        self.assertFalse(verdict_says_ship("NOT ship-ready. 4 bugs未修复"))
+        self.assertFalse(verdict_says_ship("结论: NOT ship-ready"))
+        self.assertFalse(verdict_says_ship("not ready to ship yet"))
+
+    def test_positive_markers(self):
+        from subagent import verdict_says_ship
+        self.assertTrue(verdict_says_ship("ship-ready. All clear."))
+        self.assertTrue(verdict_says_ship("ready to ship."))
+        self.assertTrue(verdict_says_ship("no blockers found"))
+        self.assertTrue(verdict_says_ship("可出货"))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

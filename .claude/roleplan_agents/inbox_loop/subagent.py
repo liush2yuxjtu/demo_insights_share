@@ -175,7 +175,16 @@ def ship_verdict(
 
 def verdict_says_ship(verdict: str) -> bool:
     lowered = verdict.lower()
-    return any(marker in lowered for marker in SHIP_MARKERS)
+    for marker in SHIP_MARKERS:
+        if marker not in lowered:
+            continue
+        idx = lowered.index(marker)
+        # if "not" appears in 5 chars before marker, it's a negation
+        prefix = lowered[max(0, idx - 5) : idx]
+        if "not" in prefix:
+            continue
+        return True
+    return False
 
 
 def run_inner_loop(args: argparse.Namespace) -> int:
