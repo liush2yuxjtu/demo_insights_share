@@ -2,11 +2,11 @@
 
 ## 5 项改动
 
-1. **新建 SKILL.md** — `.claude/skills/insights-wiki/SKILL.md`
+1. **新建 SKILL.md** — `.claude/skills/insights-share/SKILL.md`
    YAML frontmatter（name/description/allowed-tools/origin），中文说明触发条件、LAN daemon 接口约定（`/insights`、`/search` 等）、静默工作流三步、严禁 fallback 等约束。
 
 2. **新建 `hooks/insights_cache.py`** — 提供 `persist(card)`：
-   - 把 card 落盘到 `~/.cache/insights-wiki/<id>.json`
+   - 把 card 落盘到 `~/.cache/insights-share/<id>.json`
    - 维护 `manifest.json`（`last_sync_at` + `cards` 列表，去重）
    - 原子写（tempfile + os.replace）防半写
    - id 抽取顺序：`id` 字段 → `wiki_type_item` 拼接 → hash 兜底
@@ -31,7 +31,7 @@
 
 ```bash
 # 1. smoke test（先清空缓存再跑）
-rm -rf ~/.cache/insights-wiki
+rm -rf ~/.cache/insights-share
 .venv/bin/python hooks/test_insights_cache.py
 # 输出：[ALL PASSED] insights_cache smoke test（4/4 通过）
 
@@ -44,7 +44,7 @@ rm -rf ~/.cache/insights-wiki
 # 输出：全部 import OK
 
 # 4. 缓存目录落盘检查
-ls -la ~/.cache/insights-wiki/
+ls -la ~/.cache/insights-share/
 # manifest.json + t1.json + playbook_pgbouncer-tuning.json
 ```
 

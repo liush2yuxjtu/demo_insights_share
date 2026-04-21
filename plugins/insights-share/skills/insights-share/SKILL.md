@@ -1,11 +1,11 @@
 ---
-name: insights-wiki
-description: 局域网 insights-share wiki 静默回灌技能。当 Bob 在 Claude Code 里写代码、提问或排障时,自动从 LAN insightsd 守护进程拉取相关 insight 卡片,缓存到 ~/.cache/insights-wiki/,并通过 Stop hook 把命中卡片以 additionalContext 形式悄悄注入下一轮回复。仅在用户无感的前提下工作,不打断对话流。触发场景:任何技术问题、生产事故、配置调优、性能 debug。
+name: insights-share
+description: 局域网 insights-share 静默回灌技能。当 Bob 在 Claude Code 里写代码、提问或排障时,自动从 LAN insightsd 守护进程拉取相关 insight 卡片,缓存到 ~/.cache/insights-share/,并通过 Stop hook 把命中卡片以 additionalContext 形式悄悄注入下一轮回复。仅在用户无感的前提下工作,不打断对话流。触发场景:任何技术问题、生产事故、配置调优、性能 debug。
 allowed-tools: Read, Bash, Grep
 origin: demo_insights_share Team A
 ---
 
-# insights-wiki Skill
+# insights-share Skill
 
 把局域网 `insightsd`(Bob 团队的私有 wiki)里的实战 insight 静默送到 Claude Code 当前会话面前。**用户无感**是核心约束:不弹窗、不询问、不打断。
 
@@ -38,7 +38,7 @@ origin: demo_insights_share Team A
 
 ### 第一步:UserPromptSubmit 触发预热
 
-`UserPromptSubmit` hook 在用户每次按下回车后,后台异步调用 `insights_prefetch.py`,GET `/insights`,把全量卡片写入 `~/.cache/insights-wiki/<id>.json`,并更新 `manifest.json`。整个过程不阻塞主对话(命令以 `&` 后台执行,失败静默退出)。
+`UserPromptSubmit` hook 在用户每次按下回车后,后台异步调用 `insights_prefetch.py`,GET `/insights`,把全量卡片写入 `~/.cache/insights-share/<id>.json`,并更新 `manifest.json`。整个过程不阻塞主对话(命令以 `&` 后台执行,失败静默退出)。
 
 ### 第二步:Stop hook 命中检索 + 持久化
 
@@ -47,7 +47,7 @@ origin: demo_insights_share Team A
 1. 抽取 transcript 中最后一段 assistant 文本作为 query
 2. `import search_agent` 后调用 `search_agent.run(query, wiki_tree_root=...)`
 3. 取 `hits[0]` 作为 top hit
-4. **调用 `insights_cache.persist(top_hit)`** 把卡片落盘到 `~/.cache/insights-wiki/<id>.json`,并维护 `manifest.json`(`last_sync_at`、`cards` 列表)
+4. **调用 `insights_cache.persist(top_hit)`** 把卡片落盘到 `~/.cache/insights-share/<id>.json`,并维护 `manifest.json`(`last_sync_at`、`cards` 列表)
 5. 通过 stdout 返回 `hookSpecificOutput.additionalContext`,把卡片摘要塞进下一轮 Claude 上下文
 
 ### 第三步:下一轮 Claude 回复时
@@ -70,8 +70,8 @@ python insights_cli.py wiki-install --server http://192.168.22.42:7821
 
 安装器会:
 1. 检测 `/healthz`
-2. 写 config 到 `~/.cache/insights-wiki/config.json`
-3. 预热全量卡到 `~/.cache/insights-wiki/<id>.json`
+2. 写 config 到 `~/.cache/insights-share/config.json`
+3. 预热全量卡到 `~/.cache/insights-share/<id>.json`
 4. 成功后打印 `install ok server=... cached=N cards`
 
 失败退出码非 0,**不做静默 fallback**。
@@ -80,7 +80,7 @@ python insights_cli.py wiki-install --server http://192.168.22.42:7821
 
 1. **严禁 fallback**:`search_agent` 抛异常就 raise,hook 退出码非 0,validation 视为失败。不要 try/except 静默吞掉。
 2. **严禁打断用户**:任何 prompt 都不能弹窗、不能问 `[y/N]`、不能往 stdout 写人类可读文本,只允许写 JSON 协议负载。
-3. **严禁删除缓存**:`~/.cache/insights-wiki/` 下的文件由用户和 Bob 共同维护,本 skill 只 append/overwrite,不主动 unlink。
+3. **严禁删除缓存**:`~/.cache/insights-share/` 下的文件由用户和 Bob 共同维护,本 skill 只 append/overwrite,不主动 unlink。
 4. **强制中文**:所有错误提示、注释、报告都使用中文。
 5. **触发模式硬编码**:`INSIGHTS_TRIGGER_MODE` 只接受 `SILENT_AND_JUST_RUN`,`ASK_USER_APPROVAL` 仅作占位被强制 override。
 

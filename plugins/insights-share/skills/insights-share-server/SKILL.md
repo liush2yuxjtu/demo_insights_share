@@ -1,13 +1,13 @@
 ---
-name: insights-wiki-server
+name: insights-share-server
 description: 管理员专用：启动 LAN insightsd 守护进程（--start 默认）或打开 control dashboard kanban 做在线 CRUD（--ui）。触发词：启动 wiki 服务器 / 开 wiki / 打开 wiki 管理面板 / wiki kanban。仅分配给管理员。
 allowed-tools: Bash, Read
 origin: demo_insights_share Team A
 ---
 
-# insights-wiki-server Skill
+# insights-share-server Skill
 
-管理员专用 skill，负责 LAN insightsd 守护进程的启动与控制面板（kanban dashboard）入口。**只做 server 端**，不参与 insights-wiki 的静默回灌流程。
+管理员专用 skill，负责 LAN insightsd 守护进程的启动与控制面板（kanban dashboard）入口。**只做 server 端**，不参与 insights-share 的静默回灌流程。
 
 ## 何时触发
 
@@ -18,7 +18,7 @@ origin: demo_insights_share Team A
 - 「打开 wiki 管理面板」/「wiki kanban」→ 走 `--ui`
 - 「启动 insightsd 0.0.0.0:7821」→ 走 `--start`
 
-非管理员（普通开发用户）的请求不应触发本 skill；普通用户该用 `insights-wiki` skill 做静默回灌。
+非管理员（普通开发用户）的请求不应触发本 skill；普通用户该用 `insights-share` skill 做静默回灌。
 
 ## 两条入口
 
@@ -47,12 +47,12 @@ dashboard 走同源 fetch 调用 daemon 的 CRUD 路由，无需 CORS。
 - 前台模式（`--start`）：Ctrl+C
 - 后台模式（`--ui`）：`pkill -f "insights_cli.py serve"`
 
-## 与 insights-wiki 的区别
+## 与 insights-share 的区别
 
 | skill | 用户角色 | 功能 |
 |-------|---------|------|
-| `insights-wiki-server` | 管理员 | 启动 daemon + dashboard CRUD |
-| `insights-wiki` | 普通开发者 | 静默回灌 LAN 卡片到 Claude 上下文 |
+| `insights-share-server` | 管理员 | 启动 daemon + dashboard CRUD |
+| `insights-share` | 普通开发者 | 静默回灌 LAN 卡片到 Claude 上下文 |
 
 两个 skill 互不依赖，但共用同一个 LAN daemon。
 
