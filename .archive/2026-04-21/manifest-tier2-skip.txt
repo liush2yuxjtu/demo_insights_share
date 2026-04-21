@@ -1,0 +1,8 @@
+=== SKIPPED (active references) ===
+
+insights-share/demo_codes/standalone_runtime_preview.html
+  reason: insights-share/validation/test_standalone_page.py:7 is an active pytest
+          that opens this page. 归档会破测试。
+
+insights-share/plan.md
+  reason: docs/plans/index.md:112 links to it. 若要归档需同步更新 index。本轮保留。
