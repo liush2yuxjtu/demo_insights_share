@@ -30,8 +30,8 @@ DEFAULT_PROBLEM = (
     "Our checkout API is timing out, postgres is rejecting new connections "
     "during the lunch spike"
 )
-CONFIG_PATH = Path.home() / ".cache" / "insights-wiki" / "config.json"
-TRUSTED_KEYS_PATH = Path.home() / ".cache" / "insights-wiki" / "trusted_keys.json"
+CONFIG_PATH = Path.home() / ".cache" / "insights-share" / "config.json"
+TRUSTED_KEYS_PATH = Path.home() / ".cache" / "insights-share" / "trusted_keys.json"
 
 
 def _resolve_version() -> str:
@@ -94,7 +94,7 @@ def _resolve_wiki_url(value: str) -> str:
 def _resolve_team(value: str | None) -> str | None:
     if isinstance(value, str) and value.strip():
         return value.strip()
-    env_team = os.environ.get("INSIGHTS_WIKI_TEAM", "").strip()
+    env_team = os.environ.get("INSIGHTS_SHARE_TEAM", "").strip()
     if env_team:
         return env_team
     cfg_team = _load_install_config().get("team")
@@ -450,7 +450,7 @@ def cmd_wiki_install(args: argparse.Namespace) -> int:
     except urllib.error.URLError as exc:
         print(ui.color(f"unreachable: {server} ({exc})", "red"), file=sys.stderr)
         return 2
-    cfg_dir = Path.home() / ".cache" / "insights-wiki"
+    cfg_dir = Path.home() / ".cache" / "insights-share"
     cfg_dir.mkdir(parents=True, exist_ok=True)
     cfg = {
         "server_url": server,
@@ -587,7 +587,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_res.set_defaults(func=cmd_research)
 
     p_inst = sub.add_parser(
-        "wiki-install", help="install and connect insights-wiki to LAN server"
+        "wiki-install", help="install and connect insights-share to LAN server"
     )
     p_inst.add_argument(
         "--server", required=True,

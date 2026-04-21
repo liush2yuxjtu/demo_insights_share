@@ -10,6 +10,6 @@ for _ in 1 2 3 4 5 6 7 8 9 10; do
   sleep 0.5
 done
 LAN_IP=$(python -c "from insightsd.server import _detect_lan_ip; print(_detect_lan_ip())")
-echo "[insights-wiki-server] dashboard at http://${LAN_IP}:7821/"
+echo "[insights-share-server] dashboard at http://${LAN_IP}:7821/"
 open -a "Google Chrome" "http://${LAN_IP}:7821/" || echo "[warn] Chrome not available, dashboard at http://${LAN_IP}:7821/"
 wait $PID

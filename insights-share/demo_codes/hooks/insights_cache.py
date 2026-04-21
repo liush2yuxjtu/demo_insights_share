@@ -1,6 +1,6 @@
-"""insights-wiki 本地缓存模块。
+"""insights-share 本地缓存模块。
 
-把 LAN insightsd 命中的 insight 卡片落盘到 ~/.cache/insights-wiki/<id>.json,
+把 LAN insightsd 命中的 insight 卡片落盘到 ~/.cache/insights-share/<id>.json,
 同时维护 manifest.json,记录 last_sync_at 和已知 card id 列表。
 
 仅 stdlib,不依赖 requests/pydantic,与 insights_cli.py 风格保持一致。
@@ -14,7 +14,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-CACHE_DIR = Path(os.path.expanduser("~/.cache/insights-wiki"))
+CACHE_DIR = Path(os.path.expanduser("~/.cache/insights-share"))
 MANIFEST_PATH = CACHE_DIR / "manifest.json"
 
 
@@ -71,7 +71,7 @@ def _normalize_card_id(card: dict[str, Any]) -> str:
 
 
 def persist(card: dict[str, Any]) -> Path:
-    """把 card 写入 ~/.cache/insights-wiki/<id>.json,并更新 manifest。
+    """把 card 写入 ~/.cache/insights-share/<id>.json,并更新 manifest。
 
     返回写入的 card 文件绝对路径。
 

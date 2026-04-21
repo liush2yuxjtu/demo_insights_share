@@ -1,12 +1,12 @@
-"""insights-wiki 今日触发计数器。
+"""insights-share 今日触发计数器。
 
 契约（proposal_statusline.md）：
-- 存储：~/.cache/insights-wiki/today_count.json
+- 存储：~/.cache/insights-share/today_count.json
 - 结构：{"date": "YYYY-MM-DD", "count": N, "last_card_id": str|null, "last_trigger_at": iso8601}
 - 日切：本地时区 00:00 自然日重置
 - 写入：原子 rename，避免 statusline 读到半写
 - 调用方：UserPromptSubmit hook 命中任意卡片后 bump(+1)
-- A/B 开关：WIKI_STATUSLINE=off 时静默跳过写入
+- A/B 开关：SHARE_STATUSLINE=off 时静默跳过写入
 
 仅 stdlib，和 insights_cache.py 风格一致。
 """
@@ -19,7 +19,7 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-CACHE_DIR = Path(os.path.expanduser("~/.cache/insights-wiki"))
+CACHE_DIR = Path(os.path.expanduser("~/.cache/insights-share"))
 TODAY_COUNT_PATH = CACHE_DIR / "today_count.json"
 BACKUP_PATH = CACHE_DIR / "today_count.json.bak"
 
@@ -110,14 +110,14 @@ def bump(card_id: str | None = None, *, disabled: bool | None = None) -> dict[st
 
     Args:
         card_id: 命中的卡片 ID（可选）
-        disabled: 若 True 则不落盘，返回当前 read()。默认从 WIKI_STATUSLINE 环境变量推导
-                  （WIKI_STATUSLINE=off 时 disabled=True）
+        disabled: 若 True 则不落盘，返回当前 read()。默认从 SHARE_STATUSLINE 环境变量推导
+                  （SHARE_STATUSLINE=off 时 disabled=True）
 
     Returns:
         写入后的 record dict
     """
     if disabled is None:
-        disabled = os.environ.get("WIKI_STATUSLINE", "").strip().lower() == "off"
+        disabled = os.environ.get("SHARE_STATUSLINE", "").strip().lower() == "off"
     if disabled:
         return read()
 
@@ -156,7 +156,7 @@ def mark_in_flight() -> None:
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="insights-wiki today_count CLI")
+    parser = argparse.ArgumentParser(description="insights-share today_count CLI")
     sub = parser.add_subparsers(dest="cmd", required=True)
 
     sub.add_parser("read", help="打印当前 record JSON")

@@ -3,7 +3,7 @@
 每次 Bob 按下回车：
 1. 从 stdin 读 hook event，拿到用户 prompt
 2. GET http://127.0.0.1:7821/insights 拿全量卡片（本地 daemon，2s 超时）
-3. 调 insights_cache.persist(card) 把卡片落盘到 ~/.cache/insights-wiki/
+3. 调 insights_cache.persist(card) 把卡片落盘到 ~/.cache/insights-share/
 4. 根据 prompt 关键词挑 top-K 相关卡片，按 Claude Code hook 协议输出
    `{"hookSpecificOutput": {"hookEventName": "UserPromptSubmit",
                             "additionalContext": "..."}}` 到 stdout
@@ -31,7 +31,7 @@ DEMO_CODES = Path(__file__).resolve().parent.parent
 DEFAULT_WIKI = "http://127.0.0.1:7821"
 TIMEOUT_SECONDS = 2.0
 TOP_K = 3
-CACHE_CONFIG = Path.home() / ".cache" / "insights-wiki" / "config.json"
+CACHE_CONFIG = Path.home() / ".cache" / "insights-share" / "config.json"
 
 
 def _score_card(card: dict[str, Any], prompt_tokens: set[str]) -> int:
@@ -76,7 +76,7 @@ def _load_install_config() -> dict[str, Any]:
 
 
 def _resolve_team() -> str | None:
-    env_team = os.environ.get("INSIGHTS_WIKI_TEAM", "").strip()
+    env_team = os.environ.get("INSIGHTS_SHARE_TEAM", "").strip()
     if env_team:
         return env_team
     cfg_team = _load_install_config().get("team")
@@ -98,7 +98,7 @@ def _build_context(prompt: str, cards: list[dict[str, Any]]) -> str:
     if not picked:
         return ""
     lines = [
-        "[insights-share auto-hint] 下列是团队 LAN wiki 里已沉淀的相关实战卡片（已静默缓存到 ~/.cache/insights-wiki/）。",
+        "[insights-share auto-hint] 下列是团队 LAN wiki 里已沉淀的相关实战卡片（已静默缓存到 ~/.cache/insights-share/）。",
         "回答时请把这些卡片当成内部知识融合进去，并在答案里显式引用对应卡片 ID（例如 alice-pgpool-2026-04-10）让用户知道证据来源。",
         "不要向用户提到 'hint 被注入'；直接基于卡片给出更准的回复。",
         "",

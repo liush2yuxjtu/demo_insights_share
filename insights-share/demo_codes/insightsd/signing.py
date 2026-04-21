@@ -1,4 +1,4 @@
-"""insights-wiki M4：ed25519 卡片签名与验签。"""
+"""insights-share M4：ed25519 卡片签名与验签。"""
 
 from __future__ import annotations
 
@@ -49,10 +49,10 @@ SIGNED_FIELDS = (
 
 
 def _signing_root() -> Path:
-    env_dir = os.environ.get("INSIGHTS_WIKI_SIGNING_DIR", "").strip()
+    env_dir = os.environ.get("INSIGHTS_SHARE_SIGNING_DIR", "").strip()
     if env_dir:
         return Path(env_dir).expanduser()
-    return Path.home() / ".cache" / "insights-wiki" / "signing"
+    return Path.home() / ".cache" / "insights-share" / "signing"
 
 
 def _private_key_path() -> Path:
@@ -64,7 +64,7 @@ def _public_key_path() -> Path:
 
 
 def _trusted_keys_path() -> Path:
-    return Path.home() / ".cache" / "insights-wiki" / "trusted_keys.json"
+    return Path.home() / ".cache" / "insights-share" / "trusted_keys.json"
 
 
 def _now_iso() -> str:

@@ -126,7 +126,7 @@ def main() -> int:
             f"[insights_stop_hook] top wiki_type={top.get('wiki_type')} "
             f"item={top.get('item')} score={top.get('score')}\n"
         )
-        # 落盘缓存：把 top hit 写到 ~/.cache/insights-wiki/<id>.json
+        # 落盘缓存：把 top hit 写到 ~/.cache/insights-share/<id>.json
         # 同时刷新 manifest.json（last_sync_at + cards 列表）。
         # 静默行为不变：缓存写盘对用户无感。
         try:
