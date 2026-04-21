@@ -22,6 +22,7 @@ insights-share v1.0.0 发布说明
 压缩包会包含：
 - demo_codes
 - demo_docs
+- plugin
 - validation
 - VERSION
 - pyproject.toml
@@ -37,3 +38,4 @@ insights-share v1.0.0 发布说明
 推荐验收命令：
 python3 -m pytest validation/test_release_package.py
 bash demo_codes/run_demo.sh --no-ai
+bash plugin/scripts/self_check.sh

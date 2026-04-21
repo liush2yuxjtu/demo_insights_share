@@ -7,6 +7,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PLUGIN_DIR = ROOT / "plugin"
 MANIFEST = PLUGIN_DIR / ".claude-plugin" / "plugin.json"
+MARKETPLACE = PLUGIN_DIR / ".claude-plugin" / "marketplace.json"
+README = PLUGIN_DIR / "README.md"
 SELF_CHECK = PLUGIN_DIR / "scripts" / "self_check.sh"
 
 
@@ -42,3 +44,15 @@ def test_self_check_tracks_full_m2_contract() -> None:
 
     assert "wiki-diff" in script
     assert "commands=5" in script
+
+
+def test_marketplace_and_readme_align_with_current_m2_release() -> None:
+    manifest = json.loads(_read(MANIFEST))
+    marketplace = json.loads(_read(MARKETPLACE))
+    readme = _read(README)
+
+    plugin = marketplace["plugins"][0]
+    assert plugin["version"] == manifest["version"] == "0.2.0-m2"
+    assert manifest["milestones"]["current"] == "M3_MCP_NAMESPACE_TTL"
+    assert "M2_AGENTS" in readme
+    assert "/wiki-diff" in readme

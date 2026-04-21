@@ -18,6 +18,7 @@ INCLUDE_PATHS = [
     ROOT / "release" / "README.txt",
     ROOT / "demo_codes",
     ROOT / "demo_docs",
+    ROOT / "plugin",
     ROOT / "validation",
 ]
 EXCLUDE_NAMES = {
