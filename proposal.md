@@ -1,3 +1,11 @@
+# Proposal 设计文档目录
+
+> 本文件为任务 brief。正式设计文档全部落在 [proposal/](proposal/) 目录。
+>
+> **FORCE READ**：任务开始前 agent 必须先读 [proposal/INDEX.md](proposal/INDEX.md) 及其所列全部 md，再回来读本文件。
+
+---
+
 现状（Situation）：claude /insights 功能本身很好，但存在以下问题：
     1. 生成耗时过长
     2. insights 仅对个人有效，无法适配其他团队成员
