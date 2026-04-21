@@ -35,8 +35,8 @@
 
 | Skill 名称 | Flags | 说明 |
 |-----------|-------|------|
-| `insights-wiki-server` | `--start`（默认）、`--ui` | 启动服务器或打开管理看板；仅分配给管理员 |
-| `insights-wiki` | `--install` | 安装并验证连接到服务器 |
+|  `insights-share-server` | `--start`（默认）、`--ui` | 启动服务器或打开管理看板；仅分配给管理员 |
+|  `insights-share` | `--install` | 安装并验证连接到服务器 |
 
 ### 服务器地址
 

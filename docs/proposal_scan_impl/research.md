@@ -11,9 +11,9 @@
 
 ## Data Flow
 
-- 用户安装 plugin 后，`wiki-install` 把 server/team 配置写入 `~/.cache/insights-wiki/config.json`
+- 用户安装 plugin 后，`wiki-install` 把 server/team 配置写入 `~/.cache/insights-share/config.json`
 - `UserPromptSubmit` hook 读取配置，按 `team` 过滤调用 daemon `/insights`
-- 命中的卡片写入本地缓存 `~/.cache/insights-wiki/*.json` 与 `manifest.json`
+- 命中的卡片写入本地缓存 `~/.cache/insights-share/*.json` 与 `manifest.json`
 - `today_count.json` 维护日内命中数，statusline 同时读 `today_count.json`、`manifest.json`、daemon health 与 skill 安装态
 - CLI / HTTP API 通过 `team` query 和 card/topic `team` 字段实现逻辑 namespace
 

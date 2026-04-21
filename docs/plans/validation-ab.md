@@ -6,7 +6,7 @@
 
 ## A/B 实验设计
 
-**唯一变量**：`insights-wiki` skill + daemon 是否存在  
+**唯一变量**：`insights-share` skill + daemon 是否存在  
 **控制变量**：两侧使用完全相同的 prompt
 
 ---
@@ -25,8 +25,8 @@
 
 | 侧 | 环境 | 导出文件 |
 |----|------|---------|
-| A（对照） | 不加载 `insights-wiki` | [examples/A_without.human.md](../../examples/A_without.human.md) |
-| B（实验） | 加载 `insights-wiki` + daemon | [examples/B_with.human.md](../../examples/B_with.human.md) |
+| A（对照） | 不加载 `insights-share` | [examples/A_without.human.md](../../examples/A_without.human.md) |
+| B（实验） | 加载 `insights-share` + daemon | [examples/B_with.human.md](../../examples/B_with.human.md) |
 
 原始 agent 格式（供程序解析）：
 - [examples/A_without.agent.json](../../examples/A_without.agent.json)
@@ -53,7 +53,7 @@
 
 - A/B 首个用户 prompt 必须**完全相同**（规范化后逐字符匹配）
 - 不允许 prompt 泄漏实验意图（如"若意外出现 LAN 卡片…"这类提示）
-- 录制前必须清空 `~/.cache/insights-wiki/` 防止缓存污染
+- 录制前必须清空 `~/.cache/insights-share/` 防止缓存污染
 
 ### 验证脚本
 

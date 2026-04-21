@@ -67,9 +67,9 @@
 
 | 文件 | 说明 |
 |------|------|
-| [skills/insights-wiki/SKILL.md](../../insights-share/demo_codes/.claude/skills/insights-wiki/SKILL.md) | insights-wiki skill 定义（--install） |
-| [skills/insights-wiki/TEAM_A_REPORT.md](../../insights-share/demo_codes/.claude/skills/insights-wiki/TEAM_A_REPORT.md) | Team A 实现报告 |
-| [skills/insights-wiki-server/SKILL.md](../../insights-share/demo_codes/.claude/skills/insights-wiki-server/SKILL.md) | insights-wiki-server skill 定义（--start/--ui） |
+| [skills/insights-share/SKILL.md](../../insights-share/demo_codes/.claude/skills/insights-share/SKILL.md) | insights-share skill 定义（--install） |
+| [skills/insights-share/TEAM_A_REPORT.md](../../insights-share/demo_codes/.claude/skills/insights-share/TEAM_A_REPORT.md) | Team A 实现报告 |
+| [skills/insights-share-server/SKILL.md](../../insights-share/demo_codes/.claude/skills/insights-share-server/SKILL.md) | insights-share-server skill 定义（--start/--ui） |
 
 ---
 
@@ -79,8 +79,8 @@
 |------|------|
 | [deliverables/README.md](../../insights-share/validation/reports/deliverables/README.md) | 交付物目录说明 |
 | [deliverables/diff.md](../../insights-share/validation/reports/deliverables/diff.md) | A/B 对比差异分析 |
-| [deliverables/claude_export_WITH.md](../../insights-share/validation/reports/deliverables/claude_export_WITH.md) | Claude 导出（有 insights-wiki） |
-| [deliverables/claude_export_WITHOUT.md](../../insights-share/validation/reports/deliverables/claude_export_WITHOUT.md) | Claude 导出（无 insights-wiki） |
+| [deliverables/claude_export_WITH.md](../../insights-share/validation/reports/deliverables/claude_export_WITH.md) | Claude 导出（有 insights-share） |
+| [deliverables/claude_export_WITHOUT.md](../../insights-share/validation/reports/deliverables/claude_export_WITHOUT.md) | Claude 导出（无 insights-share） |
 | [deliverables/TEAM_B_REPORT.md](../../insights-share/validation/reports/deliverables/TEAM_B_REPORT.md) | Team B 验证报告 |
 
 ---
@@ -97,8 +97,8 @@
 
 | 文件 | 说明 |
 |------|------|
-| [A_without.human.md](../../examples/A_without.human.md) | A 侧人工录制导出（无 insights-wiki） |
-| [B_with.human.md](../../examples/B_with.human.md) | B 侧人工录制导出（有 insights-wiki） |
+| [A_without.human.md](../../examples/A_without.human.md) | A 侧人工录制导出（无 insights-share） |
+| [B_with.human.md](../../examples/B_with.human.md) | B 侧人工录制导出（有 insights-share） |
 | [A_without.md](../../examples/A_without.md) | A 侧 agent 格式导出 |
 | [B_with.md](../../examples/B_with.md) | B 侧 agent 格式导出 |
 | [duck_story.md](../../examples/duck_story.md) | 示例故事（参考用） |
@@ -140,8 +140,8 @@ demo_insights_share/
 │   │   │   ├── infra_cache/INDEX.md + redis_lru_session_eviction.md
 │   │   │   └── infra_queue/INDEX.md + celery_retry_storm.md
 │   │   └── .claude/skills/
-│   │       ├── insights-wiki/SKILL.md + TEAM_A_REPORT.md
-│   │       └── insights-wiki-server/SKILL.md
+│   │       ├── insights-share/SKILL.md + TEAM_A_REPORT.md
+│   │       └── insights-share-server/SKILL.md
 │   ├── demo_docs/
 │   │   ├── design.md / pm_walkthrough.md
 │   │   ├── pm_walkthrough_star.md / terminal_snapshot.md
