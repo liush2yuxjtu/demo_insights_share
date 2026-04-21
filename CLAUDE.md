@@ -25,7 +25,7 @@
 |------|------|------|
 | [proposal/proposal_conflict_design.md](proposal/proposal_conflict_design.md) | 正式数据模型（权威） | Topic 中心 Good/Bad 并列共存：同一 Topic 下多人多场景决策并列展示；good=此场景选了此方案，bad=此场景拒绝此方案；不挑最优、不合并、不做冲突检测 |
 | [proposal/proposal_wiki_card.md](proposal/proposal_wiki_card.md) | 现状磁盘形态（参考） | `wiki_tree/` 存储布局、卡片 JSON+markdown 结构、label override 流程、已废弃冲突机制说明 |
-| [proposal/proposal_statusline.md](proposal/proposal_statusline.md) | 反馈机制 | statusline 右侧常驻 `[wiki ✓ N/today]`：展示 insights-wiki 运行状态 + 今日触发计数，给用户/client 实时信任感信号 |
-| [proposal/proposal_plugin_design.md](proposal/proposal_plugin_design.md) | 分发形态设计 | 将 insights-wiki 封装为 Claude Code plugin：skill + hook + statusline + MCP + agent + slash 命令一键装；含 MVP 范围、迁移路径、签名与团队 namespace 扩展 |
+| [proposal/proposal_statusline.md](proposal/proposal_statusline.md) | 反馈机制 | statusline 右侧常驻 `[share ✓ N/today]`：展示 insights-share 运行状态 + 今日触发计数，给用户/client 实时信任感信号（M5 前徽章为 `[wiki ...]`） |
+| [proposal/proposal_plugin_design.md](proposal/proposal_plugin_design.md) | 分发形态设计 | 将 insights-share 封装为 Claude Code plugin：skill + hook + statusline + MCP + agent + slash 命令一键装；含 MVP 范围、M1–M5 迁移路径、签名与团队 namespace 扩展 |
 | [proposal/proposal_rename_to_insights_share.md](proposal/proposal_rename_to_insights_share.md) | 命名迁移（M5_RENAME） | 把 plugin 深度重命名为 `insights-share`：目录迁移 `plugins/insights-share/`、skill / command / agent / statusline / cache 全系换名；新增 `gate_no_wiki_leak` + `gate_marketplace_subdir` 两道验证门 |
 | [docs/designs/INDEX.md](docs/designs/INDEX.md) | 索引 | claude_codes_to_design / claude_design / user_design 三目录说明 |
