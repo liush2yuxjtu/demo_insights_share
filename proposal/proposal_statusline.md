@@ -76,3 +76,62 @@ statusline script 每次渲染读三处：
 - 不做 per-card 命中率统计（留给后续 dashboard）
 - 不做跨设备聚合
 - 不改 insights-wiki 触发策略本身
+
+## 预期输出
+
+### 整行渲染
+
+Claude Code statusline 右侧追加 wiki badge：
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ ~/projects/demo_insights_share  main*  claude-opus-4-7       [wiki ✓ 7/today] │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+### 三态 badge
+
+```
+[wiki ✓ 7/today]     daemon reachable + 今日已命中 7 次
+[wiki … 7/today]     当前 prompt 正在 prefetch/match
+[wiki ✗ 0/today]     daemon 断链 or skill 未装
+```
+
+### 日内递增（同一 session 连发 3 个 prompt）
+
+```
+prompt #1 发出   → [wiki … 0/today]
+prompt #1 命中   → [wiki ✓ 1/today]
+prompt #2 发出   → [wiki … 1/today]
+prompt #2 命中   → [wiki ✓ 2/today]
+prompt #3 发出   → [wiki … 2/today]
+prompt #3 未命中 → [wiki ✓ 2/today]     # 不计数，但保持 ✓
+```
+
+### 日切（本地 00:00）
+
+```
+23:59 → [wiki ✓ 42/today]
+00:00 → [wiki ✓ 0/today]                # 原子 rename 到 today_count.json.bak
+```
+
+### 故障降级
+
+```
+daemon 挂    → [wiki ✗ 7/today]         # 计数保留，仅标记断链
+skill 未装   → [wiki ✗ 0/today]
+探活超时     → [wiki ✗ 7/today]         # 300ms 内无响应即降级
+```
+
+### 配色（terminal 支持时）
+
+```
+✓  绿  (\033[32m)
+…  黄  (\033[33m)
+✗  红  (\033[31m)
+数字  默认色，确保跨主题可读
+```
+
+### 宽度预算
+
+badge 本体 ≤ 20 char，不抢占左侧 path / branch / model 段。
