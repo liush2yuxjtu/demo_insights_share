@@ -13,6 +13,7 @@
 | 新增 proposal 设计文档 | 新设计 md 落在 proposal/，同步更新 proposal/INDEX.md + CLAUDE.md 索引表；禁止加回根目录 | 新增 proposal_*.md 时 | [proposal/INDEX.md](proposal/INDEX.md) |
 | 实机测试 session | 实机测试日志走 ~/.claude/live_terminal/ 契约：当前 session 名写在 CURRENT，镜像在 <name>.log；用 .claude/skills/register-session/ 注册，agent 先 cat CURRENT 再 Read <name>.log | 用户报告实机 bug / 需要看用户实际终端输出时 | [live-terminal.md](docs/rules/live-terminal.md) |
 | tmux 嵌套必 unset $TMUX | 在 register-session 注册的 tmux 里再起 tmux 时，仅加 `-L` 独立 socket 不够；tmux 靠 `$TMUX` 环境变量判断 nested，必须用 `TMUX= tmux ...` 或 `unset TMUX`，否则报 `sessions should be nested with care` 或后续 `can't find pane` | 在 live_demo 等已注册 tmux 里运行 start.demo.sh / start.codex.sh / 任何内部再启 tmux 的脚本时 | [tmux-nested.md](docs/rules/tmux-nested.md) |
+| 编辑即原子 commit | 每次 Write/Edit/文件移动/文件删除完成后立即按单一关注点执行原子 git commit，禁止合并多个无关变更 | 任何 Write/Edit 或文件 move/rm 后 | [atomic-commits.md](docs/rules/atomic-commits.md) |
 
 ## 设计文档索引
 
