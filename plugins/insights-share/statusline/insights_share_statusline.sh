@@ -1,42 +1,42 @@
 #!/usr/bin/env bash
-# insights-wiki statusline badge 渲染器
+# insights-share statusline badge 渲染器
 #
 # 契约（proposal/proposal_statusline.md）：
-#   - 输出单行 badge：[wiki ✓ N/today] / [wiki … N/today] / [wiki ✗ N/today] / [wiki ⚠ stale] / [wiki 🔒 sig-fail]
+#   - 输出单行 badge：[share ✓ N/today] / [share … N/today] / [share ✗ N/today] / [share ⚠ stale] / [share 🔒 sig-fail]
 #   - 渲染耗时 < 100 ms
 #   - daemon 探活短超时 300 ms + 本地 60 s TTL 缓存
-#   - skill 装配性：ls ~/.claude/skills/insights-wiki/SKILL.md
-#   - 计数：~/.cache/insights-wiki/today_count.json
-#   - stale 判定：~/.cache/insights-wiki/manifest.json 超过 TTL 未同步
-#   - A/B 开关：WIKI_STATUSLINE=off 时输出空串（保持 A 侧零特征）
+#   - skill 装配性：ls ~/.claude/skills/insights-share/SKILL.md
+#   - 计数：~/.cache/insights-share/today_count.json
+#   - stale 判定：~/.cache/insights-share/manifest.json 超过 TTL 未同步
+#   - A/B 开关：SHARE_STATUSLINE=off 时输出空串（保持 A 侧零特征）
 #   - badge 本体 ≤ 20 字符（不含 ANSI 色）
 #
 # 环境变量：
-#   INSIGHTS_WIKI_URL     daemon base url，默认 http://127.0.0.1:7821
-#   WIKI_STATUSLINE       "off" 时整条链路禁用（用于 A 侧录制）
-#   WIKI_STATUSLINE_NO_COLOR  非空时禁用 ANSI 色（兼容纯日志场景）
-#   WIKI_STATUSLINE_STALE_TTL_SECONDS  本地缓存 stale TTL，默认 86400
+#   INSIGHTS_SHARE_URL     daemon base url，默认 http://127.0.0.1:7821
+#   SHARE_STATUSLINE       "off" 时整条链路禁用（用于 A 侧录制）
+#   SHARE_STATUSLINE_NO_COLOR  非空时禁用 ANSI 色（兼容纯日志场景）
+#   SHARE_STATUSLINE_STALE_TTL_SECONDS  本地缓存 stale TTL，默认 86400
 
 set -u
 umask 077
 
-if [[ "${WIKI_STATUSLINE:-}" == "off" ]]; then
+if [[ "${SHARE_STATUSLINE:-}" == "off" ]]; then
   exit 0
 fi
 
-WIKI_URL="${INSIGHTS_WIKI_URL:-http://127.0.0.1:7821}"
-CACHE_DIR="${HOME}/.cache/insights-wiki"
+WIKI_URL="${INSIGHTS_SHARE_URL:-http://127.0.0.1:7821}"
+CACHE_DIR="${HOME}/.cache/insights-share"
 TODAY_JSON="${CACHE_DIR}/today_count.json"
 MANIFEST_JSON="${CACHE_DIR}/manifest.json"
 HEALTH_CACHE="${CACHE_DIR}/.health_cache"
 IN_FLIGHT_FLAG="${CACHE_DIR}/.in_flight"
-SKILL_MARK="${HOME}/.claude/skills/insights-wiki/SKILL.md"
-STALE_TTL_SECONDS="${WIKI_STATUSLINE_STALE_TTL_SECONDS:-86400}"
+SKILL_MARK="${HOME}/.claude/skills/insights-share/SKILL.md"
+STALE_TTL_SECONDS="${SHARE_STATUSLINE_STALE_TTL_SECONDS:-86400}"
 
 mkdir -p "${CACHE_DIR}" 2>/dev/null || true
 
 # ---- 色彩 ----
-if [[ -t 1 && -z "${WIKI_STATUSLINE_NO_COLOR:-}" ]]; then
+if [[ -t 1 && -z "${SHARE_STATUSLINE_NO_COLOR:-}" ]]; then
   C_OK=$'\033[32m'
   C_WAIT=$'\033[33m'
   C_FAIL=$'\033[31m'
@@ -186,9 +186,9 @@ else
 fi
 
 if [[ "${symbol}" == "⚠" ]]; then
-  printf '%s[wiki ⚠ stale]%s\n' "${color}" "${C_RESET}"
+  printf '%s[share ⚠ stale]%s\n' "${color}" "${C_RESET}"
 elif [[ "${symbol}" == "🔒" ]]; then
-  printf '%s[wiki 🔒 sig-fail]%s\n' "${color}" "${C_RESET}"
+  printf '%s[share 🔒 sig-fail]%s\n' "${color}" "${C_RESET}"
 else
-  printf '%s[wiki %s %s/today]%s\n' "${color}" "${symbol}" "${count}" "${C_RESET}"
+  printf '%s[share %s %s/today]%s\n' "${color}" "${symbol}" "${count}" "${C_RESET}"
 fi
