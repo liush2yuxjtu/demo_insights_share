@@ -13,6 +13,7 @@ allowed-tools: Read, Bash, Grep
 ```
 /wiki-review                               # 列当前全部 topic 概览
 /wiki-review <topic-id>                    # 列某 topic 下全部并列 Good/Bad 卡片
+/wiki-review <topic-id> --team team-a      # 只看某团队 namespace
 /wiki-review <topic-id> --kanban           # 打开 kanban dashboard（走 insights-wiki-server --ui）
 /wiki-review <card-id> --override <good|bad>
 /wiki-review <card-id> --archive
@@ -21,6 +22,7 @@ allowed-tools: Read, Bash, Grep
 示例：
 
 - `/wiki-review postgres-pool-exhaustion`
+- `/wiki-review postgres-pool-exhaustion --team team-a`
 - `/wiki-review alice-pgpool-2026-04-10 --override bad`
 - `/wiki-review --kanban`
 
@@ -55,9 +57,8 @@ topic: postgres-pool-exhaustion
 - M2 阶段管理员判定：环境变量 `INSIGHTS_WIKI_ROLE=admin` 或 sandbox 标记
 - M4 引入签名 + auth 后走 daemon-issued token
 
-## 和 M3/M4 的边界
+## 和 M4 的边界
 
-- M3：支持 `--team <name>` 限定只看某团队的卡片
 - M4：所有 override / archive 必须重新签名；未签名卡片的 override 直接 REJECT
 
 ## 参考

@@ -58,9 +58,8 @@ proposal.md 需求 5「在用户无感知的时间内快速比对并验证 insig
 - **WARN**：允许发布，在 daemon 响应里附带 warning 字段，管理员后续可在 kanban 里看到
 - **PASS**：放行到 daemon
 
-## M3/M4 预留
+## M4 预留
 
-- M3：增加 `team_namespace` 校验（`wiki_tree/<team>/<topic>/...`）
 - M4：增加 ed25519 签名校验为 hard gate；未签名卡片一律 REJECT
 
 ## 参考

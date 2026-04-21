@@ -14,12 +14,14 @@ allowed-tools: Read, Bash, Grep
 /wiki-diff <topic-id>
 /wiki-diff <topic-id> --label good
 /wiki-diff <topic-id> --label bad
+/wiki-diff <topic-id> --team team-a
 ```
 
 示例：
 
 - `/wiki-diff postgres-pool-exhaustion`
 - `/wiki-diff postgres-pool-exhaustion --label bad`
+- `/wiki-diff postgres-pool-exhaustion --team team-a`
 
 ## 做什么
 
@@ -51,9 +53,8 @@ BAD
   diff: 盲目把 pool_size 从 10 提到 50 会放大 IO 抖动
 ```
 
-## 和 M3/M4 的边界
+## 和 M4 的边界
 
-- M3：支持 `--team <name>`，只看团队命名空间 `wiki_tree/<team>/...`
 - M4：若卡片签名校验失败，视图里追加 `sig-fail` 降级提示
 
 ## 参考

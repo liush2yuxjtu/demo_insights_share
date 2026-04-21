@@ -14,12 +14,14 @@ agent；校验通过才调 daemon `POST /insights`。
 ```
 /wiki-publish <card-path-or-json>              # 正式发布
 /wiki-publish <card-path-or-json> --dry-run    # 仅跑校验，不调 daemon
+/wiki-publish <card-path-or-json> --team team-a
 ```
 
 示例：
 
 - `/wiki-publish wiki_tree/database/alice-pgpool-2026-04-21.md`
 - `/wiki-publish wiki_tree/frontend/carol-next-streaming-2026-04-21.md --dry-run`
+- `/wiki-publish wiki_tree/database/postgres_pool.md --team team-a`
 
 ## 流程
 
@@ -47,11 +49,11 @@ agent；校验通过才调 daemon `POST /insights`。
 - 尊重 `proposal_conflict_design.md`：同 topic 下 Good/Bad 并列永远合法，不因
   「已有另一方向」而 REJECT
 - 尊重 `proposal_wiki_card.md`：卡片落盘路径 `wiki_tree/{wiki_type}/{slug}.md`
+- 若指定 `--team <name>`，写入卡片 JSON 的 `team` 字段，走逻辑 team namespace
 - 禁止旁路 `insight-validator`，即使 PM 指定 `--force`（M2 阶段不提供 `--force`）
 
-## 和 M3/M4 的边界
+## 和 M4 的边界
 
-- M3：支持 `--team <name>` 写入 `wiki_tree/<team>/...` namespace
 - M4：发布必带 ed25519 签名；未签名卡片在 M4 后直接 REJECT
 
 ## 参考

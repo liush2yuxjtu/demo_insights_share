@@ -31,7 +31,8 @@ allowed-tools: Bash, Read
 
 - 保留卡片原始 `label_override` 字段展示（管理员覆盖过的卡片要让用户看见）
 - 用户 prompt 里带敏感信息时，检索 query 脱敏后再发 daemon（对齐根规则「默认脱敏」）
-- daemon 不可达时静默降级到本地 `~/.cache/insights-wiki/manifest.json` 离线匹配（M3 完整实现；M1 简化为提示"daemon 不可达"）
+- 若配置了 team namespace，查询追加 `team=<name>`，只返回该团队命中的卡片
+- daemon 不可达时当前版本仍以明确报错为主；离线 fallback 不在本轮 M3 范围内
 
 ## 和 M2+ 的边界
 

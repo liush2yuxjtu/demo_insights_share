@@ -53,9 +53,8 @@ origin: insights-wiki plugin / M2
 - 删除与 label_override 走 daemon `POST /insights/{id}/edit`，禁止直接改盘
 - 禁止在无 authentication 的 daemon 上做 write（M4 签名 + auth 前 M2/M3 只在局域网可信环境开放）
 
-## M3/M4 预留钩子
+## M4 预留钩子
 
-- M3：team namespace 落地后，`list` 需要支持 `team=<name>` 过滤
 - M4：卡片 ed25519 签名到位后，`label_override` 必须重新签名；未签名卡片走降级视图
 
 ## 参考

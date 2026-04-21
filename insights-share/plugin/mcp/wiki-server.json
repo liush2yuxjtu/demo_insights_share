@@ -1,0 +1,67 @@
+{
+  "name": "wiki-server",
+  "transport": {
+    "type": "http",
+    "base_url": "http://127.0.0.1:7821",
+    "health_path": "/healthz",
+    "timeout_ms": 3000
+  },
+  "capabilities": {
+    "team_namespace": true,
+    "cache_first": true,
+    "parallel_good_bad_view": true
+  },
+  "tools": [
+    {
+      "name": "wiki_health",
+      "description": "检查 insightsd daemon 健康状态",
+      "request": {
+        "method": "GET",
+        "path": "/healthz"
+      }
+    },
+    {
+      "name": "wiki_search",
+      "description": "按 query、top-k、team 检索 wiki 卡片",
+      "request": {
+        "method": "GET",
+        "path": "/search",
+        "query": ["q", "k", "team"]
+      }
+    },
+    {
+      "name": "wiki_topics",
+      "description": "按 team 列 topic 列表",
+      "request": {
+        "method": "GET",
+        "path": "/topics",
+        "query": ["team"]
+      }
+    },
+    {
+      "name": "wiki_examples",
+      "description": "取某个 topic 下并列的 Good/Bad examples",
+      "request": {
+        "method": "GET",
+        "path": "/topics/{topic_id}/examples",
+        "query": ["label", "team"]
+      }
+    },
+    {
+      "name": "wiki_publish",
+      "description": "发布新卡片到 wiki",
+      "request": {
+        "method": "POST",
+        "path": "/insights"
+      }
+    },
+    {
+      "name": "wiki_relabel",
+      "description": "管理员覆盖卡片 label",
+      "request": {
+        "method": "POST",
+        "path": "/insights/{card_id}/relabel"
+      }
+    }
+  ]
+}

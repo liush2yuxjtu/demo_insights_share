@@ -41,6 +41,7 @@ def test_build_release_produces_versioned_bundle(tmp_path: Path) -> None:
     assert "demo_docs/design.md" in manifest_lines
     assert "plugin/.claude-plugin/plugin.json" in manifest_lines
     assert "plugin/commands/wiki-diff.md" in manifest_lines
+    assert "plugin/mcp/wiki-server.json" in manifest_lines
     assert "validation/test_release_package.py" in manifest_lines
     assert "demo_codes/.env" not in manifest_lines
     assert "demo_codes/wiki.json" not in manifest_lines
@@ -59,6 +60,7 @@ def test_build_release_produces_versioned_bundle(tmp_path: Path) -> None:
     assert f"{prefix}/demo_docs/design.md" in names
     assert f"{prefix}/plugin/.claude-plugin/plugin.json" in names
     assert f"{prefix}/plugin/commands/wiki-diff.md" in names
+    assert f"{prefix}/plugin/mcp/wiki-server.json" in names
     assert f"{prefix}/validation/test_release_package.py" in names
     assert f"{prefix}/demo_codes/.env" not in names
     assert f"{prefix}/demo_codes/wiki.json" not in names

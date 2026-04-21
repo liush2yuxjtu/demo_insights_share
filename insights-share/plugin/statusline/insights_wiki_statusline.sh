@@ -2,11 +2,12 @@
 # insights-wiki statusline badge 渲染器
 #
 # 契约（proposal/proposal_statusline.md）：
-#   - 输出单行 badge：[wiki ✓ N/today] / [wiki … N/today] / [wiki ✗ N/today]
+#   - 输出单行 badge：[wiki ✓ N/today] / [wiki … N/today] / [wiki ✗ N/today] / [wiki ⚠ stale]
 #   - 渲染耗时 < 100 ms
 #   - daemon 探活短超时 300 ms + 本地 60 s TTL 缓存
 #   - skill 装配性：ls ~/.claude/skills/insights-wiki/SKILL.md
 #   - 计数：~/.cache/insights-wiki/today_count.json
+#   - stale 判定：~/.cache/insights-wiki/manifest.json 超过 TTL 未同步
 #   - A/B 开关：WIKI_STATUSLINE=off 时输出空串（保持 A 侧零特征）
 #   - badge 本体 ≤ 20 字符（不含 ANSI 色）
 #
@@ -14,6 +15,7 @@
 #   INSIGHTS_WIKI_URL     daemon base url，默认 http://127.0.0.1:7821
 #   WIKI_STATUSLINE       "off" 时整条链路禁用（用于 A 侧录制）
 #   WIKI_STATUSLINE_NO_COLOR  非空时禁用 ANSI 色（兼容纯日志场景）
+#   WIKI_STATUSLINE_STALE_TTL_SECONDS  本地缓存 stale TTL，默认 86400
 
 set -u
 umask 077
@@ -25,9 +27,11 @@ fi
 WIKI_URL="${INSIGHTS_WIKI_URL:-http://127.0.0.1:7821}"
 CACHE_DIR="${HOME}/.cache/insights-wiki"
 TODAY_JSON="${CACHE_DIR}/today_count.json"
+MANIFEST_JSON="${CACHE_DIR}/manifest.json"
 HEALTH_CACHE="${CACHE_DIR}/.health_cache"
 IN_FLIGHT_FLAG="${CACHE_DIR}/.in_flight"
 SKILL_MARK="${HOME}/.claude/skills/insights-wiki/SKILL.md"
+STALE_TTL_SECONDS="${WIKI_STATUSLINE_STALE_TTL_SECONDS:-86400}"
 
 mkdir -p "${CACHE_DIR}" 2>/dev/null || true
 
@@ -36,11 +40,13 @@ if [[ -t 1 && -z "${WIKI_STATUSLINE_NO_COLOR:-}" ]]; then
   C_OK=$'\033[32m'
   C_WAIT=$'\033[33m'
   C_FAIL=$'\033[31m'
+  C_WARN=$'\033[33m'
   C_RESET=$'\033[0m'
 else
   C_OK=""
   C_WAIT=""
   C_FAIL=""
+  C_WARN=""
   C_RESET=""
 fi
 
@@ -98,6 +104,50 @@ if (( cache_valid == 0 )); then
   fi
 fi
 
+# ---- stale 判定（manifest.last_sync_at 超过 TTL）----
+stale=0
+if [[ -r "${MANIFEST_JSON}" ]]; then
+  stale="$(
+    python3 - "${MANIFEST_JSON}" "${STALE_TTL_SECONDS}" <<'PY' 2>/dev/null || echo 0
+import datetime as dt
+import json
+import sys
+from pathlib import Path
+
+manifest = Path(sys.argv[1])
+ttl_seconds = int(sys.argv[2])
+try:
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+except Exception:
+    print(0)
+    raise SystemExit(0)
+
+last_sync_at = data.get("last_sync_at")
+if not isinstance(last_sync_at, str) or not last_sync_at.strip():
+    print(0)
+    raise SystemExit(0)
+
+normalized = last_sync_at.strip()
+if normalized.endswith("Z"):
+    normalized = normalized[:-1] + "+00:00"
+try:
+    last_sync = dt.datetime.fromisoformat(normalized)
+except ValueError:
+    try:
+        last_sync = dt.datetime.strptime(normalized, "%Y-%m-%dT%H:%M:%S%z")
+    except ValueError:
+        print(0)
+        raise SystemExit(0)
+
+if last_sync.tzinfo is None:
+    last_sync = last_sync.replace(tzinfo=dt.datetime.now().astimezone().tzinfo)
+
+age = (dt.datetime.now().astimezone() - last_sync.astimezone()).total_seconds()
+print(1 if age >= ttl_seconds else 0)
+PY
+  )"
+fi
+
 # ---- 状态决策 ----
 if (( skill_ok == 0 || daemon_ok == 0 )); then
   symbol="✗"
@@ -105,9 +155,16 @@ if (( skill_ok == 0 || daemon_ok == 0 )); then
 elif (( in_flight == 1 )); then
   symbol="…"
   color="${C_WAIT}"
+elif (( stale == 1 )); then
+  symbol="⚠"
+  color="${C_WARN}"
 else
   symbol="✓"
   color="${C_OK}"
 fi
 
-printf '%s[wiki %s %s/today]%s\n' "${color}" "${symbol}" "${count}" "${C_RESET}"
+if [[ "${symbol}" == "⚠" ]]; then
+  printf '%s[wiki ⚠ stale]%s\n' "${color}" "${C_RESET}"
+else
+  printf '%s[wiki %s %s/today]%s\n' "${color}" "${symbol}" "${count}" "${C_RESET}"
+fi
