@@ -1,37 +1,37 @@
 {
-  "name": "insights-wiki",
-  "version": "0.4.0-m4",
-  "description": "局域网 insights-share：topic 中心 Good/Bad 并列卡片的静默回灌 + 管理面板。M4 已交付：ed25519 卡片签名、sig-fail 状态灯、marketplace 发布摘要。",
+  "name": "insights-share",
+  "version": "0.5.0-m5",
+  "description": "局域网 insights-share：topic 中心 Good/Bad 并列卡片的静默回灌 + 管理面板。M5 已交付：插件深度重命名 insights-wiki -> insights-share、plugins/<name>/ 布局、share-* 命令与 agent、[share ...] 徽章。",
   "author": {
     "name": "demo_insights_share Team A",
     "origin": "internal"
   },
-  "homepage": "insights-share/plugin/README.md",
+  "homepage": "plugins/insights-share/README.md",
   "entry": {
     "skills": [
-      "skills/insights-wiki/SKILL.md",
-      "skills/insights-wiki-server/SKILL.md"
+      "skills/insights-share/SKILL.md",
+      "skills/insights-share-server/SKILL.md"
     ],
     "commands": [
-      "commands/wiki-install.md",
-      "commands/wiki-search.md",
-      "commands/wiki-publish.md",
-      "commands/wiki-review.md",
-      "commands/wiki-diff.md"
+      "commands/share-install.md",
+      "commands/share-search.md",
+      "commands/share-publish.md",
+      "commands/share-review.md",
+      "commands/share-diff.md"
     ],
     "agents": [
-      "agents/wiki-curator.md",
-      "agents/insight-validator.md"
+      "agents/share-curator.md",
+      "agents/share-validator.md"
     ],
     "hooks": {
       "UserPromptSubmit": "hooks/user-prompt-submit.sh"
     },
-    "statusline": "statusline/insights_wiki_statusline.sh"
+    "statusline": "statusline/insights_share_statusline.sh"
   },
   "milestones": {
-    "current": "M4_SIGN_MARKETPLACE",
-    "design_doc": "proposal/proposal_plugin_design.md",
-    "completed": ["M1_MVP", "M2_AGENTS", "M3_MCP_NAMESPACE_TTL", "M4_SIGN_MARKETPLACE"],
+    "current": "M5_RENAME",
+    "design_doc": "proposal/proposal_rename_to_insights_share.md",
+    "completed": ["M1_MVP", "M2_AGENTS", "M3_MCP_NAMESPACE_TTL", "M4_SIGN_MARKETPLACE", "M5_RENAME"],
     "pending": []
   },
   "requires": {
