@@ -16,7 +16,8 @@
       "commands/wiki-install.md",
       "commands/wiki-search.md",
       "commands/wiki-publish.md",
-      "commands/wiki-review.md"
+      "commands/wiki-review.md",
+      "commands/wiki-diff.md"
     ],
     "agents": [
       "agents/wiki-curator.md",

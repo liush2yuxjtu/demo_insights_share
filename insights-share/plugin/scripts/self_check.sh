@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# plugin M1 self-check :: 在 start.demo.sh 的 sandbox self-check 段被调用。
+# plugin M2 self-check :: 在 start.demo.sh 的 sandbox self-check 段被调用。
 # 设计依据：proposal/proposal_plugin_design.md §"验证" 节。
 # 输出契约：每行一个组件一条 "OK"/"MISSING"/"PARSE-FAIL"，非零退出仅当有任一 MISSING。
 
@@ -62,7 +62,7 @@ else
 fi
 
 # commands
-for c in wiki-install wiki-search wiki-publish wiki-review; do
+for c in wiki-install wiki-search wiki-publish wiki-review wiki-diff; do
   if [ -f "$PLUGIN_DIR/commands/$c.md" ]; then
     say "command /$c: OK"
   else
@@ -81,16 +81,16 @@ for a in wiki-curator insight-validator; do
   fi
 done
 
-# manifest declares agents + 4 commands (M2 contract)
+# manifest declares agents + 5 commands (M2 contract)
 if [ -f "$MANIFEST" ]; then
   if /usr/bin/python3 - "$MANIFEST" <<'PY' >/dev/null 2>&1
 import json, sys
 m = json.load(open(sys.argv[1]))
 assert len(m["entry"].get("agents", [])) == 2, "agents count"
-assert len(m["entry"].get("commands", [])) == 4, "commands count"
+assert len(m["entry"].get("commands", [])) == 5, "commands count"
 PY
   then
-    say "manifest M2 contract (agents=2, commands=4): OK"
+    say "manifest M2 contract (agents=2, commands=5): OK"
   else
     say "manifest M2 contract: FAIL"
     fail_count=$((fail_count+1))
