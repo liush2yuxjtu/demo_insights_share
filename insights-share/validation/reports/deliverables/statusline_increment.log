@@ -1,0 +1,33 @@
+=== tmux-style evidence: statusline N -> N+1 -> N+2 ===
+# 证据日期: 2026-04-21
+# proposal: proposal/proposal_statusline.md #4 (tmux 录屏证据)
+# 记录方式: script(1) tty 录制，3 次 prompt prefetch→commit→statusline 渲染
+#
+HOME=/tmp/statusline_evidence_home
+INSIGHTS_WIKI_URL=http://127.0.0.1:17821
+------
+[prompt #1 发出]
+[wiki … 0/today]
+[prompt #1 命中: card=alice-pgpool-2026-04-10]
+[wiki ✓ 1/today]
+------
+[prompt #2 发出]
+[wiki … 1/today]
+[prompt #2 命中: card=bob-pgpool-bad]
+[wiki ✓ 2/today]
+------
+[prompt #3 发出]
+[wiki … 2/today]
+[prompt #3 命中: card=carol-pgpool-session]
+[wiki ✓ 3/today]
+------
+[A/B off: WIKI_STATUSLINE=off 应该静默]
+(empty output ok)
+------
+[raw today_count.json]
+{
+  "date": "2026-04-21",
+  "count": 3,
+  "last_card_id": "carol-pgpool-session",
+  "last_trigger_at": "2026-04-21T10:28:41+0800"
+}
