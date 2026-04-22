@@ -184,5 +184,5 @@ def main():
 | 首轮真 baseline（5-sample） | `53e112e` | PASS | search_agent p95=11908ms（pre-optimization） |
 | O1 latency_cache 模块 | `0809e1c` | PASS | 13 tests 全绿；wiki_sha 失效 + TTL 300s |
 | O3 search_agent early_exit | `1b7b689` | PASS | SEARCH_HITS 围栏一出即 break；metrics.early_exit=true/false |
-| O5 async hook + cache 集成 | — | TODO | 下一步 |
+| O5 async hook + cache 集成 | `bb59ff6` | PASS | fork+setsid 非阻塞；metrics 三行 jsonl；INSIGHTS_STOP_HOOK_ASYNC=0 可降级同步 |
 | MVP gate PASS（cache-hit） | — | TODO | 实施完重跑 baseline |
