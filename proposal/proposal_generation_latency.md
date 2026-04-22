@@ -174,3 +174,15 @@ def main():
 - `python plugins/insights-share/scripts/latency_gate.py --metrics ... --budget ...` 退出码 0
 - `claudefast -p` judge 探针返回 `{"verdict":"PASS"}`
 - 仓库新增：`baselines/latency_baseline.json` + `metrics/<date>.jsonl` + `scripts/latency_gate.py`
+
+## 推进进度
+
+| 项 | commit | 状态 | 备注 |
+|----|--------|------|------|
+| baseline 骨架 | `d1f9ddc` | PASS | schema v1 + 预算 + tolerance |
+| latency_gate.py | `974888e` | PASS | 3 gates + p95 + 退出码 |
+| 首轮真 baseline（5-sample） | `53e112e` | PASS | search_agent p95=11908ms（pre-optimization） |
+| O1 latency_cache 模块 | `0809e1c` | PASS | 13 tests 全绿；wiki_sha 失效 + TTL 300s |
+| O3 search_agent early_exit | `1b7b689` | PASS | SEARCH_HITS 围栏一出即 break；metrics.early_exit=true/false |
+| O5 async hook + cache 集成 | — | TODO | 下一步 |
+| MVP gate PASS（cache-hit） | — | TODO | 实施完重跑 baseline |
