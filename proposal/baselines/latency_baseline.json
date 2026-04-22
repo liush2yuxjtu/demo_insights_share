@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "doc_ref": "proposal/proposal_generation_latency.md",
+  "captured_at": null,
+  "sample_count": 0,
+  "env": {
+    "model": null,
+    "wiki_index_sha": null,
+    "host": null
+  },
+  "budget": {
+    "end_to_end": {
+      "cache_hit":  {"p50_ms": 1500, "p95_ms": 3000},
+      "cache_miss": {"p50_ms": 3500, "p95_ms": 6000}
+    },
+    "per_stage": {
+      "prefetch_hook": {"p95_ms": 200},
+      "search_agent":  {"p95_ms": 2500},
+      "adapter":       {"p95_ms": 1500},
+      "inject":        {"p95_ms": 120}
+    },
+    "regression_tolerance_pct": 10
+  },
+  "samples": []
+}
