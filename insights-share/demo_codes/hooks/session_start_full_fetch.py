@@ -18,6 +18,7 @@ import json
 import os
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -176,8 +177,6 @@ def _do_fetch() -> int:
 
     url = f"{wiki_url}/insights"
     if team:
-        import urllib.parse
-
         url = f"{url}?{urllib.parse.urlencode({'team': team})}"
 
     cached_etag = _load_cached_etag()
