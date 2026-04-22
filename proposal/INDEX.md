@@ -11,6 +11,7 @@
 | [proposal_statusline.md](proposal_statusline.md) | 反馈机制 | statusline 右侧常驻 `[share ✓ N/today]`：展示 insights-share 运行状态 + 今日触发计数，给用户/client 实时信任感信号（M5 前徽章为 `[wiki ...]`） |
 | [proposal_plugin_design.md](proposal_plugin_design.md) | 分发形态设计 | 将 insights-share 封装为 Claude Code plugin：skill + hook + statusline + MCP + agent + slash 命令一键装；含 MVP 范围、M1–M5 迁移路径、签名与团队 namespace 扩展 |
 | [proposal_rename_to_insights_share.md](proposal_rename_to_insights_share.md) | 命名迁移（M5_RENAME） | 把 plugin 深度重命名为 `insights-share`：`insights-share/plugin/` → `plugins/insights-share/`、skill / command / agent / statusline / cache 全系换名；新增 `gate_no_wiki_leak` + `gate_marketplace_subdir` 两道验证门 |
+| [proposal_ceo_next_steps.md](proposal_ceo_next_steps.md) | CEO 级执行摘要 | 只保留下一步推进重点与 CEO 级验收口径：兜底稳定性、状态清晰度、多主题决策一致性、端到端可演示 |
 
 ## 新增规则
 
