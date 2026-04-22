@@ -18,8 +18,14 @@ BUG_PATTERN = re.compile(
     r"bug|error|fix|fail|crash|stuck|报错|不工作|为什么|崩|挂|hang|broken|怎么办",
     re.IGNORECASE,
 )
-LOCATION_PATTERN = re.compile(r"\.(py|sh|ts|js|md|json|yaml|toml|rs|go):\d+|\$\{?\w+|/\w+/[\w\-./]+")
-MIN_ASSISTANT_CHARS = 50
+LOCATION_PATTERN = re.compile(
+    r"`[^`]{3,}`"                    # 反引号代码 / 路径 / 命令
+    r"|```"                          # 代码块
+    r"|\.(py|sh|ts|js|md|json|yaml|toml|rs|go)(:\d+)?"  # 文件名
+    r"|/\w+/[\w\-./]+"               # 绝对路径
+    r"|\$\{?\w+",                    # 环境变量
+)
+MIN_ASSISTANT_CHARS = 80
 
 
 def text_of(message: dict) -> str:
@@ -66,7 +72,11 @@ def fingerprint(scenario: str, rationale: str) -> str:
 
 
 def scan_jsonl(path: Path):
-    """yield (user_msg_text, assistant_msg_text, sessionId, line_no, ts)."""
+    """yield (user_msg_text, assistant_msg_text, sessionId, line_no, ts).
+
+    跳过 tool_result-only 的 user 消息（无文本），保留最后一条真实 user 文本，
+    匹配后续首个有文本的 assistant 回复。
+    """
     last_user = None
     last_user_line = 0
     last_user_ts = ""
@@ -78,12 +88,14 @@ def scan_jsonl(path: Path):
                 continue
             t = d.get("type")
             if t == "user":
-                last_user = text_of(d.get("message", {}))
-                last_user_line = i
-                last_user_ts = d.get("timestamp", "")
+                txt = text_of(d.get("message", {}))
+                if txt.strip():
+                    last_user = txt
+                    last_user_line = i
+                    last_user_ts = d.get("timestamp", "")
             elif t == "assistant" and last_user:
                 txt = text_of(d.get("message", {}))
-                if txt:
+                if txt.strip():
                     yield (
                         last_user,
                         txt,
@@ -91,7 +103,7 @@ def scan_jsonl(path: Path):
                         last_user_line,
                         last_user_ts,
                     )
-                last_user = None
+                    last_user = None
 
 
 def is_lesson(user_txt: str, assistant_txt: str) -> bool:
