@@ -33,6 +33,22 @@ if "claude_agent_sdk" not in sys.modules:
     sys.modules["claude_agent_sdk"] = _sdk
 
 
+def _load_real_search_agent():
+    """确保拿到的是真实 search_agent 模块，而不是 hooks 测试在 sys.modules
+    里塞的 stub（pytest 集合阶段的污染）。"""
+    import importlib
+
+    existing = sys.modules.get("search_agent")
+    if existing is not None and not hasattr(existing, "_load_topics_payload"):
+        # stub 没有这个函数，说明不是真模块 → 清掉后重新 import
+        del sys.modules["search_agent"]
+    import search_agent as sa
+
+    if not hasattr(sa, "_load_topics_payload"):
+        sa = importlib.reload(sa)
+    return sa
+
+
 @pytest.fixture
 def wiki_with_priorities(tmp_path: Path) -> Path:
     root = tmp_path / "wt"
@@ -84,7 +100,7 @@ def wiki_with_priorities(tmp_path: Path) -> Path:
 
 
 def test_topics_payload_sorted_by_priority_desc(wiki_with_priorities):
-    import search_agent
+    search_agent = _load_real_search_agent()
 
     payload = search_agent._load_topics_payload(wiki_with_priorities)
     data = json.loads(payload)
