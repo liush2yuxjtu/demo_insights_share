@@ -78,10 +78,10 @@ Wiki layout (4 layers):
   layer-3: {wiki_tree}/<type>/<item_slug>.md      (full entry, JSON frontmatter then ## sections)
   layer-4: {wiki_tree}/<type>/raw/<id>.jsonl      (raw card)
 
-Topic index (pre-loaded; may be empty if missing):
+Topic index hint (pre-loaded; may be empty):
 {topics_payload}
 
-Layer-skip rule: if the user query fuzzy-matches one topic by title/tags (semantic match, not substring), directly Read `{wiki_tree}/<wiki_type>/<item_slug>.md` where item_slug == topic.id and wiki_type == topic.wiki_type — skip Glob / INDEX.md entirely. Fall back to full glob only when no topic looks related.
+Hint usage: if the user query fuzzy-matches a topic (by title or tags), start exploration in `{wiki_tree}/<topic.wiki_type>/` — Glob that one directory first and Read its INDEX.md to pick the matching item_slug. DO NOT assume `topic.id` equals the on-disk slug — slugs may differ (e.g. id="postgres-pool-exhaustion" vs file "postgres_pool.md"). Fall back to full wiki glob only when no topic looks related.
 
 User query:
 {query}
@@ -162,7 +162,7 @@ async def _run_async(query_text: str, wiki_tree: str) -> dict:
     options = ClaudeAgentOptions(
         permission_mode="dontAsk",
         allowed_tools=["Glob", "Grep", "Read", "Bash"],
-        max_turns=3,
+        max_turns=5,
         model=get_haiku_model(),
         cwd=wiki_tree_abs,
         extra_args={"bare": None},
