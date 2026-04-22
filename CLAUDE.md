@@ -30,5 +30,6 @@
 | [proposal/proposal_plugin_design.md](proposal/proposal_plugin_design.md) | 分发形态设计 | 将 insights-share 封装为 Claude Code plugin：skill + hook + statusline + MCP + agent + slash 命令一键装；含 MVP 范围、M1–M5 迁移路径、签名与团队 namespace 扩展 |
 | [proposal/proposal_rename_to_insights_share.md](proposal/proposal_rename_to_insights_share.md) | 命名迁移（M5_RENAME） | 把 plugin 深度重命名为 `insights-share`：目录迁移 `plugins/insights-share/`、skill / command / agent / statusline / cache 全系换名；新增 `gate_no_wiki_leak` + `gate_marketplace_subdir` 两道验证门 |
 | [proposal/proposal_ceo_next_steps.md](proposal/proposal_ceo_next_steps.md) | CEO 级执行摘要 | 只描述下一步做什么与如何验证，面向 CEO 读取，不展开实现细节 |
+| [proposal/proposal_generation_latency.md](proposal/proposal_generation_latency.md) | 性能优化（M6_LATENCY 候选） | 攻 proposal.md 现状 #1 生成耗时：基线 + 8 条优化杠杆 + 数值 gate + agent-judge 双探针自测闭环 |
 | [docs/designs/INDEX.md](docs/designs/INDEX.md) | 索引 | claude_codes_to_design / claude_design / user_design 三目录说明 |
 | [docs/user_complaints_inbox/decisions_summary.md](docs/user_complaints_inbox/decisions_summary.md) | Inbox 决策记录 | role-review-inbox-loop 首次真实运行：16 条 proposals，11 approved / 5 denied，含每条问题、建议与决策理由 |
