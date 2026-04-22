@@ -1,0 +1,20 @@
+{
+  "name": "demo-insights-share",
+  "owner": {
+    "name": "demo_insights_share Team A"
+  },
+  "metadata": {
+    "description": "demo_insights_share 公共 marketplace：通过 GitHub 分发 insights-share plugin（M5 稳定版）",
+    "version": "0.5.0-m5",
+    "pluginRoot": "."
+  },
+  "plugins": [
+    {
+      "name": "insights-share",
+      "source": "./plugins/insights-share",
+      "description": "局域网 insights-share：topic 中心 Good/Bad 并列卡片的静默回灌 + 管理面板",
+      "version": "0.5.0-m5",
+      "keywords": ["insights-share", "wiki", "topic", "good-bad", "marketplace", "demo"]
+    }
+  ]
+}
