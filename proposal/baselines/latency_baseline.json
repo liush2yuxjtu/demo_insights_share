@@ -406,5 +406,103 @@
       "mean_ms": 1
     }
   },
-  "samples_post_m7_note": "captured after O2 regression fix bf2c61a"
+  "samples_post_m7_note": "captured after O2 regression fix bf2c61a",
+  "samples_post_m7_v2_captured_at": "2026-04-22T10:32:42Z",
+  "samples_post_m7_v2": [
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 1318,
+      "cache": "miss",
+      "ts": "2026-04-22T10:31:56Z",
+      "query": "postgres connection pool timeout"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 25,
+      "cache": "miss",
+      "ts": "2026-04-22T10:31:56Z",
+      "query": "懒惰信号检测"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 22,
+      "cache": "miss",
+      "ts": "2026-04-22T10:31:56Z",
+      "query": "tmux nested 环境变量"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 24,
+      "cache": "miss",
+      "ts": "2026-04-22T10:31:56Z",
+      "query": "worktree 分离开发"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 22,
+      "cache": "miss",
+      "ts": "2026-04-22T10:31:56Z",
+      "query": "删除前审计流程"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 7,
+      "cache": "hit",
+      "ts": "2026-04-22T10:31:56Z",
+      "query": "postgres connection pool timeout"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 11,
+      "cache": "hit",
+      "ts": "2026-04-22T10:31:56Z",
+      "query": "懒惰信号检测"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 16,
+      "cache": "hit",
+      "ts": "2026-04-22T10:31:56Z",
+      "query": "tmux nested 环境变量"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 12,
+      "cache": "hit",
+      "ts": "2026-04-22T10:31:56Z",
+      "query": "worktree 分离开发"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 8,
+      "cache": "hit",
+      "ts": "2026-04-22T10:31:56Z",
+      "query": "删除前审计流程"
+    }
+  ],
+  "samples_post_m7_v2_summary": {
+    "cache_miss": {
+      "count": 5,
+      "p50_ms": 24,
+      "p95_ms": 1059,
+      "mean_ms": 282
+    },
+    "cache_hit": {
+      "count": 5,
+      "p50_ms": 11,
+      "p95_ms": 15,
+      "mean_ms": 10
+    }
+  },
+  "samples_post_m7_v2_note": "Captured after local_search + adapter local-bypass (search_agent.py + local_search.py + adapter.py). cache-miss p95 dropped from 12314ms -> 1059ms; cache-hit p95 15ms (<=budget 3000). Gate PASS: end_to_end[miss] 1059ms/6000ms; end_to_end[hit] 15ms/3000ms."
 }

@@ -3,10 +3,15 @@
 输入：card JSON + problem 描述 + local_context。
 输出：AdapterResult(verdict/adapted_insight/diff_summary/confidence/latency_s)。
 任何异常都返回合法的 fallback AdapterResult，不向外抛。
+
+M7 优化（对齐 proposal_generation_latency.md adapter p95 ≤ 1500ms 预算）：
+当 card 带 `source="local"` 且本地 Jaccard 分数 ≥ 阈值时，跳过 MiniMax SDK
+走 adopt 合成结果，消除 adapter 阶段的 ~9s 网络调用。
 """
 from __future__ import annotations
 
 import json
+import os
 import re
 import time
 from dataclasses import dataclass
@@ -22,6 +27,11 @@ from claude_agent_sdk import (  # noqa: E402
     ResultMessage,
     query,
 )
+
+
+# 本地高置信短路阈值：card.score ≥ 该值即 bypass SDK。
+# 0.12 与 local_search.DEFAULT_SCORE_THRESHOLD 对齐。
+_LOCAL_BYPASS_MIN_SCORE = 0.12
 
 
 @dataclass
@@ -83,8 +93,39 @@ def _extract_json(raw: str) -> dict:
     return json.loads(match.group(0))
 
 
+def _local_bypass(card: dict, start_mono: float) -> AdapterResult | None:
+    """本地高置信短路：card 来源本地 + 分数够高 → 直接 adopt，不走 SDK。
+
+    返回 None 表示不能短路（caller 继续走 MiniMax 路径）。
+    ENV `INSIGHTS_ADAPTER_LOCAL_BYPASS=0` 可强制关闭此优化。
+    """
+    if os.environ.get("INSIGHTS_ADAPTER_LOCAL_BYPASS", "1") == "0":
+        return None
+    if card.get("source") != "local":
+        return None
+    try:
+        score = float(card.get("score", 0) or 0)
+    except (TypeError, ValueError):
+        score = 0.0
+    if score < _LOCAL_BYPASS_MIN_SCORE:
+        return None
+    elapsed = time.monotonic() - start_mono
+    title = card.get("title") or card.get("item") or "match"
+    return AdapterResult(
+        verdict="adopt",
+        adapted_insight=card.get("fix") or f"local high-confidence hit: {title}",
+        diff_summary=f"local bypass (score={score:.3f} via {card.get('rationale', '?')[:40]})",
+        # 合成 confidence：local 分数偏保守，+0.1 后封顶 0.9
+        confidence=min(0.9, score + 0.1),
+        latency_s=elapsed,
+    )
+
+
 async def adapt(card: dict, problem: str, local_context: str) -> AdapterResult:
     start = time.monotonic()
+    bypass = _local_bypass(card, start)
+    if bypass is not None:
+        return bypass
     prompt = PROMPT_TEMPLATE.format(
         card_json=json.dumps(card, ensure_ascii=False),
         problem=problem,
