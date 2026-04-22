@@ -5,7 +5,7 @@
   "sample_count": 5,
   "env": {
     "model": "MiniMax-M2.7-highspeed",
-    "wiki_index_sha": null,
+    "wiki_index_sha": "9b77609e576e",
     "host": "git@974888e"
   },
   "budget": {
@@ -81,5 +81,112 @@
       "model": "MiniMax-M2.7-highspeed",
       "ts": "2026-04-22T05:11:46Z"
     }
-  ]
+  ],
+  "samples_post_mvp_captured_at": "2026-04-22T05:26:41Z",
+  "samples_post_mvp": [
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 9996,
+      "cache": "miss",
+      "query": "postgres connection pool timeout",
+      "model": "MiniMax-M2.7-highspeed",
+      "ts": "2026-04-22T05:25:27.443826Z"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 8263,
+      "cache": "miss",
+      "query": "懒惰信号检测",
+      "model": "MiniMax-M2.7-highspeed",
+      "ts": "2026-04-22T05:25:35.707742Z"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 12875,
+      "cache": "miss",
+      "query": "删除前审计流程",
+      "model": "MiniMax-M2.7-highspeed",
+      "ts": "2026-04-22T05:25:48.583331Z"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 8864,
+      "cache": "miss",
+      "query": "tmux nested 环境变量",
+      "model": "MiniMax-M2.7-highspeed",
+      "ts": "2026-04-22T05:25:57.448811Z"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 8254,
+      "cache": "miss",
+      "query": "worktree 分离开发",
+      "model": "MiniMax-M2.7-highspeed",
+      "ts": "2026-04-22T05:26:05.703657Z"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 1,
+      "cache": "hit",
+      "query": "postgres connection pool timeout",
+      "model": "MiniMax-M2.7-highspeed",
+      "ts": "2026-04-22T05:26:05.705078Z"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 0,
+      "cache": "hit",
+      "query": "懒惰信号检测",
+      "model": "MiniMax-M2.7-highspeed",
+      "ts": "2026-04-22T05:26:05.705987Z"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 0,
+      "cache": "hit",
+      "query": "删除前审计流程",
+      "model": "MiniMax-M2.7-highspeed",
+      "ts": "2026-04-22T05:26:05.707019Z"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 1,
+      "cache": "hit",
+      "query": "tmux nested 环境变量",
+      "model": "MiniMax-M2.7-highspeed",
+      "ts": "2026-04-22T05:26:05.708077Z"
+    },
+    {
+      "stage": "end_to_end",
+      "status": "ok",
+      "latency_ms": 0,
+      "cache": "hit",
+      "query": "worktree 分离开发",
+      "model": "MiniMax-M2.7-highspeed",
+      "ts": "2026-04-22T05:26:05.709067Z"
+    }
+  ],
+  "samples_post_mvp_summary": {
+    "cache_miss": {
+      "count": 5,
+      "p50_ms": 8864,
+      "p95_ms": 12299,
+      "mean_ms": 9650
+    },
+    "cache_hit": {
+      "count": 5,
+      "p50_ms": 0,
+      "p95_ms": 1,
+      "mean_ms": 0
+    }
+  }
 }
