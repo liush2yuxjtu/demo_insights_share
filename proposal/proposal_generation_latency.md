@@ -185,4 +185,4 @@ def main():
 | O1 latency_cache 模块 | `0809e1c` | PASS | 13 tests 全绿；wiki_sha 失效 + TTL 300s |
 | O3 search_agent early_exit | `1b7b689` | PASS | SEARCH_HITS 围栏一出即 break；metrics.early_exit=true/false |
 | O5 async hook + cache 集成 | `bb59ff6` | PASS | fork+setsid 非阻塞；metrics 三行 jsonl；INSIGHTS_STOP_HOOK_ASYNC=0 可降级同步 |
-| MVP gate PASS（cache-hit） | — | TODO | 实施完重跑 baseline |
+| MVP gate PASS（cache-hit） | `61ce976` | PASS | 5+5 post-MVP 采样落盘：cache-hit p50=0ms / p95=1ms（budget 1500/3000 全绿）；cache-miss p50=8864ms / p95=12299ms（仍超预算，留给 M7 O2/O4/O6 收尾，不在 MVP 范围） |
