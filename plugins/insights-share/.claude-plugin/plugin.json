@@ -24,7 +24,8 @@
       "agents/share-validator.md"
     ],
     "hooks": {
-      "UserPromptSubmit": "hooks/user-prompt-submit.sh"
+      "UserPromptSubmit": "hooks/user-prompt-submit.sh",
+      "SessionStart": "hooks/session-start.sh"
     },
     "statusline": "statusline/insights_share_statusline.sh"
   },
