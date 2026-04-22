@@ -49,11 +49,47 @@
 | 路由 | 方法 | 用途 |
 |------|------|------|
 | `/topics` | GET | 列 topic |
+| `/topics` | POST | 新建 topic (前置, 必须先有 topic_id) |
 | `/topics/{id}/examples?label=...` | GET | 列卡片 |
 | `/insights` | POST | 新增卡 (主上传入口) |
 | `/insights/{id}/edit` | POST | patch 字段 |
 | `/insights/{id}/tag` | POST | 加 tag |
 | `/insights/merge` | POST | 合并 |
+
+## Daemon 卡片真实 schema (wiki_tree/general/bob_pgpool_bad_*.json 实测)
+```json
+{
+  "id": "<slug-with-hyphens>",
+  "title": "<≤60字 摘要>",
+  "author": "<名字>",
+  "confidence": 0.5,
+  "tags": ["..."],
+  "status": "active",
+  "topic_id": "<已存在 topic id>",
+  "label": "good|bad",
+  "label_note": "<rationale 摘要>",
+  "raw_log_type": "export"
+}
+```
+
+## Mapper (我的卡 → daemon schema)
+| 我的字段 | daemon 字段 | 转换 |
+|----------|-------------|------|
+| scenario | title | 截 60 字 |
+| decision | label | 直传 |
+| rationale | label_note | 截 200 字 |
+| labels | tags | 直传 |
+| topic | topic_id | 用 `claude-session-lessons` (上传前先 POST /topics 创建) |
+| author | author | 直传 |
+| (无) | confidence | 0.4 (auto-extracted 默认低) |
+| (无) | status | "active" |
+
+## 前置 topic 注册
+```bash
+curl --noproxy '*' -X POST http://127.0.0.1:7821/topics \
+  -H "Content-Type: application/json" \
+  -d '{"id":"claude-session-lessons","title":"Claude Session 自动抽取的教训","tags":["auto-extracted"],"created_by":"extract_lessons.py","wiki_type":"general"}'
+```
 
 ## 系统 proxy 注意
 本机 `http_proxy=http://127.0.0.1:7897` (Clash) 会拦截 loopback。所有 curl 必须加 `--noproxy '127.0.0.1,localhost'`，否则 502 Bad Gateway。Python urllib 同理需 `proxies={}`。
