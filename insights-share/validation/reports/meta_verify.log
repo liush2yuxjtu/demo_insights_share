@@ -11,3 +11,6 @@
 [2026-04-22T02:46:35Z] [1cbf669d5977] [tier=fast] [iter=1] [FAIL] [judge treated explanatory probe as execution without evidence]
 [2026-04-22T02:46:35Z] [1cbf669d5977] [tier=reliable] [iter=1] [ERROR] [claude -p returned 403 forbidden]
 --- terminal ---
+[2026-04-22T03:04:12Z] [ff7ef42822df] [tier=fast] [iter=1] [FAIL] [judge treated explanatory probe as missing execution evidence for CEO-plan/start-loop clarification]
+[2026-04-22T03:04:12Z] [ff7ef42822df] [tier=reliable] [iter=1] [ERROR] [claude -p returned 403 forbidden during CEO-plan/start-loop clarification]
+--- terminal ---
