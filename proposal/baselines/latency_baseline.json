@@ -189,221 +189,222 @@
       "mean_ms": 0
     }
   },
-  "samples_post_m7_captured_at": "2026-04-22T05:51:11Z",
+  "samples_post_m7_captured_at": "2026-04-22T05:58:43Z",
   "samples_post_m7": [
     {
       "stage": "search_total",
-      "status": "fail",
-      "latency_ms": 6964,
+      "status": "ok",
+      "latency_ms": 12671,
       "cache": "miss",
       "query": "postgres connection pool timeout",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:44:35.415877Z"
+      "ts": "2026-04-22T05:58:04.726151Z"
     },
     {
       "stage": "end_to_end",
-      "status": "fail",
-      "latency_ms": 6964,
+      "status": "ok",
+      "latency_ms": 12671,
       "cache": "miss",
       "query": "postgres connection pool timeout",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:44:35.416117Z"
+      "ts": "2026-04-22T05:58:04.726297Z"
     },
     {
       "stage": "search_total",
-      "status": "fail",
-      "latency_ms": 6880,
+      "status": "ok",
+      "latency_ms": 10885,
       "cache": "miss",
       "query": "懒惰信号检测",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:44:42.296213Z"
+      "ts": "2026-04-22T05:58:15.612066Z"
     },
     {
       "stage": "end_to_end",
-      "status": "fail",
-      "latency_ms": 6880,
+      "status": "ok",
+      "latency_ms": 10885,
       "cache": "miss",
       "query": "懒惰信号检测",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:44:42.296306Z"
+      "ts": "2026-04-22T05:58:15.612216Z"
     },
     {
       "stage": "search_total",
-      "status": "fail",
-      "latency_ms": 8412,
+      "status": "ok",
+      "latency_ms": 9892,
       "cache": "miss",
       "query": "删除前审计流程",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:44:50.709245Z"
+      "ts": "2026-04-22T05:58:25.504637Z"
     },
     {
       "stage": "end_to_end",
-      "status": "fail",
-      "latency_ms": 8412,
+      "status": "ok",
+      "latency_ms": 9892,
       "cache": "miss",
       "query": "删除前审计流程",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:44:50.709466Z"
+      "ts": "2026-04-22T05:58:25.504792Z"
     },
     {
       "stage": "search_total",
-      "status": "fail",
-      "latency_ms": 7660,
+      "status": "ok",
+      "latency_ms": 9918,
       "cache": "miss",
       "query": "tmux nested 环境变量",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:44:58.370171Z"
+      "ts": "2026-04-22T05:58:35.422718Z"
     },
     {
       "stage": "end_to_end",
-      "status": "fail",
-      "latency_ms": 7660,
+      "status": "ok",
+      "latency_ms": 9918,
       "cache": "miss",
       "query": "tmux nested 环境变量",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:44:58.370233Z"
+      "ts": "2026-04-22T05:58:35.422869Z"
     },
     {
       "stage": "search_total",
-      "status": "fail",
-      "latency_ms": 7111,
+      "status": "ok",
+      "latency_ms": 7800,
       "cache": "miss",
       "query": "worktree 分离开发",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:45:05.482037Z"
+      "ts": "2026-04-22T05:58:43.223451Z"
     },
     {
       "stage": "end_to_end",
-      "status": "fail",
-      "latency_ms": 7111,
+      "status": "ok",
+      "latency_ms": 7800,
       "cache": "miss",
       "query": "worktree 分离开发",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:45:05.482260Z"
+      "ts": "2026-04-22T05:58:43.223637Z"
     },
     {
       "stage": "search_total",
-      "status": "fail",
-      "latency_ms": 9033,
-      "cache": "miss",
+      "status": "ok",
+      "latency_ms": 1,
+      "cache": "hit",
       "query": "postgres connection pool timeout",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:45:14.515854Z"
+      "ts": "2026-04-22T05:58:43.225115Z"
     },
     {
       "stage": "end_to_end",
-      "status": "fail",
-      "latency_ms": 9033,
-      "cache": "miss",
+      "status": "ok",
+      "latency_ms": 1,
+      "cache": "hit",
       "query": "postgres connection pool timeout",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:45:14.516081Z"
+      "ts": "2026-04-22T05:58:43.225152Z"
     },
     {
       "stage": "search_total",
-      "status": "fail",
-      "latency_ms": 8485,
-      "cache": "miss",
+      "status": "ok",
+      "latency_ms": 1,
+      "cache": "hit",
       "query": "懒惰信号检测",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:45:23.001308Z"
+      "ts": "2026-04-22T05:58:43.226226Z"
     },
     {
       "stage": "end_to_end",
-      "status": "fail",
-      "latency_ms": 8485,
-      "cache": "miss",
+      "status": "ok",
+      "latency_ms": 1,
+      "cache": "hit",
       "query": "懒惰信号检测",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:45:23.001563Z"
+      "ts": "2026-04-22T05:58:43.226253Z"
     },
     {
       "stage": "search_total",
-      "status": "fail",
-      "latency_ms": 8786,
-      "cache": "miss",
+      "status": "ok",
+      "latency_ms": 1,
+      "cache": "hit",
       "query": "删除前审计流程",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:45:31.788201Z"
+      "ts": "2026-04-22T05:58:43.227404Z"
     },
     {
       "stage": "end_to_end",
-      "status": "fail",
-      "latency_ms": 8786,
-      "cache": "miss",
+      "status": "ok",
+      "latency_ms": 1,
+      "cache": "hit",
       "query": "删除前审计流程",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:45:31.788456Z"
+      "ts": "2026-04-22T05:58:43.227428Z"
     },
     {
       "stage": "search_total",
-      "status": "fail",
-      "latency_ms": 6204,
-      "cache": "miss",
+      "status": "ok",
+      "latency_ms": 1,
+      "cache": "hit",
       "query": "tmux nested 环境变量",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:45:37.992734Z"
+      "ts": "2026-04-22T05:58:43.228439Z"
     },
     {
       "stage": "end_to_end",
-      "status": "fail",
-      "latency_ms": 6204,
-      "cache": "miss",
+      "status": "ok",
+      "latency_ms": 1,
+      "cache": "hit",
       "query": "tmux nested 环境变量",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:45:37.992845Z"
+      "ts": "2026-04-22T05:58:43.228481Z"
     },
     {
       "stage": "search_total",
-      "status": "fail",
-      "latency_ms": 6372,
-      "cache": "miss",
+      "status": "ok",
+      "latency_ms": 1,
+      "cache": "hit",
       "query": "worktree 分离开发",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:45:44.365119Z"
+      "ts": "2026-04-22T05:58:43.229677Z"
     },
     {
       "stage": "end_to_end",
-      "status": "fail",
-      "latency_ms": 6372,
-      "cache": "miss",
+      "status": "ok",
+      "latency_ms": 1,
+      "cache": "hit",
       "query": "worktree 分离开发",
       "model": "MiniMax-M2.7-highspeed",
       "early_exit": null,
-      "ts": "2026-04-22T05:45:44.365188Z"
+      "ts": "2026-04-22T05:58:43.229703Z"
     }
   ],
   "samples_post_m7_summary": {
     "cache_miss": {
-      "count": 10,
-      "p50_ms": 7385,
-      "p95_ms": 8921,
-      "mean_ms": 7590
+      "count": 5,
+      "p50_ms": 9918,
+      "p95_ms": 12314,
+      "mean_ms": 10233
     },
     "cache_hit": {
-      "count": 0,
-      "p50_ms": 0,
-      "p95_ms": 0,
-      "mean_ms": 0
+      "count": 5,
+      "p50_ms": 1,
+      "p95_ms": 1,
+      "mean_ms": 1
     }
-  }
+  },
+  "samples_post_m7_note": "captured after O2 regression fix bf2c61a"
 }
