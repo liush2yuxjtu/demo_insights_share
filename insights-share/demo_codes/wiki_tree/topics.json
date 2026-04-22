@@ -600,6 +600,16 @@
       "created_by": "extract_lessons.py",
       "wiki_type": "tooling",
       "team": null
+    },
+    {
+      "id": "team6-verify-topic",
+      "title": "Team6 验证 topic",
+      "tags": [
+        "verify"
+      ],
+      "created_by": "team6",
+      "wiki_type": "general",
+      "team": null
     }
   ]
 }
