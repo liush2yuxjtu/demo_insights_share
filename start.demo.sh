@@ -151,11 +151,16 @@ cat >> "$ENV_FILE" <<EOF
 # --- 绕开 http_proxy，让 hook 直连 insightsd -----------
 export NO_PROXY="127.0.0.1,localhost"
 export no_proxy="127.0.0.1,localhost"
+
+# --- demo 沙箱强制走本机 daemon，不跟随 plugin 默认 LAN 地址 ---
+export INSIGHTS_SHARE_URL="http://127.0.0.1:${DAEMON_PORT}"
+export INSIGHTS_DAEMON_URL="http://127.0.0.1:${DAEMON_PORT}"
 EOF
 chmod 600 "$ENV_FILE"
 
 # ── Stage 5: 启动 insightsd daemon（如未在跑）──────────
-# insights-share skill 的 hook 硬编码访问 http://127.0.0.1:7821。
+# insights-share plugin 默认指向固定 LAN 地址；demo 沙箱通过上面的
+# INSIGHTS_SHARE_URL / INSIGHTS_DAEMON_URL 显式改回本机 127.0.0.1。
 # daemon 离线时 Stop hook 会报错并挂在 claude 输出里，demo 观感差。
 # 策略：7821 已 LISTEN → 复用（不动）；否则用 demo_codes/.venv 后台启动，
 # PID 写进沙箱文件；cleanup 只 kill 我们自己起的 daemon。

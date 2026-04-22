@@ -2,7 +2,7 @@
   "name": "wiki-server",
   "transport": {
     "type": "http",
-    "base_url": "http://127.0.0.1:7821",
+    "base_url": "http://192.168.22.42:7821",
     "health_path": "/healthz",
     "timeout_ms": 3000
   },

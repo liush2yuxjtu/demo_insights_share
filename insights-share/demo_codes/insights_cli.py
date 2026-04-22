@@ -21,7 +21,7 @@ import adapter
 import ui
 from insightsd.emitter import emit_from_env
 
-DEFAULT_WIKI = "http://127.0.0.1:7821"
+DEFAULT_WIKI = "http://192.168.22.42:7821"
 DEFAULT_LOCAL_CONTEXT = (
     "FastAPI + PostgreSQL 14 + PgBouncer transaction pooling, "
     "lunch-time traffic burst"

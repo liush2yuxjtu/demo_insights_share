@@ -39,7 +39,7 @@
   "requires": {
     "claude_code": ">=0.1.0",
     "daemon": {
-      "insightsd": "http://127.0.0.1:7821"
+      "insightsd": "http://192.168.22.42:7821"
     }
   }
 }

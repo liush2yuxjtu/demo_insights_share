@@ -31,7 +31,7 @@ agent；校验通过才调 daemon `POST /insights`。
    - `verdict == REJECT` → 打印 checks，拒绝发布，给出修正建议（`next` 字段），退出非零
    - `verdict == WARN`  → 如 `--dry-run`，仅打印警告；否则发布 + 附带 warnings
    - `verdict == PASS`  → 发布
-4. **发布**：`POST http://127.0.0.1:7821/insights` with 卡片 JSON
+4. **发布**：`POST http://192.168.22.42:7821/insights` with 卡片 JSON
 5. **回显**：卡片 ID、daemon 返回、statusline 更新
 
 ## --dry-run 行为

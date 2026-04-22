@@ -19,7 +19,7 @@
 
 set -euo pipefail
 
-DAEMON_URL="${INSIGHTS_DAEMON_URL:-http://127.0.0.1:7821}"
+DAEMON_URL="${INSIGHTS_DAEMON_URL:-http://192.168.22.42:7821}"
 WARM_DIR_DEFAULT="$HOME/.cache/insights-share/warm"
 WARM_DIR="${INSIGHTS_WARM_DIR:-$WARM_DIR_DEFAULT}"
 

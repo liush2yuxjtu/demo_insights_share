@@ -10,7 +10,7 @@ allowed-tools: Bash, Read
 
 ## 做什么
 
-1. 确认 daemon `http://127.0.0.1:7821` 可达；不可达则提示先开 `insights-share-server`
+1. 确认 daemon `http://192.168.22.42:7821` 可达；不可达则提示先开 `insights-share-server`
 2. 校验 plugin manifest（`.claude-plugin/plugin.json`）结构合法
 3. 校验 skill 目录存在：`skills/insights-share` 与 `skills/insights-share-server`
 4. 校验 hook wrapper 可执行：`hooks/user-prompt-submit.sh`

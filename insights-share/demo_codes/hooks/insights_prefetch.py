@@ -2,7 +2,7 @@
 
 每次 Bob 按下回车：
 1. 从 stdin 读 hook event，拿到用户 prompt
-2. GET http://127.0.0.1:7821/insights 拿全量卡片（本地 daemon，2s 超时）
+2. GET 默认 LAN daemon http://192.168.22.42:7821/insights 拿全量卡片（2s 超时）
 3. 调 insights_cache.persist(card) 把卡片落盘到 ~/.cache/insights-share/
 4. 根据 prompt 关键词挑 top-K 相关卡片，按 Claude Code hook 协议输出
    `{"hookSpecificOutput": {"hookEventName": "UserPromptSubmit",
@@ -28,7 +28,7 @@ from pathlib import Path
 from typing import Any
 
 DEMO_CODES = Path(__file__).resolve().parent.parent
-DEFAULT_WIKI = "http://127.0.0.1:7821"
+DEFAULT_WIKI = "http://192.168.22.42:7821"
 TIMEOUT_SECONDS = 2.0
 TOP_K = 3
 CACHE_CONFIG = Path.home() / ".cache" / "insights-share" / "config.json"
@@ -73,6 +73,16 @@ def _load_install_config() -> dict[str, Any]:
     except (OSError, json.JSONDecodeError):
         return {}
     return data if isinstance(data, dict) else {}
+
+
+def _resolve_wiki_url() -> str:
+    env_url = os.environ.get("INSIGHTS_SHARE_URL", "").strip()
+    if env_url:
+        return env_url.rstrip("/")
+    cfg_url = _load_install_config().get("server_url")
+    if isinstance(cfg_url, str) and cfg_url.strip():
+        return cfg_url.strip().rstrip("/")
+    return DEFAULT_WIKI
 
 
 def _resolve_team() -> str | None:
@@ -131,7 +141,7 @@ def _silent_main() -> int:
             _bump_today = None
 
         team = _resolve_team()
-        url = f"{DEFAULT_WIKI}/insights"
+        url = f"{_resolve_wiki_url()}/insights"
         if team:
             url = f"{url}?{urllib.parse.urlencode({'team': team})}"
         with urllib.request.urlopen(url, timeout=TIMEOUT_SECONDS) as resp:

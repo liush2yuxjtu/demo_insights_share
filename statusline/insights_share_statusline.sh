@@ -12,7 +12,7 @@
 #   - badge 本体 ≤ 20 字符（不含 ANSI 色）
 #
 # 环境变量：
-#   INSIGHTS_SHARE_URL     daemon base url，默认 http://127.0.0.1:7821
+#   INSIGHTS_SHARE_URL     daemon base url，默认 http://192.168.22.42:7821
 #   SHARE_STATUSLINE       "off" 时整条链路禁用（用于 A 侧录制）
 #   SHARE_STATUSLINE_NO_COLOR  非空时禁用 ANSI 色（兼容纯日志场景）
 #   SHARE_STATUSLINE_STALE_TTL_SECONDS  本地缓存 stale TTL，默认 86400
@@ -24,7 +24,7 @@ if [[ "${SHARE_STATUSLINE:-}" == "off" ]]; then
   exit 0
 fi
 
-WIKI_URL="${INSIGHTS_SHARE_URL:-http://127.0.0.1:7821}"
+WIKI_URL="${INSIGHTS_SHARE_URL:-http://192.168.22.42:7821}"
 CACHE_DIR="${HOME}/.cache/insights-share"
 TODAY_JSON="${CACHE_DIR}/today_count.json"
 MANIFEST_JSON="${CACHE_DIR}/manifest.json"
