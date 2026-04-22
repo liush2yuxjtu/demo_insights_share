@@ -79,17 +79,38 @@
 | decision | label | 直传 |
 | rationale | label_note | 截 200 字 |
 | labels | tags | 直传 |
-| topic | topic_id | 用 `claude-session-lessons` (上传前先 POST /topics 创建) |
+| topic | topic_id | 从 staging 子目录名读取真实 topic (`database`/`infra_cache`/`tooling`/...)；若 daemon `/topics` 缺，则 POST /topics 按需补建，wiki_type 取同名 |
 | author | author | 直传 |
 | (无) | confidence | 0.4 (auto-extracted 默认低) |
 | (无) | status | "active" |
 
-## 前置 topic 注册
+## 前置 topic 注册 (按 staging 真实子目录动态生成)
 ```bash
-curl --noproxy '*' -X POST http://127.0.0.1:7821/topics \
-  -H "Content-Type: application/json" \
-  -d '{"id":"claude-session-lessons","title":"Claude Session 自动抽取的教训","tags":["auto-extracted"],"created_by":"extract_lessons.py","wiki_type":"general"}'
+# 1) 列 staging 已抽出的 topic
+TOPICS=$(ls /tmp/insights_upload_staging/)
+# 2) 列 daemon 已知 topic
+KNOWN=$(curl -s --noproxy '*' http://127.0.0.1:7821/topics | jq -r '.topics[].id')
+# 3) 缺的补建
+for t in $TOPICS; do
+  TID="auto-${t}"  # 加前缀避免和 demo seeds 冲突
+  if ! echo "$KNOWN" | grep -qx "$TID"; then
+    curl -s --noproxy '*' -X POST http://127.0.0.1:7821/topics \
+      -H "Content-Type: application/json" \
+      -d "{\"id\":\"$TID\",\"title\":\"自动抽取: $t\",\"tags\":[\"auto-extracted\",\"$t\"],\"created_by\":\"extract_lessons.py\",\"wiki_type\":\"$t\"}"
+  fi
+done
 ```
+
+## Daemon 启动绝对路径 (实测命令)
+```bash
+cd /Users/m1/projects/demo_insights_share/insights-share/demo_codes && \
+  nohup .venv/bin/python insights_cli.py serve --host 127.0.0.1 --port 7821 \
+  --store wiki_tree --store-mode tree > /tmp/insightsd.log 2>&1 &
+echo $! > /tmp/insightsd.pid
+```
+
+## Self-verify 闭环说明
+judge probe 不是循环调用 plan，而是用 LLM 复述 plan 内容 + 缺项检测。retreat condition: judge 给 PASS 或 5 轮上限；REFINE 触发本文件 edit；FAIL 升级 `claude -p` (非 fast)。
 
 ## 系统 proxy 注意
 本机 `http_proxy=http://127.0.0.1:7897` (Clash) 会拦截 loopback。所有 curl 必须加 `--noproxy '127.0.0.1,localhost'`，否则 502 Bad Gateway。Python urllib 同理需 `proxies={}`。
