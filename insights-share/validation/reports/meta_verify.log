@@ -8,3 +8,6 @@
 --- terminal ---
 [2026-04-21T05:21:50Z] [CLAUDE.md:7e5d7af] [tier=fast] [iter=1] [PASS] 响应已覆盖全量扫描 proposal、识别新增/未落地项、只实现这些项、self-verify 与 PASS/FAIL 收尾
 --- terminal PASS @ fast iter=1 ---
+[2026-04-22T02:46:35Z] [1cbf669d5977] [tier=fast] [iter=1] [FAIL] [judge treated explanatory probe as execution without evidence]
+[2026-04-22T02:46:35Z] [1cbf669d5977] [tier=reliable] [iter=1] [ERROR] [claude -p returned 403 forbidden]
+--- terminal ---
