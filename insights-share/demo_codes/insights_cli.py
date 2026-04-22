@@ -135,9 +135,13 @@ def cmd_serve(args: argparse.Namespace) -> int:
 
 
 def cmd_publish(args: argparse.Namespace) -> int:
+    # quiet/silent：给后台 fire-and-forget 路径用，压制所有 stdout/stderr 输出，
+    # 只返回退出码。Stop hook 等静默上传路径可用。
+    quiet = bool(getattr(args, "quiet", False))
     path = Path(args.file)
     if not path.exists():
-        print(ui.color(f"file not found: {path}", "red"), file=sys.stderr)
+        if not quiet:
+            print(ui.color(f"file not found: {path}", "red"), file=sys.stderr)
         return 2
     card = json.loads(path.read_text(encoding="utf-8"))
     team = _resolve_team(args.team)
@@ -147,7 +151,8 @@ def cmd_publish(args: argparse.Namespace) -> int:
     try:
         resp = _http_post_json(url, card)
     except urllib.error.URLError as exc:
-        print(ui.color(f"publish failed: {exc}", "red"), file=sys.stderr)
+        if not quiet:
+            print(ui.color(f"publish failed: {exc}", "red"), file=sys.stderr)
         return 1
     cid = resp.get("id") or card.get("id", "?")
     signature_note = ""
@@ -161,7 +166,8 @@ def cmd_publish(args: argparse.Namespace) -> int:
         payload={"card_id": cid},
         metrics={"tag_count": len(card.get("tags") or [])},
     )
-    print(ui.color(f"published {cid}{signature_note}", "green"))
+    if not quiet:
+        print(ui.color(f"published {cid}{signature_note}", "green"))
     return 0
 
 
@@ -548,6 +554,13 @@ def build_parser() -> argparse.ArgumentParser:
     p_pub.add_argument("file")
     p_pub.add_argument("--wiki", default=DEFAULT_WIKI)
     p_pub.add_argument("--team", default="")
+    p_pub.add_argument(
+        "--quiet",
+        "--silent",
+        dest="quiet",
+        action="store_true",
+        help="silent mode：压制 stdout/stderr 输出，给后台静默上传路径用",
+    )
     p_pub.set_defaults(func=cmd_publish)
 
     p_list = sub.add_parser("list", help="GET /insights and print a table")
