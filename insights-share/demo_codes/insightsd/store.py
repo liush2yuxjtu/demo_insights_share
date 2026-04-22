@@ -359,6 +359,11 @@ class TreeInsightStore:
 
     def __init__(self, root: Path) -> None:
         self.root = Path(root)
+        if self.root.exists() and not self.root.is_dir():
+            raise ValueError(
+                f"TreeInsightStore root must be a directory, got file: {self.root}. "
+                "Tree mode 需要 --store 指向 wiki_tree 目录，不是 wiki.json 文件。"
+            )
         self._lock = threading.Lock()
         self.signatures = CardSignatureService()
 
@@ -605,6 +610,18 @@ class TreeInsightStore:
             self._rebuild_index(wtype)
             return True
 
+    # Admin /edit 不得修改的字段：id/结构性元数据 + 原 label + raw_log 原始证据。
+    # 对 label 的覆盖请走 /insights/{id}/relabel（只写 label_override 三元组）。
+    # 详见 proposal/proposal_conflict_design.md §"管理员权限范围"。
+    _EDIT_PROTECTED = frozenset({
+        "id", "wiki_type", "item_slug", "score",
+        "label",
+        "raw_log", "raw_log_type", "raw_log_sha256", "raw_log_path",
+        "raw_log_export_content",
+        "signature", "signature_algorithm", "signature_schema",
+        "signature_key_id", "signature_signed_at", "signature_status",
+    })
+
     def edit(self, card_id: str, patch: dict[str, Any]) -> dict[str, Any] | None:
         found = self._find_item_path(card_id)
         if not found:
@@ -615,7 +632,7 @@ class TreeInsightStore:
             if not card:
                 return None
             for key, value in (patch or {}).items():
-                if key in {"id", "wiki_type", "item_slug", "score"}:
+                if key in self._EDIT_PROTECTED:
                     continue
                 card[key] = value
             self._write_card(wtype, md.stem, card)
