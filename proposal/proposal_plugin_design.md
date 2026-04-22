@@ -238,6 +238,22 @@ M5 把 for-loop 的推进规模固化为「深度重命名 + plugins/<name>/ 官
 | plugin 热改难 | 开发期保留 skill 目录双路径，plugin 走 release 构建 |
 | tmux 嵌套跑 plugin 安装 | 遵守 `tmux-nested.md`，用 `TMUX= tmux ...` |
 
+## 分发双仓（v0.6.0-m7 起）
+
+| 仓 | URL | 体积 | 用途 |
+|----|-----|------|------|
+| **dev 仓**（保留） | `liush2yuxjtu/demo_insights_share` | ~46M | 设计 / proposal / demo_codes / validation artifacts / 历史 |
+| **plugin 仓**（新建） | `liush2yuxjtu/insights-share-plugin` | ~108K | 只含 `.claude-plugin/` + skills/commands/agents/hooks/statusline/mcp/scripts |
+
+安装路径换到 plugin 仓：
+
+```
+claude plugin marketplace add liush2yuxjtu/insights-share-plugin
+claude plugin install insights-share@insights-share-plugin
+```
+
+沙箱实测：marketplace_add 5s（原 12s），plugin cache 376K（原 46M）。dev 仓的 marketplace.json 继续保留以兼容老链路，新使用方统一走 plugin 仓。
+
 ## 与既有 proposal 对齐
 
 | 既有 proposal | 关系 |
