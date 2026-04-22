@@ -1,12 +1,14 @@
 """Smoke test for insights_stop_hook 的 latency 指标 + cache flip。
 
-对齐 proposal_generation_latency.md M6_LATENCY_MVP O5：
+对齐 proposal_generation_latency.md M6_LATENCY_MVP O5 + M7_LATENCY_DEEP O4：
 - 同步路径（INSIGHTS_STOP_HOOK_ASYNC=0）下跑两次 hook
 - 第一次 cache=miss，第二次 cache=hit
-- metrics jsonl 必须出现 search_total + end_to_end 两条，cache 字段翻转
+- metrics jsonl 必须出现 search_total + adapter + end_to_end 三条，cache 字段翻转
+- adapter stage 有非负 latency；adapter.adapt 被并行调度（O4）
 """
 from __future__ import annotations
 
+import dataclasses
 import json
 import os
 import sys
@@ -28,6 +30,32 @@ if "search_agent" not in sys.modules:
     _stub = types.ModuleType("search_agent")
     _stub.run = lambda query, wiki_tree_root: {"hits": []}  # 理论上不会被调用
     sys.modules["search_agent"] = _stub
+
+# adapter 依赖 claude_agent_sdk（real SDK）在 CI 环境下可能没装。
+# 同 search_agent 的套路：塞一个纯占位 stub，真实 adapt 会被测试 monkeypatch 覆盖。
+if "adapter" not in sys.modules:
+    _adapter_stub = types.ModuleType("adapter")
+
+    @dataclasses.dataclass
+    class _StubAdapterResult:
+        verdict: str
+        adapted_insight: str
+        diff_summary: str
+        confidence: float
+        latency_s: float
+
+    async def _stub_adapt(card, problem, local_context):  # pragma: no cover - 会被 patch
+        return _StubAdapterResult(
+            verdict="adopt",
+            adapted_insight="(stub)",
+            diff_summary="(stub)",
+            confidence=0.5,
+            latency_s=0.0,
+        )
+
+    _adapter_stub.AdapterResult = _StubAdapterResult
+    _adapter_stub.adapt = _stub_adapt
+    sys.modules["adapter"] = _adapter_stub
 
 
 @pytest.fixture
@@ -114,6 +142,24 @@ def test_stop_hook_sync_cache_miss_then_hit(
 
     monkeypatch.setattr(latency_cache, "cached_search", fake_cached_search)
 
+    # O4：monkeypatch adapter.adapt 为纯异步 stub，返回 canned AdapterResult，
+    # 避免触发真实 MiniMax SDK 调用。
+    import adapter as adapter_mod
+
+    adapter_call_count = {"n": 0}
+
+    async def fake_adapt(card, problem, local_context):
+        adapter_call_count["n"] += 1
+        return adapter_mod.AdapterResult(
+            verdict="adopt",
+            adapted_insight="(canned)",
+            diff_summary="(canned)",
+            confidence=0.9,
+            latency_s=0.01,
+        )
+
+    monkeypatch.setattr(adapter_mod, "adapt", fake_adapt)
+
     # 干掉 insights_cache.persist + emit_from_env 的真实 IO，保持 hook 流程闭合
     import insights_cache
     monkeypatch.setattr(insights_cache, "persist", lambda top: Path("/tmp/fake"))
@@ -140,9 +186,9 @@ def test_stop_hook_sync_cache_miss_then_hit(
 
     records = _read_all_metrics(metrics_dir)
     stages = [r["stage"] for r in records]
-    # 每次跑应写 3 条：search_total + inject + end_to_end（inject 存在 so bonus）
-    # 至少必须满足题目契约：search_total + end_to_end 都在
+    # 每次跑应写 4 条：search_total + adapter + inject + end_to_end
     assert "search_total" in stages, f"search_total missing; stages={stages}"
+    assert "adapter" in stages, f"adapter missing; stages={stages}"
     assert "end_to_end" in stages, f"end_to_end missing; stages={stages}"
 
     # 验证 cache 字段翻转
@@ -150,6 +196,17 @@ def test_stop_hook_sync_cache_miss_then_hit(
     assert len(search_records) == 2, f"expected 2 search_total rows, got {len(search_records)}"
     assert search_records[0]["cache"] == "miss", f"first run should be miss, got {search_records[0]}"
     assert search_records[1]["cache"] == "hit", f"second run should be hit, got {search_records[1]}"
+
+    # O4：adapter stage 被记录，latency 非负 int，两次都跑
+    adapter_records = [r for r in records if r["stage"] == "adapter"]
+    assert len(adapter_records) == 2, f"expected 2 adapter rows, got {len(adapter_records)}"
+    for r in adapter_records:
+        assert isinstance(r["latency_ms"], int)
+        assert r["latency_ms"] >= 0
+    # adapter.adapt 被实际调用了 2 次（而不是被旁路）
+    assert adapter_call_count["n"] == 2, (
+        f"adapter.adapt should be invoked twice, got {adapter_call_count['n']}"
+    )
 
     # query 截断检查
     for r in records:

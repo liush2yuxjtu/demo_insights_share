@@ -5,19 +5,24 @@
 对齐 validation.md task #2：触发模式硬编码 SILENT_AND_JUST_RUN
 （ASK_USER_APPROVAL 仅作占位，被强制 override 回 SILENT）。
 
-对齐 proposal_generation_latency.md M6_LATENCY_MVP (O1 + O3 + O5)：
+对齐 proposal_generation_latency.md M6_LATENCY_MVP (O1 + O3 + O5) 与
+M7_LATENCY_DEEP O4：
 - O1 结果级 cache：走 latency_cache.cached_search，命中直接跳 search_agent
 - O3 early exit：底层 search_agent._run_async 在 SEARCH_HITS 围栏关上时 break
+- O4 search + adapter 并行：cached_search 走 asyncio.to_thread 跑，hits 一回来
+  立刻用 asyncio.create_task 拉起 adapter.adapt，让 adapter SDK 调用与 search
+  收尾 / 文件清理重叠，不等 ResultMessage 空档
 - O5 async fire-and-forget：默认 fork 后 parent 立刻退出，child 后台跑 search +
   inject + metrics，下一轮对话不再被 hook 阻塞
 - latency 指标：每个 stage 一行 jsonl 写到
-  ~/.cache/insights-share/metrics/<YYYY-MM-DD>.jsonl
+  ~/.cache/insights-share/metrics/<YYYY-MM-DD>.jsonl；新增 adapter stage。
 
 **严禁 fallback**：search_agent / cache / inject 任何异常直接 raise，
 child 以非 0 退出；validation phase 视为失败。parent 不 retry。
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import os
 import sys
@@ -113,10 +118,66 @@ def _append_metric(
         fh.write("\n")
 
 
-def _do_search_and_inject(last_text: str, mode: str) -> int:
-    """child / 同步路径共享的主体：search → inject → metrics。
+async def _run_search_then_adapter_async(
+    query_text: str,
+    wiki_tree: Path,
+    search_runner,
+    cached_search_fn,
+    adapter_adapt_fn,
+):
+    """并行：search 用 cached_search 跑完后，立即把 top hit 喂给 adapter.adapt。
 
-    严禁吞 search_agent 异常。任何异常 raise 冒出去，由 caller 决定 exit code。
+    两阶段仍是 search 先于 adapter，但中间没有等 ResultMessage 的空档：cached_search
+    走 asyncio.to_thread 扔到线程池，hits dict 一回来立刻 asyncio.create_task
+    起 adapter.adapt 协程，让 adapter SDK 调用与线程池里 search 线程的任何
+    收尾 / 清理动作重叠。
+
+    返回 (hits, adapter_result, search_latency_ms, adapter_latency_ms,
+    total_latency_ms, was_cache_hit)。top 为 None 时按项目契约 raise，不做
+    fallback。
+    """
+    total_start = time.monotonic()
+
+    search_start = time.monotonic()
+    hits, was_cache_hit = await asyncio.to_thread(
+        cached_search_fn,
+        query_text,
+        wiki_tree,
+        search_runner,
+        300,
+    )
+    search_latency_ms = int((time.monotonic() - search_start) * 1000)
+
+    top = (hits.get("hits") or [None])[0]
+    if top is None:
+        # 严禁 fallback：hits 为空直接让 child 以 fail 退出
+        raise RuntimeError("search returned empty hits; no fallback per project rule")
+
+    # hits 一到就起 adapter task，让 adapter SDK 调用与任何 search 线程的
+    # 后续收尾（cached_search 写盘 / GC / event-loop 调度）重叠。
+    adapter_start = time.monotonic()
+    adapter_task = asyncio.create_task(
+        adapter_adapt_fn(card=top, problem=query_text, local_context="")
+    )
+    adapter_result = await adapter_task
+    adapter_latency_ms = int((time.monotonic() - adapter_start) * 1000)
+
+    total_latency_ms = int((time.monotonic() - total_start) * 1000)
+    return (
+        hits,
+        adapter_result,
+        search_latency_ms,
+        adapter_latency_ms,
+        total_latency_ms,
+        was_cache_hit,
+    )
+
+
+def _do_search_and_inject(last_text: str, mode: str) -> int:
+    """child / 同步路径共享的主体：search → adapter(并行) → inject → metrics。
+
+    严禁吞 search_agent / adapter 异常。任何异常 raise 冒出去，由 caller 决定
+    exit code。
     """
     end_to_end_start = time.perf_counter()
 
@@ -126,6 +187,7 @@ def _do_search_and_inject(last_text: str, mode: str) -> int:
     import search_agent  # noqa: E402
     import latency_cache  # noqa: E402
     import insights_cache  # noqa: E402
+    import adapter as adapter_mod  # noqa: E402
     from insightsd.emitter import emit_from_env  # noqa: E402
 
     sys.stderr.write(f"[insights_stop_hook] querying search_agent: {last_text[:120]!r}\n")
@@ -136,18 +198,32 @@ def _do_search_and_inject(last_text: str, mode: str) -> int:
         message=f"Stop hook 触发：{last_text[:80]}",
     )
 
-    # ---- stage: search_total (含 cache-lookup + miss 情况下的真实 search) ----
+    # ---- stage: search_total + adapter (并行调度) ----
     search_start = time.perf_counter()
     was_cache_hit = False
     search_status = "ok"
+    adapter_status = "ok"
     try:
-        hits, was_cache_hit = latency_cache.cached_search(
-            last_text,
-            WIKI_TREE,
-            runner=search_agent.run,
-            ttl_seconds=300,
+        (
+            hits,
+            adapter_result,
+            search_latency_ms,
+            adapter_latency_ms,
+            _combined_ms,
+            was_cache_hit,
+        ) = asyncio.run(
+            _run_search_then_adapter_async(
+                last_text,
+                WIKI_TREE,
+                search_agent.run,
+                latency_cache.cached_search,
+                adapter_mod.adapt,
+            )
         )
     except Exception:
+        # 区分不了精确是哪一阶段出的错时，把 search_total 标成 fail；
+        # adapter 只在 search 已经写完 metric 后才会被触发，所以 fail
+        # 归属 search 是保守但安全的选择。
         search_status = "fail"
         _append_metric(
             "search_total",
@@ -164,13 +240,23 @@ def _do_search_and_inject(last_text: str, mode: str) -> int:
             last_text,
         )
         raise
-    search_latency_ms = int((time.perf_counter() - search_start) * 1000)
     _append_metric(
         "search_total",
         search_status,
         search_latency_ms,
         "hit" if was_cache_hit else "miss",
         last_text,
+    )
+    _append_metric(
+        "adapter",
+        adapter_status,
+        adapter_latency_ms,
+        "hit" if was_cache_hit else "miss",
+        last_text,
+    )
+    sys.stderr.write(
+        f"[insights_stop_hook] adapter verdict={getattr(adapter_result, 'verdict', '?')} "
+        f"confidence={getattr(adapter_result, 'confidence', '?')}\n"
     )
 
     top = (hits.get("hits") or [None])[0]
