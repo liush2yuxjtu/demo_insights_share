@@ -23,12 +23,16 @@ from __future__ import annotations
 import argparse
 import asyncio
 import json
+import os
 import re
 import sys
+import time
 from pathlib import Path
 
 from _sdk_common import env_summary, get_haiku_model
 from insightsd.emitter import emit_from_env
+
+import local_search
 
 from claude_agent_sdk import (  # noqa: E402
     AssistantMessage,
@@ -42,21 +46,49 @@ from claude_agent_sdk import (  # noqa: E402
 _TOPICS_PAYLOAD_MAX_BYTES = 12 * 1024
 
 
+def _sort_topics_by_priority(items: list) -> list:
+    """按 priority desc → created_at asc 稳定排序。
+
+    对齐 proposal_ceo_next_steps.md 「决策一致性」：同一 multi-topic 命中集合
+    多次检索必须给出同一顺序。priority 字段可选，缺省为 0。
+    """
+    def _key(t):
+        if not isinstance(t, dict):
+            return (0, "")
+        prio = int(t.get("priority") or 0)
+        ts = t.get("created_at") or ""
+        # priority 越大越靠前 → 用负号
+        return (-prio, ts)
+    return sorted(items, key=_key)
+
+
 def _load_topics_payload(wiki_tree: Path) -> str:
     """读取 topics.json 并打成紧凑 JSON，供 PROMPT 注入。
 
-    仅保留 id/title/tags/wiki_type/team 字段；丢弃 created_by/created_at 以压缩体积。
+    仅保留 id/title/tags/wiki_type/team/priority 字段；丢弃 created_by/created_at 以压缩体积。
     输出紧凑 JSON（无 indent），超过 12 KB 时截取前 N 条保证不超限。
-    文件缺失时返回 "{}"（tree 模式下 topics.json 可选，不得 raise）。"""
+    文件缺失时返回 "{}"（tree 模式下 topics.json 可选，不得 raise）。
+    排序对齐多主题优先级规则：priority desc → created_at asc。"""
     topics_path = wiki_tree / "topics.json"
     if not topics_path.exists():
         return "{}"
 
     raw = json.loads(topics_path.read_text(encoding="utf-8"))
     items = raw.get("topics", []) if isinstance(raw, dict) else []
+    items = _sort_topics_by_priority(items)
 
     keep_fields = ("id", "title", "tags", "wiki_type", "team")
-    slim = [{k: t.get(k) for k in keep_fields} for t in items if isinstance(t, dict)]
+    slim: list[dict] = []
+    for t in items:
+        if not isinstance(t, dict):
+            continue
+        row = {k: t.get(k) for k in keep_fields}
+        # priority 缺省 0；None / 非法值也归 0，保证 downstream 一致
+        try:
+            row["priority"] = int(t.get("priority") or 0)
+        except (TypeError, ValueError):
+            row["priority"] = 0
+        slim.append(row)
 
     # 先整体 dump，超限则逐条弹出直到符合
     payload = json.dumps({"topics": slim}, ensure_ascii=False, separators=(",", ":"))
@@ -215,8 +247,50 @@ async def _run_async(query_text: str, wiki_tree: str) -> dict:
     return hits
 
 
+def _local_first(query_text: str, wiki_tree_root: str) -> dict | None:
+    """本地预检索短路（M7 cache-miss 优化）。
+
+    top score ≥ threshold 且 env `INSIGHTS_LOCAL_SEARCH=1`（默认开启）时返回 hits，
+    同时发 stage=search_agent / cache=miss / source=local 的 metrics；
+    否则返回 None，caller 落回 MiniMax haiku 路径。
+    """
+    if os.environ.get("INSIGHTS_LOCAL_SEARCH", "1") == "0":
+        return None
+    t0 = time.perf_counter()
+    result = local_search.search(query_text, Path(wiki_tree_root).resolve())
+    dt_ms = int((time.perf_counter() - t0) * 1000)
+    if result.get("source") != "local":
+        return None
+    top = result["hits"][0] if result["hits"] else None
+    emit_from_env(
+        stage="search",
+        status="ok",
+        source="search_agent",
+        message=f"local search 命中 {top.get('item') if top else 'none'}",
+        payload=result,
+        metrics={
+            "score": top.get("score", 0) if top else 0,
+            "early_exit": True,
+            "topics_count": 0,
+            "source": "local",
+            "latency_ms_local": dt_ms,
+        },
+    )
+    sys.stderr.write(
+        f"[search_agent] local short-circuit hit={top} dt={dt_ms}ms\n"
+    )
+    return {"hits": result["hits"]}
+
+
 def run(query: str, wiki_tree_root: str) -> dict:
-    """同步 facade：被 hooks/insights_stop_hook.py 和 store.research() 复用。"""
+    """同步 facade：被 hooks/insights_stop_hook.py 和 store.research() 复用。
+
+    优先跑 local_search；若 top 分数过阈值直接返回，绕开 MiniMax SDK。
+    否则退回 haiku-agent 原路径（不是 error fallback，是分层检索）。
+    """
+    local = _local_first(query, wiki_tree_root)
+    if local is not None:
+        return local
     return asyncio.run(_run_async(query, wiki_tree_root))
 
 
