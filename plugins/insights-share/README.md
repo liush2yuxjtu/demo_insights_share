@@ -59,6 +59,31 @@ plugins/insights-share/
 
 M5 保留两条安装路径：本地 source 模式便于开发，marketplace 模式对应团队内网分发。
 
+## 双仓说明（v0.6.0-m7 起）
+
+从 `v0.6.0-m7` 开始，`insights-share` 采用 **dev 仓** + **plugin/publish 仓**
+双仓分发：
+
+| 仓 | GitHub 仓库 | 用途 |
+|----|-------------|------|
+| dev 仓 | `liush2yuxjtu/demo_insights_share` | 主开发仓；包含 proposal、demo_codes、validation、历史记录与完整工作树 |
+| plugin / publish 仓 | `liush2yuxjtu/insights-share-plugin` | 轻量分发仓；只放 plugin 运行时需要的 `.claude-plugin/`、skills、commands、agents、hooks、statusline、mcp、scripts |
+
+含义：
+
+- 日常开发、设计、验证、`start.demo.sh`、proposal 迭代都在 **dev 仓**
+- `claude plugin marketplace add` / `claude plugin install` 的推荐入口是
+  **plugin / publish 仓**
+- 当前这个仓库工作树默认 remote 仍可能只指向 dev 仓；更新 publish 仓需要显式同步到
+  `liush2yuxjtu/insights-share-plugin`
+
+推荐安装命令：
+
+```bash
+claude plugin marketplace add liush2yuxjtu/insights-share-plugin
+claude plugin install insights-share@insights-share-plugin
+```
+
 ### A. 本地 source 模式（开发默认）
 
 ```bash
