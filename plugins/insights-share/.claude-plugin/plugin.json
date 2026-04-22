@@ -6,7 +6,7 @@
     "name": "demo_insights_share Team A",
     "origin": "internal"
   },
-  "homepage": "plugins/insights-share/README.md",
+  "homepage": "https://github.com/liush2yuxjtu/demo_insights_share/tree/main/plugins/insights-share",
   "entry": {
     "skills": [
       "skills/insights-share/SKILL.md",
