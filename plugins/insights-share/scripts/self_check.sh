@@ -133,17 +133,22 @@ else
   fail_count=$((fail_count+1))
 fi
 
-# manifest declares M5 rename contract
+# manifest declares rename + latency contract (M5 baseline + M6/M7/M8 forward-compatible)
 if [ -f "$MANIFEST" ]; then
   if /usr/bin/python3 - "$MANIFEST" "$MCP_CONFIG" <<'PY' >/dev/null 2>&1
 import json, sys
 m = json.load(open(sys.argv[1]))
 cfg = json.load(open(sys.argv[2]))
 assert m["name"] == "insights-share", "name"
-assert m["version"] == "0.5.0-m5", "version"
-assert m["milestones"]["current"] == "M5_RENAME", "milestone current"
-assert "M5_RENAME" in m["milestones"].get("completed", []), "m5 completed"
-assert m["milestones"].get("pending", []) == [], "pending"
+assert m["version"].startswith("0."), "version prefix"
+known = {"M5_RENAME", "M6_LATENCY_MVP", "M7_LATENCY_DEEP", "M8_LATENCY_INDEX"}
+current = m["milestones"]["current"]
+assert current in known, f"milestone current {current}"
+completed = set(m["milestones"].get("completed", []))
+assert "M5_RENAME" in completed, "M5_RENAME completed"
+assert all(x in known | {"M1_MVP","M2_AGENTS","M3_MCP_NAMESPACE_TTL","M4_SIGN_MARKETPLACE"} for x in completed), "completed known"
+pending = set(m["milestones"].get("pending", []))
+assert pending <= known, f"pending unknown {pending}"
 assert len(m["entry"].get("agents", [])) == 2, "agents count"
 assert len(m["entry"].get("commands", [])) == 5, "commands count"
 assert all(c.startswith("commands/share-") for c in m["entry"]["commands"]), "commands prefix"
@@ -157,9 +162,9 @@ assert len(cfg.get("tools", [])) >= 7, "mcp tools"
 assert cfg.get("capabilities", {}).get("signed_cards") is True, "signed cards"
 PY
   then
-    say "manifest M5 contract (name=insights-share, ver=0.5.0-m5, share-* cmds/agents, mcp>=7, signed_cards): OK"
+    say "manifest contract (name=insights-share, milestone forward-compat, share-* cmds/agents, mcp>=7, signed_cards): OK"
   else
-    say "manifest M5 contract: FAIL"
+    say "manifest contract: FAIL"
     fail_count=$((fail_count+1))
   fi
 fi
