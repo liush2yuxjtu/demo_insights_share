@@ -142,7 +142,9 @@ class InsightStore:
         self.path = Path(path)
         self._lock = threading.Lock()
 
-    def load(self) -> list[dict[str, Any]]:
+    def load(self, team: str | None = None) -> list[dict[str, Any]]:
+        # flat 模式不区分 team，参数仅为 TreeInsightStore 接口兼容
+        _ = team
         with self._lock:
             return self._load_unlocked()
 

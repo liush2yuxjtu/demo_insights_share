@@ -53,7 +53,7 @@ gstack 的 `/qa` 设计假定 **web app + URL**：浏览器导航 → 点击 →
 | S7 | Hooks | `hooks/user-prompt-submit.sh` + `hooks/session-start.sh` | 两个 sh 都可执行；`bash -n` 语法通过 | chmod +x；`bash -n` exit 0 |
 | S8 | Statusline | `statusline/insights_share_statusline.sh` | 在设定 `INSIGHTS_SHARE_URL` 与 `SHARE_STATUSLINE_NO_COLOR=1` 下直接跑；输出符合 `[share ✓ N/today]` 或 `[share 🔒 sig-fail]` 形态 | 非零退出码或乱码即 FAIL |
 | S9 | MCP wiki-server | `plugins/insights-share/mcp/wiki-server.json` | JSON 可解析；声明 tools；指向 daemon | `json.load` 通过；tools 列表非空 |
-| S10 | LAN daemon（insightsd）| `insights-share/demo_codes/insights_cli.py serve --port 7821` | `curl -sS http://127.0.0.1:7821/health` 200；`/insights?topic=database` 返回 JSON 列表 | HTTP 200 + 合法 JSON |
+| S10 | LAN daemon（insightsd）| `insights-share/demo_codes/insights_cli.py serve --port 7821` | `curl -sS http://127.0.0.1:7821/healthz` 200；`/insights?topic=database` 返回 `{"cards":[...]}` JSON | HTTP 200 + cards 数组非空可解析 |
 | S11 | Sandbox demo（human-last-visible）| `start.demo.sh` | 在 `register-session live_demo` 内按 `TMUX= ` 起；跑完 7 stage；右 pane self-check 5 条全绿 | 左 pane guide 日志推进；右 pane 看到 skills 列表 + statusline preview + `self_check.sh` 所有 OK |
 
 补充探针（由 `plugins/insights-share/scripts/self_check.sh` 覆盖）：
