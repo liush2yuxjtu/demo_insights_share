@@ -1,0 +1,12 @@
+{
+  "proposal_id": "b47adc665d7fb459",
+  "status": "denied",
+  "defer_count": 0,
+  "ts_resolved": "2026-04-21T21:49:20",
+  "history": [
+    {
+      "answer": "Deny",
+      "ts": "2026-04-21T21:49:20"
+    }
+  ]
+}

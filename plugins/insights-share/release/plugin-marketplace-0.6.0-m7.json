@@ -1,0 +1,96 @@
+{
+  "name": "insights-share",
+  "version": "0.6.0-m7",
+  "published_at": "2026-04-22T06:30:32.126090+00:00",
+  "source": "git+ssh://internal/insights-share.git#subdir=plugins/insights-share",
+  "checksums": [
+    {
+      "path": ".claude-plugin/marketplace.json",
+      "sha256": "c23e25374219b50774e976e4127baac937686bddd6b1b8e0e2fc7e1a8d83151f"
+    },
+    {
+      "path": ".claude-plugin/plugin.json",
+      "sha256": "6f409eb2e84d8eca02087c39abbb135ed2595df69d3ee171baedf3f57005b3e7"
+    },
+    {
+      "path": "README.md",
+      "sha256": "98441e1e6775ffd0437adc7f83554ab310619112362f5115332797cf22a7ac45"
+    },
+    {
+      "path": "agents/share-curator.md",
+      "sha256": "3391f3070baa5797eef7b304ecf4ecda284b0356a815e226e0148cebd1a26bf6"
+    },
+    {
+      "path": "agents/share-validator.md",
+      "sha256": "a5839d6d7ef33e06f97f373665b4d62994310f6835fea39bfbeb3f0dff750206"
+    },
+    {
+      "path": "commands/share-diff.md",
+      "sha256": "4cf6ca7cc627cab2e5242ea0c6f16215102fc9f6ce4a2e306f852765703f8e23"
+    },
+    {
+      "path": "commands/share-install.md",
+      "sha256": "4de039f8c7c8025c58c9cd753a9401895c7173efadb8a1456f5122264246f523"
+    },
+    {
+      "path": "commands/share-publish.md",
+      "sha256": "95c8278961195ce6f63668af177f6bab44127923fbc304e232bde98ccc4a792b"
+    },
+    {
+      "path": "commands/share-review.md",
+      "sha256": "f88e037e25f834c40880d907feb0b30f28f2e3138856b7923dd87fe605634c53"
+    },
+    {
+      "path": "commands/share-search.md",
+      "sha256": "0bfc69c74c33a2d5d52207d421e6be9437039f0716a83e37f0a6948e17282bd8"
+    },
+    {
+      "path": "hooks/session-start.sh",
+      "sha256": "f38c61a5700b85d0b94d66c5126106ab3ee5faea0b8f1184b81daee2aa33d2d8"
+    },
+    {
+      "path": "hooks/user-prompt-submit.sh",
+      "sha256": "0d317a601f92f08aa37a9f05c8c39d3e73e05a522a5f54c7f44a5e4ccf025c5a"
+    },
+    {
+      "path": "mcp/wiki-server.json",
+      "sha256": "05186becea8b66a23ebf6052cc958ba337e3aa3431bc71aa656dbe5bf2f968cd"
+    },
+    {
+      "path": "scripts/latency_gate.py",
+      "sha256": "f93ed755679e5431097eb3dba1a4e0a1ac5370955dcb0313374d9736537d2b01"
+    },
+    {
+      "path": "scripts/publish_marketplace.py",
+      "sha256": "abd6a656b1af5011305c311c2cd6f5fcb395859ce23ed626f2007dd7cd7b5aa6"
+    },
+    {
+      "path": "scripts/self_check.sh",
+      "sha256": "889010d63571f405cf5814be185c572932fb13d67a1cf7ec59598d93d898fc21"
+    },
+    {
+      "path": "skills/insights-share/SKILL.md",
+      "sha256": "76b99940782062bf250a266b6eadd119c190c1a35b05015912655bfd738eea4a"
+    },
+    {
+      "path": "skills/insights-share/TEAM_A_REPORT.md",
+      "sha256": "2f59e91c60a7ffd8b02779466b41fd82f3d8f3ebeef5cb40afbfbd24638c485c"
+    },
+    {
+      "path": "skills/insights-share-server/SKILL.md",
+      "sha256": "a501efb1fc5d54182a862c140125583ed1a4879844e01c906fc7924c2c3a2e68"
+    },
+    {
+      "path": "skills/insights-share-server/scripts/start_server.sh",
+      "sha256": "32ecd2e999a3c4f026ae032e00e5ecb58382cb650f793b34f07af496d2b4f886"
+    },
+    {
+      "path": "skills/insights-share-server/scripts/start_ui.sh",
+      "sha256": "efd981d5cc3860a081aa4d3b4a1f60a232abb070925f84dc3cbbecf37ba3cea8"
+    },
+    {
+      "path": "statusline/insights_share_statusline.sh",
+      "sha256": "aa2cbe86c991a827aa8a2b73cd8d0a725394afa3d314d823ddc8fd8337011f69"
+    }
+  ]
+}

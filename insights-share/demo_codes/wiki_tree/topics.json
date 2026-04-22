@@ -10,7 +10,8 @@
       ],
       "created_by": "alice",
       "created_at": "2026-04-10T08:00:00Z",
-      "wiki_type": "database"
+      "wiki_type": "database",
+      "team": null
     },
     {
       "id": "celery-retry-storm",
@@ -22,7 +23,8 @@
       ],
       "created_by": "alice",
       "created_at": "2026-04-10T09:00:00Z",
-      "wiki_type": "queue"
+      "wiki_type": "queue",
+      "team": null
     },
     {
       "id": "redis-allkeys-lru-evicts-session",
@@ -34,7 +36,8 @@
       ],
       "created_by": "carol",
       "created_at": "2026-04-10T10:00:00Z",
-      "wiki_type": "cache"
+      "wiki_type": "cache",
+      "team": null
     },
     {
       "id": "m1-实机日志契约",
@@ -46,7 +49,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "shell_env"
+      "wiki_type": "shell_env",
+      "team": null
     },
     {
       "id": "m1-权限检查优化",
@@ -58,7 +62,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "shell_env"
+      "wiki_type": "shell_env",
+      "team": null
     },
     {
       "id": "m1-懒惰信号检测",
@@ -68,7 +73,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "agent_workflow"
+      "wiki_type": "agent_workflow",
+      "team": null
     },
     {
       "id": "m1-任务前上下文准备",
@@ -80,7 +86,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "agent_workflow"
+      "wiki_type": "agent_workflow",
+      "team": null
     },
     {
       "id": "m1-根目录md只读",
@@ -94,7 +101,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "docs_rules"
+      "wiki_type": "docs_rules",
+      "team": null
     },
     {
       "id": "m1-skill_触发条件",
@@ -105,7 +113,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "docs_rules"
+      "wiki_type": "docs_rules",
+      "team": null
     },
     {
       "id": "m1-沙箱脚本污染",
@@ -118,7 +127,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "shell_env"
+      "wiki_type": "shell_env",
+      "team": null
     },
     {
       "id": "m1-运行期数据保留",
@@ -130,7 +140,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "agent_workflow"
+      "wiki_type": "agent_workflow",
+      "team": null
     },
     {
       "id": "m1-tmux嵌套环境变量",
@@ -142,7 +153,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "shell_env"
+      "wiki_type": "shell_env",
+      "team": null
     },
     {
       "id": "m1-跨平台路径",
@@ -154,7 +166,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "tooling"
+      "wiki_type": "tooling",
+      "team": null
     },
     {
       "id": "m1-html_自动预览",
@@ -168,7 +181,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "tooling"
+      "wiki_type": "tooling",
+      "team": null
     },
     {
       "id": "m1-错误消息格式",
@@ -179,7 +193,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "docs_rules"
+      "wiki_type": "docs_rules",
+      "team": null
     },
     {
       "id": "m1-先执行再门控",
@@ -189,7 +204,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "agent_workflow"
+      "wiki_type": "agent_workflow",
+      "team": null
     },
     {
       "id": "m1-嵌套深度控制",
@@ -201,7 +217,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "tooling"
+      "wiki_type": "tooling",
+      "team": null
     },
     {
       "id": "m1-worktree_分离开发",
@@ -213,7 +230,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "shell_env"
+      "wiki_type": "shell_env",
+      "team": null
     },
     {
       "id": "m1-claude_md_规则格式",
@@ -227,7 +245,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "docs_rules"
+      "wiki_type": "docs_rules",
+      "team": null
     },
     {
       "id": "m1-错误信号判断",
@@ -238,7 +257,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "docs_rules"
+      "wiki_type": "docs_rules",
+      "team": null
     },
     {
       "id": "m1-编码风格",
@@ -248,7 +268,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "docs_rules"
+      "wiki_type": "docs_rules",
+      "team": null
     },
     {
       "id": "m1-正则表达式斜杠转义",
@@ -258,7 +279,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "tooling"
+      "wiki_type": "tooling",
+      "team": null
     },
     {
       "id": "m1-强制执行不问",
@@ -269,7 +291,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "agent_workflow"
+      "wiki_type": "agent_workflow",
+      "team": null
     },
     {
       "id": "m1-计划_批准流程",
@@ -282,7 +305,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "agent_workflow"
+      "wiki_type": "agent_workflow",
+      "team": null
     },
     {
       "id": "m1-工作目录持久化",
@@ -293,7 +317,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "tooling"
+      "wiki_type": "tooling",
+      "team": null
     },
     {
       "id": "m1-json_文件逐行处理",
@@ -303,7 +328,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "tooling"
+      "wiki_type": "tooling",
+      "team": null
     },
     {
       "id": "m1-长文本分片读取",
@@ -313,7 +339,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "tooling"
+      "wiki_type": "tooling",
+      "team": null
     },
     {
       "id": "m1-git_非破坏操作",
@@ -324,7 +351,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "docs_rules"
+      "wiki_type": "docs_rules",
+      "team": null
     },
     {
       "id": "m1-代码注释中文化",
@@ -335,7 +363,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "docs_rules"
+      "wiki_type": "docs_rules",
+      "team": null
     },
     {
       "id": "m1-默认脱敏",
@@ -346,7 +375,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "docs_rules"
+      "wiki_type": "docs_rules",
+      "team": null
     },
     {
       "id": "m1-可视化优先",
@@ -356,7 +386,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "docs_rules"
+      "wiki_type": "docs_rules",
+      "team": null
     },
     {
       "id": "m1-循环内文件写入优化",
@@ -366,7 +397,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "tooling"
+      "wiki_type": "tooling",
+      "team": null
     },
     {
       "id": "m1-user_design目录禁止编辑",
@@ -379,7 +411,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "docs_rules"
+      "wiki_type": "docs_rules",
+      "team": null
     },
     {
       "id": "m1-格式化验证",
@@ -391,7 +424,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "tooling"
+      "wiki_type": "tooling",
+      "team": null
     },
     {
       "id": "m1-缓存与无状态",
@@ -401,7 +435,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "docs_rules"
+      "wiki_type": "docs_rules",
+      "team": null
     },
     {
       "id": "m1-外科式回滚",
@@ -412,7 +447,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "agent_workflow"
+      "wiki_type": "agent_workflow",
+      "team": null
     },
     {
       "id": "m1-前文档版本记录",
@@ -422,7 +458,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "docs_rules"
+      "wiki_type": "docs_rules",
+      "team": null
     },
     {
       "id": "m1-配置更新验证",
@@ -434,7 +471,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "agent_workflow"
+      "wiki_type": "agent_workflow",
+      "team": null
     },
     {
       "id": "m1-相对路径避免",
@@ -445,7 +483,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "tooling"
+      "wiki_type": "tooling",
+      "team": null
     },
     {
       "id": "m1-验证三要素",
@@ -455,7 +494,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "agent_workflow"
+      "wiki_type": "agent_workflow",
+      "team": null
     },
     {
       "id": "m1-默认全量并只选",
@@ -466,7 +506,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "tooling"
+      "wiki_type": "tooling",
+      "team": null
     },
     {
       "id": "m1-单一职责原则",
@@ -477,7 +518,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "docs_rules"
+      "wiki_type": "docs_rules",
+      "team": null
     },
     {
       "id": "m1-tdd_开发流程",
@@ -487,7 +529,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "agent_workflow"
+      "wiki_type": "agent_workflow",
+      "team": null
     },
     {
       "id": "m1-删除前审计",
@@ -500,7 +543,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "agent_workflow"
+      "wiki_type": "agent_workflow",
+      "team": null
     },
     {
       "id": "m1-目录树展示",
@@ -510,7 +554,8 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "tooling"
+      "wiki_type": "tooling",
+      "team": null
     },
     {
       "id": "m1-频繁工具调用优化",
@@ -520,7 +565,41 @@
       ],
       "created_by": "m1",
       "created_at": "2026-04-18T00:00:00Z",
-      "wiki_type": "tooling"
+      "wiki_type": "tooling",
+      "team": null
+    },
+    {
+      "id": "auto-database",
+      "title": "自动抽取: database",
+      "tags": [
+        "auto-extracted",
+        "database"
+      ],
+      "created_by": "extract_lessons.py",
+      "wiki_type": "database",
+      "team": null
+    },
+    {
+      "id": "auto-infra_cache",
+      "title": "自动抽取: infra_cache",
+      "tags": [
+        "auto-extracted",
+        "infra_cache"
+      ],
+      "created_by": "extract_lessons.py",
+      "wiki_type": "infra_cache",
+      "team": null
+    },
+    {
+      "id": "auto-tooling",
+      "title": "自动抽取: tooling",
+      "tags": [
+        "auto-extracted",
+        "tooling"
+      ],
+      "created_by": "extract_lessons.py",
+      "wiki_type": "tooling",
+      "team": null
     }
   ]
 }

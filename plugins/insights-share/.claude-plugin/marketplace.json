@@ -6,10 +6,10 @@
     {
       "name": "insights-share",
       "source": "git+ssh://internal/insights-share.git#subdir=plugins/insights-share",
-      "version": "0.5.0-m5",
+      "version": "0.6.0-m7",
       "manifest": ".claude-plugin/plugin.json",
       "channels": ["stable", "dev"]
     }
   ],
-  "notes": "当前 registry 对齐 plugin 0.5.0-m5；`scripts/publish_marketplace.py` 会在发布前校验 manifest/marketplace/MCP 并生成 checksums 摘要。"
+  "notes": "当前 registry 对齐 plugin 0.6.0-m7；`scripts/publish_marketplace.py` 会在发布前校验 manifest/marketplace/MCP 并生成 checksums 摘要。"
 }
