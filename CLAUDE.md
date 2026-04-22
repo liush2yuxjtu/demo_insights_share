@@ -34,3 +34,27 @@
 | [proposal/proposal_generation_latency.md](proposal/proposal_generation_latency.md) | 性能优化（M6_LATENCY 候选） | 攻 proposal.md 现状 #1 生成耗时：基线 + 8 条优化杠杆 + 数值 gate + agent-judge 双探针自测闭环 |
 | [docs/designs/INDEX.md](docs/designs/INDEX.md) | 索引 | claude_codes_to_design / claude_design / user_design 三目录说明 |
 | [docs/user_complaints_inbox/decisions_summary.md](docs/user_complaints_inbox/decisions_summary.md) | Inbox 决策记录 | role-review-inbox-loop 首次真实运行：16 条 proposals，11 approved / 5 denied，含每条问题、建议与决策理由 |
+
+## gstack (REQUIRED — global install)
+
+**Before doing ANY work, verify gstack is installed:**
+
+```bash
+test -d ~/.claude/skills/gstack/bin && echo "GSTACK_OK" || echo "GSTACK_MISSING"
+```
+
+If GSTACK_MISSING: STOP. Do not proceed. Tell the user:
+
+> gstack is required for all AI-assisted work in this repo.
+> Install it:
+> ```bash
+> git clone --depth 1 https://github.com/garrytan/gstack.git ~/.claude/skills/gstack
+> cd ~/.claude/skills/gstack && ./setup --team
+> ```
+> Then restart your AI coding tool.
+
+Do not skip skills, ignore gstack errors, or work around missing gstack.
+
+Using gstack skills: After install, skills like /qa, /ship, /review, /investigate,
+and /browse are available. Use /browse for all web browsing.
+Use ~/.claude/skills/gstack/... for gstack file paths (the global path).
