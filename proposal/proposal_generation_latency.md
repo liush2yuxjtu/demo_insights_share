@@ -189,3 +189,4 @@ def main():
 | O6 SessionStart prefetch | `a64d488`+`5cdfe95` | PASS | 2s curl → `~/.cache/insights-share/warm/topics.json`；plugin.json 登记 SessionStart |
 | O4 search+adapter 并行 | `ddd99b9` | PASS | asyncio.to_thread + create_task；新增 stage=adapter 指标 |
 | MVP gate PASS（cache-hit） | `61ce976` | PASS | 5+5 post-MVP 采样落盘：cache-hit p50=0ms / p95=1ms（budget 1500/3000 全绿）；cache-miss p50=8864ms / p95=12299ms（仍超预算，留给 M7 O2/O4/O6 收尾，不在 MVP 范围） |
+| M7 gate（cache-miss） | `197ee46` | FAIL | cache-miss p50=7385ms / p95=8921ms（budget 6000ms，仍超 48.7%）；cache-hit n=0（round 1 全 fail 导致无 cache 可命中）；10/10 queries status=fail：post-O2 `max_turns=3` + topics.json `id` 与磁盘 slug 不一致（例如 topic id `postgres-pool-exhaustion` vs file `postgres_pool.md`），haiku 读不存在路径耗尽 turn；bundled claude 2.1.97 在 `error_max_turns` 上返 rc=1 触发 SDK `ProcessError`；真实延迟写入 samples_post_m7（遵守"严禁 fallback，记实测 latency"）；修复方向：topics.json 生成时同步落 slug 字段 OR O2 prompt 用 topic.title 做模糊匹配而非 id 直拼路径 |
