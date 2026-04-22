@@ -132,12 +132,20 @@ async def _run_async(query_text: str, wiki_tree: str) -> dict:
     )
 
     collected: list[str] = []
+    early_exit = False
     async for message in query(prompt=prompt, options=options):
         if isinstance(message, AssistantMessage):
             text = _collect_text(message)
             if text:
                 collected.append(text)
                 sys.stderr.write(f"[search_agent] assistant: {text[:200]!r}\n")
+                joined = "\n".join(collected)
+                if "<<<SEARCH_HITS>>>" in joined and "<<<END>>>" in joined:
+                    early_exit = True
+                    sys.stderr.write(
+                        f"[search_agent] early_exit: sentinel closed after {len(collected)} assistant chunks\n"
+                    )
+                    break
         elif isinstance(message, ResultMessage):
             final = getattr(message, "result", None)
             if final:
@@ -155,7 +163,7 @@ async def _run_async(query_text: str, wiki_tree: str) -> dict:
         source="search_agent",
         message=f"agentic search 命中 {top.get('item') if top else 'none'}",
         payload=hits,
-        metrics={"score": top.get("score", 0) if top else 0},
+        metrics={"score": top.get("score", 0) if top else 0, "early_exit": early_exit},
     )
     return hits
 
