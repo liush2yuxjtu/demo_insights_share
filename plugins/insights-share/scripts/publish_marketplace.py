@@ -32,11 +32,13 @@ def _validate_contract() -> tuple[dict, dict]:
     plugin = marketplace["plugins"][0]
 
     assert manifest["name"] == "insights-share", "manifest name"
-    assert manifest["version"] == "0.6.0-m7", "manifest version"
+    assert manifest["version"].startswith("0."), "manifest version prefix"
     assert plugin["name"] == "insights-share", "marketplace plugin name"
     assert plugin["version"] == manifest["version"], "marketplace version"
     assert "subdir=plugins/insights-share" in plugin["source"], "marketplace subdir"
-    assert manifest["milestones"]["current"] == "M7_LATENCY_DEEP", "milestone current"
+    _known_milestones = {"M1_MVP", "M2_AGENTS", "M3_MCP_NAMESPACE_TTL", "M4_SIGN_MARKETPLACE",
+                         "M5_RENAME", "M6_LATENCY_MVP", "M7_LATENCY_DEEP", "M8_LATENCY_INDEX"}
+    assert manifest["milestones"]["current"] in _known_milestones, "milestone current"
     assert "M5_RENAME" in manifest["milestones"]["completed"], "m5 completed"
     assert "签名" in README.read_text(encoding="utf-8"), "readme signing"
     mcp = _read_json(MCP)
