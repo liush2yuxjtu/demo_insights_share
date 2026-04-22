@@ -38,6 +38,34 @@ from claude_agent_sdk import (  # noqa: E402
 )
 
 
+# 12 KB 上限：超过则逐条裁剪，保证 prompt 可控
+_TOPICS_PAYLOAD_MAX_BYTES = 12 * 1024
+
+
+def _load_topics_payload(wiki_tree: Path) -> str:
+    """读取 topics.json 并打成紧凑 JSON，供 PROMPT 注入。
+
+    仅保留 id/title/tags/wiki_type/team 字段；丢弃 created_by/created_at 以压缩体积。
+    输出紧凑 JSON（无 indent），超过 12 KB 时截取前 N 条保证不超限。
+    文件缺失时返回 "{}"（tree 模式下 topics.json 可选，不得 raise）。"""
+    topics_path = wiki_tree / "topics.json"
+    if not topics_path.exists():
+        return "{}"
+
+    raw = json.loads(topics_path.read_text(encoding="utf-8"))
+    items = raw.get("topics", []) if isinstance(raw, dict) else []
+
+    keep_fields = ("id", "title", "tags", "wiki_type", "team")
+    slim = [{k: t.get(k) for k in keep_fields} for t in items if isinstance(t, dict)]
+
+    # 先整体 dump，超限则逐条弹出直到符合
+    payload = json.dumps({"topics": slim}, ensure_ascii=False, separators=(",", ":"))
+    while len(payload.encode("utf-8")) > _TOPICS_PAYLOAD_MAX_BYTES and slim:
+        slim.pop()
+        payload = json.dumps({"topics": slim}, ensure_ascii=False, separators=(",", ":"))
+    return payload
+
+
 PROMPT_TEMPLATE = """You are an offline wiki search agent.
 
 Goal: Find the single most relevant insight entry inside a local 4-layer wiki and return a small JSON object describing the top hits.
@@ -49,6 +77,11 @@ Wiki layout (4 layers):
   layer-2: {wiki_tree}/<type>/INDEX.md            (markdown table of items in that type)
   layer-3: {wiki_tree}/<type>/<item_slug>.md      (full entry, JSON frontmatter then ## sections)
   layer-4: {wiki_tree}/<type>/raw/<id>.jsonl      (raw card)
+
+Topic index (pre-loaded; may be empty if missing):
+{topics_payload}
+
+Layer-skip rule: if the user query fuzzy-matches one topic by title/tags (semantic match, not substring), directly Read `{wiki_tree}/<wiki_type>/<item_slug>.md` where item_slug == topic.id and wiki_type == topic.wiki_type — skip Glob / INDEX.md entirely. Fall back to full glob only when no topic looks related.
 
 User query:
 {query}
@@ -107,7 +140,17 @@ def _extract_hits(raw: str) -> dict:
 
 async def _run_async(query_text: str, wiki_tree: str) -> dict:
     wiki_tree_abs = str(Path(wiki_tree).resolve())
-    prompt = PROMPT_TEMPLATE.format(wiki_tree=wiki_tree_abs, query=query_text)
+    topics_payload = _load_topics_payload(Path(wiki_tree_abs))
+    # topics_count 用于事后观测 layer-skip 是否被触发
+    try:
+        topics_count = len(json.loads(topics_payload).get("topics", []))
+    except (ValueError, AttributeError):
+        topics_count = 0
+    prompt = PROMPT_TEMPLATE.format(
+        wiki_tree=wiki_tree_abs,
+        query=query_text,
+        topics_payload=topics_payload,
+    )
     emit_from_env(
         stage="search",
         status="running",
@@ -119,7 +162,7 @@ async def _run_async(query_text: str, wiki_tree: str) -> dict:
     options = ClaudeAgentOptions(
         permission_mode="dontAsk",
         allowed_tools=["Glob", "Grep", "Read", "Bash"],
-        max_turns=5,
+        max_turns=3,
         model=get_haiku_model(),
         cwd=wiki_tree_abs,
         extra_args={"bare": None},
@@ -163,7 +206,11 @@ async def _run_async(query_text: str, wiki_tree: str) -> dict:
         source="search_agent",
         message=f"agentic search 命中 {top.get('item') if top else 'none'}",
         payload=hits,
-        metrics={"score": top.get("score", 0) if top else 0, "early_exit": early_exit},
+        metrics={
+            "score": top.get("score", 0) if top else 0,
+            "early_exit": early_exit,
+            "topics_count": topics_count,
+        },
     )
     return hits
 
