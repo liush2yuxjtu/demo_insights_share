@@ -117,12 +117,18 @@ def _with_query(url: str, **params: Any) -> str:
 def cmd_serve(args: argparse.Namespace) -> int:
     from insightsd.server import run
 
+    if args.store is None:
+        pkg_root = Path(__file__).resolve().parent
+        store_path = pkg_root / ("wiki_tree" if args.store_mode == "tree" else "wiki.json")
+    else:
+        store_path = Path(args.store).resolve()
+
     run(
         host=args.host,
         port=args.port,
-        store_path=Path(args.store),
+        store_path=store_path,
         store_mode=args.store_mode,
-        runtime_dir=Path(args.runtime_dir) if args.runtime_dir else None,
+        runtime_dir=Path(args.runtime_dir).resolve() if args.runtime_dir else None,
         enable_runners=bool(args.enable_runners),
     )
     return 0
@@ -522,7 +528,7 @@ def build_parser() -> argparse.ArgumentParser:
     p_serve = sub.add_parser("serve", help="run the insightsd HTTP daemon")
     p_serve.add_argument("--host", default="0.0.0.0")
     p_serve.add_argument("--port", type=int, default=7821)
-    p_serve.add_argument("--store", default="./wiki.json")
+    p_serve.add_argument("--store", default=None)
     p_serve.add_argument(
         "--store-mode",
         choices=["flat", "tree"],
