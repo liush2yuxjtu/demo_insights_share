@@ -157,47 +157,61 @@ def _silent_main() -> int:
         if cached_etag:
             req.add_header("If-None-Match", cached_etag)
 
-        with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as resp:
-            if resp.status == 304:
-                # Server says cache is current - skip card processing, still build context from cache
-                sys.stderr.write("[insights_prefetch] 304 Not Modified, using cached cards\n")
-                # Load cards from local cache instead
-                manifest_path = Path.home() / ".cache" / "insights-share" / "manifest.json"
-                try:
-                    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-                    cached_ids = manifest.get("cards") or []
-                    cards = []
-                    for cid in cached_ids:
-                        card_path = Path.home() / ".cache" / "insights-share" / f"{cid}.json"
-                        if card_path.is_file():
-                            try:
-                                card = json.loads(card_path.read_text(encoding="utf-8"))
-                                if isinstance(card, dict):
-                                    cards.append(card)
-                            except (OSError, json.JSONDecodeError):
-                                continue
-                except (OSError, json.JSONDecodeError):
-                    cards = []
-            else:
-                payload = json.loads(resp.read().decode("utf-8"))
-                new_etag = resp.headers.get("ETag") or resp.headers.get("Last-Modified") or cached_etag
-                cards_raw = payload.get("cards") or []
-                cards = [
-                    c
-                    for c in cards_raw
-                    if isinstance(c, dict) and c.get("signature_status") != "invalid"
-                ]
-                # Update manifest etag
-                if new_etag and new_etag != cached_etag:
+        def _load_cards_from_cache() -> list[dict[str, Any]]:
+            """ETag 304 命中时，用本地 ~/.cache/insights-share/ 复建 cards 列表。"""
+            manifest_path = Path.home() / ".cache" / "insights-share" / "manifest.json"
+            try:
+                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                cached_ids = manifest.get("cards") or []
+            except (OSError, json.JSONDecodeError):
+                return []
+            out: list[dict[str, Any]] = []
+            for cid in cached_ids:
+                card_path = Path.home() / ".cache" / "insights-share" / f"{cid}.json"
+                if card_path.is_file():
                     try:
-                        manifest_path = Path.home() / ".cache" / "insights-share" / "manifest.json"
-                        manifest = {}
-                        if manifest_path.is_file():
-                            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
-                        manifest["etag"] = new_etag
-                        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
-                    except OSError:
-                        pass
+                        card = json.loads(card_path.read_text(encoding="utf-8"))
+                        if isinstance(card, dict):
+                            out.append(card)
+                    except (OSError, json.JSONDecodeError):
+                        continue
+            return out
+
+        try:
+            with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as resp:
+                # urllib 对 304 通常直接抛 HTTPError，这里 if 分支只作兜底
+                if resp.status == 304:
+                    sys.stderr.write("[insights_prefetch] 304 Not Modified, using cached cards\n")
+                    cards = _load_cards_from_cache()
+                else:
+                    payload = json.loads(resp.read().decode("utf-8"))
+                    new_etag = resp.headers.get("ETag") or resp.headers.get("Last-Modified") or cached_etag
+                    cards_raw = payload.get("cards") or []
+                    cards = [
+                        c
+                        for c in cards_raw
+                        if isinstance(c, dict) and c.get("signature_status") != "invalid"
+                    ]
+                    # Update manifest etag
+                    if new_etag and new_etag != cached_etag:
+                        try:
+                            manifest_path = Path.home() / ".cache" / "insights-share" / "manifest.json"
+                            manifest = {}
+                            if manifest_path.is_file():
+                                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                            manifest["etag"] = new_etag
+                            manifest_path.write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
+                        except OSError:
+                            pass
+        except urllib.error.HTTPError as http_err:
+            # urllib 的默认行为：任何非 2xx（含 304 Not Modified）都抛 HTTPError
+            # Feature #2 要求：缓存命中时可二次使用、不重复全流程 → 这里必须用本地缓存兜住
+            if http_err.code == 304:
+                sys.stderr.write("[insights_prefetch] 304 Not Modified (HTTPError), using cached cards\n")
+                cards = _load_cards_from_cache()
+            else:
+                # 其他 HTTP 错误继续被外层统一吞掉（保持无感失败契约）
+                raise
 
         for card in cards:
             try:
