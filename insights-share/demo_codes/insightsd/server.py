@@ -513,6 +513,41 @@ class InsightHandler(BaseHTTPRequestHandler):
             topic = self.store.create_topic(body)
             self._send_json(200, {"id": topic.get("id")})
             return
+        # POST /topics/{topic_id}/examples → 追加一条 Example 到指定 Topic
+        if path.startswith("/topics/") and path.endswith("/examples"):
+            if not isinstance(self.store, TreeInsightStore):
+                self._send_json(400, {"error": "topics_not_supported", "detail": "tree mode only"})
+                return
+            topic_id = path[len("/topics/"):-len("/examples")]
+            body, err = self._read_json_body()
+            if err is not None or body is None:
+                self._send_json(400, {"error": "invalid_json", "detail": err})
+                return
+            # 强制把路径 topic_id 写入 card,忽略 body 里不一致的值
+            card = dict(body)
+            card["topic_id"] = topic_id
+            if not card.get("id"):
+                # 自动生成 id: {author}-{topic_id}-{uploaded_at?}
+                from datetime import datetime, timezone
+                stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+                author = str(card.get("author") or "anon").strip() or "anon"
+                card["id"] = f"{author}-{topic_id}-{stamp}"
+            try:
+                saved = self.store.add(card, wiki_type=card.get("wiki_type") or "general")
+            except ValueError as exc:
+                self._send_json(400, {"error": "invalid_card", "detail": str(exc)})
+                return
+            self._send_json(
+                200,
+                {
+                    "id": saved.get("id"),
+                    "topic_id": topic_id,
+                    "label": saved.get("label"),
+                    "signature_status": saved.get("signature_status"),
+                    "signature_key_id": saved.get("signature_key_id"),
+                },
+            )
+            return
         # POST /insights/{id}/relabel
         if path.startswith("/insights/") and path.endswith("/relabel"):
             if not isinstance(self.store, TreeInsightStore):
