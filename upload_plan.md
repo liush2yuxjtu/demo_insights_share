@@ -38,11 +38,25 @@
 - 重复 (同 root cause 已存在 wiki_tree 卡片 → skip)
 
 ## 执行步骤
-1. **dry-run**: 扫单一 jsonl (`7a4bcb58-...jsonl`, 342 行)，输出 staging，**不上传**
-2. **judge probe**: `claudefast -p "@upload_plan.md @<jsonl> @<staging_dir> what would you do with this plan? ONLY EXPLAIN"` 验证理解
-3. **judge 回 PASS** → 跑 fixed `scripts/extract_lessons.sh` 全量扫描
-4. **JSON 上传**: `curl -X POST http://127.0.0.1:7821/api/cards` 每张卡 (daemon API 待探测)
-5. **gate**: 上传后 `curl http://127.0.0.1:7821/` kanban 看到新卡 → PASS
+1. **daemon 起动 (precondition)**: `cd insights-share/demo_codes && .venv/bin/python insights_cli.py serve --host 0.0.0.0 --port 7821 --store wiki_tree --store-mode tree &`，pid 写 `/tmp/insightsd.pid`
+2. **dry-run**: 扫单一 jsonl (`7a4bcb58-...jsonl`, 342 行)，输出 staging，**不上传**
+3. **judge probe**: `claudefast -p "@upload_plan.md @<jsonl> @<staging_dir> what would you do with this plan? ONLY EXPLAIN"` 验证理解
+4. **judge 回 PASS** → 跑 fixed `scripts/extract_lessons.sh` 全量扫描
+5. **JSON 上传**: `curl --noproxy '127.0.0.1,localhost' -X POST http://127.0.0.1:7821/insights -H "Content-Type: application/json" -d @<card.json>` 每张卡
+6. **gate**: 上传后 `curl --noproxy '*' http://127.0.0.1:7821/topics` 含新 topic → PASS
+
+## Daemon API (server.py 已确认)
+| 路由 | 方法 | 用途 |
+|------|------|------|
+| `/topics` | GET | 列 topic |
+| `/topics/{id}/examples?label=...` | GET | 列卡片 |
+| `/insights` | POST | 新增卡 (主上传入口) |
+| `/insights/{id}/edit` | POST | patch 字段 |
+| `/insights/{id}/tag` | POST | 加 tag |
+| `/insights/merge` | POST | 合并 |
+
+## 系统 proxy 注意
+本机 `http_proxy=http://127.0.0.1:7897` (Clash) 会拦截 loopback。所有 curl 必须加 `--noproxy '127.0.0.1,localhost'`，否则 502 Bad Gateway。Python urllib 同理需 `proxies={}`。
 
 ## 安全 / 隔离
 - staging 目录: `/tmp/insights_upload_staging/` (非 ~/.claude，避免污染)
