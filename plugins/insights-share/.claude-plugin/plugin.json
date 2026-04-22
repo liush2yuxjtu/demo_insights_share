@@ -1,7 +1,7 @@
 {
   "name": "insights-share",
-  "version": "0.5.0-m5",
-  "description": "局域网 insights-share：topic 中心 Good/Bad 并列卡片的静默回灌 + 管理面板。M5 已交付：插件深度重命名 insights-wiki -> insights-share、plugins/<name>/ 布局、share-* 命令与 agent、[share ...] 徽章。",
+  "version": "0.6.0-m7",
+  "description": "局域网 insights-share：topic 中心 Good/Bad 并列卡片的静默回灌 + 管理面板。M5 已交付：插件深度重命名 insights-wiki -> insights-share、plugins/<name>/ 布局、share-* 命令与 agent、[share ...] 徽章。M6/M7 交付：latency_cache + early-exit + async hook + SessionStart prefetch + parallel search/adapter（cache-hit p95=1ms）。",
   "author": {
     "name": "demo_insights_share Team A",
     "origin": "internal"
@@ -30,10 +30,11 @@
     "statusline": "statusline/insights_share_statusline.sh"
   },
   "milestones": {
-    "current": "M5_RENAME",
-    "design_doc": "proposal/proposal_rename_to_insights_share.md",
-    "completed": ["M1_MVP", "M2_AGENTS", "M3_MCP_NAMESPACE_TTL", "M4_SIGN_MARKETPLACE", "M5_RENAME"],
-    "pending": []
+    "current": "M7_LATENCY_DEEP",
+    "design_doc": "proposal/proposal_generation_latency.md",
+    "completed": ["M1_MVP", "M2_AGENTS", "M3_MCP_NAMESPACE_TTL", "M4_SIGN_MARKETPLACE", "M5_RENAME", "M6_LATENCY_MVP"],
+    "partial": ["M7_LATENCY_DEEP"],
+    "pending": ["M8_LATENCY_INDEX"]
   },
   "requires": {
     "claude_code": ">=0.1.0",
