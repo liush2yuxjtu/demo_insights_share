@@ -55,6 +55,28 @@ else
   fail_count=$((fail_count+1))
 fi
 
+# session-start hook (O6 + user-unaware download)
+if [ -x "$PLUGIN_DIR/hooks/session-start.sh" ]; then
+  say "hook SessionStart (full download): OK"
+else
+  say "hook SessionStart (full download): MISSING"
+  fail_count=$((fail_count+1))
+fi
+
+# session_start_full_fetch.py (delta sync + ETag)
+SESSION_FETCH="$PLUGIN_DIR/../../insights-share/demo_codes/hooks/session_start_full_fetch.py"
+if [ -f "$SESSION_FETCH" ]; then
+  if /usr/bin/python3 -c "import ast; ast.parse(open('$SESSION_FETCH').read())" 2>/dev/null; then
+    say "session_start_full_fetch.py: OK"
+  else
+    say "session_start_full_fetch.py: PARSE-FAIL"
+    fail_count=$((fail_count+1))
+  fi
+else
+  say "session_start_full_fetch.py: MISSING"
+  fail_count=$((fail_count+1))
+fi
+
 # statusline
 if [ -x "$PLUGIN_DIR/statusline/insights_share_statusline.sh" ]; then
   say "plugin statusline: OK"

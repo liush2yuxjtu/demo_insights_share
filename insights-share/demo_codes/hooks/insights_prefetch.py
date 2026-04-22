@@ -144,15 +144,61 @@ def _silent_main() -> int:
         url = f"{_resolve_wiki_url()}/insights"
         if team:
             url = f"{url}?{urllib.parse.urlencode({'team': team})}"
-        with urllib.request.urlopen(url, timeout=TIMEOUT_SECONDS) as resp:
-            payload = json.loads(resp.read().decode("utf-8"))
 
-        cards_raw = payload.get("cards") or []
-        cards: list[dict[str, Any]] = [
-            c
-            for c in cards_raw
-            if isinstance(c, dict) and c.get("signature_status") != "invalid"
-        ]
+        # ETag delta sync: send If-None-Match, skip processing on 304
+        req = urllib.request.Request(url)
+        req.add_header("Accept", "application/json")
+        cached_etag: str | None = None
+        try:
+            manifest = json.loads((Path.home() / ".cache" / "insights-share" / "manifest.json").read_text(encoding="utf-8"))
+            cached_etag = manifest.get("etag")
+        except (OSError, json.JSONDecodeError, TypeError):
+            pass
+        if cached_etag:
+            req.add_header("If-None-Match", cached_etag)
+
+        with urllib.request.urlopen(req, timeout=TIMEOUT_SECONDS) as resp:
+            if resp.status == 304:
+                # Server says cache is current - skip card processing, still build context from cache
+                sys.stderr.write("[insights_prefetch] 304 Not Modified, using cached cards\n")
+                # Load cards from local cache instead
+                manifest_path = Path.home() / ".cache" / "insights-share" / "manifest.json"
+                try:
+                    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                    cached_ids = manifest.get("cards") or []
+                    cards = []
+                    for cid in cached_ids:
+                        card_path = Path.home() / ".cache" / "insights-share" / f"{cid}.json"
+                        if card_path.is_file():
+                            try:
+                                card = json.loads(card_path.read_text(encoding="utf-8"))
+                                if isinstance(card, dict):
+                                    cards.append(card)
+                            except (OSError, json.JSONDecodeError):
+                                continue
+                except (OSError, json.JSONDecodeError):
+                    cards = []
+            else:
+                payload = json.loads(resp.read().decode("utf-8"))
+                new_etag = resp.headers.get("ETag") or resp.headers.get("Last-Modified") or cached_etag
+                cards_raw = payload.get("cards") or []
+                cards = [
+                    c
+                    for c in cards_raw
+                    if isinstance(c, dict) and c.get("signature_status") != "invalid"
+                ]
+                # Update manifest etag
+                if new_etag and new_etag != cached_etag:
+                    try:
+                        manifest_path = Path.home() / ".cache" / "insights-share" / "manifest.json"
+                        manifest = {}
+                        if manifest_path.is_file():
+                            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                        manifest["etag"] = new_etag
+                        manifest_path.write_text(json.dumps(manifest, ensure_ascii=False), encoding="utf-8")
+                    except OSError:
+                        pass
+
         for card in cards:
             try:
                 persist(card)

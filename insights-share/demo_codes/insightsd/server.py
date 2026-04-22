@@ -250,7 +250,27 @@ class InsightHandler(BaseHTTPRequestHandler):
             params = parse_qs(parsed.query)
             team = (params.get("team") or [None])[0]
             team = team.strip() if isinstance(team, str) and team.strip() else None
-            self._send_json(200, {"cards": self.store.list_all(team=team)})
+            # ETag delta sync: compute from full card content (load()), not sparse list_all()
+            # This also fixes user-unaware download: prefetch now gets full cards on session start
+            cards = self.store.load(team=team) if hasattr(self.store, "load") else self.store.list_all(team=team)
+            import hashlib, json as _json
+            content_bytes = _json.dumps(cards, sort_keys=True, ensure_ascii=False).encode()
+            etag = f'"{hashlib.md5(content_bytes, usedforsecurity=False).hexdigest()}"'
+            if_none_match = self.headers.get("If-None-Match", "")
+            if if_none_match and if_none_match == etag:
+                self.send_response(304)
+                self.send_header("ETag", etag)
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                return
+            body = _json.dumps({"cards": cards}, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("ETag", etag)
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(body)
             return
         if path == "/search":
             params = parse_qs(parsed.query)
@@ -272,7 +292,25 @@ class InsightHandler(BaseHTTPRequestHandler):
             params = parse_qs(parsed.query)
             team = (params.get("team") or [None])[0]
             team = team.strip() if isinstance(team, str) and team.strip() else None
-            self._send_json(200, {"topics": self.store.list_topics(team=team)})
+            topics = self.store.list_topics(team=team)
+            import hashlib, json as _json
+            content_bytes = _json.dumps(topics, sort_keys=True, ensure_ascii=False).encode()
+            etag = f'"{hashlib.md5(content_bytes, usedforsecurity=False).hexdigest()}"'
+            if_none_match = self.headers.get("If-None-Match", "")
+            if if_none_match and if_none_match == etag:
+                self.send_response(304)
+                self.send_header("ETag", etag)
+                self.send_header("Cache-Control", "no-store")
+                self.end_headers()
+                return
+            body = _json.dumps({"topics": topics}, ensure_ascii=False).encode("utf-8")
+            self.send_response(200)
+            self.send_header("Content-Type", "application/json; charset=utf-8")
+            self.send_header("Content-Length", str(len(body)))
+            self.send_header("ETag", etag)
+            self.send_header("Cache-Control", "no-store")
+            self.end_headers()
+            self.wfile.write(body)
             return
         # GET /topics/{topic_id}/examples?label=...
         if path.startswith("/topics/") and path.endswith("/examples"):
