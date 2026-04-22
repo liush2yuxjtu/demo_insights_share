@@ -1,25 +1,85 @@
 {
   "schema_version": 1,
   "doc_ref": "proposal/proposal_generation_latency.md",
-  "captured_at": null,
-  "sample_count": 0,
+  "captured_at": "2026-04-22T05:12:08Z",
+  "sample_count": 5,
   "env": {
-    "model": null,
+    "model": "MiniMax-M2.7-highspeed",
     "wiki_index_sha": null,
-    "host": null
+    "host": "git@974888e"
   },
   "budget": {
     "end_to_end": {
-      "cache_hit":  {"p50_ms": 1500, "p95_ms": 3000},
-      "cache_miss": {"p50_ms": 3500, "p95_ms": 6000}
+      "cache_hit": {
+        "p50_ms": 1500,
+        "p95_ms": 3000
+      },
+      "cache_miss": {
+        "p50_ms": 3500,
+        "p95_ms": 6000
+      }
     },
     "per_stage": {
-      "prefetch_hook": {"p95_ms": 200},
-      "search_agent":  {"p95_ms": 2500},
-      "adapter":       {"p95_ms": 1500},
-      "inject":        {"p95_ms": 120}
+      "prefetch_hook": {
+        "p95_ms": 200
+      },
+      "search_agent": {
+        "p95_ms": 2500
+      },
+      "adapter": {
+        "p95_ms": 1500
+      },
+      "inject": {
+        "p95_ms": 120
+      }
     },
     "regression_tolerance_pct": 10
   },
-  "samples": []
+  "samples": [
+    {
+      "stage": "search_agent",
+      "status": "ok",
+      "latency_ms": 9636,
+      "cache": "miss",
+      "query": "postgres connection pool timeout",
+      "model": "MiniMax-M2.7-highspeed",
+      "ts": "2026-04-22T05:11:07Z"
+    },
+    {
+      "stage": "search_agent",
+      "status": "ok",
+      "latency_ms": 12297,
+      "cache": "miss",
+      "query": "懒惰信号检测",
+      "model": "MiniMax-M2.7-highspeed",
+      "ts": "2026-04-22T05:11:19Z"
+    },
+    {
+      "stage": "search_agent",
+      "status": "ok",
+      "latency_ms": 8554,
+      "cache": "miss",
+      "query": "删除前审计流程",
+      "model": "MiniMax-M2.7-highspeed",
+      "ts": "2026-04-22T05:11:27Z"
+    },
+    {
+      "stage": "search_agent",
+      "status": "ok",
+      "latency_ms": 7896,
+      "cache": "miss",
+      "query": "tmux nested 环境变量",
+      "model": "MiniMax-M2.7-highspeed",
+      "ts": "2026-04-22T05:11:35Z"
+    },
+    {
+      "stage": "search_agent",
+      "status": "fail",
+      "latency_ms": 10350,
+      "cache": "miss",
+      "query": "worktree 分离开发",
+      "model": "MiniMax-M2.7-highspeed",
+      "ts": "2026-04-22T05:11:46Z"
+    }
+  ]
 }
