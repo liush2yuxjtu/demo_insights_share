@@ -233,6 +233,17 @@ trap cleanup EXIT
 LEFT_SH="$SANDBOX/left.sh"
 cat > "$LEFT_SH" <<EOF
 #!/usr/bin/env bash
+# 只加 set -u 不加 -e/-pipefail：exec tail -f 下 -e 无意义，下游 lossy pipe 无。
+set -u
+# 入口预检 4 项资源（feedback_real_sandbox.md: 沙箱隔离不可退化）
+for _p in "$SANDBOX" "$GUIDE_LOG" "$GUIDE_SCRIPT" "$SANDBOX_HOME"; do
+  if [ ! -e "\$_p" ]; then
+    echo "[left pane FATAL] 缺资源: \$_p" >&2
+    echo "(pane 保留 60s 供查看, 然后退出)" >&2
+    sleep 60
+    exit 1
+  fi
+done
 export HOME="$SANDBOX_HOME"
 bash "$GUIDE_SCRIPT" "$SANDBOX" "$GUIDE_LOG" "$SKILL_NAME" "$SANDBOX_HOME" >/dev/null 2>&1 &
 exec tail -f "$GUIDE_LOG"
@@ -251,6 +262,18 @@ chmod +x "$LEFT_SH"
 RIGHT_SH="$SANDBOX/right.sh"
 cat > "$RIGHT_SH" <<EOF
 #!/usr/bin/env bash
+# 只加 set -u 不加 -e/-pipefail：RIGHT_SH 里大量故意 lossy pipe (| head | sed | xargs)，
+# pipefail 会把 benign miss 变 pane killer；-u 只防未定义变量，是最小诚实防护。
+set -u
+# 入口预检 4 项资源
+for _p in "$SANDBOX_WORKDIR" "$ENV_FILE" "$SANDBOX_HOME" "$REPO_ROOT"; do
+  if [ ! -e "\$_p" ]; then
+    echo "[right pane FATAL] 缺资源: \$_p" >&2
+    echo "(pane 保留 60s 供查看, 然后退出)" >&2
+    sleep 60
+    exit 1
+  fi
+done
 cd "$SANDBOX_WORKDIR"
 source "$ENV_FILE"
 clear
