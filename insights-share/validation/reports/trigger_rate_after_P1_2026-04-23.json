@@ -1,0 +1,236 @@
+[
+  {
+    "split": "train",
+    "threshold": 0.05,
+    "counts": {
+      "tp": 6,
+      "fp": 3,
+      "tn": 3,
+      "fn": 0,
+      "total": 12
+    },
+    "precision": 0.6667,
+    "recall": 1.0,
+    "f1": 0.8,
+    "accuracy": 0.75,
+    "per_case": [
+      {
+        "id": "t01",
+        "split": "train",
+        "should_trigger": true,
+        "expected_card_id": "alice-pgpool-2026-04-10",
+        "top_id": "alice-pgpool-2026-04-10",
+        "top_score": 0.3625,
+        "triggered": true,
+        "verdict": "TP"
+      },
+      {
+        "id": "t02",
+        "split": "train",
+        "should_trigger": true,
+        "expected_card_id": "alice-pgpool-2026-04-10",
+        "top_id": "alice-pgpool-2026-04-10",
+        "top_score": 0.3545,
+        "triggered": true,
+        "verdict": "TP"
+      },
+      {
+        "id": "t03",
+        "split": "train",
+        "should_trigger": true,
+        "expected_card_id": "alice-pgpool-2026-04-10",
+        "top_id": "alice-pgpool-2026-04-10",
+        "top_score": 0.3682,
+        "triggered": true,
+        "verdict": "TP"
+      },
+      {
+        "id": "t05",
+        "split": "train",
+        "should_trigger": true,
+        "expected_card_id": "alice-celery-retry-2026-04-08",
+        "top_id": "alice-celery-retry-2026-04-08",
+        "top_score": 0.55,
+        "triggered": true,
+        "verdict": "TP"
+      },
+      {
+        "id": "t06",
+        "split": "train",
+        "should_trigger": true,
+        "expected_card_id": "alice-celery-retry-2026-04-08",
+        "top_id": "alice-celery-retry-2026-04-08",
+        "top_score": 0.5038,
+        "triggered": true,
+        "verdict": "TP"
+      },
+      {
+        "id": "t08",
+        "split": "train",
+        "should_trigger": true,
+        "expected_card_id": "carol-redis-eviction-2026-03-27",
+        "top_id": "carol-redis-eviction-2026-03-27",
+        "top_score": 0.3577,
+        "triggered": true,
+        "verdict": "TP"
+      },
+      {
+        "id": "t11",
+        "split": "train",
+        "should_trigger": false,
+        "expected_card_id": null,
+        "top_id": "m1-caveman-mode-2026-04-22",
+        "top_score": 0.1885,
+        "triggered": true,
+        "verdict": "FP"
+      },
+      {
+        "id": "t12",
+        "split": "train",
+        "should_trigger": false,
+        "expected_card_id": null,
+        "top_id": "m1-atomic-commit-2026-04-22",
+        "top_score": 0.387,
+        "triggered": true,
+        "verdict": "FP"
+      },
+      {
+        "id": "t13",
+        "split": "train",
+        "should_trigger": false,
+        "expected_card_id": null,
+        "top_id": "m1-权限检查优化-2026-04-18",
+        "top_score": 0.0435,
+        "triggered": false,
+        "verdict": "TN"
+      },
+      {
+        "id": "t14",
+        "split": "train",
+        "should_trigger": false,
+        "expected_card_id": null,
+        "top_id": "m1-tmux-nested-2026-04-22",
+        "top_score": 0.0143,
+        "triggered": false,
+        "verdict": "TN"
+      },
+      {
+        "id": "t15",
+        "split": "train",
+        "should_trigger": false,
+        "expected_card_id": null,
+        "top_id": "bob-pgpool-bad-2026-04-12",
+        "top_score": 0.02,
+        "triggered": false,
+        "verdict": "TN"
+      },
+      {
+        "id": "t16",
+        "split": "train",
+        "should_trigger": false,
+        "expected_card_id": null,
+        "top_id": "m1-kb-ao-002",
+        "top_score": 0.0714,
+        "triggered": true,
+        "verdict": "FP"
+      }
+    ]
+  },
+  {
+    "split": "test",
+    "threshold": 0.05,
+    "counts": {
+      "tp": 3,
+      "fp": 1,
+      "tn": 3,
+      "fn": 1,
+      "total": 8
+    },
+    "precision": 0.75,
+    "recall": 0.75,
+    "f1": 0.75,
+    "accuracy": 0.75,
+    "per_case": [
+      {
+        "id": "t04",
+        "split": "test",
+        "should_trigger": true,
+        "expected_card_id": "alice-pgpool-2026-04-10",
+        "top_id": "alice-pgpool-2026-04-10",
+        "top_score": 0.4064,
+        "triggered": true,
+        "verdict": "TP"
+      },
+      {
+        "id": "t07",
+        "split": "test",
+        "should_trigger": true,
+        "expected_card_id": "alice-celery-retry-2026-04-08",
+        "top_id": "alice-celery-retry-2026-04-08",
+        "top_score": 0.2159,
+        "triggered": true,
+        "verdict": "TP"
+      },
+      {
+        "id": "t09",
+        "split": "test",
+        "should_trigger": true,
+        "expected_card_id": "carol-redis-eviction-2026-03-27",
+        "top_id": "carol-redis-eviction-2026-03-27",
+        "top_score": 0.549,
+        "triggered": true,
+        "verdict": "TP"
+      },
+      {
+        "id": "t10",
+        "split": "test",
+        "should_trigger": true,
+        "expected_card_id": "carol-redis-eviction-2026-03-27",
+        "top_id": "m1-kb-ao-012",
+        "top_score": 0.2611,
+        "triggered": true,
+        "verdict": "FN"
+      },
+      {
+        "id": "t17",
+        "split": "test",
+        "should_trigger": false,
+        "expected_card_id": null,
+        "top_id": "alice-celery-retry-2026-04-08",
+        "top_score": 0.0101,
+        "triggered": false,
+        "verdict": "TN"
+      },
+      {
+        "id": "t18",
+        "split": "test",
+        "should_trigger": false,
+        "expected_card_id": null,
+        "top_id": null,
+        "top_score": 0.0,
+        "triggered": false,
+        "verdict": "TN"
+      },
+      {
+        "id": "t19",
+        "split": "test",
+        "should_trigger": false,
+        "expected_card_id": null,
+        "top_id": "m1-json_文件逐行处理-2026-04-18",
+        "top_score": 0.237,
+        "triggered": true,
+        "verdict": "FP"
+      },
+      {
+        "id": "t20",
+        "split": "test",
+        "should_trigger": false,
+        "expected_card_id": null,
+        "top_id": null,
+        "top_score": 0.0,
+        "triggered": false,
+        "verdict": "TN"
+      }
+    ]
+  }
+]
