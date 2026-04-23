@@ -149,7 +149,9 @@ def main() -> int:
     ap.add_argument("--cases", default=str(default_cases))
     ap.add_argument("--split", choices=["train", "test", "all"], default="all")
     ap.add_argument("--wiki", default=DEFAULT_WIKI)
-    ap.add_argument("--threshold", type=float, default=0.02)
+    # P1 fix (2026-04-23)：阈值 0.02 → 0.05（sweet spot，实测 train f1 0.53 → 0.67
+    # 同时 FP 从 5 降到 2；超过 0.08 recall 崩，0.05 精确-召回均衡）。
+    ap.add_argument("--threshold", type=float, default=0.05)
     ap.add_argument("--report", default=None, help="可选 JSON 报告输出路径")
     args = ap.parse_args()
 
