@@ -1,0 +1,136 @@
+================ sandbox self-check ==============
+==
+cwd  : /tmp/demo-sandbox-20260423-135857.oLxzd5/wo
+rkdir
+HOME : /tmp/demo-sandbox-20260423-135857.oLxzd5/ho
+me
+tmux : F1=左pane(讲解) / F2=右pane(Claude) / F
+12=退出
+----- project-level skills ($cwd/.claude/skills/)
+-----
+insights-share
+----- user-level skills ($HOME/.claude/skills/) --
+---
+insights-share
+----- repo *.sh ($REPO_ROOT/*.sh) -----
+start.claude.sh
+start.codex.sh
+start.demo.sh
+
+╔═════════════════════════════════════════════════
+═════════════╗
+║  📋 6 CORE FEATURES CHECKLIST (canonical from FE
+ATURES.md)   ║
+╚═════════════════════════════════════════════════
+═════════════╝
+
+┌─ [F1/6] Topic 中心 Good/Bad 并列 ───────────────
+──────────────
+│  Topics: 1 · Cards: 258
+│  Store: wiki_tree/{type}/{slug}.md · label=good|
+bad 并列共存
+│  规则: 不合并·不挑最优·不冲突检测·消费方按 appli
+es_when 自行匹配
+
+┌─ [F2/6] Statusline 实时反馈（5 态徽章） ────────
+─────────────
+│  预览 5 态:
+│    [share ✓ N/today]     daemon 可达 + 今日命中
+N 次
+│    [share ✗ 0/today]     daemon 断链 or skill 未
+装
+│    [share … N/today]     prompt prefetch/match
+中
+│    [share ⚠ stale]       卡片 TTL 过期（M3 新增
+）
+│    [share 🔒 sig-fail]   ed25519 签名失败（M4 新
+增）
+│  实机当前徽章:
+│    [share ✓ 0/today]
+
+┌─ [F3/6] Claude Code Plugin 封装 ────────────────
+─────────────
+│  manifest: plugins/insights-share/.claude-plugin
+/plugin.json
+│  version : 0.6.0-m7
+│  install : claude plugin install insights-share@
+<marketplace>
+│  upgrade : claude plugin upgrade insights-share
+│  uninstall: claude plugin uninstall insights-sha
+re
+
+┌─ [F4/6] 核心 Slash 命令（5 条） ────────────────
+─────────────
+│  /share-install   ✓
+│  /share-search   ✓
+│  /share-publish   ✓
+│  /share-review   ✓
+│  /share-diff   ✓
+│  agents: share-validator(✓) · share-curator(✓)
+
+┌─ [F5/6] 安全与分发 ─────────────────────────────
+─────────────
+│  ed25519 签名: ✓ statusline 支持 [share 🔒 sig-f
+ail] 降级态
+│  team namespace: wiki_tree/<team>/<topic>/ 路径
+约定（向后兼容无 team）
+│  TTL + stale: 卡片过期 → [share ⚠ stale] 状态灯
+（M3 新增态）
+│  LAN marketplace: .claude-plugin/marketplace.jso
+n ✓ + insightsd :7821
+│  发布脚本: plugins/insights-share/scripts/publis
+h_marketplace.py
+│  双仓分发: dev 仓(全量) + plugin 仓(~108K, v0.6.
+0-m7 起)
+
+┌─ [F6/6] 数据模型（Topic / Example Schema） ─────
+─────────────
+│  Example 核心字段（from database/postgres_pool.m
+d）:
+│      "id": "alice-pgpool-2026-04-10",
+│      "applies_when": [
+│      "do_not_apply_when": [
+│      "raw_log": "./raw/alice-pgpool-2026-04-10.j
+sonl",
+│      "topic_id": "postgres-pool-exhaustion",
+│      "label": "good",
+│  API: POST /topics · POST /topics/{id}/examples
+· GET /topics?q=  (?label=good|bad)
+
+╔═════════════════════════════════════════════════
+═════════════╗
+║  📚 canonical manifest: /Users/m1/projects/demo_
+insights_share/FEATURES.md
+╚═════════════════════════════════════════════════
+═════════════╝
+
+----- plugin M5 self-check (plugins/insights-share
+/) -----
+manifest: OK (insights-share v0.6.0-m7)
+marketplace: OK
+skill insights-share: OK
+skill insights-share-server: OK
+hook UserPromptSubmit: OK
+hook SessionStart (full download): OK
+session_start_full_fetch.py: OK
+plugin statusline: OK
+command /share-install: OK
+command /share-search: OK
+command /share-publish: OK
+command /share-review: OK
+command /share-diff: OK
+agent share-curator: OK
+agent share-validator: OK
+mcp wiki-server: OK (wiki-server tools=7)
+marketplace publish script: OK
+manifest contract (name=insights-share, milestone
+forward-compat, share-* cmds/agents, mcp>=7, signe
+d_cards): OK
+plugin self-check: ALL GREEN
+==================================================
+==
+期望: 6/6 feature 全 ✓；statusline [share ✓ 0/toda
+y]；plugin self-check ALL GREEN。
+按 F1 看左 pane 讲解 · F2 回来进 claude · F12 退出
+ demo。
+按回车进入 claude…
