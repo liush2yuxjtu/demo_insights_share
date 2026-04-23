@@ -10,6 +10,8 @@ from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+REPO_ROOT = ROOT.parent
+PLUGIN_ROOT = REPO_ROOT / "plugins" / "insights-share"
 DEFAULT_OUTPUT_DIR = ROOT / "dist"
 INCLUDE_PATHS = [
     ROOT / "VERSION",
@@ -18,7 +20,7 @@ INCLUDE_PATHS = [
     ROOT / "release" / "README.txt",
     ROOT / "demo_codes",
     ROOT / "demo_docs",
-    ROOT / "plugin",
+    PLUGIN_ROOT,
     ROOT / "validation",
 ]
 EXCLUDE_NAMES = {
@@ -78,6 +80,14 @@ def iter_release_files() -> list[Path]:
     return files
 
 
+def archive_relative_path(path: Path) -> Path:
+    if path.is_relative_to(ROOT):
+        return path.relative_to(ROOT)
+    if path.is_relative_to(REPO_ROOT):
+        return path.relative_to(REPO_ROOT)
+    raise ValueError(f"unexpected release path outside repo roots: {path}")
+
+
 def sha256_of_file(path: Path) -> str:
     digest = hashlib.sha256()
     with path.open("rb") as fh:
@@ -105,7 +115,7 @@ def build_release(output_dir: Path) -> tuple[Path, Path, Path]:
 
     with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
         for src in files:
-            rel = src.relative_to(ROOT)
+            rel = archive_relative_path(src)
             arcname = Path(prefix) / rel
             zf.write(src, arcname.as_posix())
             manifest_lines.append(rel.as_posix())

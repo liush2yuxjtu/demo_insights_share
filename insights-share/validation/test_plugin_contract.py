@@ -19,7 +19,7 @@ def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
 
 
-def test_plugin_manifest_declares_m5_release() -> None:
+def test_plugin_manifest_declares_current_release() -> None:
     manifest = json.loads(_read(MANIFEST))
     commands = manifest["entry"]["commands"]
 
@@ -40,10 +40,10 @@ def test_plugin_manifest_declares_m5_release() -> None:
         "skills/insights-share/SKILL.md",
         "skills/insights-share-server/SKILL.md",
     ]
-    assert manifest["version"] == "0.5.0-m5"
-    assert manifest["milestones"]["current"] == "M5_RENAME"
+    assert manifest["version"] == "0.6.0-m7"
+    assert manifest["milestones"]["current"] == "M7_LATENCY_DEEP"
     assert "M5_RENAME" in manifest["milestones"]["completed"]
-    assert manifest["milestones"]["pending"] == []
+    assert manifest["milestones"]["pending"] == ["M8_LATENCY_INDEX"]
 
 
 def test_share_diff_command_exists() -> None:
@@ -55,23 +55,25 @@ def test_share_diff_command_exists() -> None:
     assert "只写 diff" in text
 
 
-def test_self_check_tracks_full_m5_contract() -> None:
+def test_self_check_tracks_bundle_local_contract() -> None:
     script = _read(SELF_CHECK)
 
     assert "share-diff" in script
     assert "mcp wiki-server" in script
     assert "marketplace publish script" in script
     assert "insights_share_statusline.sh" in script
+    assert "insights_prefetch.py" in script
+    assert "session_start_full_fetch.py" in script
     assert 'm["name"] == "insights-share"' in script
-    assert 'm["version"] == "0.5.0-m5"' in script
-    assert 'm["milestones"]["current"] == "M5_RENAME"' in script
+    assert 'm["version"].startswith("0.")' in script
+    assert 'current in known' in script
 
 
 def test_mcp_contract_exists_and_covers_team_queries() -> None:
     payload = json.loads(_read(MCP))
 
     assert payload["name"] == "wiki-server"
-    assert payload["transport"]["base_url"] == "http://127.0.0.1:7821"
+    assert payload["transport"]["base_url"] == "http://192.168.22.42:7821"
     tool_names = [tool["name"] for tool in payload["tools"]]
     assert "wiki_search" in tool_names
     assert "wiki_topics" in tool_names
@@ -82,7 +84,7 @@ def test_mcp_contract_exists_and_covers_team_queries() -> None:
     assert payload["capabilities"]["signed_cards"] is True
 
 
-def test_marketplace_and_readme_align_with_current_m5_release() -> None:
+def test_marketplace_and_readme_align_with_current_release() -> None:
     manifest = json.loads(_read(MANIFEST))
     marketplace = json.loads(_read(MARKETPLACE))
     readme = _read(README)
@@ -90,10 +92,11 @@ def test_marketplace_and_readme_align_with_current_m5_release() -> None:
     plugin = marketplace["plugins"][0]
     assert marketplace["name"] == "insights-share"
     assert plugin["name"] == "insights-share"
-    assert plugin["version"] == manifest["version"] == "0.5.0-m5"
-    assert "subdir=plugins/insights-share" in plugin["source"]
-    assert manifest["milestones"]["current"] == "M5_RENAME"
-    assert "M5_RENAME" in readme
+    assert plugin["version"] == manifest["version"] == "0.6.0-m7"
+    assert plugin["source"] == "./"
+    assert manifest["milestones"]["current"] == "M7_LATENCY_DEEP"
+    assert "M7_LATENCY_DEEP" in readme
+    assert "v0.6.0-m7" in readme
     assert "/share-diff" in readme
     assert "[share ⚠ stale]" in readme
     assert "[share 🔒 sig-fail]" in readme

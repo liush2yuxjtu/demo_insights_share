@@ -17,16 +17,13 @@
 
 set -euo pipefail
 
-DAEMON_URL="${INSIGHTS_DAEMON_URL:-http://192.168.22.42:7821}"
+DAEMON_URL="${INSIGHTS_SHARE_URL:-${INSIGHTS_DAEMON_URL:-http://192.168.22.42:7821}}"
 WARM_DIR_DEFAULT="$HOME/.cache/insights-share/warm"
 WARM_DIR="${INSIGHTS_WARM_DIR:-$WARM_DIR_DEFAULT}"
 
-# plugin_root 定位：hook 文件所在 plugins/insights-share/hooks/*.sh
 HOOK_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ROOT="$(cd "$HOOK_DIR/.." && pwd)"
-REPO_ROOT="$(cd "$PLUGIN_ROOT/../.." && pwd)"
-DEMO_CODES="$REPO_ROOT/insights-share/demo_codes"
-LOCAL_TOPICS="$DEMO_CODES/wiki_tree/topics.json"
+PYTHON_BIN="$(command -v python3 || true)"
 
 mkdir -p "$WARM_DIR"
 
@@ -52,15 +49,8 @@ if try_url "$DAEMON_URL/topics"; then
 # 2) /wiki/topics.json
 elif try_url "$DAEMON_URL/wiki/topics.json"; then
   SOURCE="$DAEMON_URL/wiki/topics.json"
-# 3) 本地 fallback：仅最后一层允许
-elif [ -f "$LOCAL_TOPICS" ]; then
-  if cp "$LOCAL_TOPICS" "$TMP_PATH" 2>/dev/null; then
-    SOURCE="local:$LOCAL_TOPICS"
-  else
-    FAIL_REASON="local copy failed"
-  fi
 else
-  FAIL_REASON="daemon unreachable and local topics.json missing"
+  FAIL_REASON="daemon topics endpoints unreachable"
 fi
 
 if [ -z "$SOURCE" ]; then
@@ -88,14 +78,11 @@ EOF
 fi
 
 # ---- Phase 2: Full card fetch with delta sync (user-unaware download) ----
-# 调用 session_start_full_fetch.py 拉完整卡片到 ~/.cache/insights-share/
-# 支持 If-None-Match / ETag，304 时跳过 persist 直接复用缓存
-# Python 脚本内部 all errors → stderr + exit 0（soft skip）
-FULL_FETCH_SCRIPT="$DEMO_CODES/hooks/session_start_full_fetch.py"
+# 调用 bundle-local session_start_full_fetch.py 拉完整卡片到 ~/.cache/insights-share/
+FULL_FETCH_SCRIPT="$PLUGIN_ROOT/scripts/session_start_full_fetch.py"
 if [ -f "$FULL_FETCH_SCRIPT" ]; then
-  if command -v python3 >/dev/null 2>&1; then
-    python3 "$FULL_FETCH_SCRIPT" >&2
-    # exit code 0 always (soft skip inside script)
+  if [ -n "$PYTHON_BIN" ]; then
+    "$PYTHON_BIN" "$FULL_FETCH_SCRIPT" >&2
   else
     echo "[session-start] python3 not found, skipping full card fetch" >&2
   fi

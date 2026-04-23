@@ -9,6 +9,10 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 MCP_CONFIG="$PLUGIN_DIR/mcp/wiki-server.json"
 PUBLISH_SCRIPT="$PLUGIN_DIR/scripts/publish_marketplace.py"
+PREFETCH_SCRIPT="$PLUGIN_DIR/scripts/insights_prefetch.py"
+SESSION_FETCH_SCRIPT="$PLUGIN_DIR/scripts/session_start_full_fetch.py"
+CACHE_SCRIPT="$PLUGIN_DIR/scripts/insights_cache.py"
+TODAY_COUNT_SCRIPT="$PLUGIN_DIR/scripts/today_count.py"
 
 fail_count=0
 say() { printf '%s\n' "$*"; }
@@ -63,10 +67,24 @@ else
   fail_count=$((fail_count+1))
 fi
 
-# session_start_full_fetch.py (delta sync + ETag)
-SESSION_FETCH="$PLUGIN_DIR/../../insights-share/demo_codes/hooks/session_start_full_fetch.py"
-if [ -f "$SESSION_FETCH" ]; then
-  if /usr/bin/python3 -c "import ast; ast.parse(open('$SESSION_FETCH').read())" 2>/dev/null; then
+# bundle-local runtime scripts
+for runtime_script in "$CACHE_SCRIPT" "$TODAY_COUNT_SCRIPT" "$PREFETCH_SCRIPT"; do
+  runtime_name="$(basename "$runtime_script")"
+  if [ -f "$runtime_script" ]; then
+    if /usr/bin/python3 -c "import ast; ast.parse(open('$runtime_script').read())" 2>/dev/null; then
+      say "$runtime_name: OK"
+    else
+      say "$runtime_name: PARSE-FAIL"
+      fail_count=$((fail_count+1))
+    fi
+  else
+    say "$runtime_name: MISSING"
+    fail_count=$((fail_count+1))
+  fi
+done
+
+if [ -f "$SESSION_FETCH_SCRIPT" ]; then
+  if /usr/bin/python3 -c "import ast; ast.parse(open('$SESSION_FETCH_SCRIPT').read())" 2>/dev/null; then
     say "session_start_full_fetch.py: OK"
   else
     say "session_start_full_fetch.py: PARSE-FAIL"

@@ -1,6 +1,6 @@
 # insights-share plugin
 
-demo_insights_share 团队内部 Claude Code plugin。当前已交付 **M5_RENAME**。
+demo_insights_share 团队内部 Claude Code plugin。当前主线是 **v0.6.0-m7 / M7_LATENCY_DEEP**。
 
 > **权威设计文档**：[`proposal/proposal_rename_to_insights_share.md`](../../proposal/proposal_rename_to_insights_share.md)
 >
@@ -40,7 +40,7 @@ plugins/insights-share/
 └── README.md                    # 本文件
 ```
 
-## 当前能力（M5）
+## 当前能力（M7）
 
 - 两个 skill：`insights-share`、`insights-share-server`
 - 一个 hook：`UserPromptSubmit`
@@ -51,6 +51,7 @@ plugins/insights-share/
 - 一套逻辑 team namespace：通过 `team` 字段、API query 和本地安装配置隔离命中范围
 - 一套 ed25519 卡片签名链路：daemon 写入时签名，读取时验签，缓存 manifest 聚合 `sig-fail`
 - 一条 marketplace 发布摘要链路：`scripts/publish_marketplace.py --check/--output`
+- 一套 bundle-local hook runtime：`scripts/insights_prefetch.py`、`scripts/session_start_full_fetch.py`、`scripts/insights_cache.py`、`scripts/today_count.py`
 
 其中 `/share-diff` 专门对应 `proposal_conflict_design.md` 的**并列 Good/Bad 视图**
 要求，只输出差异和适用场景，不替用户做最终裁决。
@@ -84,7 +85,7 @@ claude plugin marketplace add liush2yuxjtu/insights-share-plugin
 claude plugin install insights-share@insights-share-plugin
 ```
 
-### A. 本地 source 模式（开发默认）
+### A. 本地 source / 本地 marketplace 模式（开发默认）
 
 ```bash
 # 1. 启 daemon（管理员侧）
@@ -92,9 +93,9 @@ claude plugin install insights-share@insights-share-plugin
     ./insights-share/demo_codes/insights_cli.py serve \
     --host 0.0.0.0 --port 7821 --store wiki.json --store-mode flat &
 
-# 2. 把本 plugin 目录挂入 Claude Code（任选其一）
-#    - 软链到 user-level：ln -s $(pwd)/plugins/insights-share ~/.claude/plugins/insights-share
-#    - 或直接跑 start.demo.sh（会做 plugin 自检）
+# 2. 把本 plugin 目录作为本地 marketplace 加进 Claude Code
+claude plugin marketplace add "$(pwd)/plugins/insights-share"
+claude plugin install insights-share@insights-share
 
 # 3. 在 Claude Code 里敲斜杠命令
 /share-install --team team-a
@@ -119,11 +120,12 @@ claude plugin install insights-share    # 新包
 
 安装后应能看到：
 
-- version: `0.5.0-m5`
+- version: `0.6.0-m7`
 - commands: `share-install/share-search/share-publish/share-review/share-diff`
 - agents: `share-curator/share-validator`
 - mcp: `wiki-server`（内部名，M6 改）
 - statusline: fresh=`[share ✓ N/today]` / stale=`[share ⚠ stale]` / sig-fail=`[share 🔒 sig-fail]`
+- hooks runtime: `scripts/insights_prefetch.py` / `scripts/session_start_full_fetch.py` 已随 plugin cache 一起安装，不依赖 dev repo checkout
 
 ## 验证
 

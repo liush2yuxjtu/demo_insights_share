@@ -5,15 +5,15 @@
 #   /tmp/demo-sandbox-<ts>.XXXX/
 #     home/
 #       .claude/
-#         skills/insights-share/        ← cp 进来（完全独立副本）
-#         .credentials.json → symlink 到真实 auth（只为能登录）
-#         settings.json     → symlink 到真实 settings（只为继承偏好）
-#       .cache/                        ← insights-share skill 写缓存的地方
+#         plugins/                     ← claude plugin install 写入的真实 plugin cache
+#         .credentials.json            ← 订阅模式下软链到真实 auth
+#         settings.json                ← plugin marketplace + enabledPlugins
+#       .cache/                        ← insights-share plugin 写缓存的地方
 #     guide.log                        ← 左 pane tail -f
 #     .env                             ← 右 pane source 的环境文件
 #
 # 启动 claude 时右 pane export HOME=$SANDBOX_HOME，
-# 所以 claude 看到的 ~/.claude/ 就是沙箱目录，skill 和 cache 全部隔离。
+# 所以 claude 看到的 ~/.claude/ 就是沙箱目录，plugin install 和 cache 全部隔离。
 # 退出时一口气 rm -rf 沙箱，真实 HOME 零污染。
 
 set -euo pipefail
@@ -26,11 +26,10 @@ SANDBOX_CLAUDE="$SANDBOX_HOME/.claude"
 SANDBOX_WORKDIR="$SANDBOX/workdir"   # claude 的 cwd — 只有项目级 skill，不放别的
 GUIDE_LOG="$SANDBOX/guide.log"
 ENV_FILE="$SANDBOX/.env"
-SKILL_NAME="insights-share"
-SKILL_SRC="$REPO_ROOT/insights-share/demo_codes/.claude/skills/$SKILL_NAME"
 DEMO_CODES="$REPO_ROOT/insights-share/demo_codes"
-DEMO_SETTINGS="$DEMO_CODES/.claude/settings.json"   # 注册 insights-share hook
 DEMO_VENV_PY="$DEMO_CODES/.venv/bin/python"
+PLUGIN_DIR="$REPO_ROOT/plugins/insights-share"
+PLUGIN_NAME="insights-share"
 DAEMON_PORT="7821"
 DAEMON_LOG="$SANDBOX/insightsd.log"
 DAEMON_PID_FILE="$SANDBOX/insightsd.pid"
@@ -56,8 +55,7 @@ die()  { printf '\033[31m[错误]\033[0m %s\n' "$1" >&2; exit 1; }
 note() { printf '\033[36m[提示]\033[0m %s\n' "$1"; }
 
 # ── 前置检查 ───────────────────────────────────────────
-[ -d "$SKILL_SRC" ]     || die "缺失 skill 源目录：$SKILL_SRC"
-[ -f "$DEMO_SETTINGS" ] || die "缺失 hook 配置：$DEMO_SETTINGS"
+[ -d "$PLUGIN_DIR/.claude-plugin" ] || die "缺失 plugin 根目录：$PLUGIN_DIR"
 [ -x "$DEMO_VENV_PY" ]  || die "缺失 demo venv：$DEMO_VENV_PY（请先 cd $DEMO_CODES && python -m venv .venv && .venv/bin/pip install -r requirements.txt）"
 [ -f "$TMUX_CONF" ]     || die "缺失 tmux 配置：$TMUX_CONF"
 [ -f "$GUIDE_SCRIPT" ]  || die "缺失 guide 脚本：$GUIDE_SCRIPT"
@@ -65,8 +63,7 @@ command -v tmux   >/dev/null 2>&1 || die "请先安装 tmux：brew install tmux"
 command -v claude >/dev/null 2>&1 || die "请先安装 claude CLI"
 
 # ── Stage 1: 准备沙箱目录 ─────────────────────────────
-# 双层 skill 入口（user-level + project-level）保证 claude 无论读 HOME 还是 cwd 都能拿到 skill
-mkdir -p "$SANDBOX_CLAUDE/skills" "$SANDBOX_HOME/.cache" "$SANDBOX_WORKDIR/.claude/skills"
+mkdir -p "$SANDBOX_CLAUDE" "$SANDBOX_HOME/.cache" "$SANDBOX_WORKDIR"
 : > "$GUIDE_LOG"
 step 1 "创建沙箱 $SANDBOX ........ done"
 
@@ -99,27 +96,18 @@ else
   2) 或先执行 claude 订阅登录（让 ~/.claude/.credentials.json 存在）"
 fi
 
-# ── Stage 2: 写 settings.json（含 insights-share hook），订阅再软链 credentials ──
-# 不 symlink 用户全局 settings.json —— 全局里注册的是 continuous-learning 等
-# 其他用户 hook，在沙箱 HOME 下 claude 解析路径时找不到脚本，会报
-# 　Stop hook error: evaluate-session.sh: No such file or directory
-# 更关键：insights-share 的触发是 **hook 驱动**（UserPromptSubmit + Stop），
-# 必须用 demo_codes/.claude/settings.json 这份注册，skill 才会被 claude 真正"用上"。
-# user-level + project-level 各放一份，两条加载路径都能找到。
-cp "$DEMO_SETTINGS" "$SANDBOX_CLAUDE/settings.json"
-cp "$DEMO_SETTINGS" "$SANDBOX_WORKDIR/.claude/settings.json"
+# ── Stage 2: 认证准备（订阅 credentials 软链；MiniMax 不落 settings） ─────
 if [ "$AUTH_MODE" = "subscription" ]; then
   ln -s "$HOME/.claude/.credentials.json" "$SANDBOX_CLAUDE/.credentials.json"
-  step 2 "装入 insights-share hook + 订阅 credentials . done"
+  step 2 "准备订阅 credentials ................ done"
 else
-  step 2 "装入 insights-share hook（走 MiniMax）....... done"
+  step 2 "MiniMax 模式无需 credentials ........ done"
 fi
 
-# ── Stage 3: 拷贝 skill 到沙箱（双位置：user-level + project-level）─────────
-# 用 cp 而不是 symlink：用户在 demo 里如果改了 skill，不影响源文件
-cp -R "$SKILL_SRC" "$SANDBOX_CLAUDE/skills/$SKILL_NAME"
-cp -R "$SKILL_SRC" "$SANDBOX_WORKDIR/.claude/skills/$SKILL_NAME"
-step 3 "拷贝 $SKILL_NAME skill 到沙箱（user+project 双保险）... done"
+# ── Stage 3: 真实 plugin install（user-scope, sandbox HOME）──────────────
+HOME="$SANDBOX_HOME" claude plugin marketplace add "$PLUGIN_DIR" --scope user >/dev/null
+HOME="$SANDBOX_HOME" claude plugin install "${PLUGIN_NAME}@${PLUGIN_NAME}" --scope user >/dev/null
+step 3 "claude plugin install ${PLUGIN_NAME}@${PLUGIN_NAME} ... done"
 
 # ── Stage 4: 按 AUTH_MODE 写环境文件 ────────────────────
 # token 来源在 Stage 2 之前就已决定，这里只负责把它落到沙箱 .env：
@@ -260,7 +248,7 @@ for _p in "$SANDBOX" "$GUIDE_LOG" "$GUIDE_SCRIPT" "$SANDBOX_HOME"; do
   fi
 done
 export HOME="$SANDBOX_HOME"
-bash "$GUIDE_SCRIPT" "$SANDBOX" "$GUIDE_LOG" "$SKILL_NAME" "$SANDBOX_HOME" >/dev/null 2>&1 &
+bash "$GUIDE_SCRIPT" "$SANDBOX" "$GUIDE_LOG" "$PLUGIN_NAME" "$SANDBOX_HOME" >/dev/null 2>&1 &
 exec tail -f "$GUIDE_LOG"
 EOF
 chmod +x "$LEFT_SH"
@@ -296,10 +284,10 @@ echo "================ sandbox self-check ================"
 echo "cwd  : $SANDBOX_WORKDIR"
 echo "HOME : $SANDBOX_HOME"
 echo "tmux : F1=左pane(讲解) / F2=右pane(Claude) / F12=退出"
-echo "----- project-level skills (\\\$cwd/.claude/skills/) -----"
-ls "$SANDBOX_WORKDIR/.claude/skills/" 2>/dev/null || echo "(none)"
-echo "----- user-level skills (\\\$HOME/.claude/skills/) -----"
-ls "$SANDBOX_HOME/.claude/skills/" 2>/dev/null || echo "(none)"
+echo "----- installed plugins (\\\$HOME/.claude/plugins/installed_plugins.json) -----"
+cat "$SANDBOX_HOME/.claude/plugins/installed_plugins.json" 2>/dev/null || echo "(missing)"
+echo "----- plugin cache roots (\\\$HOME/.claude/plugins/cache/) -----"
+find "$SANDBOX_HOME/.claude/plugins/cache" -maxdepth 4 -mindepth 1 2>/dev/null | sed 's#^#  #' || echo "(none)"
 echo "----- repo *.sh (\\\$REPO_ROOT/*.sh) -----"
 ls "$REPO_ROOT"/*.sh 2>/dev/null | xargs -n1 basename 2>/dev/null || echo "(none)"
 echo ""
@@ -381,7 +369,7 @@ echo "----- plugin M5 self-check (plugins/insights-share/) -----"
 bash "$REPO_ROOT/plugins/insights-share/scripts/self_check.sh" \
   || echo "(plugin self-check exit non-zero)"
 echo "===================================================="
-echo "期望: 6/6 feature 全 ✓；statusline [share ✓ 0/today]；plugin self-check ALL GREEN。"
+echo "期望: 6/6 feature 全 ✓；sandbox 内已完成真实 plugin install；plugin self-check ALL GREEN。"
 echo "按 F1 看左 pane 讲解 · F2 回来进 claude · F12 退出 demo。"
 printf "按回车进入 claude…"
 read _

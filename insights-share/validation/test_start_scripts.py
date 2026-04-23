@@ -42,7 +42,8 @@ def test_start_demo_script_surfaces_plugin_m5_checks() -> None:
 
     assert 'plugins/insights-share/statusline/insights_share_statusline.sh' in script
     assert 'plugin M5 self-check' in script
-    assert '5 个命令 + 2 个 agent + 签名/发布脚本 全 OK' in script
+    assert 'claude plugin install "${PLUGIN_NAME}@${PLUGIN_NAME}"' in script
+    assert "sandbox 内已完成真实 plugin install" in script
 
 
 def test_start_claude_script_wraps_shared_driver() -> None:

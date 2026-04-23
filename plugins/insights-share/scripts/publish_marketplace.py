@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""生成 insights-share 的 M5 marketplace 发布摘要。"""
+"""生成 insights-share 的 marketplace 发布摘要。"""
 
 from __future__ import annotations
 
@@ -15,7 +15,9 @@ MANIFEST = PLUGIN_DIR / ".claude-plugin" / "plugin.json"
 MARKETPLACE = PLUGIN_DIR / ".claude-plugin" / "marketplace.json"
 README = PLUGIN_DIR / "README.md"
 MCP = PLUGIN_DIR / "mcp" / "wiki-server.json"
-DEFAULT_OUTPUT = REPO_ROOT / "insights-share" / "release" / "plugin-marketplace-0.5.0-m5.json"
+def _default_output() -> Path:
+    version = _read_json(MANIFEST)["version"]
+    return PLUGIN_DIR / "release" / f"plugin-marketplace-{version}.json"
 
 
 def _sha256(path: Path) -> str:
@@ -34,8 +36,11 @@ def _validate_contract() -> tuple[dict, dict]:
     assert manifest["name"] == "insights-share", "manifest name"
     assert manifest["version"].startswith("0."), "manifest version prefix"
     assert plugin["name"] == "insights-share", "marketplace plugin name"
-    assert plugin["version"] == manifest["version"], "marketplace version"
-    assert "subdir=plugins/insights-share" in plugin["source"], "marketplace subdir"
+    plugin_version = plugin.get("version")
+    if plugin_version is not None:
+        assert plugin_version == manifest["version"], "marketplace version"
+    plugin_source = str(plugin.get("source") or "")
+    assert plugin_source in {"./", "."} or "subdir=plugins/insights-share" in plugin_source, "marketplace source"
     _known_milestones = {"M1_MVP", "M2_AGENTS", "M3_MCP_NAMESPACE_TTL", "M4_SIGN_MARKETPLACE",
                          "M5_RENAME", "M6_LATENCY_MVP", "M7_LATENCY_DEEP", "M8_LATENCY_INDEX"}
     assert manifest["milestones"]["current"] in _known_milestones, "milestone current"
@@ -68,7 +73,7 @@ def _build_bundle(manifest: dict, marketplace: dict) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true", help="只校验，不落盘")
-    parser.add_argument("--output", default=str(DEFAULT_OUTPUT), help="发布摘要输出路径")
+    parser.add_argument("--output", default=str(_default_output()), help="发布摘要输出路径")
     args = parser.parse_args()
 
     manifest, marketplace = _validate_contract()
