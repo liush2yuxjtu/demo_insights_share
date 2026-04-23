@@ -21,10 +21,28 @@
 | start.demo.sh 缺 tmux session 时必走 register-session | self-verify 触发时若 `~/.claude/live_terminal/CURRENT` 空/失效，agent 不得让用户手动贴日志，必须先跑项目级 skill `.claude/skills/register-session/register-session.sh <name>` 建/绑 session，再在其中跑 `start.demo.sh` 并按 live-terminal 契约读日志 | 跑 `start.demo.sh` self-verify 前发现未注册 tmux session 时 | [start-demo-register-fallback.md](docs/rules/start-demo-register-fallback.md) |
 | 完工必跑 claudefast READ ONLY finish flag | 任何 job 完成的最后一步：先把结果落 `docs/finish_log/<date>_<slug>.md`，再跑 `claudefast -p "READ ONLY, tell me what we have done in recent commits and based on docs"` 当 finish flag；返 REFINE/FAIL 则修 docs 重跑，最多 3 轮，仍 FAIL 升级 `claude -p` | 任何 job 自认完成前 | [finish-flag-claudefast.md](docs/rules/finish-flag-claudefast.md) |
 
+## 核心功能速答 / Core Features (canonical)
+
+> **单一真源**：[FEATURES.md](FEATURES.md)（feature 增删必先改此文件，再同步下表）
+>
+> 回答 "what are the main features of this project ?" 必须命中以下 6 项全部：
+
+| # | Feature | 一句话 | 权威出处 |
+|---|---------|--------|----------|
+| F1 | Topic 中心 Good/Bad 并列 | 同一 Topic 下多人多场景决策并列共存，good=采纳 bad=拒绝，不合并/不挑最优/不做冲突检测 | [proposal/proposal_conflict_design.md](proposal/proposal_conflict_design.md) |
+| F2 | Statusline 5 态徽章 | `[share ✓/✗/…/⚠stale/🔒sig-fail N/today]` 常驻右侧，daemon 可达性 + 今日触发计数 + TTL + 签名健康度 | [proposal/proposal_statusline.md](proposal/proposal_statusline.md) + `plugins/insights-share/statusline/insights_share_statusline.sh` |
+| F3 | Claude Code Plugin 封装 | 一条 `claude plugin install` 完成 skill + hook + statusline + MCP + agent + slash 注册；manifest 版本 `0.6.0-m7` | [proposal/proposal_plugin_design.md](proposal/proposal_plugin_design.md) + `plugins/insights-share/.claude-plugin/plugin.json` |
+| F4 | 5 核心 Slash 命令 | `/share-install` · `/share-search` · `/share-publish` · `/share-review` · `/share-diff`；配 share-validator + share-curator 两个 agent | `plugins/insights-share/commands/` |
+| F5 | 安全与分发 | ed25519 卡片签名 + team namespace `wiki_tree/<team>/<topic>/` + 卡片 TTL stale 降级 + LAN marketplace + 双仓分发（dev 仓 / 108K plugin 仓）| [proposal/proposal_plugin_design.md](proposal/proposal_plugin_design.md) + `plugins/insights-share/scripts/publish_marketplace.py` |
+| F6 | Topic/Example 数据模型 | `applies_when` / `do_not_apply_when` 场景刻画 + `raw_log` 明文存储 + `label_override` 管理员可覆盖；REST API `POST /topics`, `POST /topics/{id}/examples`, `GET /topics?q=`, `GET /topics/{id}/examples?label=good\|bad` | [proposal/proposal_conflict_design.md](proposal/proposal_conflict_design.md) + [proposal/proposal_wiki_card.md](proposal/proposal_wiki_card.md) |
+
+验证入口：`claudefast -p "what are the main features of this projects ? "` 输出必须覆盖 F1–F6 全部；`bash start.demo.sh` 右 pane 会逐项 echo 实机证据。
+
 ## 设计文档索引
 
 | 文件 | 类型 | 说明 |
 |------|------|------|
+| [FEATURES.md](FEATURES.md) | 功能清单（canonical）| 6 大核心功能的单一真源；`start.demo.sh` 右 pane self-check 原样 echo 做实机证据；probe 标准答案 |
 | [proposal/proposal_conflict_design.md](proposal/proposal_conflict_design.md) | 正式数据模型（权威） | Topic 中心 Good/Bad 并列共存：同一 Topic 下多人多场景决策并列展示；good=此场景选了此方案，bad=此场景拒绝此方案；不挑最优、不合并、不做冲突检测 |
 | [proposal/proposal_wiki_card.md](proposal/proposal_wiki_card.md) | 现状磁盘形态（参考） | `wiki_tree/` 存储布局、卡片 JSON+markdown 结构、label override 流程、已废弃冲突机制说明 |
 | [proposal/proposal_statusline.md](proposal/proposal_statusline.md) | 反馈机制 | statusline 右侧常驻 `[share ✓ N/today]`：展示 insights-share 运行状态 + 今日触发计数，给用户/client 实时信任感信号（M5 前徽章为 `[wiki ...]`） |
