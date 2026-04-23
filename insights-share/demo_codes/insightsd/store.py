@@ -109,6 +109,22 @@ def search_cards(
     k: int = 3,
     skip_not_triggered: bool = False,
 ) -> list[dict[str, Any]]:
+    """Jaccard + tag_bonus 打分（保留原 Jaccard 兼容 + tag 高信号加权）。
+
+    P1 fix (2026-04-23)：纯 Jaccard `|inter|/|union|` 让 canonical 卡（alice-pgpool
+    等）被精简短卡 (m1-project-001) 以高 Jaccard 胜出。而长 noise 卡
+    (carol do_not_apply_when 含 "postgres" 干扰词) 又会借 coverage 反超。
+
+    最终策略：
+    - 保留 Jaccard（对短精准卡友好）
+    - 加 `0.15 * tag_hit_count`（tags 是高信号，noise-free，线性加权）
+    - 不用 coverage（避免长 noise 卡伪命中）
+
+    trigger_rate.py 实测（tree mode）：
+    - before (flat mode): train f1=0.0 test f1=0.0
+    - tree mode only:     train f1=0.53 test f1=0.75
+    - tree + tag_bonus:   train f1=? test f1=?（见 finish_log）
+    """
     query_tokens = _tokenize(q or "")
     if not query_tokens:
         return []
@@ -120,11 +136,17 @@ def search_cards(
         card_tokens = _card_tokens(card)
         if not card_tokens:
             continue
-        union = query_tokens | card_tokens
-        if not union:
-            continue
         inter = query_tokens & card_tokens
-        score = len(inter) / len(union)
+        if not inter:
+            continue
+        union = query_tokens | card_tokens
+        jaccard = len(inter) / len(union) if union else 0.0
+        # tag bonus：query 与 card tags 的 token 重叠计数（线性 0.15/命中）
+        card_tags = card.get("tags") or []
+        tag_text = " ".join(str(t) for t in card_tags if isinstance(t, str))
+        tag_tokens = _tokenize(tag_text)
+        tag_hit_count = len(query_tokens & tag_tokens)
+        score = jaccard + 0.15 * tag_hit_count
         if score <= 0:
             continue
         scored.append((score, card))
