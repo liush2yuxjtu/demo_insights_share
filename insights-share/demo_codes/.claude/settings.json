@@ -4,17 +4,6 @@
     "command": "/Users/m1/projects/demo_insights_share/statusline/insights_share_statusline.sh"
   },
   "hooks": {
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python /Users/m1/projects/demo_insights_share/insights-share/demo_codes/hooks/insights_stop_hook.py"
-          }
-        ]
-      }
-    ],
     "UserPromptSubmit": [
       {
         "matcher": "",
@@ -22,6 +11,17 @@
           {
             "type": "command",
             "command": "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python /Users/m1/projects/demo_insights_share/insights-share/demo_codes/hooks/insights_prefetch.py 2>/dev/null"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python /Users/m1/projects/demo_insights_share/insights-share/demo_codes/hooks/session_start_full_fetch.py 2>/dev/null"
           }
         ]
       }
