@@ -266,47 +266,43 @@ echo "----- repo *.sh (\\\$REPO_ROOT/*.sh) -----"
 ls "$REPO_ROOT"/*.sh 2>/dev/null | xargs -n1 basename 2>/dev/null || echo "(none)"
 echo ""
 echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  📋 6 CORE FEATURES CHECKLIST (canonical from FEATURES.md)   ║"
+echo "║  📋 CANONICAL FEATURE MANIFEST (source: FEATURES.md)          ║"
+echo "╚══════════════════════════════════════════════════════════════╝"
+if [ -f "$REPO_ROOT/FEATURES.md" ]; then
+  cat "$REPO_ROOT/FEATURES.md"
+else
+  echo "(FEATURES.md 缺失 — canonical 源丢失, 请 checkout main)"
+fi
+echo ""
+echo "╔══════════════════════════════════════════════════════════════╗"
+echo "║  🔬 LIVE RUNTIME EVIDENCE (per-feature)                      ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
-echo "┌─ [F1/6] Topic 中心 Good/Bad 并列 ─────────────────────────────"
+echo "┌─ [F1] wiki_tree 数据 ─────────────────────────────────────────"
 if [ -f "$REPO_ROOT/insights-share/demo_codes/wiki_tree/topics.json" ]; then
   topic_n=\$("$DEMO_VENV_PY" -c 'import json,sys;print(len(json.load(open(sys.argv[1]))))' "$REPO_ROOT/insights-share/demo_codes/wiki_tree/topics.json" 2>/dev/null || echo "?")
   card_n=\$(find "$REPO_ROOT/insights-share/demo_codes/wiki_tree" -name "*.md" -not -name "INDEX.md" 2>/dev/null | wc -l | tr -d ' ')
   echo "│  Topics: \${topic_n} · Cards: \${card_n}"
-  echo "│  Store: wiki_tree/{type}/{slug}.md · label=good|bad 并列共存"
-  echo "│  规则: 不合并·不挑最优·不冲突检测·消费方按 applies_when 自行匹配"
 else
   echo "│  (wiki_tree 未就绪)"
 fi
 echo ""
-echo "┌─ [F2/6] Statusline 实时反馈（5 态徽章） ─────────────────────"
-echo "│  预览 5 态:"
-echo "│    [share ✓ N/today]     daemon 可达 + 今日命中 N 次"
-echo "│    [share ✗ 0/today]     daemon 断链 or skill 未装"
-echo "│    [share … N/today]     prompt prefetch/match 中"
-echo "│    [share ⚠ stale]       卡片 TTL 过期（M3 新增）"
-echo "│    [share 🔒 sig-fail]   ed25519 签名失败（M4 新增）"
-echo "│  实机当前徽章:"
-printf  "│    "
-INSIGHTS_SHARE_URL=http://127.0.0.1:7821 SHARE_STATUSLINE_NO_COLOR=1 \
+echo "┌─ [F2] 实机 statusline 徽章 ───────────────────────────────────"
+printf  "│  "
+INSIGHTS_SHARE_URL=http://127.0.0.1:${DAEMON_PORT} SHARE_STATUSLINE_NO_COLOR=1 \
   bash "$REPO_ROOT/plugins/insights-share/statusline/insights_share_statusline.sh" \
   2>&1 | head -1 || echo "(statusline exit non-zero)"
 echo ""
-echo "┌─ [F3/6] Claude Code Plugin 封装 ─────────────────────────────"
+echo "┌─ [F3] plugin manifest ────────────────────────────────────────"
 plugin_json="$REPO_ROOT/plugins/insights-share/.claude-plugin/plugin.json"
 if [ -f "\$plugin_json" ]; then
   ver=\$("$DEMO_VENV_PY" -c 'import json,sys;print(json.load(open(sys.argv[1]))["version"])' "\$plugin_json" 2>/dev/null || echo "?")
-  echo "│  manifest: plugins/insights-share/.claude-plugin/plugin.json"
-  echo "│  version : \${ver}"
-  echo "│  install : claude plugin install insights-share@<marketplace>"
-  echo "│  upgrade : claude plugin upgrade insights-share"
-  echo "│  uninstall: claude plugin uninstall insights-share"
+  echo "│  version: \${ver}"
 else
   echo "│  (plugin.json 未找到)"
 fi
 echo ""
-echo "┌─ [F4/6] 核心 Slash 命令（5 条） ─────────────────────────────"
+echo "┌─ [F4] slash 命令 + agent 文件存在性 ──────────────────────────"
 cmd_dir="$REPO_ROOT/plugins/insights-share/commands"
 if [ -d "\$cmd_dir" ]; then
   for f in share-install share-search share-publish share-review share-diff; do
@@ -322,40 +318,26 @@ else
   echo "│  (commands 目录未找到)"
 fi
 echo ""
-echo "┌─ [F5/6] 安全与分发 ──────────────────────────────────────────"
+echo "┌─ [F5] 签名 + marketplace ─────────────────────────────────────"
 if grep -q "sig-fail" "$REPO_ROOT/plugins/insights-share/statusline/insights_share_statusline.sh" 2>/dev/null; then
-  echo "│  ed25519 签名: ✓ statusline 支持 [share 🔒 sig-fail] 降级态"
+  echo "│  ed25519 sig-fail state: ✓ 支持"
 else
-  echo "│  ed25519 签名: ? (statusline sig-fail state 未找到)"
+  echo "│  ed25519 sig-fail state: ? 未找到"
 fi
-echo "│  team namespace: wiki_tree/<team>/<topic>/ 路径约定（向后兼容无 team）"
-echo "│  TTL + stale: 卡片过期 → [share ⚠ stale] 状态灯（M3 新增态）"
 mp_json="$REPO_ROOT/plugins/insights-share/.claude-plugin/marketplace.json"
 if [ -f "\$mp_json" ]; then
-  echo "│  LAN marketplace: .claude-plugin/marketplace.json ✓ + insightsd :7821"
+  echo "│  LAN marketplace: ✓"
 else
-  echo "│  LAN marketplace: (marketplace.json 未找到)"
+  echo "│  LAN marketplace: ✗"
 fi
-echo "│  发布脚本: plugins/insights-share/scripts/publish_marketplace.py"
-echo "│  双仓分发: dev 仓(全量) + plugin 仓(~108K, v0.6.0-m7 起)"
 echo ""
-echo "┌─ [F6/6] 数据模型（Topic / Example Schema） ──────────────────"
+echo "┌─ [F6] 样例 Example schema 字段 ───────────────────────────────"
 sample="$REPO_ROOT/insights-share/demo_codes/wiki_tree/database/postgres_pool.md"
 if [ -f "\$sample" ]; then
-  echo "│  Example 核心字段（from database/postgres_pool.md）:"
-  grep -E '"(id|topic_id|label|applies_when|do_not_apply_when|raw_log_type|raw_log)"' "\$sample" 2>/dev/null | head -6 | sed 's/^/│    /'
+  grep -E '"(id|topic_id|label|applies_when|do_not_apply_when|raw_log_type|raw_log)"' "\$sample" 2>/dev/null | head -6 | sed 's/^/│  /'
 else
-  echo "│  Example 核心字段:"
-  echo "│    id / topic_id / author / label(good|bad)"
-  echo "│    applies_when[] / do_not_apply_when[]  (场景刻画，核心)"
-  echo "│    raw_log_type(export|jsonl) / raw_log (明文存储，不可修改)"
-  echo "│    label_override / label_override_by / label_override_at (管理员可覆盖)"
+  echo "│  (sample 未找到)"
 fi
-echo "│  API: POST /topics · POST /topics/{id}/examples · GET /topics?q=  (?label=good|bad)"
-echo ""
-echo "╔══════════════════════════════════════════════════════════════╗"
-echo "║  📚 canonical manifest: $REPO_ROOT/FEATURES.md"
-echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 echo "----- plugin M5 self-check (plugins/insights-share/) -----"
 bash "$REPO_ROOT/plugins/insights-share/scripts/self_check.sh" \
