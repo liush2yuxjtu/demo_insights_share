@@ -170,9 +170,12 @@ if lsof -iTCP:${DAEMON_PORT} -sTCP:LISTEN -nP >/dev/null 2>&1; then
 else
   (
     cd "$DEMO_CODES"
+    # P1 fix (2026-04-23)：切到 tree mode，加载 wiki_tree/ 258 张含 canonical
+    # (alice-pgpool / alice-celery-retry / carol-redis-eviction)，修好 validation
+    # cases.yml 的 FN 堆积。旧 flat mode 走 wiki.json 200 张不含 canonical。
     nohup "$DEMO_VENV_PY" insights_cli.py serve \
       --host 127.0.0.1 --port "$DAEMON_PORT" \
-      --store wiki.json --store-mode flat \
+      --store wiki_tree --store-mode tree \
       > "$DAEMON_LOG" 2>&1 &
     echo $! > "$DAEMON_PID_FILE"
   )
