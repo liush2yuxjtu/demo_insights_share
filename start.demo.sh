@@ -37,6 +37,19 @@ DAEMON_PID_FILE="$SANDBOX/insightsd.pid"
 TMUX_CONF="$REPO_ROOT/insights-share/validation/tmux.noob.conf"
 GUIDE_SCRIPT="$REPO_ROOT/insights-share/validation/guide_loop.sh"
 
+# ── dry-run flag 解析（D6：为 test_start_scripts.py 提供白盒断言入口）───
+# DRY_RUN=1 时跳过 Stage 5 daemon 启动 + Stage 7 tmux attach，
+# 但保留 Stage 1-4（沙箱/settings/skill/env 真跑），最后 dump LEFT_SH+RIGHT_SH。
+# 沙箱仍被 cleanup trap 删除，无残留。
+DRY_RUN=0
+for arg in "$@"; do
+  case "$arg" in
+    --dry-run) DRY_RUN=1 ;;
+    --help|-h) echo "Usage: start.demo.sh [--dry-run]"; exit 0 ;;
+  esac
+done
+[ "${DRY_RUN:-0}" = "1" ] && DRY_RUN=1
+
 # ── 漂亮的进度条输出 ──────────────────────────────────
 step() { printf '\033[32m🟢 [%s/7]\033[0m %s\n' "$1" "$2"; }
 die()  { printf '\033[31m[错误]\033[0m %s\n' "$1" >&2; exit 1; }
@@ -165,7 +178,9 @@ chmod 600 "$ENV_FILE"
 # 策略：7821 已 LISTEN → 复用（不动）；否则用 demo_codes/.venv 后台启动，
 # PID 写进沙箱文件；cleanup 只 kill 我们自己起的 daemon。
 DAEMON_STARTED_BY_US=0
-if lsof -iTCP:${DAEMON_PORT} -sTCP:LISTEN -nP >/dev/null 2>&1; then
+if [ "$DRY_RUN" = "1" ]; then
+  step 5 "DRY RUN: would start insightsd :${DAEMON_PORT} via $DEMO_VENV_PY ........ skipped"
+elif lsof -iTCP:${DAEMON_PORT} -sTCP:LISTEN -nP >/dev/null 2>&1; then
   step 5 "insightsd :${DAEMON_PORT} 已在运行（复用）... done"
 else
   (
@@ -373,6 +388,33 @@ read _
 HOME="$SANDBOX_HOME" exec claude
 EOF
 chmod +x "$RIGHT_SH"
+
+# ── dry-run 分支：打印 LEFT_SH + RIGHT_SH dump，不 spawn tmux，不 attach ─
+# test_start_scripts.py 走 `bash start.demo.sh --dry-run` → 断言 stdout schema。
+if [ "$DRY_RUN" = "1" ]; then
+  echo ""
+  echo "==== DRY RUN: provider=demo auth_mode=$AUTH_MODE sandbox=$SANDBOX ===="
+  echo "==== 固定步骤数=7 ===="
+  echo "==== would spawn tmux session '$SESSION' on socket '$SOCK' ===="
+  echo ""
+  echo "==== LEFT_SH ($LEFT_SH) ===="
+  cat "$LEFT_SH"
+  echo ""
+  echo "==== RIGHT_SH ($RIGHT_SH) ===="
+  cat "$RIGHT_SH"
+  echo ""
+  echo "==== ENV_FILE ($ENV_FILE, secrets REDACTED) ===="
+  sed -E \
+    -e 's/(ANTHROPIC_AUTH_TOKEN=")[^"]*/\1<REDACTED>/' \
+    -e 's/(ANTHROPIC_API_KEY=")[^"]*/\1<REDACTED>/' \
+    -e 's/(MINIMAX_TOKEN=")[^"]*/\1<REDACTED>/' \
+    -e 's/(Bearer )[A-Za-z0-9._~+/-]+/\1<REDACTED>/g' \
+    "$ENV_FILE"
+  echo ""
+  echo "==== 输出日志归档路径 (D5 pending): $REPO_ROOT/insights-share/validation/reports/deliverables/ ===="
+  echo "==== DRY RUN END — trap cleanup 将删除沙箱 ===="
+  exit 0
+fi
 
 # ── 启动 tmux（独立 socket）────────────────────────────
 tm -f "$TMUX_CONF" new-session -d -s "$SESSION" -x 220 -y 55 \
