@@ -29,6 +29,18 @@ def _detect_lan_ip() -> str:
         sock.close()
 
 
+def _is_loopback_client(client_ip: str) -> bool:
+    return client_ip in {"127.0.0.1", "::1", "::ffff:127.0.0.1"}
+
+
+def _write_auth_error(client_ip: str, headers: Any, expected_token: str) -> str | None:
+    if _is_loopback_client(client_ip):
+        return None
+    if headers.get("X-Insights-Token", "") == expected_token:
+        return None
+    return "write requires loopback or X-Insights-Token"
+
+
 class InsightHandler(BaseHTTPRequestHandler):
     store: Any  # InsightStore | TreeInsightStore, injected by run()
     runtime: RuntimeStore
@@ -93,6 +105,17 @@ class InsightHandler(BaseHTTPRequestHandler):
             return None, "body must be a JSON object"
         return data, None
 
+    def _reject_write_if_unauthorized(self) -> bool:
+        detail = _write_auth_error(
+            self.client_address[0],
+            self.headers,
+            self.runtime.internal_token,
+        )
+        if detail is None:
+            return False
+        self._send_json(403, {"error": "forbidden", "detail": detail})
+        return True
+
     def do_GET(self) -> None:  # noqa: N802
         parsed = urlsplit(self.path)
         path = parsed.path
@@ -154,7 +177,7 @@ class InsightHandler(BaseHTTPRequestHandler):
             self._send_json(200, self.runtime.system_summary())
             return
         if path == "/api/cli/tmux/summary":
-            allow_input = self.client_address[0] in {"127.0.0.1", "::1"}
+            allow_input = _is_loopback_client(self.client_address[0])
             self._send_json(200, self.terminal.tmux_summary(input_enabled=allow_input))
             return
         if path == "/api/cli/tmux":
@@ -332,7 +355,7 @@ class InsightHandler(BaseHTTPRequestHandler):
         path = parsed.path
 
         if path == "/_events":
-            if self.client_address[0] not in {"127.0.0.1", "::1"}:
+            if not _is_loopback_client(self.client_address[0]):
                 self._send_json(403, {"error": "forbidden", "detail": "loopback only"})
                 return
             if self.headers.get("X-Insights-Token", "") != self.runtime.internal_token:
@@ -360,6 +383,8 @@ class InsightHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/runs/demo":
+            if self._reject_write_if_unauthorized():
+                return
             if not self.runtime.runner_enabled:
                 self._send_json(403, {"error": "runner_disabled"})
                 return
@@ -376,6 +401,8 @@ class InsightHandler(BaseHTTPRequestHandler):
             return
 
         if path == "/api/runs/validation":
+            if self._reject_write_if_unauthorized():
+                return
             if not self.runtime.runner_enabled:
                 self._send_json(403, {"error": "runner_disabled"})
                 return
@@ -383,7 +410,7 @@ class InsightHandler(BaseHTTPRequestHandler):
             self._send_json(202, {"session_id": session_id})
             return
         if path == "/api/cli/tmux/input":
-            if self.client_address[0] not in {"127.0.0.1", "::1"}:
+            if not _is_loopback_client(self.client_address[0]):
                 self._send_json(403, {"error": "forbidden", "detail": "loopback only"})
                 return
             body, err = self._read_json_body()
@@ -409,6 +436,8 @@ class InsightHandler(BaseHTTPRequestHandler):
 
         # POST /insights → add
         if path == "/insights":
+            if self._reject_write_if_unauthorized():
+                return
             card, err = self._read_json_body()
             if err is not None or card is None:
                 self._send_json(400, {"error": "invalid_json", "detail": err})
@@ -433,6 +462,8 @@ class InsightHandler(BaseHTTPRequestHandler):
 
         # POST /insights/merge → merge source into target
         if path == "/insights/merge":
+            if self._reject_write_if_unauthorized():
+                return
             if not isinstance(self.store, TreeInsightStore):
                 self._send_json(400, {"error": "merge_not_supported", "detail": "tree mode only"})
                 return
@@ -449,6 +480,8 @@ class InsightHandler(BaseHTTPRequestHandler):
 
         # POST /insights/research → agentic search + write new card
         if path == "/insights/research":
+            if self._reject_write_if_unauthorized():
+                return
             if not isinstance(self.store, TreeInsightStore):
                 self._send_json(400, {"error": "research_not_supported", "detail": "tree mode only"})
                 return
@@ -467,6 +500,8 @@ class InsightHandler(BaseHTTPRequestHandler):
 
         # POST /insights/{id}/edit → patch fields
         if path.endswith("/edit") and path.startswith("/insights/"):
+            if self._reject_write_if_unauthorized():
+                return
             if not isinstance(self.store, TreeInsightStore):
                 self._send_json(400, {"error": "edit_not_supported", "detail": "tree mode only"})
                 return
@@ -484,6 +519,8 @@ class InsightHandler(BaseHTTPRequestHandler):
 
         # POST /insights/{id}/tag → add tags (sticky for not_triggered)
         if path.endswith("/tag") and path.startswith("/insights/"):
+            if self._reject_write_if_unauthorized():
+                return
             if not isinstance(self.store, TreeInsightStore):
                 self._send_json(400, {"error": "tag_not_supported", "detail": "tree mode only"})
                 return
@@ -503,6 +540,8 @@ class InsightHandler(BaseHTTPRequestHandler):
 
         # POST /topics
         if path == "/topics":
+            if self._reject_write_if_unauthorized():
+                return
             if not isinstance(self.store, TreeInsightStore):
                 self._send_json(400, {"error": "topics_not_supported", "detail": "tree mode only"})
                 return
@@ -515,6 +554,8 @@ class InsightHandler(BaseHTTPRequestHandler):
             return
         # POST /topics/{topic_id}/examples → 追加一条 Example 到指定 Topic
         if path.startswith("/topics/") and path.endswith("/examples"):
+            if self._reject_write_if_unauthorized():
+                return
             if not isinstance(self.store, TreeInsightStore):
                 self._send_json(400, {"error": "topics_not_supported", "detail": "tree mode only"})
                 return
@@ -550,6 +591,8 @@ class InsightHandler(BaseHTTPRequestHandler):
             return
         # POST /insights/{id}/relabel
         if path.startswith("/insights/") and path.endswith("/relabel"):
+            if self._reject_write_if_unauthorized():
+                return
             if not isinstance(self.store, TreeInsightStore):
                 self._send_json(400, {"error": "relabel_not_supported", "detail": "tree mode only"})
                 return
@@ -582,6 +625,8 @@ class InsightHandler(BaseHTTPRequestHandler):
         parsed = urlsplit(self.path)
         path = parsed.path
         if path.startswith("/insights/"):
+            if self._reject_write_if_unauthorized():
+                return
             if not isinstance(self.store, TreeInsightStore):
                 self._send_json(400, {"error": "delete_not_supported", "detail": "tree mode only"})
                 return

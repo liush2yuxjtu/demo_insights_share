@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import importlib.util
 import json
 from pathlib import Path
 
@@ -17,6 +18,14 @@ PUBLISH_SCRIPT = PLUGIN_DIR / "scripts" / "publish_marketplace.py"
 
 def _read(path: Path) -> str:
     return path.read_text(encoding="utf-8")
+
+
+def _load_module(path: Path, name: str):
+    spec = importlib.util.spec_from_file_location(name, path)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def test_plugin_manifest_declares_current_release() -> None:
@@ -107,3 +116,30 @@ def test_marketplace_and_readme_align_with_current_release() -> None:
 def test_publish_marketplace_script_exists() -> None:
     assert PUBLISH_SCRIPT.is_file()
     assert "--check" in _read(PUBLISH_SCRIPT)
+
+
+def test_bundle_cache_persist_sanitizes_sensitive_fields(tmp_path: Path, monkeypatch) -> None:
+    monkeypatch.setenv("HOME", str(tmp_path))
+    module = _load_module(PLUGIN_DIR / "scripts" / "insights_cache.py", "plugin_insights_cache_test")
+
+    saved_path = module.persist(
+        {
+            "id": "cache-card-1",
+            "title": "Postgres Pool Exhaustion",
+            "author": "alice",
+            "wiki_type": "database",
+            "tags": ["postgres"],
+            "raw_log": "./raw/cache-card-1.jsonl",
+            "label_note": "internal only",
+            "description": "should not leak into cache",
+            "signature_status": "verified",
+        }
+    )
+
+    saved = json.loads(Path(saved_path).read_text(encoding="utf-8"))
+    assert saved["id"] == "cache-card-1"
+    assert saved["title"] == "Postgres Pool Exhaustion"
+    assert saved["signature_status"] == "verified"
+    assert "raw_log" not in saved
+    assert "label_note" not in saved
+    assert "description" not in saved

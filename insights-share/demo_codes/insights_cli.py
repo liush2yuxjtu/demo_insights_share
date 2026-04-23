@@ -53,12 +53,21 @@ def _http_get(url: str, timeout: float = 5.0) -> dict[str, Any]:
         return json.loads(resp.read().decode("utf-8"))
 
 
+def _auth_headers() -> dict[str, str]:
+    token = os.environ.get("INSIGHTS_INTERNAL_TOKEN", "").strip()
+    if not token:
+        return {}
+    return {"X-Insights-Token": token}
+
+
 def _http_post_json(url: str, payload: dict[str, Any], timeout: float = 5.0) -> dict[str, Any]:
     body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
+    headers = {"Content-Type": "application/json; charset=utf-8"}
+    headers.update(_auth_headers())
     req = urllib.request.Request(
         url,
         data=body,
-        headers={"Content-Type": "application/json; charset=utf-8"},
+        headers=headers,
         method="POST",
     )
     with urllib.request.urlopen(req, timeout=timeout) as resp:
@@ -66,7 +75,7 @@ def _http_post_json(url: str, payload: dict[str, Any], timeout: float = 5.0) -> 
 
 
 def _http_delete(url: str, timeout: float = 5.0) -> dict[str, Any]:
-    req = urllib.request.Request(url, method="DELETE")
+    req = urllib.request.Request(url, headers=_auth_headers(), method="DELETE")
     with urllib.request.urlopen(req, timeout=timeout) as resp:
         return json.loads(resp.read().decode("utf-8"))
 

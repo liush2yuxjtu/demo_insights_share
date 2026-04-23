@@ -23,6 +23,8 @@ import urllib.request
 from pathlib import Path
 from typing import Any
 
+from insights_cache import persist
+
 DEMO_CODES = Path(__file__).resolve().parent.parent
 CACHE_DIR = Path.home() / ".cache" / "insights-share"
 WARM_DIR = CACHE_DIR / "warm"
@@ -122,48 +124,10 @@ def _save_cached_etag(etag: str) -> None:
     _persist_manifest_etag(etag)
 
 
-def _normalize_card_id(card: dict[str, Any]) -> str:
-    cid = card.get("id")
-    if isinstance(cid, str) and cid.strip():
-        return cid.strip()
-    wt = card.get("wiki_type") or ""
-    item = card.get("item") or ""
-    if wt or item:
-        return f"{wt}_{item}".strip("_") or "unknown"
-    return f"anon_{abs(hash(json.dumps(card, sort_keys=True, ensure_ascii=False))) % 10**10}"
-
-
-def _atomic_write_json(path: Path, payload: dict[str, Any]) -> None:
-    import tempfile
-
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    fd, tmp = tempfile.mkstemp(
-        prefix=f".{path.name}.", suffix=".tmp", dir=str(CACHE_DIR)
-    )
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as fh:
-            json.dump(payload, fh, ensure_ascii=False, indent=2)
-        os.replace(tmp, path)
-    except Exception:
-        try:
-            os.unlink(tmp)
-        except OSError:
-            pass
-        raise
-
-
 def _persist_card(card: dict[str, Any]) -> Path | None:
     try:
-        cid = _normalize_card_id(card)
-        card_path = CACHE_DIR / f"{cid}.json"
-        _atomic_write_json(card_path, card)
-
-        # Update manifest cards list
+        card_path = persist(card)
         manifest = _load_manifest()
-        cards: list[str] = manifest.get("cards") or []
-        if cid not in cards:
-            cards.append(cid)
-        manifest["cards"] = cards
         manifest["session_start_fetch"] = True
         _save_manifest(manifest)
         return card_path

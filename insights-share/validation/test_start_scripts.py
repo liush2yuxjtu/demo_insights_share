@@ -44,6 +44,9 @@ def test_start_demo_script_surfaces_plugin_m5_checks() -> None:
     assert 'plugin M5 self-check' in script
     assert 'claude plugin install "${PLUGIN_NAME}@${PLUGIN_NAME}"' in script
     assert "sandbox 内已完成真实 plugin install" in script
+    assert "Stage 0 secret gate" in script
+    assert "wiki_tree/**/raw" in script
+    assert "sk-[A-Za-z0-9_-]{10,}" in script
 
 
 def test_start_claude_script_wraps_shared_driver() -> None:

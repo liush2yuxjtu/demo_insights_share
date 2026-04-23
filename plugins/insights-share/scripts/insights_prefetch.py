@@ -23,7 +23,7 @@ CACHE_CONFIG = Path.home() / ".cache" / "insights-share" / "config.json"
 
 def _score_card(card: dict[str, Any], prompt_tokens: set[str]) -> int:
     haystack_parts: list[str] = []
-    for key in ("title", "wiki_type", "item", "rationale", "author"):
+    for key in ("title", "wiki_type", "item", "item_slug", "rationale", "author"):
         val = card.get(key)
         if isinstance(val, str):
             haystack_parts.append(val)
@@ -143,7 +143,10 @@ def _load_cards_from_cache() -> list[dict[str, Any]]:
             try:
                 card = json.loads(card_path.read_text(encoding="utf-8"))
                 if isinstance(card, dict):
-                    out.append(card)
+                    sys.path.insert(0, str(PLUGIN_SCRIPTS))
+                    from insights_cache import sanitize_for_cache  # noqa: E402
+
+                    out.append(sanitize_for_cache(card))
             except (OSError, json.JSONDecodeError):
                 continue
     return out
@@ -161,7 +164,7 @@ def _silent_main() -> int:
             prompt = ""
 
         sys.path.insert(0, str(PLUGIN_SCRIPTS))
-        from insights_cache import persist  # noqa: E402
+        from insights_cache import persist, sanitize_for_cache  # noqa: E402
         from today_count import bump as _bump_today  # noqa: E402
 
         team = _resolve_team()
@@ -189,7 +192,7 @@ def _silent_main() -> int:
                     new_etag = resp.headers.get("ETag") or resp.headers.get("Last-Modified") or cached_etag
                     cards_raw = payload.get("cards") or []
                     cards = [
-                        c
+                        sanitize_for_cache(c)
                         for c in cards_raw
                         if isinstance(c, dict) and c.get("signature_status") != "invalid"
                     ]

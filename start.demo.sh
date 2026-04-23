@@ -62,6 +62,21 @@ note() { printf '\033[36m[提示]\033[0m %s\n' "$1"; }
 command -v tmux   >/dev/null 2>&1 || die "请先安装 tmux：brew install tmux"
 command -v claude >/dev/null 2>&1 || die "请先安装 claude CLI"
 
+# ── Stage 0: raw secret gate ──────────────────────────
+secret_gate() {
+  local findings=""
+  findings="$(rg -n -S --glob '**/raw/*' \
+    'sk-[A-Za-z0-9_-]{10,}|ghp_[A-Za-z0-9]{20,}|Bearer[[:space:]]+[A-Za-z0-9._~+/-]{10,}|AKIA[0-9A-Z]{16}' \
+    "$DEMO_CODES/wiki_tree" 2>/dev/null || true)"
+  if [ -n "$findings" ]; then
+    printf '%s\n' "$findings" >&2
+    rm -rf "$SANDBOX"
+    die "Stage 0 secret gate failed：wiki_tree/**/raw 含疑似明文 secret，请先脱敏再跑 demo"
+  fi
+  note "Stage 0 secret gate passed（wiki_tree/**/raw 无明文 secret）"
+}
+secret_gate
+
 # ── Stage 1: 准备沙箱目录 ─────────────────────────────
 mkdir -p "$SANDBOX_CLAUDE" "$SANDBOX_HOME/.cache" "$SANDBOX_WORKDIR"
 : > "$GUIDE_LOG"

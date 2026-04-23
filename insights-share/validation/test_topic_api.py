@@ -13,6 +13,7 @@ from pathlib import Path
 import pytest
 
 from insightsd.server import _make_handler
+from insightsd.server import _write_auth_error
 from insightsd.store import InsightStore, TreeInsightStore
 
 
@@ -73,6 +74,21 @@ def http_post(host: str, port: int, path: str, payload: dict) -> tuple[int, dict
 
 
 class TestTopicAPI:
+    def test_write_auth_allows_loopback_or_valid_token(self) -> None:
+        assert _write_auth_error("127.0.0.1", {}, "test-token") is None
+        assert _write_auth_error("::1", {}, "test-token") is None
+        assert _write_auth_error("192.168.22.9", {}, "test-token") == "write requires loopback or X-Insights-Token"
+        assert _write_auth_error(
+            "192.168.22.9",
+            {"X-Insights-Token": "wrong-token"},
+            "test-token",
+        ) == "write requires loopback or X-Insights-Token"
+        assert _write_auth_error(
+            "192.168.22.9",
+            {"X-Insights-Token": "test-token"},
+            "test-token",
+        ) is None
+
     def test_get_topics_returns_list(self, httpd: tuple[ThreadingHTTPServer, str, int], store: TreeInsightStore) -> None:
         _, host, port = httpd
         status, body = http_get(host, port, "/topics")

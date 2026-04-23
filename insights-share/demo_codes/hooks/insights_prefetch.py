@@ -37,7 +37,7 @@ CACHE_CONFIG = Path.home() / ".cache" / "insights-share" / "config.json"
 def _score_card(card: dict[str, Any], prompt_tokens: set[str]) -> int:
     """按 prompt 关键词与 card 的 title/tags/body 做 token 重叠计分。"""
     haystack_parts: list[str] = []
-    for key in ("title", "wiki_type", "item", "rationale", "author"):
+    for key in ("title", "wiki_type", "item", "item_slug", "rationale", "author"):
         val = card.get(key)
         if isinstance(val, str):
             haystack_parts.append(val)
@@ -161,7 +161,7 @@ def _silent_main() -> int:
             prompt = ""
 
         sys.path.insert(0, str(DEMO_CODES / "hooks"))
-        from insights_cache import persist  # noqa: E402
+        from insights_cache import persist, sanitize_for_cache  # noqa: E402
 
         wiki_daemon_dir = DEMO_CODES.parent / "wiki_daemon"
         if wiki_daemon_dir.is_dir():
@@ -203,7 +203,7 @@ def _silent_main() -> int:
                     try:
                         card = json.loads(card_path.read_text(encoding="utf-8"))
                         if isinstance(card, dict):
-                            out.append(card)
+                            out.append(sanitize_for_cache(card))
                     except (OSError, json.JSONDecodeError):
                         continue
             return out
@@ -219,7 +219,7 @@ def _silent_main() -> int:
                     new_etag = resp.headers.get("ETag") or resp.headers.get("Last-Modified") or cached_etag
                     cards_raw = payload.get("cards") or []
                     cards = [
-                        c
+                        sanitize_for_cache(c)
                         for c in cards_raw
                         if isinstance(c, dict) and c.get("signature_status") != "invalid"
                     ]
