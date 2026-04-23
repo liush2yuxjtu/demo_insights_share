@@ -95,16 +95,47 @@ def _resolve_team() -> str | None:
     return None
 
 
-def _build_context(prompt: str, cards: list[dict[str, Any]]) -> str:
-    prompt_tokens = {
-        t
-        for t in prompt.lower().replace("-", " ").replace("_", " ").split()
-        if len(t) >= 3
-    }
-    scored = sorted(cards, key=lambda c: _score_card(c, prompt_tokens), reverse=True)
-    picked = [c for c in scored if _score_card(c, prompt_tokens) > 0][:TOP_K]
-    if not picked:
-        picked = scored[:TOP_K]
+def _fetch_search_hits(base_url: str, prompt: str, team: str | None) -> list[dict[str, Any]]:
+    """P1 (2026-04-23): 调 daemon /search?q=<prompt> 拿 server-side ranking。
+
+    daemon 已在 store.py::search_cards 实现 Jaccard + tag_bonus 打分，信号比
+    本地 _score_card 的纯 token 重叠计数强。失败时返 []（上层用 fallback）。
+    """
+    if not prompt.strip():
+        return []
+    try:
+        params = {"q": prompt, "k": str(TOP_K)}
+        if team:
+            params["team"] = team
+        url = f"{base_url}/search?{urllib.parse.urlencode(params)}"
+        with urllib.request.urlopen(url, timeout=TIMEOUT_SECONDS) as resp:
+            if resp.status != 200:
+                return []
+            payload = json.loads(resp.read().decode("utf-8"))
+        hits = payload.get("hits") or []
+        return [h for h in hits if isinstance(h, dict)]
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, ConnectionError, json.JSONDecodeError, OSError):
+        return []
+
+
+def _build_context(
+    prompt: str,
+    cards: list[dict[str, Any]],
+    preferred_hits: list[dict[str, Any]] | None = None,
+) -> str:
+    # P1 优先用 daemon /search top hits（server-side scoring 含 tag_bonus）
+    if preferred_hits:
+        picked = preferred_hits[:TOP_K]
+    else:
+        prompt_tokens = {
+            t
+            for t in prompt.lower().replace("-", " ").replace("_", " ").split()
+            if len(t) >= 3
+        }
+        scored = sorted(cards, key=lambda c: _score_card(c, prompt_tokens), reverse=True)
+        picked = [c for c in scored if _score_card(c, prompt_tokens) > 0][:TOP_K]
+        if not picked:
+            picked = scored[:TOP_K]
     if not picked:
         return ""
     lines = [
@@ -220,7 +251,10 @@ def _silent_main() -> int:
                 # 落盘失败不阻塞注入
                 continue
 
-        additional = _build_context(prompt, cards)
+        # P1 (2026-04-23): 先问 daemon /search 拿 server-side ranking 的 top hits，
+        # daemon 失败/空 → fallback 到本地 _score_card
+        preferred = _fetch_search_hits(_resolve_wiki_url(), prompt, team)
+        additional = _build_context(prompt, cards, preferred_hits=preferred)
         if additional:
             out = {
                 "hookSpecificOutput": {
