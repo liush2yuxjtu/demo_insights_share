@@ -1,15 +1,16 @@
 {
-  "marketplace_version": 1,
   "name": "insights-share",
-  "description": "demo_insights_share 团队内网 plugin registry（当前稳定版：M5 深度重命名 + plugins/<name>/ 官方布局）",
+  "owner": {
+    "name": "demo_insights_share Team A",
+    "email": "team-a@internal"
+  },
+  "metadata": {
+    "description": "demo_insights_share 团队内网 plugin registry（M5 深度重命名 + plugins/<name>/ 官方布局，当前 plugin 0.6.0-m7）"
+  },
   "plugins": [
     {
       "name": "insights-share",
-      "source": "git+ssh://internal/insights-share.git#subdir=plugins/insights-share",
-      "version": "0.6.0-m7",
-      "manifest": ".claude-plugin/plugin.json",
-      "channels": ["stable", "dev"]
+      "source": "./"
     }
-  ],
-  "notes": "当前 registry 对齐 plugin 0.6.0-m7；`scripts/publish_marketplace.py` 会在发布前校验 manifest/marketplace/MCP 并生成 checksums 摘要。"
+  ]
 }
