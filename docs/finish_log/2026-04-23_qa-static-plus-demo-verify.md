@@ -62,27 +62,92 @@ log 镜像显示：
 
 guide 已推进到"请把 postgres 故障 prompt 贴到右 pane"阶段，等待用户在 Claude REPL 内实际输入。
 
-### 用户端残留项（Agent 边界外）
+### A5 Agent 亲自实测右 pane claude REPL（补录）
 
-- 右 pane Claude REPL 内实际触发 skill 并看到 manifest/缓存 + statusline `[share ✓ N/today]` 递增：**需用户 attach `tmux attach -t start_demo_verify` 后手动执行**。
-- 这与 2026-04-23 上轮 finish_log S11 条目一致（"tmux 双 pane attach + F12 退出 ⏸️ Bash tool 不能 attach"）。
+用户第二轮要求 "please register and test by yourself"。Agent 走 **独立 socket 路径** 突破 "Bash tool 不能 attach" 边界：
+
+- socket 名 = `demo-20260423-122824-31909`（start.demo.sh `SESSION="demo-$$"` + `SOCK="demo-${TS}-$$"`，独立 tmux server 不受外层限制）
+- session = `demo-31909`，双 pane = `0.0` (左 guide 只读 tail) / `0.1` (右 claude REPL)
+- 通过 `tmux -L <SOCK> send-keys -t demo-31909:0.1` 直接驱动右 pane
+
+右 pane **sandbox self-check** 18/18 全绿（statusline preview `[share ✓ 0/today]` + manifest v0.6.0-m7 + 2 skills + 2 hooks + 5 cmds + 2 agents + mcp 7 tools + marketplace publish script + contract forward-compat OK + plugin self-check ALL GREEN）。
+
+右 pane claude REPL 启动：
+
+| 阶段 | Agent 动作 | pane 反馈 |
+|---|---|---|
+| theme 选择 | send Enter | dark mode (default) ✓ |
+| security notes | send Enter | 通过 ✓ |
+| folder trust | send Enter | trust `/private/tmp/demo-sandbox-.../workdir` ✓ |
+| REPL 启 | — | Welcome back! **MiniMax-M2.7-highspeed** + statusline `[share ✓ 0/today]` + "Anthropic marketplace installed" |
+| 发 postgres 故障 prompt | send-keys + Enter | prompt accepted |
+| 等 20s | — | 完整诊断 SQL（pg_stat_activity state / 锁等待 pg_catalog.pg_locks / wait_event） + 修复代码（pgxpool MaxConns=15 / MaxConnLifetime / ALTER SYSTEM max_connections=500） |
+| **statusline 真变化** | — | **`[share ✓ 0/today]` → `[share ✓ 1/today]`**（UserPromptSubmit hook 真触发 + 真计数 +1） |
+
+### A5 gap 实测发现（⚠️ DONE_WITH_CONCERNS）
+
+claude 回答开头：
+
+```
+⏺ 未引用任何 LAN 卡片（缓存卡片均为 insights-share 机制相关，非 PG 性能诊断内容）
+```
+
+daemon side 明明有 hit：
+
+```
+curl http://127.0.0.1:7821/search?q=postgres&k=3
+→ {"hits":[{"id":"m1-kb-aa-003","title":"Postgres 高并发下 Lock Timeout 排查","score":0.1,...}]}
+```
+
+但 sandbox 内 UserPromptSubmit hook 只把"insights-share 机制相关"卡片注入 context（如 bob-k8s-oom-2026-04-22 / test-123），没拿到 m1-kb-aa-003。
+
+两个可能成因：
+1. **SessionStart prefetch 范围**：M7 prefetch 按默认 topic 或空 query 拉，没按 prompt 关键词二次拉
+2. **hook 触发后 cache 查询路径**：hook 走沙箱本地 cache 而非回源 daemon 的 `/search?q=<prompt_keywords>`
+
+真正的闭环应该：hook 至少一次按 prompt 关键词查 daemon（或对 prefetch cache 做 embedding rerank）。
+
+对齐 validation.md §1 "触发率：持续优化触发率，直到达标" 未完成工作项。
 
 ## PASS / FAIL 总结
 
 | 层级 | 状态 | 说明 |
 |---|---|---|
-| B 静态契约 | ✅ PASS | 7 项契约全绿，与 commit trail `93a93fb…958e6ac` 对齐 |
+| B 静态契约 | ✅ PASS | 7 项契约全绿 |
 | A1 tmux register | ✅ PASS | session 活 + pipe-pane 镜像活 |
-| A2 start.demo.sh 7 步 | ✅ PASS | 沙箱 + hook + skill + MiniMax + daemon + tmux + 双 pane 全绿 |
-| A3 daemon 4 端点 | ✅ PASS | healthz / insights / search / topics(flat=400) 全对齐契约 |
-| A4 guide_loop 推进 | ✅ PASS | 左 pane 检测 skill 已装 + 等 user 触发 |
-| A5 用户 REPL 真触发 | ⏸️ | Agent 不能 attach，需用户手动 tmux attach 验证 |
+| A2 start.demo.sh 7 步 | ✅ PASS | 沙箱 + hook + skill + MiniMax + daemon + tmux + 双 pane |
+| A3 daemon 4 端点 | ✅ PASS | healthz / insights / search / topics(flat=400) 契约对齐 |
+| A4 guide_loop 推进 | ✅ PASS | 左 pane 检测 skill 已装 |
+| A5 sandbox self-check 18/18 | ✅ PASS | statusline preview + manifest + skills + hooks + cmds + agents + mcp + marketplace publish |
+| A5 REPL 发 prompt + statusline +1 | ✅ PASS | 真触发真计数 |
+| A5 卡片引用内容匹配 | ⚠️ DONE_WITH_CONCERNS | daemon side 有 hit 但 sandbox hook 未拉到；validation.md §1 触发率优化未完成 |
+| claudefast finish flag | ✅ | READ ONLY 裁决 = PASS |
 
-**最终裁决：PASS**（Agent 可验证范围全绿；A5 交用户）。
+**最终裁决：PASS with gap**（基础设施 + 静态契约 + 动态触发闭环 100% 活；卡片 relevance 匹配是 validation.md 已记录的未完成项）。
 
-## 后续操作指引
+## 下一步候选
 
-1. 用户要真看 demo：在任何 Terminal 里 `tmux attach -t start_demo_verify`（macOS Terminal 窗口已弹出）
-2. 双 pane 内按 guide 指示在右 pane Claude REPL 输入 postgres 故障 prompt
-3. F12 退出 demo，触发 start.demo.sh 的 trap cleanup（`rm -rf /tmp/demo-sandbox-*`）
-4. 如需复现这次 QA：`bash .claude/skills/register-session/register-session.sh start_demo_verify && tmux send-keys -t start_demo_verify "unset TMUX && bash start.demo.sh" Enter`
+| 优先级 | 动作 | 路径 |
+|---|---|---|
+| P1 | 修 hook 让其按 prompt 关键词真查 daemon `/search?q=`（或对 prefetch cache 做 embedding rerank） | `plugins/insights-share/hooks/user-prompt-submit.sh` + `insights-share/demo_codes/hooks/insights_prefetch.py` |
+| P2 | validation.md §1：真跑 20 触发用例（12 训/8 测），出触发率数 | `insights-share/validation/` |
+| P3 | 回归测：sandbox 内发 postgres prompt 必须引用 m1-kb-aa-003 | 新 integration test |
+
+## 复现本轮 QA
+
+```bash
+# 清过期 CURRENT → 建 tmux → 在其内 spawn start.demo.sh
+bash .claude/skills/register-session/register-session.sh --clear
+bash .claude/skills/register-session/register-session.sh start_demo_verify
+tmux send-keys -t start_demo_verify "unset TMUX && bash start.demo.sh" Enter
+
+# 拿 sandbox 独立 socket（看 /tmp/tmux-$UID/demo-<ts>-<pid>）
+ls -la /tmp/tmux-$(id -u)/ | grep demo-
+
+# 驱动右 pane（替换 SOCK 为真实值）
+SOCK=demo-20260423-122824-31909
+SESSION=demo-31909
+tmux -L "$SOCK" send-keys -t "$SESSION:0.1" Enter  # 回车进 claude (过 theme/security/trust)
+tmux -L "$SOCK" send-keys -t "$SESSION:0.1" "<prompt>" Enter
+tmux -L "$SOCK" capture-pane -t "$SESSION:0.1" -p -S -50
+```
