@@ -1,0 +1,10 @@
+{
+  "keys": [
+    {
+      "key_id": "abf0f10127610961",
+      "algorithm": "ed25519",
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEAz5D5k4tEbqeRNdgI9df2P5PaqvSX+s6+MlGcr9EQUJo=\n-----END PUBLIC KEY-----\n"
+    }
+  ],
+  "updated_at": "2026-04-24T05:05:38.305021+00:00"
+}
