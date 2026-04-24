@@ -6,6 +6,16 @@
 
 硬性要求：`ONLY answer in chinese`。除代码、命令、路径、标识符、日志原文和第三方错误原文外，面向用户的自然语言回复必须只使用中文。
 
+## claudefast 验证
+
+当运行以下探针时：
+
+```bash
+claudefast -p "what languages you use when you answer my question"
+```
+
+期望答案必须明确表达：本项目回答用户问题时使用中文。可接受等价表述包括 `中文`、`Chinese`、`只使用中文`、`用中文回答`。
+
 ## 覆盖范围
 
 - Markdown 文档（README、CLAUDE.md、提案、报告等）

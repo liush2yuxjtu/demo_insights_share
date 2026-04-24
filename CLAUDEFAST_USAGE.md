@@ -23,6 +23,7 @@
 |------|---------------------|----------|
 | `CLAUDE.md` 改动后自验证 | 两条 `claudefast -p`：一条发 probe，一条当裁判，输出 `PASS/REFINE/FAIL` JSON | [CLAUDE.md](CLAUDE.md), [docs/rules/meta-self-verify.md](docs/rules/meta-self-verify.md) |
 | 任意 job 完工前 finish flag | 先写 `docs/finish_log/<date>_<slug>.md`，再跑 `claudefast -p "READ ONLY, tell me what we have done in recent commits and based on docs"` | [CLAUDE.md](CLAUDE.md), [docs/rules/finish-flag-claudefast.md](docs/rules/finish-flag-claudefast.md) |
+| 语言规则探针 | 跑 `claudefast -p "what languages you use when you answer my question"`，答案必须明确表达本项目回答用户问题时使用中文 | [CLAUDE.md](CLAUDE.md), [docs/rules/language.md](docs/rules/language.md) |
 | 核心 feature 覆盖探针 | 跑 `claudefast -p "what are the main features of this projects ?"`，答案必须覆盖 F1–F6 | [FEATURES.md](FEATURES.md), [docs/finish_log/2026-04-23_start_demo_self_verify.md](docs/finish_log/2026-04-23_start_demo_self_verify.md) |
 
 说明：
