@@ -18,9 +18,9 @@
 - 已跑通 `bash insights-share/validation/run_start_tmux_smoke.sh`：`start.claude.sh` 与 `start.codex.sh` 均完成 healthz、publish_good、publish_bad、solve、install、cache，报告写入 `tmux_claude_smoke.txt` 与 `tmux_codex_smoke.txt`。
 - 新增并跑通 AP-1 最小 adoption proof 入口：`bash insights-share/validation/run_adoption_proof.sh`，用隔离 `HOME` 与临时 wiki store 验证 clean-machine install、first relevant hit、first publish、day-2 return，最新报告写入 `adoption_proof_latest.json`。
 - 新增 CI/pre-commit 共用 gate：`bash insights-share/validation/run_ci_gate.sh`；新增 `.github/workflows/e2e-gates.yml`，在 `start.*`、plugin、demo_codes、validation、release 改动时跑确定性门禁。
-- 对账 `TODOS.md`：`SB-1`、`AP-1`、`FL-1`、`FL-2`、`UC-2` 已关闭；当前唯一 open 项是 `UC-1 plugin bundle self-containment`。
+- 对账 `TODOS.md`：`SB-1`、`AP-1`、`FL-1`、`FL-2`、`UC-2`、`UC-1 plugin bundle self-containment` 均已关闭；当前没有开放 E2E 阻塞项。
 - 补 raw log trust boundary：`TreeInsightStore` 写 export/jsonl raw log 前会脱敏敏感字段和常见 token pattern；`additionalContext` 注入链路有公开字段 allowlist 合同测试。
-- 最新本机 gate：`bash insights-share/validation/run_ci_gate.sh` 通过，包含 39 项合同测试、adoption proof、`start.demo.sh --dry-run`。
+- 最新本机 gate：`bash insights-share/validation/run_ci_gate.sh` 通过，包含 52 项合同测试、adoption proof、`start.demo.sh --dry-run`。
 - 清理状态：没有残留 `:7821` / `:18821` daemon 监听；工作区只剩预先存在且未触碰的 `.claude/settings.local.json` 未跟踪。
 
 ## 关键结论

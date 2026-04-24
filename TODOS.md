@@ -27,7 +27,7 @@
 
 - **What**：`start.demo.sh` Stage 3 已在 sandbox HOME 内执行 `claude plugin marketplace add` + `claude plugin install insights-share@insights-share`，不再靠旧式手动 copy skill 作为 hero install path。
 - **Evidence**：`bash start.demo.sh --dry-run`、live `bash start.demo.sh`、`bash insights-share/validation/run_ci_gate.sh` 均已通过；右 pane 自检显示 sandbox plugin cache 与 `plugin self-check: ALL GREEN`。
-- **Follow-up still open**：`UC-1` 仍保留，因为 plugin runtime self-containment 是更大的分发契约，不等同于 hero surface 改用 plugin install。
+- **Historical follow-up**：当时 `UC-1` 仍保留，因为 plugin runtime self-containment 是更大的分发契约，不等同于 hero surface 改用 plugin install；当前 UC-1 已在上方关闭。
 - **Source**：2026-04-24 E2E recovery。
 
 ### [DONE] [AP-1] clean-machine adoption proof
@@ -39,7 +39,7 @@
 ### [DONE] [FL-1] CI/pre-commit gate
 
 - **What**：新增 `bash insights-share/validation/run_ci_gate.sh` 与 `.github/workflows/e2e-gates.yml`，监视 start/plugin/demo_codes/validation/release 相关改动。
-- **Evidence**：本机 `bash insights-share/validation/run_ci_gate.sh` 已跑通 contract tests、adoption proof、`start.demo.sh --dry-run`；合同测试扩到 23 项。
+- **Evidence**：本机 `bash insights-share/validation/run_ci_gate.sh` 已跑通 contract tests、adoption proof、`start.demo.sh --dry-run`；当时合同测试扩到 23 项，当前合同测试为 52 项。
 - **Source**：2026-04-24 CI gate。
 
 ### [DONE] [FL-2] corpus secret 自检升级为 start.demo.sh Stage 0
@@ -51,7 +51,7 @@
 ### [DONE] [UC-2] trust / audit boundary
 
 - **What**：daemon 写接口已有 loopback/token 检查；tree store 写 raw log 前新增敏感字段和 token pattern 脱敏；`insights_prefetch.py` 的 `additionalContext` 继续只输出 card id/title/author/tags 等公开字段。
-- **Evidence**：`test_topic_api.py::test_write_auth_allows_loopback_or_valid_token` 覆盖写 auth；`test_topic_store.py` 覆盖 export/jsonl raw log 脱敏；`test_plugin_contract.py::test_prefetch_additional_context_uses_public_card_allowlist` 覆盖注入 allowlist；`run_ci_gate.sh` 已通过 39 项合同。
+- **Evidence**：`test_topic_api.py::test_write_auth_allows_loopback_or_valid_token` 覆盖写 auth；`test_topic_store.py` 覆盖 export/jsonl raw log 脱敏；`test_plugin_contract.py::test_prefetch_additional_context_uses_public_card_allowlist` 覆盖注入 allowlist；当时 `run_ci_gate.sh` 已通过 39 项合同，当前合同测试为 52 项。
 - **Source**：2026-04-24 trust boundary gate。
 
 ### [DONE] [SB-2] start.demo.sh 新增 `--dry-run` seam
@@ -254,7 +254,7 @@ Skipped. 当前 plan 没有足够 UI scope，主要是 demo shell / plugin / val
 | contract test 漂移 | 以 `FEATURES.md` 为真源，重写断言到 dry-run output / manifest |
 | trust story 过窄 | secret scan 保留，但补 adoption + audit + trust signal |
 
-### Failure Modes Registry
+### Historical Failure Modes Registry（2026-04-23 快照）
 
 | Failure mode | Severity | Status |
 |-------------|----------|--------|
@@ -414,7 +414,7 @@ LLM/prompt 层这轮不需要独立 eval 套件。真正该补的是 install con
 - release builder 能产 zip / manifest / sha256
 - `examples/` 和 `validation/` 里已经有 adoption / contract 的骨架
 
-### Failure Modes Registry
+### Historical Failure Modes Registry（2026-04-23 快照）
 
 | Failure mode | Severity | Status |
 |-------------|----------|--------|
@@ -432,7 +432,7 @@ LLM/prompt 层这轮不需要独立 eval 套件。真正该补的是 install con
 | `FL-1` | Keep, but widen to full contract suite |
 | `FL-2` | Keep as backup only |
 | `AP-1` | Keep, but convert to concrete artifact + harness |
-| New surfaced challenge | `UC-1` plugin self-containment |
+| New surfaced challenge | `UC-1` plugin self-containment（已于 2026-04-24 关闭） |
 | New surfaced challenge | `UC-2` trust / audit boundary |
 | Phase result | 5/6 consensus, 1 taste disagreement |
 

@@ -32,7 +32,7 @@
 ## 验证计划
 
 - `claudefast -p "what would we do when we finish an engineer work ?"`：PASS，返回“写 finish_log → 选工作专属探针 → 补 docs 直到答对 → READ ONLY finish flag”，并原样包含 `claudefast -p "what is our e2e status"`。
-- `claudefast -p "what is our e2e status"`：PASS，返回 E2E 全部通过，并指出唯一 open 项是 `UC-1 plugin bundle self-containment`。
+- `claudefast -p "what is our e2e status"`：历史 PASS；当时返回 E2E 全部通过，并指出唯一 open 项是 `UC-1 plugin bundle self-containment`。后续 UC-1 已关闭，当前权威状态以 `docs/CURRENT_STATUS.md` 与 `docs/plans/e2e_next_plans_2026-04-24.md` 为准：没有开放 E2E 阻塞项，默认下一步是 release/PR 收尾。
 - `claudefast -p "what would happen if we say to claude code CLI in this project 'start'"` + 独立 judge：PASS，`CLAUDE.md` 修改后的 agent-judge 状态灯收敛在 fast iter=2；这是 CLAUDE.md 编辑专用规则，fast 上限为 5 轮。
 - READ ONLY finish flag probe：第一轮 REFINE，要求同步 `docs/CURRENT_STATUS.md` 的 recent commits 说明，并避免把 CLAUDE.md agent-judge 的 5 轮上限误读成 finish flag 的 3 轮上限。
 
