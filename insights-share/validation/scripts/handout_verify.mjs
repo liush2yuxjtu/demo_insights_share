@@ -2,12 +2,15 @@ import { copyFile, mkdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import http from 'node:http';
+import { spawn, spawnSync } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import { chromium } from 'playwright';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const VALIDATION_DIR = path.resolve(__dirname, '..');
+const PROJECT_ROOT = path.resolve(VALIDATION_DIR, '..');
+const SERVER_DIR = path.join(PROJECT_ROOT, 'demo_codes');
 const ARTIFACT_ROOT = path.join(VALIDATION_DIR, 'artifacts', 'handout');
 const RUN_ID = `verify-${new Date().toISOString().replace(/[:.]/g, '-')}`;
 const RUN_DIR = path.join(ARTIFACT_ROOT, 'runs', RUN_ID);
@@ -21,6 +24,8 @@ const FIXED_PROMPT = '请只回复：CLI 输入链路已验证';
 
 const consoleLines = [];
 const screenshots = [];
+let startedDaemon = null;
+let startedTmuxSession = false;
 
 function log(message) {
   const line = `[${new Date().toISOString()}] ${message}`;
@@ -58,6 +63,104 @@ async function fetchJson(url) {
       reject(new Error(`${url} -> timeout`));
     });
   });
+}
+
+async function isHealthy() {
+  try {
+    const health = await fetchJson(`${BASE_URL}/healthz`);
+    return Boolean(health.ok);
+  } catch (error) {
+    return false;
+  }
+}
+
+async function ensureDaemon() {
+  if (await isHealthy()) {
+    log(`复用已在线 daemon: ${BASE_URL}`);
+    return;
+  }
+
+  log('daemon 未在线，handout verify 临时启动 insightsd');
+  startedDaemon = spawn(
+    path.join(SERVER_DIR, '.venv', 'bin', 'python'),
+    [
+      'insights_cli.py',
+      'serve',
+      '--host',
+      '127.0.0.1',
+      '--port',
+      '7821',
+      '--store-mode',
+      'tree',
+      '--store',
+      './wiki_tree',
+      '--runtime-dir',
+      './runtime-web',
+      '--enable-runners',
+    ],
+    {
+      cwd: SERVER_DIR,
+      env: {
+        ...process.env,
+        NO_PROXY: '127.0.0.1,localhost',
+      },
+      stdio: ['ignore', 'ignore', 'pipe'],
+    }
+  );
+  startedDaemon.stderr.on('data', (chunk) => {
+    consoleLines.push(`[daemon] ${String(chunk).trim()}`);
+  });
+
+  const started = Date.now();
+  while (Date.now() - started < 30000) {
+    if (await isHealthy()) {
+      log('临时 daemon 已在线');
+      return;
+    }
+    await delay(1000);
+  }
+  throw new Error('等待临时 daemon /healthz 超时');
+}
+
+function cleanupDaemon() {
+  if (!startedDaemon) {
+    return;
+  }
+  startedDaemon.kill('SIGTERM');
+  startedDaemon = null;
+}
+
+function tmux(args) {
+  return spawnSync('tmux', args, {
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      TMUX: '',
+    },
+  });
+}
+
+function ensureTmuxTarget() {
+  const existing = tmux(['has-session', '-t', 'web_cli_demo']);
+  if (existing.status === 0) {
+    log('复用已存在 tmux session: web_cli_demo');
+    return;
+  }
+  const created = tmux(['new-session', '-d', '-s', 'web_cli_demo', '-x', '120', '-y', '30']);
+  if (created.status !== 0) {
+    throw new Error(`创建 web_cli_demo tmux session 失败: ${created.stderr || created.stdout}`);
+  }
+  startedTmuxSession = true;
+  tmux(['send-keys', '-t', 'web_cli_demo:0.0', 'printf "web cli demo ready\\n"', 'Enter']);
+  log('已创建临时 tmux session: web_cli_demo');
+}
+
+function cleanupTmuxTarget() {
+  if (!startedTmuxSession) {
+    return;
+  }
+  tmux(['kill-session', '-t', 'web_cli_demo']);
+  startedTmuxSession = false;
 }
 
 function extractSessions(payload) {
@@ -110,15 +213,12 @@ async function main() {
   });
 
   try {
-    const health = await fetchJson(`${BASE_URL}/healthz`);
-    if (!health.ok) {
-      throw new Error('daemon 预检失败');
-    }
+    ensureTmuxTarget();
+    await ensureDaemon();
 
     log('验证 /handout 自动检查');
     await page.goto(`${BASE_URL}/handout`, { waitUntil: 'domcontentloaded' });
     await page.locator('[data-step-id="start_service"][data-state="passed"]').waitFor({ timeout: 60000 });
-    await page.locator('[data-step-id="dashboard_live"][data-state="passed"]').waitFor({ timeout: 60000 });
     await saveScreenshot(page, 'verify-step-1-handout');
 
     const baselineSessions = extractSessions(await fetchJson(`${BASE_URL}/api/sessions?limit=30`));
@@ -165,6 +265,7 @@ async function main() {
       120000,
     );
     await page.goto(`${BASE_URL}/handout`, { waitUntil: 'domcontentloaded' });
+    await page.locator('[data-step-id="dashboard_live"][data-state="passed"]').waitFor({ timeout: 60000 });
     await page.locator('[data-step-id="run_demo"][data-state="passed"]').waitFor({ timeout: 60000 });
     await page.locator('[data-step-id="cli_send"][data-state="passed"]').waitFor({ timeout: 60000 });
     await page.locator('[data-step-id="run_validation"][data-state="passed"]').waitFor({ timeout: 120000 });
@@ -203,6 +304,8 @@ async function main() {
     await page.close().catch(() => undefined);
     await context.close().catch(() => undefined);
     await browser.close().catch(() => undefined);
+    cleanupDaemon();
+    cleanupTmuxTarget();
   }
 }
 

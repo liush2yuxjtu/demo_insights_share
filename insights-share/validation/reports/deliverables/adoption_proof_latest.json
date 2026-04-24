@@ -1,0 +1,257 @@
+{
+  "schema_version": "adoption-proof/v2",
+  "pass": true,
+  "checked_at": "2026-04-24T05:28:30Z",
+  "run": {
+    "started_at": "2026-04-24T05:28:28Z",
+    "finished_at": "2026-04-24T05:28:30Z",
+    "duration_ms": 1909
+  },
+  "wiki_url": "http://127.0.0.1:18821",
+  "report": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_latest.txt",
+  "environment": {
+    "repo_root": "/Users/liushiyu/projects/demo_insights_share",
+    "source_dir": "/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes",
+    "workdir": "/tmp/insights-adoption-proof.8eWgQt",
+    "home_dir": "/tmp/insights-adoption-proof.8eWgQt/home",
+    "store_dir": "/tmp/insights-adoption-proof.8eWgQt/wiki_tree",
+    "python": "/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python"
+  },
+  "artifacts": {
+    "dir": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest",
+    "wiki_tree": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/wiki_tree",
+    "cache_dir": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/cache/insights-share"
+  },
+  "legacy_signals": {
+    "clean_machine_install": "ok",
+    "first_relevant_hit": "alice-pgpool-2026-04-10",
+    "first_publish": "alice-pgpool-2026-04-10,bob-pgpool-bad-2026-04-12",
+    "day_2_return": "ok",
+    "relevance_lift_matrix": "ok"
+  },
+  "signals": {
+    "clean_machine_install": {
+      "status": "ok",
+      "started_at": "2026-04-24T05:28:29Z",
+      "finished_at": "2026-04-24T05:28:29Z",
+      "duration_ms": 198,
+      "command": [
+        "insights_cli.py",
+        "wiki-install",
+        "--server",
+        "http://127.0.0.1:18821"
+      ],
+      "evidence": {
+        "isolated_home": "/tmp/insights-adoption-proof.8eWgQt/home",
+        "ephemeral_cache_dir": "/tmp/insights-adoption-proof.8eWgQt/home/.cache/insights-share",
+        "cache_dir": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/cache/insights-share",
+        "config_path": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/cache/insights-share/config.json",
+        "trusted_keys_path": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/cache/insights-share/trusted_keys.json",
+        "config_server_url": "http://127.0.0.1:18821",
+        "cached_card_count": 2,
+        "cached_card_ids": [
+          "alice-pgpool-2026-04-10",
+          "bob-pgpool-bad-2026-04-12"
+        ],
+        "trusted_key_count": 1,
+        "output_excerpt": "install ok server=http://127.0.0.1:18821 cached=2 cards trusted_keys=1"
+      }
+    },
+    "first_relevant_hit": {
+      "status": "ok",
+      "started_at": "2026-04-24T05:28:29Z",
+      "finished_at": "2026-04-24T05:28:29Z",
+      "duration_ms": 200,
+      "command": [
+        "insights_cli.py",
+        "solve",
+        "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike",
+        "--wiki",
+        "http://127.0.0.1:18821",
+        "--no-ai"
+      ],
+      "evidence": {
+        "query": "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike",
+        "top_hit_id": "alice-pgpool-2026-04-10",
+        "top_hit_author": "alice",
+        "top_hit_score": 0.3625,
+        "hit_count": 3,
+        "hit_ids": [
+          "alice-pgpool-2026-04-10",
+          "bob-pgpool-bad-2026-04-12",
+          "carol-redis-eviction-2026-03-27"
+        ],
+        "required_phrase": "idle_in_transaction_session_timeout",
+        "output_excerpt": "DEMO: Bob hits prod incident\n\nrestate: Our checkout API is timing out, postgres is rejecting new connections during the lunch spike\n\nhot-loaded alice-pgpool-2026-04-10 from alice (score=0.3625)\n\n+------------------------------------------------------------------------------+\n| Set idle_in_transaction_session_timeout=30s and bump pool size to 2x worker count |\n+------------------------------------------------------------------------------+\n| raw (no-ai) confidence=0.82                                                  |\n+------------------------------------------------------------------------------+\n\nfast path: 0.0s (no-ai)   slow path baseline: ~62s"
+      }
+    },
+    "first_publish": {
+      "status": "ok",
+      "started_at": "2026-04-24T05:28:28Z",
+      "finished_at": "2026-04-24T05:28:29Z",
+      "duration_ms": 380,
+      "commands": [
+        [
+          "insights_cli.py",
+          "publish",
+          "seeds/alice_pgpool.json",
+          "--wiki",
+          "http://127.0.0.1:18821"
+        ],
+        [
+          "insights_cli.py",
+          "publish",
+          "seeds/bob_pgpool_bad.json",
+          "--wiki",
+          "http://127.0.0.1:18821"
+        ]
+      ],
+      "evidence": {
+        "published_card_ids": [
+          "alice-pgpool-2026-04-10",
+          "bob-pgpool-bad-2026-04-12"
+        ],
+        "published_card_count": 2,
+        "all_card_ids_after_ap2": [
+          "alice-celery-retry-2026-04-08",
+          "alice-pgpool-2026-04-10",
+          "bob-pgpool-bad-2026-04-12",
+          "carol-redis-eviction-2026-03-27"
+        ],
+        "topic_id": "postgres-pool-exhaustion",
+        "topic_count": 0,
+        "topic_example_count": 2,
+        "good_example_count": 1,
+        "bad_example_count": 1,
+        "paths": {
+          "alice-pgpool-2026-04-10": {
+            "card_md": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/wiki_tree/general/alice_pgpool_2026_04_10.md",
+            "raw_log": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/wiki_tree/general/raw/alice-pgpool-2026-04-10.jsonl"
+          },
+          "bob-pgpool-bad-2026-04-12": {
+            "card_md": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/wiki_tree/general/bob_pgpool_bad_2026_04_12.md",
+            "raw_log": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/wiki_tree/general/raw/bob-pgpool-bad-2026-04-12.txt"
+          },
+          "topics_json": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/wiki_tree/topics.json",
+          "topics_json_exists": false,
+          "wiki_types_json": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/wiki_tree/wiki_types.json"
+        },
+        "outputs": {
+          "good": "published alice-pgpool-2026-04-10 signed_by=124bb59f5dc65992",
+          "bad": "published bob-pgpool-bad-2026-04-12 signed_by=124bb59f5dc65992"
+        }
+      }
+    },
+    "day_2_return": {
+      "status": "ok",
+      "started_at": "2026-04-24T05:28:29Z",
+      "finished_at": "2026-04-24T05:28:29Z",
+      "duration_ms": 198,
+      "command": [
+        "insights_cli.py",
+        "solve",
+        "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike",
+        "--no-ai"
+      ],
+      "evidence": {
+        "cwd": "/tmp/insights-adoption-proof.8eWgQt/day2",
+        "used_installed_config": true,
+        "config_path": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/cache/insights-share/config.json",
+        "config_server_url": "http://127.0.0.1:18821",
+        "expected_card_id": "alice-pgpool-2026-04-10",
+        "output_excerpt": "DEMO: Bob hits prod incident\n\nrestate: Our checkout API is timing out, postgres is rejecting new connections during the lunch spike\n\nhot-loaded alice-pgpool-2026-04-10 from alice (score=0.3625)\n\n+------------------------------------------------------------------------------+\n| Set idle_in_transaction_session_timeout=30s and bump pool size to 2x worker count |\n+------------------------------------------------------------------------------+\n| raw (no-ai) confidence=0.82                                                  |\n+------------------------------------------------------------------------------+\n\nfast path: 0.0s (no-ai)   slow path baseline: ~62s"
+      }
+    },
+    "relevance_lift_matrix": {
+      "status": "ok",
+      "started_at": "2026-04-24T05:28:29Z",
+      "finished_at": "2026-04-24T05:28:30Z",
+      "duration_ms": 418,
+      "commands": [
+        [
+          "insights_cli.py",
+          "publish",
+          "seeds/alice_celery_retry.json",
+          "--wiki",
+          "http://127.0.0.1:18821"
+        ],
+        [
+          "insights_cli.py",
+          "publish",
+          "seeds/carol_redis_eviction.json",
+          "--wiki",
+          "http://127.0.0.1:18821"
+        ],
+        [
+          "GET",
+          "/search?q=<canonical>&k=3"
+        ]
+      ],
+      "evidence": {
+        "baseline": {
+          "query": "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike",
+          "hit_count": 0,
+          "hit_ids": []
+        },
+        "matrix": {
+          "status": "ok",
+          "baseline_before_publish": {
+            "query": "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike",
+            "hit_count": 0,
+            "hit_ids": []
+          },
+          "case_count": 3,
+          "cases": [
+            {
+              "name": "postgres_pool_exhaustion",
+              "query": "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike",
+              "expected_top_id": "alice-pgpool-2026-04-10",
+              "top_hit_id": "alice-pgpool-2026-04-10",
+              "top_hit_score": 0.3625,
+              "hit_ids": [
+                "alice-pgpool-2026-04-10",
+                "bob-pgpool-bad-2026-04-12",
+                "carol-redis-eviction-2026-03-27"
+              ],
+              "wrong_domain_not_top": true
+            },
+            {
+              "name": "celery_retry_storm",
+              "query": "Celery retry storm is overwhelming Redis broker and workers loop immediate retry without backoff",
+              "expected_top_id": "alice-celery-retry-2026-04-08",
+              "top_hit_id": "alice-celery-retry-2026-04-08",
+              "top_hit_score": 0.575,
+              "hit_ids": [
+                "alice-celery-retry-2026-04-08",
+                "carol-redis-eviction-2026-03-27",
+                "alice-pgpool-2026-04-10"
+              ],
+              "wrong_domain_not_top": true
+            },
+            {
+              "name": "redis_session_eviction",
+              "query": "Redis allkeys-lru is evicting session data and users are logged out during cache warm-up",
+              "expected_top_id": "carol-redis-eviction-2026-03-27",
+              "top_hit_id": "carol-redis-eviction-2026-03-27",
+              "top_hit_score": 0.4313,
+              "hit_ids": [
+                "carol-redis-eviction-2026-03-27",
+                "alice-celery-retry-2026-04-08",
+                "alice-pgpool-2026-04-10"
+              ],
+              "wrong_domain_not_top": true
+            }
+          ]
+        },
+        "published_card_ids": [
+          "alice-celery-retry-2026-04-08",
+          "carol-redis-eviction-2026-03-27"
+        ],
+        "outputs": {
+          "celery": "published alice-celery-retry-2026-04-08 signed_by=124bb59f5dc65992",
+          "redis": "published carol-redis-eviction-2026-03-27 signed_by=124bb59f5dc65992"
+        }
+      }
+    }
+  }
+}

@@ -1,103 +1,120 @@
-[start.claude] 隔离副本：/tmp/start-claude.8H97qF/demo_codes
-[start.claude] 日志文件：/Users/m1/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_claude.latest.txt
-[start.claude] 当前模式：手动
+[start.claude] 隔离副本：/tmp/start-claude.xAxdon/demo_codes
+[start.claude] 日志文件：/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_claude.latest.txt
+[start.claude] 当前模式：自动
 
 第1步：确认自己在隔离副本里
-这一步重要，是因为接下来所有演示操作都会真正修改文件和启动服务，必须先确保你站在一份临时副本里，而不是团队正式的代码仓库，这样即使演示翻车也不会污染真实项目。
-马上你会看到屏幕打印出当前所在的文件夹完整路径，然后空一行，再列出这个文件夹里的所有文件和子目录，包含创建时间和权限信息。
-看到路径里带有 tmp、demo、copy、sandbox 这类字样，并且能看到 insights-share 项目该有的文件都齐全，就说明你确实在隔离副本里，这一步就算成功。
+这一步的目的很简单：先确认你看到的是临时副本，不会污染正式仓库。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
-你的选择：固定命令：pwd && printf '\n' && ls -la
-/tmp/start-claude.8H97qF/demo_codes
+[自动模式] 继续执行下一步。
+固定命令：pwd && printf '\n' && ls -la
+/tmp/start-claude.xAxdon/demo_codes
 
-total 208
--rw-r--r--   1 m1  staff   1009  4月 13 18:28 _sdk_common.py
-drwxr-xr-x  19 m1  staff    608  4月 17 10:25 .
-drwx------   7 m1  wheel    224  4月 17 11:44 ..
-drwxr-xr-x   5 m1  staff    160  4月 14 09:52 .claude
--rw-r--r--   1 m1  staff    544  4月 15 13:37 .env
--rw-r--r--   1 m1  staff    283  4月 13 17:03 .env.example
--rw-r--r--   1 m1  staff     50  4月 17 10:20 .gitignore
--rw-r--r--   1 m1  staff   4040  4月 13 17:03 adapter.py
-drwxr-xr-x   6 m1  staff    192  4月 17 10:20 hooks
--rw-r--r--   1 m1  staff  19439  4月 17 10:20 insights_cli.py
-drwxr-xr-x  22 m1  staff    704  4月 17 10:20 insightsd
--rw-r--r--   1 m1  staff     31  4月 13 17:03 requirements.txt
--rwxr-xr-x   1 m1  staff   1782  4月 17 10:20 run_demo.sh
--rw-r--r--   1 m1  staff   6203  4月 17 10:20 search_agent.py
-drwxr-xr-x   6 m1  staff    192  4月 15 18:34 seeds
--rw-r--r--   1 m1  staff  34254  4月 17 10:20 standalone_runtime_preview.html
--rw-r--r--   1 m1  staff   3413  4月 13 17:03 ui.py
-drwxr-xr-x   8 m1  staff    256  4月 15 18:47 wiki_tree
--rw-r--r--   1 m1  staff   5311  4月 17 10:25 wiki.json
+total 664
+drwxr-xr-x  29 liushiyu  staff     928 Apr 24 10:32 .
+drwx------   6 liushiyu  wheel     192 Apr 24 13:24 ..
+drwxr-xr-x   5 liushiyu  staff     160 Apr 23 11:50 .claude
+-rw-r--r--   1 liushiyu  staff     544 Apr 15 13:37 .env
+-rw-r--r--   1 liushiyu  staff     283 Apr 13 17:03 .env.example
+-rw-r--r--   1 liushiyu  staff      79 Apr 24 10:45 .gitignore
+drwxr-xr-x   6 liushiyu  staff     192 Apr 13 17:03 .venv.broken-20260424-103256
+-rw-r--r--   1 liushiyu  staff    1009 Apr 13 18:28 _sdk_common.py
+-rw-r--r--   1 liushiyu  staff    5677 Apr 22 18:30 adapter.py
+-rw-r--r--   1 liushiyu  staff    4461 Apr 22 18:31 capture_m7_post_local_search.py
+drwxr-xr-x   8 liushiyu  staff     256 Apr 23 13:10 hooks
+-rw-r--r--   1 liushiyu  staff   23992 Apr 23 16:43 insights_cli.py
+drwxr-xr-x  23 liushiyu  staff     736 Apr 23 13:08 insightsd
+-rw-r--r--   1 liushiyu  staff    4722 Apr 22 13:16 latency_cache.py
+-rw-r--r--   1 liushiyu  staff    7747 Apr 22 18:22 local_search.py
+-rw-r--r--   1 liushiyu  staff      31 Apr 13 17:03 requirements.txt
+-rwxr-xr-x   1 liushiyu  staff    1782 Apr 17 10:20 run_demo.sh
+-rw-r--r--   1 liushiyu  staff   11354 Apr 22 18:26 search_agent.py
+drwxr-xr-x   6 liushiyu  staff     192 Apr 15 18:34 seeds
+-rw-r--r--   1 liushiyu  staff   34254 Apr 17 10:20 standalone_runtime_preview.html
+-rw-r--r--   1 liushiyu  staff    6063 Apr 22 13:17 test_latency_cache.py
+-rw-r--r--   1 liushiyu  staff    7267 Apr 22 18:25 test_local_search.py
+-rw-r--r--   1 liushiyu  staff    4586 Apr 22 18:34 test_search_agent_priority.py
+-rw-r--r--   1 liushiyu  staff    5112 Apr 23 13:09 test_search_http_integration.py
+-rw-r--r--   1 liushiyu  staff    5204 Apr 23 12:43 test_search_ranking.py
+-rw-r--r--   1 liushiyu  staff    3413 Apr 13 17:03 ui.py
+-rw-r--r--   1 liushiyu  staff    4307 Apr 22 17:58 upload_errors.py
+-rw-r--r--   1 liushiyu  staff  154048 Apr 22 16:01 wiki.json
+drwxr-xr-x  12 liushiyu  staff     384 Apr 18 19:01 wiki_tree
 这一步完成：确认自己在隔离副本里
 
 第2步：确认 demo CLI 可以运行
-这一步之所以重要，是因为在做任何案例发布、问题求解之前，必须先证明 insights-share 这个命令行工具本身是能跑起来的，否则后面所有演示都没有前提。
-你马上会看到终端里打印出一行简短的版本号信息，类似 "insights_cli version x.y.z" 这样的文字，它就是产品的"身份证"。
-只要这一行版本号正常出现，没有弹出红色报错或"command not found"之类的提示，就说明 Python 运行时和 CLI 可执行文件是通的，这一步就算成功。
-如果看到报错，说明环境有问题，后面的发布、求解、安装都跑不起来，需要先修环境再继续演示。
+这一步的目的很简单：先看 CLI 版本，能最快证明可执行文件和 Python 运行时是通的。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
-你的选择：固定命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py version
+[自动模式] 继续执行下一步。
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py version
 0.0.0+dev
 这一步完成：确认 demo CLI 可以运行
 
 第3步：启动本地 wiki 服务
-这一步是整条演示链路的地基，没有它，后面的案例发布、搜索、安装全部无从谈起，所以必须先把服务跑起来并拿到一个可访问的地址。
-接下来屏幕上会出现一条后台启动命令，执行后你会看到一个进程号被打印出来，同时日志会被写入 /tmp/start_claude_daemon.17821.log，服务监听在本机的 127.0.0.1:17821 端口。
-判断成功的标志很简单：命令返回后没有报错、进程号正常打印、端口 17821 进入监听状态，这说明 wiki 服务已经在本地活着，可以接收后续的发布和查询请求了。
-如果看到端口被占用或进程号没打出来，就是启动失败，需要先处理再往后走。
+这一步的目的很简单：没有服务端就没有后续发布、搜索和安装，所以它是整条链路的起点。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
-你的选择：固定命令：mkdir -p ./runtime-start && "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py serve --host 127.0.0.1 --port 17821 --store ./runtime-start/wiki_tree --store-mode tree >/tmp/start_claude_daemon.17821.log 2>&1 & echo $! > .start_demo_daemon.pid && cat .start_demo_daemon.pid
-20115
+[自动模式] 继续执行下一步。
+固定命令：mkdir -p ./runtime-start && "/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py serve --host 127.0.0.1 --port 17821 --store ./runtime-start/wiki_tree --store-mode tree >/tmp/start_claude_daemon.17821.log 2>&1 & echo $! > .start_demo_daemon.pid && cat .start_demo_daemon.pid
+83902
 这一步完成：启动本地 wiki 服务
 
 第4步：确认服务健康检查通过
-这一步是整个演示的"生命体征确认"：前面我们刚把服务拉起来，但进程起来不等于能对外响应，只有健康检查通过，后面发布案例、提交问题、本地安装这些真实业务动作才有意义，否则都是空转。
-接下来屏幕上会看到脚本最多尝试十次，每隔一秒去敲一下服务的健康检查接口，直到拿到一个 ok 的回应就立刻停下来往下走。
-只要看到脚本没有停在第十次后失败退出，而是顺利进入下一步提示，就说明服务已经真正在线、可以对话了，这一步就算成功。
+这一步的目的很简单：健康检查通过，后面所有 HTTP 命令才有意义。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
-你的选择：固定命令：for attempt in 1 2 3 4 5 6 7 8 9 10; do curl -fsS "http://127.0.0.1:17821/healthz" && exit 0; sleep 1; done; exit 1
-{"ok": true}这一步完成：确认服务健康检查通过
+[自动模式] 继续执行下一步。
+固定命令：for attempt in 1 2 3 4 5 6 7 8 9 10; do curl -fsS "http://127.0.0.1:17821/healthz" && exit 0; sleep 1; done; exit 1
+curl: (7) Failed to connect to 127.0.0.1 port 17821 after 0 ms: Couldn't connect to server
+{"ok": true, "signing": {"enabled": true, "key_ids": ["af723926fef5ea44"]}}这一步完成：确认服务健康检查通过
 
 第5步：查看初始 wiki 列表
-这一步是整场演示的"空白对照"，先让你亲眼看到一个干净的 wiki——里面还没有任何案例，这样后面一旦有内容出现，你就能立刻感受到"从零到一"的落差，而不是看到一堆数据却分不清哪条是新发布的。
-你马上会在终端里看到一段结构化输出，通常是一个空的列表（例如 items 为空数组，或者明确提示"暂无案例"），同时服务返回 ok 状态，说明 wiki 已经在线、只是还没人投稿。
-只要看到"连接成功 + 列表为空"这两个信号同时出现，就算这一步通过；如果看到报错、连不上端口，或者列表里已经有内容，那就说明环境不干净，需要回头检查。
+这一步的目的很简单：先看空表，PM 才能直观看到“发布前”和“发布后”的差异。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
-你的选择：固定命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py list --wiki "http://127.0.0.1:17821"
+[自动模式] 继续执行下一步。
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py list --wiki "http://127.0.0.1:17821"
 (no insights yet)
 这一步完成：查看初始 wiki 列表
 
 第6步：发布 Alice 的 good 案例
-这一步重要，是因为 insights-share 的核心价值就是"真实踩坑经验能被别人复用"，所以我们必须先往知识库里放进第一条经过验证的好案例，后面的 solve 步骤才有东西可以命中。
-接下来屏幕上会出现一条命令开始执行，脚本会把 Alice 关于 pgpool 的一段实战经验打包上传到刚刚启动的 Wiki 服务里，完成后会提示发布成功并返回一个 insight 的编号或标识。
-看到返回"发布成功"字样、并且给出了对应的 insight id，就说明这条 good 案例已经正式入库，知识库从空变成了"有一条可用经验"，这一步就算成功。
+这一步的目的很简单：先放入一个 good 实战案例，让 solve 有正确经验可命中。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
-你的选择：固定命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py publish seeds/alice_pgpool.json --wiki "http://127.0.0.1:17821"
-published alice-pgpool-2026-04-10
+[自动模式] 继续执行下一步。
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py publish seeds/alice_pgpool.json --wiki "http://127.0.0.1:17821"
+published alice-pgpool-2026-04-10 signed_by=af723926fef5ea44
 这一步完成：发布 Alice 的 good 案例
 
 第7步：发布 Bob 的 bad 案例
-这一步重要，是因为一个靠谱的经验库不能只收录"做对了"的案例，还必须诚实保留"踩过的坑"，让后来人能对照避雷，才算真正沉淀团队知识。
-接下来屏幕上会执行一条发布命令，把 Bob 关于 pgpool 的反面案例推送到刚才启动的 wiki 服务里，稍等片刻就会返回一行简短的发布回执。
-看到类似 published bob-pgpool-... 这样的一行输出，就说明这条 bad 案例已被 wiki 正式接收，和刚才 Alice 的 good 案例并排存放，可以进入下一步演示。
+这一步的目的很简单：再放入一个 bad 案例，展示 wiki 同时能容纳反例。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
-你的选择：固定命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py publish seeds/bob_pgpool_bad.json --wiki "http://127.0.0.1:17821"
-published bob-pgpool-bad-2026-04-12
+[自动模式] 继续执行下一步。
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py publish seeds/bob_pgpool_bad.json --wiki "http://127.0.0.1:17821"
+published bob-pgpool-bad-2026-04-12 signed_by=af723926fef5ea44
 这一步完成：发布 Bob 的 bad 案例
 
 第8步：用真实事故问题做一次 solve
-这一步最像真实工作场景：运营半夜遇到故障，不再翻群聊、不再 @ 同事，直接把一句话问题扔给系统，由它调取刚才发布的两份实战案例给出答案。这也是整个闭环里"知识真正被用起来"的关键一环，前面发布的经验如果不能被检索到，整条链路就没有商业价值。
-接下来屏幕上会出现一段命令行输出：系统先提示正在读取 wiki，然后打印检索到的相关案例标题和评分，最后给出一段针对"结账 API 超时、postgres 连接被拒"的处理建议。
-只要看到输出里同时出现刚才那条 bob-pgpool-bad-2026-04-12（反面教材）以及更早发布的正面案例，并且末尾给出了可读的中文或英文处置建议，就说明热加载和检索都正常，这一步就算成功。
+这一步的目的很简单：这一步最像真实使用场景：用户问问题，系统热加载经验并直接给出答案。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
-你的选择：固定命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py solve "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike" --wiki "http://127.0.0.1:17821" --no-ai
+[自动模式] 继续执行下一步。
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py solve "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike" --wiki "http://127.0.0.1:17821" --no-ai
                           DEMO: Bob hits prod incident
 
 restate: Our checkout API is timing out, postgres is rejecting new connections during the lunch spike
 
-hot-loaded alice-pgpool-2026-04-10 from alice (score=0.0625)
+hot-loaded alice-pgpool-2026-04-10 from alice (score=0.3625)
 
 +------------------------------------------------------------------------------+
 | Set idle_in_transaction_session_timeout=30s and bump pool size to 2x worker count |
@@ -105,40 +122,45 @@ hot-loaded alice-pgpool-2026-04-10 from alice (score=0.0625)
 | raw (no-ai) confidence=0.82                                                  |
 +------------------------------------------------------------------------------+
 
-fast path: 0.1s (no-ai)   slow path baseline: ~62s
+fast path: 0.0s (no-ai)   slow path baseline: ~62s
 这一步完成：用真实事故问题做一次 solve
 
-第9步：安装 insights-wiki 到本机缓存
-这一步重要，是因为前面所有的服务启动、案例发布、问题求解都只发生在服务端，现在要模拟一个普通同事第一次接入公司局域网 wiki，把服务端的知识内容拉到自己电脑的本地缓存，这代表知识真正落地到每个人手里。
-你马上会看到终端打印出连接服务地址、下载卡片清单、逐条写入本地缓存目录的过程，以及每张卡片的标题、作者和 good/bad 标签。
-看到最后一行提示安装完成、并列出本机缓存路径（通常是 ~/.insights-wiki 或类似目录），没有红色报错、没有 connection refused，就算这一步成功。
+第9步：安装 insights-share 到本机缓存
+这一步的目的很简单：安装步骤会把服务端内容写入本机缓存，模拟普通用户接入 LAN wiki。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
-你的选择：固定命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py wiki-install --server "http://127.0.0.1:17821"
-install ok server=http://127.0.0.1:17821 cached=2 cards
-这一步完成：安装 insights-wiki 到本机缓存
+[自动模式] 继续执行下一步。
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py wiki-install --server "http://127.0.0.1:17821"
+install ok server=http://127.0.0.1:17821 cached=2 cards trusted_keys=1
+这一步完成：安装 insights-share 到本机缓存
 
 第10步：确认缓存文件已经落地
-这一步是整场演示的收尾，前面所有发布、求解、安装的动作如果真的成功，最终都必须以"文件确实写到了本地磁盘"为证据，否则之前看到的成功提示都只是屏幕上的字。
-你马上会在屏幕上看到一个本地缓存目录的清单，里面会列出几个以卡片名命名的文件，每个文件都带有大小和最近修改时间，下面还会再单独把这些文件的完整路径排好序列出来一遍。
-只要目录存在、文件数量和上一步提示的 cached=2 cards 对得上、并且能看到清晰的文件名和非零大小，就说明闭环已经完整跑通，可以直接截图作为交付证据。
+这一步的目的很简单：最后确认缓存文件真的落盘，给 PM 一个可以截图的成功证据。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
-你的选择：固定命令：ls -la ~/.cache/insights-wiki && printf '\n' && find ~/.cache/insights-wiki -maxdepth 1 -type f | sort
-total 24
-drwxr-xr-x   5 m1  staff  160  4月 17 12:02 .
-drwxr-xr-x  17 m1  staff  544  4月 17 12:02 ..
--rw-r--r--   1 m1  staff  224  4月 17 12:02 alice-pgpool-2026-04-10.json
--rw-r--r--   1 m1  staff  212  4月 17 12:02 bob-pgpool-bad-2026-04-12.json
--rw-r--r--   1 m1  staff   92  4月 17 12:02 config.json
+[自动模式] 继续执行下一步。
+固定命令：ls -la ~/.cache/insights-share && printf '\n' && find ~/.cache/insights-share -maxdepth 1 -type f | sort
+total 32
+drwxr-xr-x   7 liushiyu  staff   224 Apr 24 13:24 .
+drwxr-xr-x  10 liushiyu  staff   320 Apr 24 13:24 ..
+-rw-r--r--   1 liushiyu  staff  1759 Apr 24 13:24 alice-pgpool-2026-04-10.json
+-rw-r--r--   1 liushiyu  staff  2371 Apr 24 13:24 bob-pgpool-bad-2026-04-12.json
+-rw-r--r--   1 liushiyu  staff   108 Apr 24 13:24 config.json
+drwxr-xr-x   4 liushiyu  staff   128 Apr 24 13:24 signing
+-rw-r--r--   1 liushiyu  staff   292 Apr 24 13:24 trusted_keys.json
 
-/Users/m1/.cache/insights-wiki/alice-pgpool-2026-04-10.json
-/Users/m1/.cache/insights-wiki/bob-pgpool-bad-2026-04-12.json
-/Users/m1/.cache/insights-wiki/config.json
+/Users/liushiyu/.cache/insights-share/alice-pgpool-2026-04-10.json
+/Users/liushiyu/.cache/insights-share/bob-pgpool-bad-2026-04-12.json
+/Users/liushiyu/.cache/insights-share/config.json
+/Users/liushiyu/.cache/insights-share/trusted_keys.json
 这一步完成：确认缓存文件已经落地
 
-我们已经跑完 insights-share CLI 的真实端到端闭环，healthz/publish_good/publish_bad/solve/install/cache 六项全部通过。
-业务价值：PM 可在几分钟内沉淀真实 A/B 案例并一键分发给团队复用，明显降低经验流失与重复踩坑成本。
-关键证据：六项状态全部为 1，代表从健康检查、好/坏案例发布、求解、安装到缓存写入形成了可复现的完整链路。
-下一步建议：接入更多真实业务话题、补齐多人协作下的冲突合并演示，并把命中率与节省工时做成看板给管理层汇报。
+完整真实闭环已经跑完，你现在看到的是脚本的内置总结。
+业务价值：用户不用改代码，只要接入 wiki，就能复用团队经验。
+成功证据：healthz、publish、solve、install、cache 五个信号都已经在日志里留下了原始输出。
+下一次可以继续做的事：换一个问题重跑 solve，或者拿日志给 PM/VC 做演示。
 接下来可输入 1 重新执行 solve，输入 2 查看日志目录，输入 3 查看缓存目录，输入 q 退出。
 
 结果摘要：
@@ -148,7 +170,5 @@ RESULT publish_bad=ok
 RESULT solve=ok
 RESULT install=ok
 RESULT cache=ok
-日志文件：/Users/m1/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_claude.latest.txt
-隔离副本：/tmp/start-claude.8H97qF/demo_codes
-你的选择：只支持 1、2、3、q。
-你的选择：演示结束，开始清理临时资源。
+日志文件：/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_claude.latest.txt
+隔离副本：/tmp/start-claude.xAxdon/demo_codes

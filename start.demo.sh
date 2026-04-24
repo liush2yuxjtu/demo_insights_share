@@ -10,6 +10,7 @@
 #         settings.json                ← plugin marketplace + enabledPlugins
 #       .cache/                        ← insights-share plugin 写缓存的地方
 #     guide.log                        ← 左 pane tail -f
+#     right.log                        ← 右 pane self-check 证据
 #     .env                             ← 右 pane source 的环境文件
 #
 # 启动 claude 时右 pane export HOME=$SANDBOX_HOME，
@@ -25,11 +26,13 @@ SANDBOX_HOME="$SANDBOX/home"
 SANDBOX_CLAUDE="$SANDBOX_HOME/.claude"
 SANDBOX_WORKDIR="$SANDBOX/workdir"   # claude 的 cwd — 只有项目级 skill，不放别的
 GUIDE_LOG="$SANDBOX/guide.log"
+RIGHT_LOG="$SANDBOX/right.log"
 ENV_FILE="$SANDBOX/.env"
 DEMO_CODES="$REPO_ROOT/insights-share/demo_codes"
-DEMO_VENV_PY="$DEMO_CODES/.venv/bin/python"
 PLUGIN_DIR="$REPO_ROOT/plugins/insights-share"
 PLUGIN_NAME="insights-share"
+INSTALLED_PLUGIN_DIR=""
+PLUGIN_SERVER_START=""
 DAEMON_PORT="7821"
 DAEMON_LOG="$SANDBOX/insightsd.log"
 DAEMON_PID_FILE="$SANDBOX/insightsd.pid"
@@ -54,20 +57,41 @@ step() { printf '\033[32m🟢 [%s/7]\033[0m %s\n' "$1" "$2"; }
 die()  { printf '\033[31m[错误]\033[0m %s\n' "$1" >&2; exit 1; }
 note() { printf '\033[36m[提示]\033[0m %s\n' "$1"; }
 
+resolve_installed_plugin_dir() {
+  python3 - "$SANDBOX_HOME" "$PLUGIN_NAME" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+home = Path(sys.argv[1])
+plugin_name = sys.argv[2]
+cache_root = home / ".claude" / "plugins" / "cache"
+for manifest in sorted(cache_root.glob("**/.claude-plugin/plugin.json")):
+    try:
+        payload = json.loads(manifest.read_text(encoding="utf-8"))
+    except Exception:
+        continue
+    if payload.get("name") == plugin_name:
+        print(manifest.parents[1])
+        raise SystemExit(0)
+raise SystemExit(1)
+PY
+}
+
 # ── 前置检查 ───────────────────────────────────────────
 [ -d "$PLUGIN_DIR/.claude-plugin" ] || die "缺失 plugin 根目录：$PLUGIN_DIR"
-[ -x "$DEMO_VENV_PY" ]  || die "缺失 demo venv：$DEMO_VENV_PY（请先 cd $DEMO_CODES && python -m venv .venv && .venv/bin/pip install -r requirements.txt）"
 [ -f "$TMUX_CONF" ]     || die "缺失 tmux 配置：$TMUX_CONF"
 [ -f "$GUIDE_SCRIPT" ]  || die "缺失 guide 脚本：$GUIDE_SCRIPT"
 command -v tmux   >/dev/null 2>&1 || die "请先安装 tmux：brew install tmux"
 command -v claude >/dev/null 2>&1 || die "请先安装 claude CLI"
+command -v python3 >/dev/null 2>&1 || die "请先安装 python3"
 
 # ── Stage 0: raw secret gate ──────────────────────────
 secret_gate() {
   local findings=""
   findings="$(rg -n -S --glob '**/raw/*' \
     'sk-[A-Za-z0-9_-]{10,}|ghp_[A-Za-z0-9]{20,}|Bearer[[:space:]]+[A-Za-z0-9._~+/-]{10,}|AKIA[0-9A-Z]{16}' \
-    "$DEMO_CODES/wiki_tree" 2>/dev/null || true)"
+    "$DEMO_CODES/wiki_tree" "$PLUGIN_DIR/runtime/wiki_tree" 2>/dev/null || true)"
   if [ -n "$findings" ]; then
     printf '%s\n' "$findings" >&2
     rm -rf "$SANDBOX"
@@ -80,6 +104,7 @@ secret_gate
 # ── Stage 1: 准备沙箱目录 ─────────────────────────────
 mkdir -p "$SANDBOX_CLAUDE" "$SANDBOX_HOME/.cache" "$SANDBOX_WORKDIR"
 : > "$GUIDE_LOG"
+: > "$RIGHT_LOG"
 step 1 "创建沙箱 $SANDBOX ........ done"
 
 # ── 决定认证模式：minimax / subscription / none ────────
@@ -122,6 +147,9 @@ fi
 # ── Stage 3: 真实 plugin install（user-scope, sandbox HOME）──────────────
 HOME="$SANDBOX_HOME" claude plugin marketplace add "$PLUGIN_DIR" --scope user >/dev/null
 HOME="$SANDBOX_HOME" claude plugin install "${PLUGIN_NAME}@${PLUGIN_NAME}" --scope user >/dev/null
+INSTALLED_PLUGIN_DIR="$(resolve_installed_plugin_dir)" || die "无法定位 sandbox 已安装 plugin cache"
+PLUGIN_SERVER_START="$INSTALLED_PLUGIN_DIR/skills/insights-share-server/scripts/start_server.sh"
+[ -x "$PLUGIN_SERVER_START" ] || die "已安装 plugin 缺少 server 启动脚本：$PLUGIN_SERVER_START"
 step 3 "claude plugin install ${PLUGIN_NAME}@${PLUGIN_NAME} ... done"
 
 # ── Stage 4: 按 AUTH_MODE 写环境文件 ────────────────────
@@ -178,25 +206,22 @@ chmod 600 "$ENV_FILE"
 # insights-share plugin 默认指向固定 LAN 地址；demo 沙箱通过上面的
 # INSIGHTS_SHARE_URL / INSIGHTS_DAEMON_URL 显式改回本机 127.0.0.1。
 # daemon 离线时 Stop hook 会报错并挂在 claude 输出里，demo 观感差。
-# 策略：7821 已 LISTEN → 复用（不动）；否则用 demo_codes/.venv 后台启动，
+# 策略：7821 已 LISTEN → 复用（不动）；否则用 sandbox 已安装 plugin 的
+# bundle-local runtime 后台启动，
 # PID 写进沙箱文件；cleanup 只 kill 我们自己起的 daemon。
 DAEMON_STARTED_BY_US=0
 if [ "$DRY_RUN" = "1" ]; then
-  step 5 "DRY RUN: would start insightsd :${DAEMON_PORT} via $DEMO_VENV_PY ........ skipped"
+  step 5 "DRY RUN: would start insightsd :${DAEMON_PORT} via installed plugin runtime ........ skipped"
 elif lsof -iTCP:${DAEMON_PORT} -sTCP:LISTEN -nP >/dev/null 2>&1; then
   step 5 "insightsd :${DAEMON_PORT} 已在运行（复用）... done"
 else
-  (
-    cd "$DEMO_CODES"
-    # P1 fix (2026-04-23)：切到 tree mode，加载 wiki_tree/ 258 张含 canonical
-    # (alice-pgpool / alice-celery-retry / carol-redis-eviction)，修好 validation
-    # cases.yml 的 FN 堆积。旧 flat mode 走 wiki.json 200 张不含 canonical。
-    nohup "$DEMO_VENV_PY" insights_cli.py serve \
-      --host 127.0.0.1 --port "$DAEMON_PORT" \
-      --store wiki_tree --store-mode tree \
-      > "$DAEMON_LOG" 2>&1 &
-    echo $! > "$DAEMON_PID_FILE"
-  )
+  HOME="$SANDBOX_HOME" \
+  INSIGHTS_SHARE_HOST="127.0.0.1" \
+  INSIGHTS_SHARE_PORT="$DAEMON_PORT" \
+  INSIGHTS_SHARE_STORE="$INSTALLED_PLUGIN_DIR/runtime/wiki_tree" \
+  INSIGHTS_UI_ENABLE_RUNNERS=1 \
+    nohup bash "$PLUGIN_SERVER_START" > "$DAEMON_LOG" 2>&1 &
+  echo $! > "$DAEMON_PID_FILE"
   DAEMON_STARTED_BY_US=1
   # 给 daemon 最多 5 秒起来
   for i in 1 2 3 4 5; do
@@ -239,10 +264,22 @@ cleanup() {
   # 保存本次日志副本到仓库外部，方便事后翻看
   local final_log="$REPO_ROOT/insights-share/validation/reports/deliverables/start_demo.latest.txt"
   mkdir -p "$(dirname "$final_log")"
-  cp -f "$GUIDE_LOG" "$final_log" 2>/dev/null || true
+  if [ "$DRY_RUN" != "1" ]; then
+    {
+      echo "===== LEFT PANE GUIDE LOG ====="
+      cat "$GUIDE_LOG" 2>/dev/null || true
+      echo
+      echo "===== RIGHT PANE SELF-CHECK LOG ====="
+      cat "$RIGHT_LOG" 2>/dev/null || true
+    } > "$final_log" 2>/dev/null || true
+  fi
   # 整个沙箱直接删除 —— 真实 ~/.claude/ 无任何残留
   rm -rf "$SANDBOX"
-  printf '\n\033[36m[cleanup]\033[0m 沙箱已删除，真实 ~/.claude/ 零污染。日志：\n  %s\n' "$final_log"
+  if [ "$DRY_RUN" = "1" ]; then
+    printf '\n\033[36m[cleanup]\033[0m 沙箱已删除，真实 ~/.claude/ 零污染。dry-run 不覆盖 latest 日志。\n'
+  else
+    printf '\n\033[36m[cleanup]\033[0m 沙箱已删除，真实 ~/.claude/ 零污染。日志：\n  %s\n' "$final_log"
+  fi
 }
 trap cleanup EXIT
 
@@ -283,8 +320,9 @@ cat > "$RIGHT_SH" <<EOF
 # 只加 set -u 不加 -e/-pipefail：RIGHT_SH 里大量故意 lossy pipe (| head | sed | xargs)，
 # pipefail 会把 benign miss 变 pane killer；-u 只防未定义变量，是最小诚实防护。
 set -u
-# 入口预检 4 项资源
-for _p in "$SANDBOX_WORKDIR" "$ENV_FILE" "$SANDBOX_HOME" "$REPO_ROOT"; do
+exec > >(tee -a "$RIGHT_LOG") 2>&1
+# 入口预检 5 项资源
+for _p in "$SANDBOX_WORKDIR" "$ENV_FILE" "$SANDBOX_HOME" "$REPO_ROOT" "$INSTALLED_PLUGIN_DIR"; do
   if [ ! -e "\$_p" ]; then
     echo "[right pane FATAL] 缺资源: \$_p" >&2
     echo "(pane 保留 60s 供查看, 然后退出)" >&2
@@ -320,9 +358,9 @@ echo "║  🔬 LIVE RUNTIME EVIDENCE (per-feature)                      ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 echo "┌─ [F1] wiki_tree 数据 ─────────────────────────────────────────"
-if [ -f "$REPO_ROOT/insights-share/demo_codes/wiki_tree/topics.json" ]; then
-  topic_n=\$("$DEMO_VENV_PY" -c 'import json,sys;print(len(json.load(open(sys.argv[1]))))' "$REPO_ROOT/insights-share/demo_codes/wiki_tree/topics.json" 2>/dev/null || echo "?")
-  card_n=\$(find "$REPO_ROOT/insights-share/demo_codes/wiki_tree" -name "*.md" -not -name "INDEX.md" 2>/dev/null | wc -l | tr -d ' ')
+if [ -f "$INSTALLED_PLUGIN_DIR/runtime/wiki_tree/topics.json" ]; then
+  topic_n=\$(python3 -c 'import json,sys;print(len(json.load(open(sys.argv[1]))))' "$INSTALLED_PLUGIN_DIR/runtime/wiki_tree/topics.json" 2>/dev/null || echo "?")
+  card_n=\$(find "$INSTALLED_PLUGIN_DIR/runtime/wiki_tree" -name "*.md" -not -name "INDEX.md" 2>/dev/null | wc -l | tr -d ' ')
   echo "│  Topics: \${topic_n} · Cards: \${card_n}"
 else
   echo "│  (wiki_tree 未就绪)"
@@ -331,20 +369,20 @@ echo ""
 echo "┌─ [F2] 实机 statusline 徽章 ───────────────────────────────────"
 printf  "│  "
 INSIGHTS_SHARE_URL=http://127.0.0.1:${DAEMON_PORT} SHARE_STATUSLINE_NO_COLOR=1 \
-  bash "$REPO_ROOT/plugins/insights-share/statusline/insights_share_statusline.sh" \
+  bash "$INSTALLED_PLUGIN_DIR/statusline/insights_share_statusline.sh" \
   2>&1 | head -1 || echo "(statusline exit non-zero)"
 echo ""
 echo "┌─ [F3] plugin manifest ────────────────────────────────────────"
-plugin_json="$REPO_ROOT/plugins/insights-share/.claude-plugin/plugin.json"
+plugin_json="$INSTALLED_PLUGIN_DIR/.claude-plugin/plugin.json"
 if [ -f "\$plugin_json" ]; then
-  ver=\$("$DEMO_VENV_PY" -c 'import json,sys;print(json.load(open(sys.argv[1]))["version"])' "\$plugin_json" 2>/dev/null || echo "?")
+  ver=\$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["version"])' "\$plugin_json" 2>/dev/null || echo "?")
   echo "│  version: \${ver}"
 else
   echo "│  (plugin.json 未找到)"
 fi
 echo ""
 echo "┌─ [F4] slash 命令 + agent 文件存在性 ──────────────────────────"
-cmd_dir="$REPO_ROOT/plugins/insights-share/commands"
+cmd_dir="$INSTALLED_PLUGIN_DIR/commands"
 if [ -d "\$cmd_dir" ]; then
   for f in share-install share-search share-publish share-review share-diff; do
     if [ -f "\$cmd_dir/\${f}.md" ]; then
@@ -353,19 +391,19 @@ if [ -d "\$cmd_dir" ]; then
       echo "│  /\${f}   ✗ MISSING"
     fi
   done
-  agent_dir="$REPO_ROOT/plugins/insights-share/agents"
+  agent_dir="$INSTALLED_PLUGIN_DIR/agents"
   echo "│  agents: share-validator(\$([ -f "\$agent_dir/share-validator.md" ] && echo ✓ || echo ✗)) · share-curator(\$([ -f "\$agent_dir/share-curator.md" ] && echo ✓ || echo ✗))"
 else
   echo "│  (commands 目录未找到)"
 fi
 echo ""
 echo "┌─ [F5] 签名 + marketplace ─────────────────────────────────────"
-if grep -q "sig-fail" "$REPO_ROOT/plugins/insights-share/statusline/insights_share_statusline.sh" 2>/dev/null; then
+if grep -q "sig-fail" "$INSTALLED_PLUGIN_DIR/statusline/insights_share_statusline.sh" 2>/dev/null; then
   echo "│  ed25519 sig-fail state: ✓ 支持"
 else
   echo "│  ed25519 sig-fail state: ? 未找到"
 fi
-mp_json="$REPO_ROOT/plugins/insights-share/.claude-plugin/marketplace.json"
+mp_json="$INSTALLED_PLUGIN_DIR/.claude-plugin/marketplace.json"
 if [ -f "\$mp_json" ]; then
   echo "│  LAN marketplace: ✓"
 else
@@ -373,15 +411,15 @@ else
 fi
 echo ""
 echo "┌─ [F6] 样例 Example schema 字段 ───────────────────────────────"
-sample="$REPO_ROOT/insights-share/demo_codes/wiki_tree/database/postgres_pool.md"
+sample="$INSTALLED_PLUGIN_DIR/runtime/wiki_tree/database/postgres_pool.md"
 if [ -f "\$sample" ]; then
   grep -E '"(id|topic_id|label|applies_when|do_not_apply_when|raw_log_type|raw_log)"' "\$sample" 2>/dev/null | head -6 | sed 's/^/│  /'
 else
   echo "│  (sample 未找到)"
 fi
 echo ""
-echo "----- plugin M5 self-check (plugins/insights-share/) -----"
-bash "$REPO_ROOT/plugins/insights-share/scripts/self_check.sh" \
+echo "----- plugin self-check (sandbox installed plugin cache) -----"
+bash "$INSTALLED_PLUGIN_DIR/scripts/self_check.sh" \
   || echo "(plugin self-check exit non-zero)"
 echo "===================================================="
 echo "期望: 6/6 feature 全 ✓；sandbox 内已完成真实 plugin install；plugin self-check ALL GREEN。"

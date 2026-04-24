@@ -5,12 +5,12 @@
     "email": "team-a@internal"
   },
   "metadata": {
-    "description": "demo_insights_share 团队内网 plugin registry（M5 深度重命名 + plugins/<name>/ 官方布局，当前 plugin 0.6.0-m7）"
+    "description": "demo_insights_share 团队内网 plugin registry（M5 深度重命名 + plugins/<name>/ 官方布局，当前 plugin 0.6.1-m7）"
   },
   "plugins": [
     {
       "name": "insights-share",
-      "version": "0.6.0-m7",
+      "version": "0.6.1-m7",
       "source": "./"
     }
   ]

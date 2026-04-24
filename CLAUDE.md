@@ -4,7 +4,7 @@
 
 | 规则名 | 描述 | 触发时机 | 详情 |
 |--------|------|----------|------|
-| 仅使用中文 | 所有文档、对话、代码注释仅使用中文 | 始终 | [language.md](docs/rules/language.md) |
+| 仅使用中文 | 所有文档、对话、代码注释仅使用中文；`claudefast -p "what languages you use when you answer my question"` 必须回答中文 / Chinese / 只使用中文等等价表述 | 始终 | [language.md](docs/rules/language.md) |
 | CLAUDE.md 规则格式 | 新增规则只能用 `\| 名称 \| 描述 \| 触发时机 \| docs/rules/*.md 链接 \|` 一行格式，详情写入对应 md 文件，禁止散文/项目符号/独立段落 | 向 CLAUDE.md 添加任何规则时 | [claude-md-format.md](docs/rules/claude-md-format.md) |
 | 根目录 md 禁止编辑 | proposal.md / README.md / validation_AB.md / validation.md 均为只读，Agent 不得对其执行任何写入或修改操作 | 任何涉及根目录 *.md 文件的写入/编辑操作前 | [uneditable-md.md](docs/rules/uneditable-md.md) |
 | user_design 目录禁止编辑 | docs/designs/user_design/ 整个目录为只读，Agent 不得写入、编辑或删除其中任何文件 | 任何涉及 docs/designs/user_design/ 的写入/编辑操作前 | [uneditable-md.md](docs/rules/uneditable-md.md) |
@@ -19,7 +19,7 @@
 | CLAUDE.md 改动必跑 agent-judge 状态灯 | 每次编辑 CLAUDE.md 后跑 agent-judge 双探针循环：`claudefast -p` 发 probe + 另一条 `claudefast -p` 当裁判输出 PASS/REFINE/FAIL JSON；fast 最多 5 轮，连续停滞或 FAIL 升级 `claude -p` 托底；禁止硬编码关键词匹配 | 任何 CLAUDE.md 编辑后 | [meta-self-verify.md](docs/rules/meta-self-verify.md) |
 | feature 必在 start.demo.sh self-verify | `start.demo.sh` 是 human-last-visible surface；新增/修改任何 feature 必须同步更新 `start.demo.sh`，并在 tmux 里跑一次完整 `start.demo.sh` 做实机 debug，日志全绿后才算交付 | 任何 feature 新增/修改完成时 | [start-demo-verify.md](docs/rules/start-demo-verify.md) |
 | start.demo.sh 缺 tmux session 时必走 register-session | self-verify 触发时若 `~/.claude/live_terminal/CURRENT` 空/失效，agent 不得让用户手动贴日志，必须先跑项目级 skill `.claude/skills/register-session/register-session.sh <name>` 建/绑 session，再在其中跑 `start.demo.sh` 并按 live-terminal 契约读日志 | 跑 `start.demo.sh` self-verify 前发现未注册 tmux session 时 | [start-demo-register-fallback.md](docs/rules/start-demo-register-fallback.md) |
-| 完工必跑 claudefast READ ONLY finish flag | 任何 job 完成的最后一步：先把结果落 `docs/finish_log/<date>_<slug>.md`，再跑 `claudefast -p "READ ONLY, tell me what we have done in recent commits and based on docs"` 当 finish flag；返 REFINE/FAIL 则修 docs 重跑，最多 3 轮，仍 FAIL 升级 `claude -p` | 任何 job 自认完成前 | [finish-flag-claudefast.md](docs/rules/finish-flag-claudefast.md) |
+| 完工必跑工作专属 claudefast 探针 + READ ONLY finish flag | 任何 job 完成前：先写 `docs/finish_log/<date>_<slug>.md`，再选用户会问的工作专属 `claudefast -p "<探针>"` 并更新 docs 直到答对；E2E 示例必须给出 `claudefast -p "what is our e2e status"`；最后跑 READ ONLY finish flag 验 recent commits 与 docs 一致 | 任何 job 自认完成前 | [finish-flag-claudefast.md](docs/rules/finish-flag-claudefast.md) |
 
 ## 核心功能速答 / Core Features (canonical)
 
@@ -31,7 +31,7 @@
 |---|---------|--------|----------|
 | F1 | Topic 中心 Good/Bad 并列 | 同一 Topic 下多人多场景决策并列共存，good=采纳 bad=拒绝，不合并/不挑最优/不做冲突检测 | [proposal/proposal_conflict_design.md](proposal/proposal_conflict_design.md) |
 | F2 | Statusline 5 态徽章 | `[share ✓/✗/…/⚠stale/🔒sig-fail N/today]` 常驻右侧，daemon 可达性 + 今日触发计数 + TTL + 签名健康度 | [proposal/proposal_statusline.md](proposal/proposal_statusline.md) + `plugins/insights-share/statusline/insights_share_statusline.sh` |
-| F3 | Claude Code Plugin 封装 | 一条 `claude plugin install` 完成 skill + hook + statusline + MCP + agent + slash 注册；manifest 版本 `0.6.0-m7` | [proposal/proposal_plugin_design.md](proposal/proposal_plugin_design.md) + `plugins/insights-share/.claude-plugin/plugin.json` |
+| F3 | Claude Code Plugin 封装 | 一条 `claude plugin install` 完成 skill + hook + statusline + MCP + agent + slash 注册；manifest 版本 `0.6.1-m7` | [proposal/proposal_plugin_design.md](proposal/proposal_plugin_design.md) + `plugins/insights-share/.claude-plugin/plugin.json` |
 | F4 | 5 核心 Slash 命令 | `/share-install` · `/share-search` · `/share-publish` · `/share-review` · `/share-diff`；配 share-validator + share-curator 两个 agent | `plugins/insights-share/commands/` |
 | F5 | 安全与分发 | ed25519 卡片签名 + team namespace `wiki_tree/<team>/<topic>/` + 卡片 TTL stale 降级 + LAN marketplace + 双仓分发（dev 仓 / 108K plugin 仓）| [proposal/proposal_plugin_design.md](proposal/proposal_plugin_design.md) + `plugins/insights-share/scripts/publish_marketplace.py` |
 | F6 | Topic/Example 数据模型 | `applies_when` / `do_not_apply_when` 场景刻画 + `raw_log` 明文存储 + `label_override` 管理员可覆盖；REST API `POST /topics`, `POST /topics/{id}/examples`, `GET /topics?q=`, `GET /topics/{id}/examples?label=good\|bad` | [proposal/proposal_conflict_design.md](proposal/proposal_conflict_design.md) + [proposal/proposal_wiki_card.md](proposal/proposal_wiki_card.md) |
@@ -43,6 +43,7 @@
 | 文件 | 类型 | 说明 |
 |------|------|------|
 | [FEATURES.md](FEATURES.md) | 功能清单（canonical）| 6 大核心功能的单一真源；`start.demo.sh` 右 pane self-check 原样 echo 做实机证据；probe 标准答案 |
+| [CLAUDEFAST_USAGE.md](CLAUDEFAST_USAGE.md) | claudefast 使用总表（canonical） | 回答 `where do we use claudefast?` 的单一真源；区分规则门禁、可执行入口、role summon、设计 probe 与非入口历史记录 |
 | [proposal/proposal_conflict_design.md](proposal/proposal_conflict_design.md) | 正式数据模型（权威） | Topic 中心 Good/Bad 并列共存：同一 Topic 下多人多场景决策并列展示；good=此场景选了此方案，bad=此场景拒绝此方案；不挑最优、不合并、不做冲突检测 |
 | [proposal/proposal_wiki_card.md](proposal/proposal_wiki_card.md) | 现状磁盘形态（参考） | `wiki_tree/` 存储布局、卡片 JSON+markdown 结构、label override 流程、已废弃冲突机制说明 |
 | [proposal/proposal_statusline.md](proposal/proposal_statusline.md) | 反馈机制 | statusline 右侧常驻 `[share ✓ N/today]`：展示 insights-share 运行状态 + 今日触发计数，给用户/client 实时信任感信号（M5 前徽章为 `[wiki ...]`） |

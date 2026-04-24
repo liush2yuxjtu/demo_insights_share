@@ -1,0 +1,9 @@
+.env
+.claude/
+.venv/
+.venv.broken-*/
+__pycache__/
+*.pyc
+wiki.json
+runtime/
+runtime-web/

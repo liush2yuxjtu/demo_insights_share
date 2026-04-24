@@ -27,10 +27,10 @@ origin: demo_insights_share Team A
 调用 `scripts/start_server.sh`，前台启动 daemon：
 
 ```bash
-python insights_cli.py serve --host 0.0.0.0 --port 7821 --store-mode tree
+bash scripts/start_server.sh
 ```
 
-启动后会在 stderr 打印 LAN IP，方便其它机器连接。
+脚本从 plugin 自带的 `runtime/` 启动 `insights_cli.py`，默认 store 是 `runtime/wiki_tree`，不依赖 dev repo checkout 或 `demo_codes/.venv`。可用 `INSIGHTS_SHARE_HOST`、`INSIGHTS_SHARE_PORT`、`INSIGHTS_SHARE_STORE`、`INSIGHTS_SHARE_RUNTIME_DIR` 覆盖。
 
 ### `--ui`
 
@@ -67,5 +67,6 @@ dashboard 走同源 fetch 调用 daemon 的 CRUD 路由，无需 CORS。
 
 - `scripts/start_server.sh` — `--start` 入口
 - `scripts/start_ui.sh` — `--ui` 入口
-- `insights-share/demo_codes/insightsd/server.py` — daemon 实现
-- `insights-share/demo_codes/insightsd/dashboard.html` — kanban 前端
+- `runtime/insightsd/server.py` — bundle-local daemon 实现
+- `runtime/insightsd/dashboard.html` — bundle-local kanban 前端
+- `runtime/wiki_tree/` — bundle-local seed corpus

@@ -1,0 +1,4 @@
+[P0] PASS
+cwd=/Users/liushiyu/projects/demo_insights_share
+command=bash -lc test -d ~/.claude/skills/gstack/bin
+duration_ms=159

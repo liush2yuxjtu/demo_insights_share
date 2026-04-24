@@ -284,6 +284,41 @@ class TestTopicStore:
         content = raw_txt.read_text(encoding="utf-8")
         assert "原始日志行1" in content
 
+    def test_raw_log_export_content_redacts_secret_patterns(self, tmp_path: Path) -> None:
+        """export raw log 写盘前要脱敏常见 token pattern."""
+        store = TreeInsightStore(tmp_path / "wiki_tree")
+        (tmp_path / "wiki_tree").mkdir(parents=True)
+
+        card = {
+            "id": "redacted-export-card",
+            "title": "Redacted Export Card",
+            "author": "tester",
+            "confidence": 0.7,
+            "tags": ["security"],
+            "topic_id": "security-topic",
+            "label": "good",
+            "raw_log_type": "export",
+            "raw_log_export_content": (
+                "token sk-liveSECRET1234567890\n"
+                "github ghp_abcdefghijklmnopqrstuvwxyz\n"
+                "aws AKIA1234567890ABCDEF\n"
+                "auth Bearer abcdefghijklmnopqrstuvwxyz"
+            ),
+            "context": "ctx",
+            "symptom": "sym",
+            "fix": "fix",
+        }
+        store.add(card, wiki_type="security")
+
+        raw_txt = tmp_path / "wiki_tree" / "security" / "raw" / "redacted-export-card.txt"
+        content = raw_txt.read_text(encoding="utf-8")
+
+        assert "sk-liveSECRET1234567890" not in content
+        assert "ghp_abcdefghijklmnopqrstuvwxyz" not in content
+        assert "AKIA1234567890ABCDEF" not in content
+        assert "Bearer abcdefghijklmnopqrstuvwxyz" not in content
+        assert content.count("<redacted:secret>") == 4
+
     def test_raw_log_jsonl_copied_verbatim_for_jsonl_type(self, tmp_path: Path) -> None:
         """raw_log_type=jsonl（默认）时写入 .jsonl，内容为卡片字段 JSON."""
         store = TreeInsightStore(tmp_path / "wiki_tree")
@@ -311,6 +346,36 @@ class TestTopicStore:
         parsed = json.loads(lines[0])
         assert parsed["id"] == "test-jsonl-card"
         assert "wiki_type" not in parsed  # raw 中不含 wiki_type
+
+    def test_raw_log_jsonl_redacts_sensitive_fields_and_values(self, tmp_path: Path) -> None:
+        """jsonl raw log 递归脱敏敏感字段名和正文里的 token pattern."""
+        store = TreeInsightStore(tmp_path / "wiki_tree")
+        (tmp_path / "wiki_tree").mkdir(parents=True)
+
+        card = {
+            "id": "redacted-jsonl-card",
+            "title": "Redacted JSONL Card",
+            "author": "tester",
+            "confidence": 0.7,
+            "tags": ["security"],
+            "topic_id": "security-topic",
+            "label": "good",
+            "raw_log_type": "jsonl",
+            "context": "request header Bearer abcdefghijklmnopqrstuvwxyz",
+            "symptom": "token leaked",
+            "fix": "redact raw evidence",
+            "api_key": "sk-liveSECRET1234567890",
+            "metadata": {"password": "postgres://user:pass@host/db"},
+        }
+        store.add(card, wiki_type="security")
+
+        raw_jsonl = tmp_path / "wiki_tree" / "security" / "raw" / "redacted-jsonl-card.jsonl"
+        parsed = json.loads(raw_jsonl.read_text(encoding="utf-8"))
+
+        assert parsed["api_key"] == "<redacted:field>"
+        assert parsed["metadata"]["password"] == "<redacted:field>"
+        assert "Bearer abcdefghijklmnopqrstuvwxyz" not in parsed["context"]
+        assert "<redacted:secret>" in parsed["context"]
 
     def test_legacy_card_without_new_fields_still_readable(self, store: TreeInsightStore) -> None:
         """老卡片（无 topic_id/label/raw_log_type）能被正常加载，不抛异常."""

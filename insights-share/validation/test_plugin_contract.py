@@ -2,18 +2,29 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
+import shutil
+import socket
+import subprocess
+import sys
+import time
+import urllib.request
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = ROOT.parents[0]
 PLUGIN_DIR = REPO_ROOT / "plugins" / "insights-share"
+DEMO_CODES = REPO_ROOT / "insights-share" / "demo_codes"
 MANIFEST = PLUGIN_DIR / ".claude-plugin" / "plugin.json"
 MARKETPLACE = PLUGIN_DIR / ".claude-plugin" / "marketplace.json"
 README = PLUGIN_DIR / "README.md"
 SELF_CHECK = PLUGIN_DIR / "scripts" / "self_check.sh"
 MCP = PLUGIN_DIR / "mcp" / "wiki-server.json"
 PUBLISH_SCRIPT = PLUGIN_DIR / "scripts" / "publish_marketplace.py"
+SERVER_START = PLUGIN_DIR / "skills" / "insights-share-server" / "scripts" / "start_server.sh"
+SERVER_UI = PLUGIN_DIR / "skills" / "insights-share-server" / "scripts" / "start_ui.sh"
+PLUGIN_RUNTIME = PLUGIN_DIR / "runtime"
 
 
 def _read(path: Path) -> str:
@@ -26,6 +37,18 @@ def _load_module(path: Path, name: str):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def _load_runtime_cli(monkeypatch, home: Path):
+    monkeypatch.setenv("HOME", str(home))
+    sys.path.insert(0, str(PLUGIN_RUNTIME))
+    try:
+        return _load_module(PLUGIN_RUNTIME / "insights_cli.py", f"insights_cli_test_{time.time_ns()}")
+    finally:
+        try:
+            sys.path.remove(str(PLUGIN_RUNTIME))
+        except ValueError:
+            pass
 
 
 def test_plugin_manifest_declares_current_release() -> None:
@@ -49,7 +72,7 @@ def test_plugin_manifest_declares_current_release() -> None:
         "skills/insights-share/SKILL.md",
         "skills/insights-share-server/SKILL.md",
     ]
-    assert manifest["version"] == "0.6.0-m7"
+    assert manifest["version"] == "0.6.1-m7"
     assert manifest["milestones"]["current"] == "M7_LATENCY_DEEP"
     assert "M5_RENAME" in manifest["milestones"]["completed"]
     assert manifest["milestones"]["pending"] == ["M8_LATENCY_INDEX"]
@@ -73,9 +96,52 @@ def test_self_check_tracks_bundle_local_contract() -> None:
     assert "insights_share_statusline.sh" in script
     assert "insights_prefetch.py" in script
     assert "session_start_full_fetch.py" in script
+    assert "server runtime bundle" in script
+    assert "start_server.sh" in script
+    assert "start_ui.sh" in script
     assert 'm["name"] == "insights-share"' in script
     assert 'm["version"].startswith("0.")' in script
     assert 'current in known' in script
+
+
+def test_self_check_executes_bundle_local_contract() -> None:
+    result = subprocess.run(
+        ["bash", str(SELF_CHECK)],
+        cwd=REPO_ROOT,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "server runtime bundle: OK" in result.stdout
+    assert "start_server.sh: OK" in result.stdout
+    assert "start_ui.sh: OK" in result.stdout
+    assert "plugin self-check: ALL GREEN" in result.stdout
+
+
+def test_server_skill_entries_are_bundle_local() -> None:
+    forbidden = [
+        "../../../../../insights-share",
+        "insights-share/demo_codes",
+        "demo_codes/.venv",
+        "$(pwd)/.venv",
+    ]
+
+    for path in (SERVER_START, SERVER_UI):
+        text = _read(path)
+        assert "PLUGIN_ROOT" in text
+        assert "runtime" in text
+        assert "INSIGHTS_SHARE_RUNTIME_DIR" in text
+        assert all(item not in text for item in forbidden)
+
+
+def test_plugin_runtime_bundle_has_daemon_assets() -> None:
+    assert (PLUGIN_RUNTIME / "insights_cli.py").is_file()
+    assert (PLUGIN_RUNTIME / "insightsd" / "server.py").is_file()
+    assert (PLUGIN_RUNTIME / "insightsd" / "dashboard.html").is_file()
+    assert (PLUGIN_RUNTIME / "wiki_tree" / "topics.json").is_file()
+    assert (PLUGIN_RUNTIME / "wiki_tree" / "database" / "postgres_pool.md").is_file()
 
 
 def test_mcp_contract_exists_and_covers_team_queries() -> None:
@@ -101,11 +167,11 @@ def test_marketplace_and_readme_align_with_current_release() -> None:
     plugin = marketplace["plugins"][0]
     assert marketplace["name"] == "insights-share"
     assert plugin["name"] == "insights-share"
-    assert plugin["version"] == manifest["version"] == "0.6.0-m7"
+    assert plugin["version"] == manifest["version"] == "0.6.1-m7"
     assert plugin["source"] == "./"
     assert manifest["milestones"]["current"] == "M7_LATENCY_DEEP"
     assert "M7_LATENCY_DEEP" in readme
-    assert "v0.6.0-m7" in readme
+    assert "v0.6.1-m7" in readme
     assert "/share-diff" in readme
     assert "[share ⚠ stale]" in readme
     assert "[share 🔒 sig-fail]" in readme
@@ -116,6 +182,25 @@ def test_marketplace_and_readme_align_with_current_release() -> None:
 def test_publish_marketplace_script_exists() -> None:
     assert PUBLISH_SCRIPT.is_file()
     assert "--check" in _read(PUBLISH_SCRIPT)
+
+
+def test_publish_marketplace_excludes_runtime_state(tmp_path: Path) -> None:
+    output = tmp_path / "marketplace.json"
+    subprocess.run(
+        [sys.executable, str(PUBLISH_SCRIPT), "--output", str(output)],
+        cwd=REPO_ROOT,
+        check=True,
+    )
+
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    paths = [item["path"] for item in payload["checksums"]]
+
+    assert "runtime/insights_cli.py" in paths
+    assert "runtime/insightsd/server.py" in paths
+    assert "runtime/wiki_tree/database/postgres_pool.md" in paths
+    assert not any(path.startswith("runtime/.claude/") for path in paths)
+    assert not any("runtime-web" in path for path in paths)
+    assert not any("/sessions/" in path for path in paths)
 
 
 def test_bundle_cache_persist_sanitizes_sensitive_fields(tmp_path: Path, monkeypatch) -> None:
@@ -143,3 +228,147 @@ def test_bundle_cache_persist_sanitizes_sensitive_fields(tmp_path: Path, monkeyp
     assert "raw_log" not in saved
     assert "label_note" not in saved
     assert "description" not in saved
+
+
+def test_wiki_install_statusline_config_installs_direct_command(tmp_path: Path, monkeypatch) -> None:
+    home = tmp_path / "home"
+    module = _load_runtime_cli(monkeypatch, home)
+
+    outcome = module._configure_claude_statusline("http://127.0.0.1:7821")
+
+    settings = json.loads((home / ".claude" / "settings.json").read_text(encoding="utf-8"))
+    command = settings["statusLine"]["command"]
+    assert outcome == "statusline=installed"
+    assert settings["statusLine"]["type"] == "command"
+    assert "INSIGHTS_SHARE_URL=http://127.0.0.1:7821" in command
+    assert "NO_PROXY=127.0.0.1,localhost" in command
+    assert "statusline/insights_share_statusline.sh" in command
+
+
+def test_wiki_install_statusline_config_wraps_existing_command(tmp_path: Path, monkeypatch) -> None:
+    home = tmp_path / "home"
+    settings = home / ".claude" / "settings.json"
+    settings.parent.mkdir(parents=True)
+    settings.write_text(
+        json.dumps(
+            {
+                "statusLine": {
+                    "type": "command",
+                    "command": "printf existing",
+                },
+                "effortLevel": "high",
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    module = _load_runtime_cli(monkeypatch, home)
+
+    outcome = module._configure_claude_statusline("http://127.0.0.1:7821")
+
+    payload = json.loads(settings.read_text(encoding="utf-8"))
+    wrapper = home / ".cache" / "insights-share" / "statusline_wrapper.sh"
+    wrapper_text = wrapper.read_text(encoding="utf-8")
+    assert outcome == "statusline=wrapped"
+    assert payload["effortLevel"] == "high"
+    assert payload["statusLine"]["command"] == str(wrapper)
+    assert "previous_command='printf existing'" in wrapper_text
+    assert "INSIGHTS_SHARE_URL=http://127.0.0.1:7821" in wrapper_text
+    assert "insights_share_statusline.sh" in wrapper_text
+    assert wrapper.stat().st_mode & 0o700 == 0o700
+
+
+def test_prefetch_additional_context_uses_public_card_allowlist() -> None:
+    module = _load_module(PLUGIN_DIR / "scripts" / "insights_prefetch.py", "prefetch_contract_test")
+
+    additional = module._build_context(
+        "postgres token",
+        [
+            {
+                "id": "safe-card-1",
+                "title": "Postgres Pool",
+                "author": "alice",
+                "tags": ["postgres"],
+                "raw_log": "./raw/safe-card-1.jsonl",
+                "raw_log_export_content": "sk-liveSECRET1234567890",
+                "description": "Bearer abcdefghijklmnopqrstuvwxyz",
+                "fix": "do not leak this field",
+            }
+        ],
+    )
+
+    assert "safe-card-1" in additional
+    assert "Postgres Pool" in additional
+    assert "alice" in additional
+    assert "raw_log" not in additional
+    assert "sk-liveSECRET1234567890" not in additional
+    assert "Bearer abcdefghijklmnopqrstuvwxyz" not in additional
+    assert "do not leak this field" not in additional
+
+
+def _free_port() -> int:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind(("127.0.0.1", 0))
+        return int(sock.getsockname()[1])
+
+
+def test_bundle_copy_can_start_server_and_search_without_repo_checkout(tmp_path: Path) -> None:
+    bundle = tmp_path / "installed-plugin"
+    shutil.copytree(
+        PLUGIN_DIR,
+        bundle,
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc"),
+    )
+    port = _free_port()
+    home = tmp_path / "home"
+    home.mkdir()
+    env = {
+        **os.environ,
+        "HOME": str(home),
+        "INSIGHTS_SHARE_PORT": str(port),
+        "INSIGHTS_SHARE_HOST": "127.0.0.1",
+        "INSIGHTS_ADAPTER_LOCAL_BYPASS": "1",
+    }
+    proc = subprocess.Popen(
+        ["bash", str(bundle / "skills" / "insights-share-server" / "scripts" / "start_server.sh")],
+        cwd=tmp_path,
+        env=env,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    try:
+        base = f"http://127.0.0.1:{port}"
+        last_error = ""
+        for _ in range(120):
+            if proc.poll() is not None:
+                out, err = proc.communicate(timeout=1)
+                raise AssertionError(f"server exited early\nstdout={out}\nstderr={err}")
+            try:
+                with urllib.request.urlopen(f"{base}/healthz", timeout=1.0) as resp:
+                    assert resp.status == 200
+                    break
+            except Exception as exc:  # noqa: BLE001
+                last_error = repr(exc)
+                time.sleep(0.25)
+        else:
+            proc.terminate()
+            out, err = proc.communicate(timeout=3)
+            raise AssertionError(f"server did not become healthy: {last_error}\nstdout={out}\nstderr={err}")
+
+        with urllib.request.urlopen(
+            f"{base}/search?q=checkout%20postgres%20pool&k=1",
+            timeout=2,
+        ) as resp:
+            payload = json.loads(resp.read().decode("utf-8"))
+
+        assert payload["hits"], payload
+        assert payload["hits"][0]["id"] == "alice-pgpool-2026-04-10"
+    finally:
+        proc.terminate()
+        try:
+            proc.communicate(timeout=3)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            proc.communicate(timeout=3)

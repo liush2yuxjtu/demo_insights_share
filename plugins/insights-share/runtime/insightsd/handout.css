@@ -1,0 +1,415 @@
+:root {
+  --handout-bg:
+    radial-gradient(circle at top left, rgba(14, 116, 144, 0.15), transparent 28%),
+    radial-gradient(circle at top right, rgba(245, 158, 11, 0.16), transparent 24%),
+    linear-gradient(180deg, #fbf6eb 0%, #f4edde 45%, #ede1cb 100%);
+  --handout-surface: rgba(255, 251, 244, 0.9);
+  --handout-surface-strong: rgba(255, 252, 247, 0.98);
+  --handout-border: rgba(51, 65, 85, 0.13);
+  --handout-ink: #14202b;
+  --handout-muted: #556270;
+  --handout-shadow: 0 26px 90px rgba(46, 35, 18, 0.12);
+  --handout-ok: #166534;
+  --handout-fail: #b91c1c;
+  --handout-warn: #a16207;
+}
+
+body[data-mode="handout"] {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--handout-ink);
+  background: var(--handout-bg);
+  font-family: "Avenir Next", "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", sans-serif;
+}
+
+.handout-shell {
+  width: min(1380px, calc(100vw - 32px));
+  margin: 0 auto;
+  padding: 30px 0 72px;
+}
+
+.handout-hero,
+.guide-band,
+.anchor-panel,
+.recording-panel,
+.step-card {
+  background: var(--handout-surface);
+  border: 1px solid var(--handout-border);
+  border-radius: 30px;
+  box-shadow: var(--handout-shadow);
+  backdrop-filter: blur(12px);
+}
+
+.handout-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(340px, 0.95fr);
+  gap: 22px;
+  padding: 30px;
+  position: relative;
+  overflow: hidden;
+}
+
+.handout-hero::after {
+  content: "";
+  position: absolute;
+  right: -100px;
+  top: -100px;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(245, 158, 11, 0.25), rgba(245, 158, 11, 0));
+  pointer-events: none;
+}
+
+.hero-story,
+.hero-start {
+  position: relative;
+  z-index: 1;
+}
+
+.eyebrow,
+.section-label {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.78rem;
+  color: #7c4a15;
+  font-weight: 700;
+}
+
+.hero-story h1,
+.guide-copy h2,
+.panel-head h2,
+.start-card h2 {
+  margin: 10px 0 0;
+  font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+}
+
+.hero-story h1 {
+  max-width: 12ch;
+  font-size: clamp(2.5rem, 5vw, 4.8rem);
+}
+
+.hero-text,
+.start-card p,
+.step-block p,
+.baseline-note,
+.recording-summary,
+.anchor-card p,
+.proof-chip span,
+.rail-step,
+.baseline-list span {
+  color: var(--handout-muted);
+  line-height: 1.65;
+}
+
+.proof-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.proof-chip {
+  display: grid;
+  gap: 6px;
+  padding: 16px 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+}
+
+.proof-chip strong {
+  font-size: 1rem;
+}
+
+.hero-actions,
+.step-actions,
+.record-links {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.hero-actions {
+  margin-top: 22px;
+}
+
+.hero-start {
+  display: grid;
+  gap: 18px;
+}
+
+.start-card,
+.baseline-card {
+  background: var(--handout-surface-strong);
+  border: 1px solid var(--handout-border);
+  border-radius: 24px;
+  padding: 22px;
+}
+
+.start-card h2 {
+  font-size: 2rem;
+}
+
+.baseline-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.baseline-list strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.guide-band {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+  gap: 20px;
+  margin-top: 22px;
+  padding: 26px 28px;
+}
+
+.guide-copy h2 {
+  font-size: clamp(2rem, 3vw, 3rem);
+}
+
+.guide-rail {
+  display: grid;
+  gap: 10px;
+  align-content: center;
+}
+
+.rail-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.64);
+  border: 1px solid rgba(51, 65, 85, 0.08);
+}
+
+.rail-step span {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #172554;
+  color: #fff;
+  font-weight: 700;
+}
+
+.handout-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 22px;
+}
+
+.step-card {
+  padding: 24px;
+  border-top-width: 4px;
+}
+
+.accent-amber { border-top-color: #d97706; }
+.accent-blue { border-top-color: #0f766e; }
+.accent-coral { border-top-color: #dc2626; }
+.accent-gold { border-top-color: #ca8a04; }
+.accent-ink { border-top-color: #334155; }
+
+.step-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.step-index {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f59e0b, #c2410c);
+  color: #fff;
+  font-weight: 800;
+}
+
+.step-title {
+  font-size: 1.18rem;
+  font-weight: 800;
+}
+
+.step-subtitle {
+  color: var(--handout-muted);
+  margin-top: 5px;
+}
+
+.step-status {
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.14);
+  color: var(--handout-muted);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.step-card[data-status="passed"] .step-status,
+.record-step[data-status="passed"] .record-meta span {
+  color: var(--handout-ok);
+}
+
+.step-card[data-status="failed"] .step-status,
+.record-step[data-status="failed"] .record-meta span {
+  color: var(--handout-fail);
+}
+
+.step-card[data-status="running"] .step-status,
+.record-step[data-status="running"] .record-meta span {
+  color: var(--handout-warn);
+}
+
+.step-body {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.step-block {
+  padding: 14px 16px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.step-block strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.step-block p {
+  margin: 0;
+}
+
+.step-detail {
+  min-height: 34px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.05);
+  color: var(--handout-muted);
+}
+
+.anchor-panel,
+.recording-panel {
+  margin-top: 22px;
+  padding: 28px;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.panel-head h2 {
+  font-size: clamp(2rem, 3vw, 3.2rem);
+}
+
+.anchor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.anchor-card {
+  display: block;
+  min-height: 148px;
+  padding: 20px;
+  border-radius: 24px;
+  color: inherit;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid var(--handout-border);
+}
+
+.anchor-live { background: linear-gradient(180deg, rgba(224, 242, 254, 0.82), rgba(255, 255, 255, 0.72)); }
+.anchor-cli { background: linear-gradient(180deg, rgba(254, 249, 195, 0.82), rgba(255, 255, 255, 0.72)); }
+.anchor-report { background: linear-gradient(180deg, rgba(226, 232, 240, 0.82), rgba(255, 255, 255, 0.72)); }
+
+.anchor-card strong {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 1.04rem;
+}
+
+.recording-video {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.recording-video video {
+  width: 100%;
+  max-width: 980px;
+  border-radius: 26px;
+  border: 1px solid var(--handout-border);
+  background: #0f172a;
+}
+
+.recording-steps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.record-step {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 22px;
+  border: 1px solid var(--handout-border);
+  background: rgba(255, 255, 255, 0.74);
+}
+
+.record-step img {
+  width: 100%;
+  border-radius: 16px;
+  border: 1px solid var(--handout-border);
+}
+
+.record-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+}
+
+.record-meta strong {
+  font-size: 1rem;
+}
+
+@media (max-width: 1120px) {
+  .handout-shell {
+    width: min(100vw - 20px, 1380px);
+    padding-top: 20px;
+  }
+
+  .handout-hero,
+  .guide-band,
+  .handout-grid,
+  .anchor-grid,
+  .recording-steps,
+  .proof-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .panel-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

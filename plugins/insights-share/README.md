@@ -1,6 +1,6 @@
 # insights-share plugin
 
-demo_insights_share 团队内部 Claude Code plugin。当前主线是 **v0.6.0-m7 / M7_LATENCY_DEEP**。
+demo_insights_share 团队内部 Claude Code plugin。当前主线是 **v0.6.1-m7 / M7_LATENCY_DEEP**。
 
 > **权威设计文档**：[`proposal/proposal_rename_to_insights_share.md`](../../proposal/proposal_rename_to_insights_share.md)
 >
@@ -89,9 +89,7 @@ claude plugin install insights-share@insights-share-plugin
 
 ```bash
 # 1. 启 daemon（管理员侧）
-./insights-share/demo_codes/.venv/bin/python \
-    ./insights-share/demo_codes/insights_cli.py serve \
-    --host 0.0.0.0 --port 7821 --store wiki.json --store-mode flat &
+bash plugins/insights-share/skills/insights-share-server/scripts/start_server.sh &
 
 # 2. 把本 plugin 目录作为本地 marketplace 加进 Claude Code
 claude plugin marketplace add "$(pwd)/plugins/insights-share"
@@ -120,12 +118,13 @@ claude plugin install insights-share    # 新包
 
 安装后应能看到：
 
-- version: `0.6.0-m7`
+- version: `0.6.1-m7`
 - commands: `share-install/share-search/share-publish/share-review/share-diff`
 - agents: `share-curator/share-validator`
 - mcp: `wiki-server`（内部名，M6 改）
 - statusline: fresh=`[share ✓ N/today]` / stale=`[share ⚠ stale]` / sig-fail=`[share 🔒 sig-fail]`
 - hooks runtime: `scripts/insights_prefetch.py` / `scripts/session_start_full_fetch.py` 已随 plugin cache 一起安装，不依赖 dev repo checkout
+- server runtime: `runtime/insights_cli.py` / `runtime/insightsd/` / `runtime/wiki_tree/` 已随 plugin cache 一起安装，不依赖 dev repo checkout 或 `demo_codes/.venv`
 
 ## 验证
 
@@ -135,6 +134,7 @@ claude plugin install insights-share    # 新包
 | marketplace 与 manifest 对齐 | `python - <<'PY' ... PY` | version 与 milestone 对齐 |
 | skill 完整 | `ls plugins/insights-share/skills/*/SKILL.md` | 两个 SKILL.md |
 | hook 可执行 | `test -x plugins/insights-share/hooks/user-prompt-submit.sh && bash -n $_` | `SYNTAX OK` |
+| server runtime 自包含 | `bash plugins/insights-share/scripts/self_check.sh` | `server runtime bundle: OK` 且 `start_server.sh/start_ui.sh: OK` |
 | statusline 可执行 | `SHARE_STATUSLINE_NO_COLOR=1 bash plugins/insights-share/statusline/insights_share_statusline.sh` | 输出 `[share …]` / `[share ✓ N/today]` / `[share ⚠ stale]` / `[share 🔒 sig-fail]` |
 | MCP 契约可解析 | `python -c 'import json; json.load(open("plugins/insights-share/mcp/wiki-server.json"))'` | 无异常 |
 | M5 合同自检 | `bash plugins/insights-share/scripts/self_check.sh` | 五个 share-* 命令、两个 share-* agent、签名能力、发布脚本全 `OK` |

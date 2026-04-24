@@ -30,6 +30,7 @@ run_one() {
 
   tmux capture-pane -pt "${session}" -S -2000 >> "${raw}" 2>/dev/null || true
   tmux kill-session -t "${session}" 2>/dev/null || true
+  LC_ALL=C perl -0pi -e 's/\r\n/\n/g; s/\r/\n/g; s/[ \t]+$//mg' "${raw}"
 
   if ! grep -q "__SCRIPT_DONE__:0" "${raw}"; then
     printf 'tmux smoke failed: %s 未在 %s 秒内成功结束\n' "${provider}" "${timeout_sec}" >&2

@@ -1,13 +1,22 @@
 # Proposal: CEO 级下一步执行与验收
 
-> 日期：2026-04-22
-> 状态：全部下一步已落地（2026-04-22 更新）
+> 日期：2026-04-24
+> 状态：2026-04-22 三项已落地；当前下一步切到 E2E 检查闭环
 
 ## 下一步做什么
 
-1. 把命令失灵时的兜底链路做稳，避免 demo 或实际使用因为单点失败而中断。
-2. 把本地状态与提示规则收敛成清晰、一致的信号，让用户和管理者都能快速判断系统当前在做什么。
-3. 把"命中多个主题时先看哪一个"固化为固定优先级，确保不同人、不同轮次得到一致结果。
+当前 next plans 以 [docs/plans/e2e_next_plans_2026-04-24.md](../docs/plans/e2e_next_plans_2026-04-24.md) 为准：
+
+1. 先修 Python/pytest runner，让 start/plugin/release 三组合同测试可执行。
+2. 跑 `bash start.demo.sh --dry-run` 与一次 live `bash start.demo.sh`，确认 hero path 真实走 `claude plugin install`。
+3. 跑 Playwright `handout:record` / `handout:verify`，确认录屏与 manifest 不漂移。
+4. 跑 `run_start_tmux_smoke.sh`，覆盖 `start.claude.sh` 与 `start.codex.sh`。
+5. 补 adoption proof：clean-machine install、first relevant hit、first publish、day-2 return。
+6. 全部本地门绿后再加 CI/pre-commit gate，避免把 broken test runner 固化成假红。
+
+`start.demo.sh` 的定位：可以做 hero E2E surface；不能替代 pytest、Playwright、tmux smoke、release package 与 adoption proof。
+
+## 已完成的上一轮下一步
 
 ## 落地状态（2026-04-22 更新）
 

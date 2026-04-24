@@ -1,0 +1,1207 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>insights-share · 独立演示页</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f3efe6;
+    --paper: rgba(255, 251, 245, 0.82);
+    --panel: rgba(250, 244, 236, 0.9);
+    --ink: #15202b;
+    --muted: #5e635d;
+    --line: rgba(21, 32, 43, 0.12);
+    --accent: #bf5a36;
+    --accent-deep: #7f2f1c;
+    --accent-soft: rgba(191, 90, 54, 0.14);
+    --green: #29694b;
+    --yellow: #996e14;
+    --red: #8b3030;
+    --shadow: 0 24px 70px rgba(74, 43, 28, 0.12);
+    --radius-xl: 28px;
+    --radius-lg: 22px;
+    --radius-md: 16px;
+    --radius-sm: 12px;
+    --mono: "SFMono-Regular", "JetBrains Mono", "Menlo", monospace;
+    --sans: "Avenir Next", "Segoe UI", "PingFang SC", "Hiragino Sans GB", sans-serif;
+    --serif: "Iowan Old Style", "Palatino Linotype", "Songti SC", serif;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html,
+  body {
+    margin: 0;
+    min-height: 100%;
+    font-family: var(--sans);
+    background:
+      radial-gradient(circle at top left, rgba(191, 90, 54, 0.18), transparent 28%),
+      radial-gradient(circle at top right, rgba(22, 94, 80, 0.1), transparent 24%),
+      linear-gradient(180deg, #f7f2e9 0%, #efe7d8 100%);
+    color: var(--ink);
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      linear-gradient(rgba(21, 32, 43, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(21, 32, 43, 0.02) 1px, transparent 1px);
+    background-size: 26px 26px;
+    mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.8), transparent);
+  }
+
+  a {
+    color: var(--accent-deep);
+  }
+
+  .shell {
+    width: min(1380px, calc(100vw - 32px));
+    margin: 22px auto 44px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .masthead {
+    display: grid;
+    grid-template-columns: 1.4fr 0.9fr;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  .hero,
+  .meta-card,
+  .panel,
+  .ops-panel {
+    background: var(--paper);
+    border: 1px solid rgba(255, 255, 255, 0.68);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(18px);
+  }
+
+  .hero {
+    padding: 28px;
+    border-radius: var(--radius-xl);
+    min-height: 260px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--accent-deep);
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .eyebrow::before {
+    content: "";
+    width: 44px;
+    height: 1px;
+    background: currentColor;
+    opacity: 0.45;
+  }
+
+  .hero h1 {
+    font-family: var(--serif);
+    font-size: clamp(38px, 6vw, 72px);
+    line-height: 0.95;
+    margin: 18px 0 14px;
+    max-width: 8.5em;
+    letter-spacing: -0.04em;
+  }
+
+  .hero p {
+    max-width: 48ch;
+    margin: 0;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.65;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .meta-card {
+    border-radius: var(--radius-xl);
+    padding: 24px;
+    display: grid;
+    gap: 16px;
+    align-content: start;
+  }
+
+  .mode-switch {
+    display: inline-flex;
+    padding: 6px;
+    background: rgba(21, 32, 43, 0.05);
+    border-radius: 999px;
+    gap: 6px;
+  }
+
+  .mode-switch button,
+  .action,
+  .ghost,
+  .session-chip,
+  .session-card,
+  .subtab {
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .mode-switch button {
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    transition: 180ms ease;
+  }
+
+  .mode-switch button.active {
+    background: var(--ink);
+    color: #fff;
+  }
+
+  .action,
+  .ghost {
+    padding: 11px 16px;
+    border-radius: 999px;
+    transition: transform 180ms ease, background 180ms ease, color 180ms ease;
+  }
+
+  .action {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .ghost {
+    background: rgba(21, 32, 43, 0.05);
+    color: var(--ink);
+  }
+
+  .action:hover,
+  .ghost:hover,
+  .session-chip:hover,
+  .session-card:hover,
+  .subtab:hover {
+    transform: translateY(-1px);
+  }
+
+  .inline-note {
+    margin: 0;
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  .inline-note strong {
+    color: var(--ink);
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .meta-grid .cell,
+  .metric,
+  .artifact,
+  .detail-box,
+  .wiki-item,
+  .topic-item {
+    border-radius: var(--radius-md);
+    border: 1px solid var(--line);
+    background: var(--panel);
+  }
+
+  .meta-grid .cell {
+    padding: 14px;
+  }
+
+  .label {
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .value {
+    font-size: 20px;
+    line-height: 1.2;
+  }
+
+  .content {
+    display: grid;
+    gap: 20px;
+  }
+
+  .preview-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 0.9fr;
+    gap: 20px;
+  }
+
+  .panel {
+    border-radius: var(--radius-xl);
+    padding: 22px;
+  }
+
+  .stage-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: flex-end;
+    margin-bottom: 18px;
+  }
+
+  .stage-kind {
+    display: inline-flex;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent-deep);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-size: 12px;
+  }
+
+  .stage-title {
+    margin: 10px 0 0;
+    font-size: clamp(26px, 3vw, 42px);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+  }
+
+  .progress-wrap {
+    text-align: right;
+  }
+
+  .progress-value {
+    font-size: clamp(34px, 4vw, 54px);
+    line-height: 0.92;
+    letter-spacing: -0.06em;
+  }
+
+  .status-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: rgba(21, 32, 43, 0.06);
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .pill[data-status="completed"],
+  .pill[data-status="ok"] {
+    background: rgba(41, 105, 75, 0.14);
+    color: var(--green);
+  }
+
+  .pill[data-status="running"] {
+    background: rgba(153, 110, 20, 0.14);
+    color: var(--yellow);
+  }
+
+  .pill[data-status="failed"] {
+    background: rgba(139, 48, 48, 0.14);
+    color: var(--red);
+  }
+
+  .stage-message {
+    padding: 18px;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, rgba(191, 90, 54, 0.1), rgba(21, 32, 43, 0.03));
+    border: 1px solid rgba(191, 90, 54, 0.12);
+    font-size: 17px;
+    line-height: 1.7;
+  }
+
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 18px;
+  }
+
+  .metric {
+    padding: 16px;
+  }
+
+  .metric strong {
+    display: block;
+    font-size: 24px;
+    line-height: 1.05;
+    margin-top: 4px;
+  }
+
+  .rail-stack,
+  .playback-controls,
+  .session-strip,
+  .artifact-list,
+  .ops-layout,
+  .ops-sidebar,
+  .ops-main,
+  .ops-rail,
+  .subtabs {
+    display: grid;
+    gap: 12px;
+  }
+
+  .session-chip {
+    text-align: left;
+    padding: 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid transparent;
+    background: rgba(21, 32, 43, 0.04);
+  }
+
+  .session-chip.active,
+  .session-card.active,
+  .subtab.active {
+    border-color: rgba(191, 90, 54, 0.24);
+    background: rgba(191, 90, 54, 0.1);
+  }
+
+  .session-chip strong,
+  .session-card strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 15px;
+  }
+
+  .session-chip span,
+  .session-card span {
+    display: block;
+    color: var(--muted);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .artifact {
+    padding: 14px 15px;
+  }
+
+  .artifact a {
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  .playback {
+    display: grid;
+    gap: 14px;
+  }
+
+  .playback-controls {
+    grid-template-columns: auto auto 1fr auto;
+    align-items: center;
+  }
+
+  .mono {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+  }
+
+  .timeline {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+    gap: 10px;
+  }
+
+  .timeline-node {
+    padding: 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.46);
+    min-height: 108px;
+    transition: 180ms ease;
+  }
+
+  .timeline-node.current {
+    border-color: rgba(191, 90, 54, 0.34);
+    background: rgba(191, 90, 54, 0.12);
+    transform: translateY(-2px);
+  }
+
+  .timeline-node .time {
+    color: var(--muted);
+    font-size: 12px;
+    margin-top: 8px;
+  }
+
+  .detail-box {
+    padding: 18px;
+    min-height: 160px;
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.7;
+  }
+
+  .ops-layout {
+    grid-template-columns: 0.9fr 1.2fr 0.9fr;
+    align-items: start;
+  }
+
+  .ops-panel {
+    padding: 20px;
+    border-radius: var(--radius-xl);
+  }
+
+  .summary-row,
+  .compare-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .summary-row .cell,
+  .compare-grid .cell {
+    padding: 14px;
+    border-radius: var(--radius-md);
+    background: rgba(21, 32, 43, 0.04);
+    border: 1px solid var(--line);
+  }
+
+  .session-card {
+    padding: 16px;
+    text-align: left;
+    border-radius: var(--radius-md);
+    background: rgba(21, 32, 43, 0.04);
+  }
+
+  .log-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .log-item {
+    padding: 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--line);
+    background: rgba(255, 255, 255, 0.46);
+  }
+
+  .log-item strong {
+    display: block;
+    margin-bottom: 6px;
+  }
+
+  .subtabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .subtab {
+    padding: 12px 14px;
+    border-radius: var(--radius-md);
+    background: rgba(21, 32, 43, 0.05);
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  @media (max-width: 1080px) {
+    .masthead,
+    .preview-grid,
+    .ops-layout {
+      grid-template-columns: 1fr;
+    }
+
+    .playback-controls {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 720px) {
+    .shell {
+      width: min(100vw - 18px, 100%);
+      margin: 10px auto 28px;
+    }
+
+    .hero,
+    .meta-card,
+    .panel,
+    .ops-panel {
+      padding: 18px;
+      border-radius: 22px;
+    }
+
+    .hero h1 {
+      font-size: 42px;
+    }
+
+    .metric-grid,
+    .summary-row,
+    .compare-grid,
+    .meta-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="shell">
+    <section class="masthead">
+      <header class="hero">
+        <div>
+          <div class="eyebrow">insights-share · 单文件演示页</div>
+          <h1>一个可直接运行的独立页面</h1>
+          <p>
+            这是为 PM / 评审准备的自包含版本。双击本文件即可打开，默认加载内置演示数据；
+            不需要 daemon、不依赖外部样式脚本，也能看到 Preview 与 Ops 的完整走查。
+          </p>
+        </div>
+        <div class="hero-actions">
+          <button id="mode-preview" class="action">Preview 模式</button>
+          <button id="mode-ops" class="ghost">Ops 模式</button>
+          <button id="play-sequence" class="ghost">自动播放</button>
+        </div>
+      </header>
+
+      <aside class="meta-card">
+        <div class="eyebrow">内置演示数据</div>
+        <div class="mode-switch">
+          <button id="select-demo" class="active">Demo</button>
+          <button id="select-validation">Validation</button>
+        </div>
+        <p class="inline-note">
+          <strong>直接打开方式：</strong>双击
+          <span class="mono">demo_codes/standalone_runtime_preview.html</span>
+        </p>
+        <p class="inline-note">
+          <strong>若你要看实时版：</strong>
+          已启动 daemon 时再访问
+          <span class="mono">/preview</span> 与 <span class="mono">/ops</span>。
+        </p>
+        <div class="meta-grid">
+          <div class="cell">
+            <div class="label">展示形式</div>
+            <div class="value">单页双模</div>
+          </div>
+          <div class="cell">
+            <div class="label">依赖</div>
+            <div class="value">零外链</div>
+          </div>
+          <div class="cell">
+            <div class="label">数据源</div>
+            <div class="value">内置 Session / Event</div>
+          </div>
+          <div class="cell">
+            <div class="label">证据链接</div>
+            <div class="value">本地相对路径</div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <main class="content">
+      <section id="preview-view" class="preview-grid">
+        <div class="panel">
+          <div class="label">当前主舞台</div>
+          <div class="stage-head">
+            <div>
+              <div id="stage-kind" class="stage-kind">DEMO</div>
+              <h2 id="stage-title" class="stage-title">等待选择 session</h2>
+            </div>
+            <div class="progress-wrap">
+              <div class="label">进度</div>
+              <div id="stage-progress" class="progress-value">0%</div>
+            </div>
+          </div>
+
+          <div class="status-strip">
+            <span id="stage-name" class="pill">pending</span>
+            <span id="stage-status" class="pill" data-status="idle">idle</span>
+            <span id="stage-timer" class="pill mono">0 / 0</span>
+          </div>
+
+          <div id="stage-message" class="stage-message">
+            选择任意一个内置 session，就能开始回放。
+          </div>
+
+          <div id="metrics-grid" class="metric-grid"></div>
+        </div>
+
+        <aside class="rail-stack">
+          <section class="panel">
+            <div class="label">证据</div>
+            <div id="artifact-list" class="artifact-list"></div>
+          </section>
+
+          <section class="panel">
+            <div class="label">最近 Session</div>
+            <div id="session-strip" class="session-strip"></div>
+          </section>
+        </aside>
+      </section>
+
+      <section class="panel playback">
+        <div class="playback-controls">
+          <button id="play-btn" class="action">播放回放</button>
+          <button id="live-btn" class="ghost">回到末尾</button>
+          <input id="timeline-slider" type="range" min="0" max="0" value="0" />
+          <div id="slider-label" class="mono">0 / 0</div>
+        </div>
+        <div id="timeline" class="timeline"></div>
+        <div id="event-detail" class="detail-box">当前事件详情会显示在这里。</div>
+      </section>
+
+      <section id="ops-view" class="ops-layout hidden">
+        <section class="ops-panel ops-sidebar">
+          <div class="label">Session 列表</div>
+          <div id="ops-session-list"></div>
+        </section>
+
+        <section class="ops-panel ops-main">
+          <div class="label">运行摘要</div>
+          <div id="ops-summary" class="summary-row"></div>
+
+          <div class="label" style="margin-top: 18px;">事件时间线</div>
+          <div id="ops-log" class="log-list"></div>
+        </section>
+
+        <aside class="ops-panel ops-rail">
+          <div class="label">检查器</div>
+          <div id="ops-detail" class="detail-box"></div>
+
+          <div class="label">指标对比</div>
+          <div id="compare-grid" class="compare-grid"></div>
+
+          <div class="label">Wiki / Topics</div>
+          <div class="subtabs">
+            <button id="show-wiki" class="subtab active">Wiki</button>
+            <button id="show-topics" class="subtab">Topics</button>
+          </div>
+          <div id="wiki-panel"></div>
+          <div id="topics-panel" class="hidden"></div>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+<script>
+const DATA = {
+  sessions: [
+    {
+      id: "demo-20260416-bob",
+      kind: "demo",
+      title: "Bob 午高峰 PostgreSQL 故障演示",
+      status: "completed",
+      started_at: "2026-04-16T17:51:42+08:00",
+      ended_at: "2026-04-16T17:51:43+08:00",
+      current_stage: "summary",
+      progress: 1,
+      headline_metrics: {
+        published_count: 4,
+        score: 0.0222,
+        confidence: 0.82,
+        fast_path_s: 0.016,
+        slow_path_s: 62.0
+      },
+      latest_message: "demo 完成，可进入历史回放",
+      artifact_refs: [
+        { label: "PM 演示", href: "../demo_docs/pm_walkthrough.md" },
+        { label: "系统设计", href: "../demo_docs/design.md" },
+        { label: "Alice 种子卡", href: "./seeds/alice_pgpool.json" },
+        { label: "STAR 讲解", href: "../demo_docs/pm_walkthrough_star.md" },
+        { label: "终端快照", href: "../demo_docs/terminal_snapshot.md" },
+        { label: "验证总览", href: "../validation/reports/final_report.html" }
+      ]
+    },
+    {
+      id: "validation-20260416-phase",
+      kind: "validation",
+      title: "Phase 0-5 验证流",
+      status: "completed",
+      started_at: "2026-04-16T17:51:42+08:00",
+      ended_at: "2026-04-16T17:51:43+08:00",
+      current_stage: "summary",
+      progress: 1,
+      headline_metrics: {
+        snapshot: "phase5_tmux.txt",
+        report: "wiki_structure.json",
+        passed: 6,
+        total: 6
+      },
+      latest_message: "Phase 验证完成：6/6 通过",
+      artifact_refs: [
+        { label: "验证报告", href: "../validation/reports/final_report.html" },
+        { label: "交付物证据", href: "../validation/reports/deliverables/DELIVERABLES_SUMMARY.html" }
+      ]
+    }
+  ],
+  events: {
+    "demo-20260416-bob": [
+      {
+        stage: "bootstrap",
+        status: "running",
+        ts: "17:51:42",
+        source: "demo-runner",
+        message: "准备 demo 环境",
+        metrics: {},
+        payload: {},
+        artifact_refs: []
+      },
+      {
+        stage: "publish",
+        status: "ok",
+        ts: "17:51:42",
+        source: "demo-runner",
+        message: "已加载 4 张 demo 样本卡片（只读回放）",
+        metrics: { published_count: 4 },
+        payload: { cards: ["alice-pgpool-2026-04-10", "bob-pgpool-bad-2026-04-12", "alice-celery-retry-2026-04-08", "carol-redis-eviction-2026-03-27"] },
+        artifact_refs: [{ label: "Alice 种子卡", href: "./seeds/alice_pgpool.json" }]
+      },
+      {
+        stage: "search",
+        status: "ok",
+        ts: "17:51:42",
+        source: "search",
+        message: "命中 alice-pgpool-2026-04-10 (score=0.0222)",
+        metrics: { score: 0.0222 },
+        payload: {
+          card_id: "alice-pgpool-2026-04-10",
+          title: "PostgreSQL pool exhaustion under burst traffic"
+        },
+        artifact_refs: [{ label: "STAR 讲解", href: "../demo_docs/pm_walkthrough_star.md" }]
+      },
+      {
+        stage: "result",
+        status: "ok",
+        ts: "17:51:42",
+        source: "demo-runner",
+        message: "Set idle_in_transaction_session_timeout=30s and bump pool size to 2x worker count",
+        metrics: { confidence: 0.82, fast_path_s: 0.016 },
+        payload: {
+          verdict: "adopt",
+          diff_summary: "runner 默认走 no-ai 路径",
+          card_id: "alice-pgpool-2026-04-10"
+        },
+        artifact_refs: [
+          { label: "终端快照", href: "../demo_docs/terminal_snapshot.md" },
+          { label: "验证总览", href: "../validation/reports/final_report.html" }
+        ]
+      },
+      {
+        stage: "summary",
+        status: "completed",
+        ts: "17:51:43",
+        source: "demo-runner",
+        message: "demo 完成，可进入历史回放",
+        metrics: { fast_path_s: 0.016, slow_path_s: 62.0 },
+        payload: {
+          pm_takeaway: "不读终端，也能知道这条建议来自哪张卡、快了多少、证据在哪。"
+        },
+        artifact_refs: []
+      }
+    ],
+    "validation-20260416-phase": [
+      { stage: "phase0", status: "ok", ts: "17:51:42", source: "validation-runner", message: "Baseline + MiniMax 预检", metrics: { snapshot: "phase0_tmux.txt" }, payload: {}, artifact_refs: [] },
+      { stage: "phase1", status: "ok", ts: "17:51:42", source: "validation-runner", message: "Trigger rate 20 cases", metrics: { report: "trigger_rate_test.json" }, payload: {}, artifact_refs: [] },
+      { stage: "phase2", status: "ok", ts: "17:51:42", source: "validation-runner", message: "SILENT_AND_JUST_RUN Stop hook", metrics: { snapshot: "phase2_tmux.txt" }, payload: {}, artifact_refs: [] },
+      { stage: "phase3", status: "ok", ts: "17:51:42", source: "validation-runner", message: "Wiki CRUD 操作", metrics: { snapshot: "phase3_tmux.txt" }, payload: {}, artifact_refs: [] },
+      { stage: "phase4", status: "ok", ts: "17:51:43", source: "validation-runner", message: "Wiki 4 层结构迁移", metrics: { report: "wiki_structure.json" }, payload: {}, artifact_refs: [] },
+      { stage: "phase5", status: "ok", ts: "17:51:43", source: "validation-runner", message: "MiniMax agentic search", metrics: { snapshot: "phase5_tmux.txt" }, payload: {}, artifact_refs: [] },
+      { stage: "summary", status: "completed", ts: "17:51:43", source: "validation-runner", message: "Phase 验证完成：6/6 通过", metrics: { passed: 6, total: 6 }, payload: { result: "所有阶段均可回放" }, artifact_refs: [
+        { label: "验证报告", href: "../validation/reports/final_report.html" },
+        { label: "交付物证据", href: "../validation/reports/deliverables/DELIVERABLES_SUMMARY.html" }
+      ] }
+    ]
+  },
+  wiki: [
+    {
+      title: "alice-pgpool-2026-04-10",
+      desc: "PgBouncer transaction mode 下的连接池耗尽修复建议",
+      href: "./wiki_tree/general/alice_pgpool_2026_04_10.md"
+    },
+    {
+      title: "bob-pgpool-bad-2026-04-12",
+      desc: "错误案例：盲目放大 pool size 导致 IO 更差",
+      href: "./wiki_tree/general/bob_pgpool_bad_2026_04_12.md"
+    },
+    {
+      title: "carol-redis-eviction-2026-03-27",
+      desc: "Redis allkeys-lru 误淘汰 session 的 bad case",
+      href: "./wiki_tree/infra_cache/redis_lru_session_eviction.md"
+    }
+  ],
+  topics: [
+    {
+      title: "postgres-pool-exhaustion",
+      desc: "同主题下同时保留 good / bad 两类案例，方便 PM 对照讲解。"
+    },
+    {
+      title: "celery-retry-storm",
+      desc: "验证系统支持 queue 类 incident 作为另一个 topic 维度。"
+    }
+  ]
+};
+
+const state = {
+  mode: "preview",
+  selectedSessionId: DATA.sessions[0].id,
+  compareSessionId: DATA.sessions[1].id,
+  playbackIndex: DATA.events[DATA.sessions[0].id].length - 1,
+  playing: false,
+  timer: null,
+  inspectorTab: "wiki"
+};
+
+const el = {
+  previewView: document.getElementById("preview-view"),
+  opsView: document.getElementById("ops-view"),
+  stageKind: document.getElementById("stage-kind"),
+  stageTitle: document.getElementById("stage-title"),
+  stageProgress: document.getElementById("stage-progress"),
+  stageName: document.getElementById("stage-name"),
+  stageStatus: document.getElementById("stage-status"),
+  stageTimer: document.getElementById("stage-timer"),
+  stageMessage: document.getElementById("stage-message"),
+  metricsGrid: document.getElementById("metrics-grid"),
+  artifactList: document.getElementById("artifact-list"),
+  sessionStrip: document.getElementById("session-strip"),
+  playBtn: document.getElementById("play-btn"),
+  liveBtn: document.getElementById("live-btn"),
+  slider: document.getElementById("timeline-slider"),
+  sliderLabel: document.getElementById("slider-label"),
+  timeline: document.getElementById("timeline"),
+  eventDetail: document.getElementById("event-detail"),
+  opsSessionList: document.getElementById("ops-session-list"),
+  opsSummary: document.getElementById("ops-summary"),
+  opsLog: document.getElementById("ops-log"),
+  opsDetail: document.getElementById("ops-detail"),
+  compareGrid: document.getElementById("compare-grid"),
+  wikiPanel: document.getElementById("wiki-panel"),
+  topicsPanel: document.getElementById("topics-panel")
+};
+
+function getSession(id) {
+  return DATA.sessions.find((item) => item.id === id) || DATA.sessions[0];
+}
+
+function getEvents(id) {
+  return DATA.events[id] || [];
+}
+
+function currentEvent() {
+  const events = getEvents(state.selectedSessionId);
+  return events[state.playbackIndex] || events[events.length - 1] || null;
+}
+
+function fmtPercent(value) {
+  return `${Math.round((Number(value) || 0) * 100)}%`;
+}
+
+function metricEntries(session, event) {
+  return Object.entries({ ...(session.headline_metrics || {}), ...((event && event.metrics) || {}) });
+}
+
+function renderMetrics(session, event) {
+  const entries = metricEntries(session, event);
+  el.metricsGrid.innerHTML = entries.map(([key, value]) => `
+    <div class="metric">
+      <div class="label">${key}</div>
+      <strong>${value}</strong>
+    </div>
+  `).join("");
+}
+
+function renderArtifacts(session, event) {
+  const merged = [...(session.artifact_refs || []), ...(((event && event.artifact_refs) || []))];
+  const seen = new Set();
+  const unique = merged.filter((item) => {
+    if (!item || !item.href || seen.has(item.href)) return false;
+    seen.add(item.href);
+    return true;
+  });
+  el.artifactList.innerHTML = unique.map((item) => `
+    <div class="artifact">
+      <div class="label">Artifact</div>
+      <a href="${item.href}" target="_blank" rel="noreferrer">${item.label}</a>
+      <div class="mono">${item.href}</div>
+    </div>
+  `).join("");
+}
+
+function renderSessionStrip() {
+  el.sessionStrip.innerHTML = DATA.sessions.map((session) => `
+    <button class="session-chip ${session.id === state.selectedSessionId ? "active" : ""}" data-session="${session.id}">
+      <strong>${session.title}</strong>
+      <span>${session.kind} · ${session.status}</span>
+      <span>${session.latest_message}</span>
+    </button>
+  `).join("");
+  el.sessionStrip.querySelectorAll("[data-session]").forEach((node) => {
+    node.addEventListener("click", () => selectSession(node.dataset.session));
+  });
+}
+
+function renderTimeline(events) {
+  el.timeline.innerHTML = events.map((event, idx) => `
+    <div class="timeline-node ${idx === state.playbackIndex ? "current" : ""}" data-idx="${idx}">
+      <div class="label">${event.stage}</div>
+      <strong>${event.message}</strong>
+      <div class="pill" data-status="${event.status}">${event.status}</div>
+      <div class="time">${event.ts} · ${event.source}</div>
+    </div>
+  `).join("");
+  el.timeline.querySelectorAll("[data-idx]").forEach((node) => {
+    node.addEventListener("click", () => {
+      stopPlayback();
+      state.playbackIndex = Number(node.dataset.idx || 0);
+      render();
+    });
+  });
+}
+
+function renderPreview() {
+  const session = getSession(state.selectedSessionId);
+  const events = getEvents(session.id);
+  const event = currentEvent();
+  el.stageKind.textContent = session.kind.toUpperCase();
+  el.stageTitle.textContent = session.title;
+  el.stageProgress.textContent = fmtPercent(session.progress);
+  el.stageName.textContent = event ? event.stage : session.current_stage;
+  el.stageStatus.textContent = event ? event.status : session.status;
+  el.stageStatus.dataset.status = event ? event.status : session.status;
+  el.stageTimer.textContent = `${Math.min(state.playbackIndex + 1, events.length)} / ${events.length}`;
+  el.stageMessage.textContent = event ? event.message : session.latest_message;
+  renderMetrics(session, event);
+  renderArtifacts(session, event);
+  renderSessionStrip();
+  el.slider.max = String(Math.max(events.length - 1, 0));
+  el.slider.value = String(state.playbackIndex);
+  el.sliderLabel.textContent = `${Math.min(state.playbackIndex + 1, events.length)} / ${events.length}`;
+  renderTimeline(events);
+
+  const detail = {
+    stage: event && event.stage,
+    status: event && event.status,
+    source: event && event.source,
+    payload: event && event.payload,
+    metrics: event && event.metrics
+  };
+  el.eventDetail.textContent = JSON.stringify(detail, null, 2);
+}
+
+function renderOps() {
+  const current = getSession(state.selectedSessionId);
+  const compare = getSession(state.compareSessionId);
+  const events = getEvents(current.id);
+
+  el.opsSessionList.innerHTML = DATA.sessions.map((session) => `
+    <button class="session-card ${session.id === current.id ? "active" : ""}" data-ops-session="${session.id}">
+      <strong>${session.title}</strong>
+      <span>${session.kind} · ${session.status}</span>
+      <span>${session.latest_message}</span>
+    </button>
+  `).join("");
+  el.opsSessionList.querySelectorAll("[data-ops-session]").forEach((node) => {
+    node.addEventListener("click", () => selectSession(node.dataset.opsSession));
+  });
+
+  const counts = {
+    total: DATA.sessions.length,
+    demo: DATA.sessions.filter((item) => item.kind === "demo").length,
+    validation: DATA.sessions.filter((item) => item.kind === "validation").length,
+    completed: DATA.sessions.filter((item) => item.status === "completed").length
+  };
+  el.opsSummary.innerHTML = Object.entries(counts).map(([key, value]) => `
+    <div class="cell">
+      <div class="label">${key}</div>
+      <div class="value">${value}</div>
+    </div>
+  `).join("");
+
+  el.opsLog.innerHTML = events.map((event, idx) => `
+    <div class="log-item">
+      <div class="label">${idx + 1} · ${event.stage}</div>
+      <strong>${event.message}</strong>
+      <div class="mono">${event.ts} · ${event.source} · ${event.status}</div>
+    </div>
+  `).join("");
+
+  el.opsDetail.textContent = JSON.stringify({
+    session: current,
+    active_event: currentEvent()
+  }, null, 2);
+
+  const left = current.headline_metrics || {};
+  const right = compare.headline_metrics || {};
+  const keys = Array.from(new Set([...Object.keys(left), ...Object.keys(right)]));
+  el.compareGrid.innerHTML = keys.map((key) => `
+    <div class="cell">
+      <div class="label">${key}</div>
+      <div class="mono">${current.kind}: ${left[key] ?? "-"}</div>
+      <div class="mono">${compare.kind}: ${right[key] ?? "-"}</div>
+    </div>
+  `).join("");
+
+  el.wikiPanel.innerHTML = DATA.wiki.map((item) => `
+    <div class="wiki-item" style="padding: 14px;">
+      <strong>${item.title}</strong>
+      <div style="margin: 6px 0 8px; color: var(--muted);">${item.desc}</div>
+      <a href="${item.href}" target="_blank" rel="noreferrer">${item.href}</a>
+    </div>
+  `).join("");
+
+  el.topicsPanel.innerHTML = DATA.topics.map((item) => `
+    <div class="topic-item" style="padding: 14px;">
+      <strong>${item.title}</strong>
+      <div style="margin-top: 6px; color: var(--muted);">${item.desc}</div>
+    </div>
+  `).join("");
+}
+
+function renderMode() {
+  const previewActive = state.mode === "preview";
+  document.getElementById("mode-preview").classList.toggle("active", previewActive);
+  document.getElementById("mode-preview").classList.toggle("ghost", !previewActive);
+  document.getElementById("mode-ops").classList.toggle("active", !previewActive);
+  document.getElementById("mode-ops").classList.toggle("ghost", previewActive);
+  el.previewView.classList.toggle("hidden", !previewActive);
+  el.opsView.classList.toggle("hidden", previewActive);
+}
+
+function renderSelectionButtons() {
+  document.getElementById("select-demo").classList.toggle("active", state.selectedSessionId === DATA.sessions[0].id);
+  document.getElementById("select-validation").classList.toggle("active", state.selectedSessionId === DATA.sessions[1].id);
+}
+
+function renderInspectorTabs() {
+  const wiki = state.inspectorTab === "wiki";
+  document.getElementById("show-wiki").classList.toggle("active", wiki);
+  document.getElementById("show-topics").classList.toggle("active", !wiki);
+  el.wikiPanel.classList.toggle("hidden", !wiki);
+  el.topicsPanel.classList.toggle("hidden", wiki);
+}
+
+function render() {
+  renderMode();
+  renderSelectionButtons();
+  renderPreview();
+  renderOps();
+  renderInspectorTabs();
+  el.playBtn.textContent = state.playing ? "暂停回放" : "播放回放";
+}
+
+function selectSession(id) {
+  state.selectedSessionId = id;
+  const events = getEvents(id);
+  state.playbackIndex = Math.max(events.length - 1, 0);
+  state.compareSessionId = DATA.sessions.find((item) => item.id !== id)?.id || id;
+  stopPlayback();
+  render();
+}
+
+function stopPlayback() {
+  if (state.timer) {
+    clearInterval(state.timer);
+    state.timer = null;
+  }
+  state.playing = false;
+}
+
+function startPlayback() {
+  stopPlayback();
+  const events = getEvents(state.selectedSessionId);
+  if (!events.length) return;
+  state.playing = true;
+  state.playbackIndex = 0;
+  render();
+  state.timer = setInterval(() => {
+    if (state.playbackIndex >= events.length - 1) {
+      stopPlayback();
+      render();
+      return;
+    }
+    state.playbackIndex += 1;
+    render();
+  }, 1100);
+}
+
+document.getElementById("mode-preview").addEventListener("click", () => {
+  state.mode = "preview";
+  render();
+});
+
+document.getElementById("mode-ops").addEventListener("click", () => {
+  state.mode = "ops";
+  render();
+});
+
+document.getElementById("select-demo").addEventListener("click", () => selectSession(DATA.sessions[0].id));
+document.getElementById("select-validation").addEventListener("click", () => selectSession(DATA.sessions[1].id));
+document.getElementById("show-wiki").addEventListener("click", () => {
+  state.inspectorTab = "wiki";
+  renderInspectorTabs();
+});
+document.getElementById("show-topics").addEventListener("click", () => {
+  state.inspectorTab = "topics";
+  renderInspectorTabs();
+});
+
+document.getElementById("play-sequence").addEventListener("click", () => {
+  state.mode = "preview";
+  selectSession(DATA.sessions[0].id);
+  startPlayback();
+});
+
+el.playBtn.addEventListener("click", () => {
+  if (state.playing) {
+    stopPlayback();
+    render();
+    return;
+  }
+  startPlayback();
+});
+
+el.liveBtn.addEventListener("click", () => {
+  stopPlayback();
+  const events = getEvents(state.selectedSessionId);
+  state.playbackIndex = Math.max(events.length - 1, 0);
+  render();
+});
+
+el.slider.addEventListener("input", (event) => {
+  stopPlayback();
+  state.playbackIndex = Number(event.target.value || 0);
+  render();
+});
+
+render();
+</script>
+</body>
+</html>

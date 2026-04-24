@@ -1,0 +1,6 @@
+[P3] PASS
+cwd=/Users/liushiyu/projects/demo_insights_share
+command=bash insights-share/validation/run_contract_tests.sh
+duration_ms=9164
+....................................................                     [100%]
+52 passed in 8.84s

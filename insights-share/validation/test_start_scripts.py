@@ -40,13 +40,20 @@ def test_start_scripts_exist_and_are_shell_scripts() -> None:
 def test_start_demo_script_surfaces_plugin_m5_checks() -> None:
     script = _read(START_DEMO)
 
-    assert 'plugins/insights-share/statusline/insights_share_statusline.sh' in script
-    assert 'plugin M5 self-check' in script
+    assert 'statusline/insights_share_statusline.sh' in script
+    assert 'plugin self-check (sandbox installed plugin cache)' in script
+    assert 'RIGHT_LOG="$SANDBOX/right.log"' in script
+    assert "===== RIGHT PANE SELF-CHECK LOG =====" in script
+    assert "dry-run 不覆盖 latest 日志" in script
     assert 'claude plugin install "${PLUGIN_NAME}@${PLUGIN_NAME}"' in script
+    assert "resolve_installed_plugin_dir" in script
+    assert "PLUGIN_SERVER_START" in script
+    assert "installed plugin runtime" in script
     assert "sandbox 内已完成真实 plugin install" in script
     assert "Stage 0 secret gate" in script
     assert "wiki_tree/**/raw" in script
     assert "sk-[A-Za-z0-9_-]{10,}" in script
+    assert "demo_codes/.venv" not in script
 
 
 def test_start_claude_script_wraps_shared_driver() -> None:
@@ -83,6 +90,15 @@ def test_shared_start_driver_contains_real_demo_flow() -> None:
     assert "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike" in script
     assert "wiki-install --server" in script
     assert "cleanup() {" in script
+
+
+def test_guide_loop_checks_plugin_cache_not_legacy_skill_copy() -> None:
+    guide = _read(ROOT / "insights-share/validation/guide_loop.sh")
+
+    assert "PLUGIN_CACHE_ROOT=" in guide
+    assert "find_plugin_skill" in guide
+    assert "claude plugin install" in guide
+    assert 'SKILL_DIR="$SANDBOX_HOME/.claude/skills/$SKILL_NAME"' not in guide
 
 
 def test_start_scripts_support_dry_run() -> None:

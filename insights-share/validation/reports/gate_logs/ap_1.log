@@ -1,0 +1,16 @@
+[AP-1] PASS
+cwd=/Users/liushiyu/projects/demo_insights_share
+command=bash insights-share/validation/run_adoption_proof.sh
+duration_ms=1995
+[adoption-proof] workdir=/tmp/insights-adoption-proof.RgeXL0
+[adoption-proof] home=/tmp/insights-adoption-proof.RgeXL0/home
+[adoption-proof] python=/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python
+[adoption-proof] start isolated daemon on http://127.0.0.1:18821
+[adoption-proof] assert initial wiki is empty
+[adoption-proof] first publish: Alice good + Bob bad
+[adoption-proof] first relevant hit / cite
+[adoption-proof] clean-machine install into isolated HOME
+[adoption-proof] day-2 return: solve uses installed config without --wiki
+[adoption-proof] AP-2 relevance-lift matrix
+[adoption-proof] PASS clean_machine_install=ok first_relevant_hit=alice-pgpool-2026-04-10 first_publish=2 day_2_return=ok relevance_lift_matrix=ok
+[adoption-proof] report=/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_latest.json

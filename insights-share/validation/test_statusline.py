@@ -38,6 +38,14 @@ def test_root_and_plugin_statusline_scripts_stay_identical() -> None:
     assert STATUSLINE.read_text(encoding="utf-8") == ROOT_STATUSLINE.read_text(encoding="utf-8")
 
 
+def test_statusline_reads_install_config_and_bypasses_proxy() -> None:
+    text = STATUSLINE.read_text(encoding="utf-8")
+
+    assert "config.json" in text
+    assert '"server_url"' in text
+    assert "curl --noproxy '*'" in text
+
+
 def test_statusline_shows_green_badge_when_cache_is_fresh(tmp_path: Path) -> None:
     home = tmp_path / "home"
     (home / ".claude" / "skills" / "insights-share").mkdir(parents=True)
@@ -63,6 +71,45 @@ def test_statusline_shows_green_badge_when_cache_is_fresh(tmp_path: Path) -> Non
     )
 
     assert _run_statusline(home) == "[share ✓ 4/today]"
+
+
+def test_statusline_accepts_installed_plugin_cache_without_old_skill_path(tmp_path: Path) -> None:
+    home = tmp_path / "home"
+    plugin_skill = (
+        home
+        / ".claude"
+        / "plugins"
+        / "cache"
+        / "insights-share-plugin"
+        / "insights-share"
+        / "0.6.0-m7"
+        / "skills"
+        / "insights-share"
+        / "SKILL.md"
+    )
+    plugin_skill.parent.mkdir(parents=True)
+    plugin_skill.write_text("ok", encoding="utf-8")
+    cache_dir = home / ".cache" / "insights-share"
+    cache_dir.mkdir(parents=True)
+    (cache_dir / ".health_cache").write_text("ok", encoding="utf-8")
+    _write_json(
+        cache_dir / "today_count.json",
+        {
+            "date": datetime.now().date().isoformat(),
+            "count": 3,
+            "last_card_id": "plugin-cache-card",
+            "last_trigger_at": datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%S%z"),
+        },
+    )
+    _write_json(
+        cache_dir / "manifest.json",
+        {
+            "last_sync_at": datetime.now().astimezone().strftime("%Y-%m-%dT%H:%M:%S%z"),
+            "cards": ["plugin-cache-card"],
+        },
+    )
+
+    assert _run_statusline(home) == "[share ✓ 3/today]"
 
 
 def test_statusline_shows_stale_badge_when_manifest_is_expired(tmp_path: Path) -> None:

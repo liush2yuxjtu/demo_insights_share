@@ -1,56 +1,189 @@
 {
+  "schema_version": "validation-aggregate/v2",
+  "repo_root": "/Users/liushiyu/projects/demo_insights_share",
+  "reports_dir": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports",
+  "final_report": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/final_report.html",
   "all_pass": true,
-  "passed": 6,
-  "total": 6,
-  "phases": [
+  "required_passed": 7,
+  "required_total": 7,
+  "enabled_passed": 7,
+  "enabled_total": 7,
+  "generated_at": "2026-04-24T13:24:54.829149",
+  "env_flags": {
+    "RUN_CONTRACT_TESTS": "1",
+    "RUN_ADOPTION_PROOF": "1",
+    "RUN_START_DEMO_DRY": "1",
+    "RUN_START_DEMO_LIVE": "0",
+    "RUN_HANDOUT_RECORD": "0",
+    "RUN_HANDOUT_VERIFY": "1",
+    "RUN_TMUX_SMOKE": "1"
+  },
+  "gates": [
     {
-      "phase": "Phase 0",
-      "task": "Baseline + MiniMax 预检",
-      "rule": "validation framework #2 (tmux 抓取)",
-      "snapshot": "/Users/m1/projects/demo_insights_share/insights-share/validation/snapshots/phase0_tmux.txt",
-      "pass": true,
-      "metrics": "demo finished + MiniMax PONG"
+      "id": "P0",
+      "title": "gstack 环境门",
+      "expectation": "~/.claude/skills/gstack/bin 必须存在",
+      "command": [
+        "bash",
+        "-lc",
+        "test -d ~/.claude/skills/gstack/bin"
+      ],
+      "cwd": "/Users/liushiyu/projects/demo_insights_share",
+      "mode": "1",
+      "enabled": true,
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 159,
+      "log": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/gate_logs/p0.log",
+      "reason": "exit 0"
     },
     {
-      "phase": "Phase 4",
-      "task": "Wiki 4 层结构迁移",
-      "rule": "validation task #4 (wiki_type → INDEX → item → raw)",
-      "snapshot": "/Users/m1/projects/demo_insights_share/insights-share/validation/snapshots/phase4_tmux.txt",
-      "pass": true,
-      "metrics": "20/20 layer checks PASS"
+      "id": "P3",
+      "title": "pytest 合同门",
+      "expectation": "start/plugin/release/statusline/topic/adoption 合同测试可执行",
+      "command": [
+        "bash",
+        "insights-share/validation/run_contract_tests.sh"
+      ],
+      "cwd": "/Users/liushiyu/projects/demo_insights_share",
+      "mode": "1",
+      "enabled": true,
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 9164,
+      "log": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/gate_logs/p3.log",
+      "reason": "exit 0"
     },
     {
-      "phase": "Phase 1",
-      "task": "Trigger rate 20 cases",
-      "rule": "validation task #1 (12 train / 8 test)",
-      "snapshot": "/Users/m1/projects/demo_insights_share/insights-share/validation/snapshots/phase1_tmux.txt",
-      "pass": true,
-      "metrics": "train f1=0.9231 | test f1=1.0000 precision=1.0000 acc=1.0000"
+      "id": "AP-1",
+      "title": "adoption proof 门",
+      "expectation": "clean-machine install、first relevant hit、first publish、day-2 return、relevance-lift matrix 五信号",
+      "command": [
+        "bash",
+        "insights-share/validation/run_adoption_proof.sh"
+      ],
+      "cwd": "/Users/liushiyu/projects/demo_insights_share",
+      "mode": "1",
+      "enabled": true,
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 1995,
+      "log": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/gate_logs/ap_1.log",
+      "reason": "exit 0"
     },
     {
-      "phase": "Phase 5",
-      "task": "MiniMax agentic search",
-      "rule": "validation task #5 (agentic search wiki minimax)",
-      "snapshot": "/Users/m1/projects/demo_insights_share/insights-share/validation/snapshots/phase5_tmux.txt",
-      "pass": true,
-      "metrics": "real haiku-agent hit postgres_pool, NO fallback"
+      "id": "P1",
+      "title": "start.demo.sh dry-run hero",
+      "expectation": "沙箱、plugin install 与脚本结构可复验",
+      "command": [
+        "bash",
+        "start.demo.sh",
+        "--dry-run"
+      ],
+      "cwd": "/Users/liushiyu/projects/demo_insights_share",
+      "mode": "1",
+      "enabled": true,
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 4643,
+      "log": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/gate_logs/p1.log",
+      "reason": "exit 0"
     },
     {
-      "phase": "Phase 2",
-      "task": "SILENT_AND_JUST_RUN Stop hook",
-      "rule": "validation task #2 (S-T-A-R + silent trigger)",
-      "snapshot": "/Users/m1/projects/demo_insights_share/insights-share/validation/snapshots/phase2_tmux.txt",
-      "pass": true,
-      "metrics": "Bob silent session → Stop hook → postgres_pool"
+      "id": "P2",
+      "title": "start.demo.sh live hero",
+      "expectation": "PM 可见实机闭环，默认关闭以避免误起交互 session",
+      "command": [
+        "bash",
+        "start.demo.sh"
+      ],
+      "cwd": "/Users/liushiyu/projects/demo_insights_share",
+      "mode": "0",
+      "enabled": false,
+      "required": false,
+      "status": "SKIP",
+      "exit_code": null,
+      "duration_ms": 0,
+      "log": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/gate_logs/p2.log",
+      "reason": "disabled by env value '0'"
     },
     {
-      "phase": "Phase 3",
-      "task": "Wiki CRUD 操作",
-      "rule": "validation task #3 (add/edit/tag/merge/delete/research)",
-      "snapshot": "/Users/m1/projects/demo_insights_share/insights-share/validation/snapshots/phase3_tmux.txt",
-      "pass": true,
-      "metrics": "6/6 CRUD ops OK"
+      "id": "P4",
+      "title": "Playwright handout record",
+      "expectation": "录完整 user-flow mp4/console/manifest",
+      "command": [
+        "npm",
+        "run",
+        "handout:record"
+      ],
+      "cwd": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation",
+      "mode": "0",
+      "enabled": false,
+      "required": false,
+      "status": "SKIP",
+      "exit_code": null,
+      "duration_ms": 0,
+      "log": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/gate_logs/p4.log",
+      "reason": "disabled by env value '0'"
+    },
+    {
+      "id": "P5",
+      "title": "Playwright handout verify",
+      "expectation": "回放 latest manifest 并门控退出码",
+      "command": [
+        "npm",
+        "run",
+        "handout:verify"
+      ],
+      "cwd": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation",
+      "mode": "1",
+      "enabled": true,
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 6485,
+      "log": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/gate_logs/p5.log",
+      "reason": "exit 0"
+    },
+    {
+      "id": "P6",
+      "title": "tmux start-script smoke",
+      "expectation": "start.claude.sh / start.codex.sh 批量实机 smoke",
+      "command": [
+        "bash",
+        "insights-share/validation/run_start_tmux_smoke.sh"
+      ],
+      "cwd": "/Users/liushiyu/projects/demo_insights_share",
+      "mode": "1",
+      "enabled": true,
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 20232,
+      "log": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/gate_logs/p6.log",
+      "reason": "exit 0"
+    },
+    {
+      "id": "P7",
+      "title": "validation aggregate report",
+      "expectation": "生成 final_report.html / final_summary.json，并汇总当前 P0-P7 + AP-1 口径",
+      "command": [
+        "bash",
+        "insights-share/validation/run_all_validations.sh"
+      ],
+      "cwd": "/Users/liushiyu/projects/demo_insights_share",
+      "mode": "1",
+      "enabled": true,
+      "required": true,
+      "status": "PASS",
+      "exit_code": 0,
+      "duration_ms": 0,
+      "log": "",
+      "reason": "required gates passed"
     }
-  ],
-  "generated_at": "2026-04-14T09:56:39.047404"
+  ]
 }

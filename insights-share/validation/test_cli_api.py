@@ -13,6 +13,7 @@ import pytest
 from insightsd.runtime import RuntimeStore
 from insightsd.server import _make_handler
 from insightsd.store import TreeInsightStore
+from insightsd.terminal import TerminalBridge
 
 
 def _body_json(resp) -> dict:
@@ -159,3 +160,15 @@ def test_cli_page_and_tmux_routes(
     conn.close()
     assert sent.status == 202
     assert terminal.inputs[-1]["text"] == "status"
+
+
+def test_terminal_bridge_does_not_repoint_tmux_tmpdir(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.delenv("TMUX_TMPDIR", raising=False)
+    monkeypatch.setenv("TMPDIR", "/tmp/not-the-tmux-socket")
+
+    bridge = TerminalBridge(tmp_path)
+
+    assert "TMUX_TMPDIR" not in bridge.tmux_env

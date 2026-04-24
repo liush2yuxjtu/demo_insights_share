@@ -1,5 +1,5 @@
 import { spawn, spawnSync, execSync } from 'node:child_process';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, rm, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import http from 'node:http';
@@ -16,12 +16,14 @@ const RUNS_DIR = path.join(ARTIFACT_ROOT, 'runs');
 const NOW = new Date().toISOString().replace(/[:.]/g, '-');
 const RUN_DIR = path.join(RUNS_DIR, NOW);
 const VIDEO_PATH = path.join(RUN_DIR, 'user-flow.mp4');
+const VIDEO_TEMP_DIR = path.join(RUN_DIR, 'video-temp');
 const CONSOLE_PATH = path.join(RUN_DIR, 'console.log');
 const MANIFEST_PATH = path.join(RUN_DIR, 'manifest.json');
 const LATEST_PATH = path.join(ARTIFACT_ROOT, 'latest.json');
 const BASE_URL = 'http://127.0.0.1:7821';
 const PROMPT_TEXT = '请只回复：CLI 输入链路已验证';
 const DAEMON_COMMAND = `cd ${SERVER_DIR} && export NO_PROXY=127.0.0.1,localhost && ./.venv/bin/python insights_cli.py serve --host 127.0.0.1 --port 7821 --store-mode tree --store ./wiki_tree --runtime-dir ./runtime-web --enable-runners`;
+const MIN_VIDEO_BYTES = 1024;
 
 const stepArtifacts = [];
 const consoleLines = [];
@@ -90,6 +92,85 @@ function spawnDaemonFallback() {
   daemon.unref();
 }
 
+async function stopFfmpeg(ffmpeg) {
+  if (!ffmpeg || ffmpeg.exitCode !== null || ffmpeg.signalCode !== null) {
+    return;
+  }
+  const exited = new Promise((resolve) => ffmpeg.once('exit', resolve));
+  try {
+    if (ffmpeg.stdin && !ffmpeg.stdin.destroyed) {
+      ffmpeg.stdin.write('q\n');
+      ffmpeg.stdin.end();
+    }
+  } catch (error) {
+    consoleLines.push(`[ffmpeg] stop stdin failed: ${error.message}`);
+  }
+  const stopped = await Promise.race([
+    exited.then(() => true),
+    delay(5000).then(() => false),
+  ]);
+  if (stopped) {
+    return;
+  }
+  consoleLines.push('[ffmpeg] graceful stop timed out, sending SIGTERM');
+  ffmpeg.kill('SIGTERM');
+  const terminated = await Promise.race([
+    exited.then(() => true),
+    delay(3000).then(() => false),
+  ]);
+  if (!terminated) {
+    consoleLines.push('[ffmpeg] SIGTERM timed out, sending SIGKILL');
+    ffmpeg.kill('SIGKILL');
+    await exited.catch(() => undefined);
+  }
+}
+
+async function isUsableFile(filePath) {
+  try {
+    const fileStat = await stat(filePath);
+    return fileStat.size >= MIN_VIDEO_BYTES;
+  } catch (error) {
+    return false;
+  }
+}
+
+async function ensureVideoArtifact(pageVideo) {
+  if (await isUsableFile(VIDEO_PATH)) {
+    log('整屏录制 mp4 已生成');
+    return;
+  }
+  if (!pageVideo) {
+    throw new Error('录屏产物缺失：ffmpeg 未生成 mp4，且 Playwright video 不可用');
+  }
+
+  const browserVideoPath = await pageVideo.path();
+  if (!(await isUsableFile(browserVideoPath))) {
+    throw new Error(`录屏产物缺失：Playwright video 不可用 (${browserVideoPath})`);
+  }
+
+  log('整屏录制不可用，使用 Playwright 视频转码兜底');
+  await rm(VIDEO_PATH, { force: true });
+  const result = spawnSync('/opt/homebrew/bin/ffmpeg', [
+    '-y',
+    '-i', browserVideoPath,
+    '-vcodec', 'libx264',
+    '-pix_fmt', 'yuv420p',
+    VIDEO_PATH,
+  ], {
+    encoding: 'utf8',
+    timeout: 60000,
+  });
+  if (result.stderr) {
+    consoleLines.push(result.stderr.trim());
+  }
+  if (result.status !== 0) {
+    throw new Error(`Playwright 视频转码 mp4 失败: ${result.stderr || result.stdout || `exit ${result.status}`}`);
+  }
+  if (!(await isUsableFile(VIDEO_PATH))) {
+    throw new Error(`录屏产物缺失：转码后 mp4 不可用 (${VIDEO_PATH})`);
+  }
+}
+
 async function waitForHealth(timeoutMs = 30000) {
   const started = Date.now();
   while (Date.now() - started < timeoutMs) {
@@ -131,6 +212,7 @@ async function withResponse(page, matcher, action) {
 
 async function main() {
   await mkdir(RUN_DIR, { recursive: true });
+  await mkdir(VIDEO_TEMP_DIR, { recursive: true });
   stopExistingDaemon();
 
   log('启动整屏录制');
@@ -171,12 +253,17 @@ async function main() {
     channel: 'chrome',
     args: ['--window-position=72,56', '--window-size=1440,960'],
   });
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+  const context = await browser.newContext({
+    viewport: { width: 1440, height: 900 },
+    recordVideo: { dir: VIDEO_TEMP_DIR, size: { width: 1440, height: 900 } },
+  });
   const page = await context.newPage();
+  const pageVideo = page.video();
   page.on('console', (msg) => {
     consoleLines.push(`[browser:${msg.type()}] ${msg.text()}`);
   });
 
+  let manifest = null;
   try {
     log('打开 /handout');
     await page.goto(`${BASE_URL}/handout`, { waitUntil: 'domcontentloaded' });
@@ -237,7 +324,7 @@ async function main() {
     await delay(2500);
     await screenshot(page, 'step-5-handout-autofill', 'step-5-handout-autofill');
 
-    const manifest = {
+    manifest = {
       mode: 'record',
       status: 'passed',
       captured_at: new Date().toISOString(),
@@ -252,17 +339,22 @@ async function main() {
         run_validation: { status: 'passed', screenshot: stepArtifacts[4]?.href || stepArtifacts[3]?.href || null },
       },
     };
-    await writeFile(CONSOLE_PATH, `${consoleLines.join('\n')}\n`, 'utf8');
-    await writeFile(MANIFEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
-    await writeFile(LATEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
-    log('录像产物写入完成');
   } finally {
     await context.close().catch(() => undefined);
     await browser.close().catch(() => undefined);
-    ffmpeg.stdin.write('q\n');
-    await new Promise((resolve) => ffmpeg.once('exit', resolve));
+    await stopFfmpeg(ffmpeg);
     stopExistingDaemon();
   }
+
+  if (!manifest) {
+    throw new Error('录屏 manifest 未生成');
+  }
+  await ensureVideoArtifact(pageVideo);
+  await rm(VIDEO_TEMP_DIR, { recursive: true, force: true });
+  await writeFile(CONSOLE_PATH, `${consoleLines.join('\n')}\n`, 'utf8');
+  await writeFile(MANIFEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+  await writeFile(LATEST_PATH, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+  log('录像产物写入完成');
 }
 
 main().catch(async (error) => {

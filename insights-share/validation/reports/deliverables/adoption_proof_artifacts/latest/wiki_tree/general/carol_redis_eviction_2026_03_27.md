@@ -1,0 +1,75 @@
+---
+{
+  "id": "carol-redis-eviction-2026-03-27",
+  "title": "Redis allkeys-lru silently evicting hot session data",
+  "author": "carol",
+  "team": null,
+  "confidence": 0.9,
+  "tags": [
+    "redis",
+    "eviction",
+    "session-store",
+    "maxmemory",
+    "prod-incident"
+  ],
+  "status": "active",
+  "applies_when": [
+    "single Redis instance shared across session-store and cache workloads",
+    "maxmemory-policy is allkeys-* (lru/lfu/random)",
+    "session keys are written without TTL or with very long TTL"
+  ],
+  "do_not_apply_when": [
+    "sessions are already stored in a separate datastore (e.g., dedicated Redis or Postgres)",
+    "all keys carry TTL and application explicitly tolerates session loss",
+    "Redis is used purely as a volatile cache with no durability expectations"
+  ],
+  "raw_log": "./raw/carol-redis-eviction-2026-03-27.jsonl",
+  "topic_id": "redis-allkeys-lru-evicts-session",
+  "label": "bad",
+  "label_note": "allkeys-lru 在 session 数据上表现不佳",
+  "label_override": null,
+  "label_override_by": null,
+  "label_override_at": null,
+  "raw_log_type": "jsonl",
+  "raw_log_sha256": "cc640d8b255554a6b6c172d682fec3fa331252d5788ac668694f27f77df88965",
+  "signature_algorithm": "ed25519",
+  "signature_schema": 1,
+  "signature_key_id": "124bb59f5dc65992",
+  "signature": "fhGgbtTJSIsteBG/bjfZyHdqVt4dzGpfoRjaNEQJ0CKkeiLZb2n+wyrNYA/ru/6hUmHVKEtRebhOW2v/Ldv3Dg==",
+  "signature_signed_at": "2026-04-24T05:28:30.224158+00:00"
+}
+---
+
+# Redis allkeys-lru silently evicting hot session data
+
+> author: carol · team: shared · confidence: 0.9
+
+## Description
+
+Single Redis 7.x instance shared by session store, cache layer, and rate-limiter counters; maxmemory=4gb with maxmemory-policy=allkeys-lru
+
+allkeys-lru treats session keys and disposable cache entries equally, so a burst of cache writes evicts live sessions that happen to be less recently touched
+
+## Bad example
+
+Users randomly logged out mid-session; auth service reports 'session not found' for keys that were written minutes ago; eviction metric spikes during cache warm-up jobs
+
+## Good example
+
+Move sessions to a dedicated Redis instance (or a separate logical DB with its own memory budget); on the shared instance switch policy to volatile-lru and set TTL only on cache keys so sessions (untagged) are never eligible for eviction
+
+## Applies when
+
+- single Redis instance shared across session-store and cache workloads
+- maxmemory-policy is allkeys-* (lru/lfu/random)
+- session keys are written without TTL or with very long TTL
+
+## Do NOT apply when
+
+- sessions are already stored in a separate datastore (e.g., dedicated Redis or Postgres)
+- all keys carry TTL and application explicitly tolerates session loss
+- Redis is used purely as a volatile cache with no durability expectations
+
+## Raw log
+
+[./raw/carol-redis-eviction-2026-03-27.jsonl](./raw/carol-redis-eviction-2026-03-27.jsonl)

@@ -5,7 +5,7 @@
 #   - 输出单行 badge：[share ✓ N/today] / [share … N/today] / [share ✗ N/today] / [share ⚠ stale] / [share 🔒 sig-fail]
 #   - 渲染耗时 < 100 ms
 #   - daemon 探活短超时 300 ms + 本地 60 s TTL 缓存
-#   - skill 装配性：ls ~/.claude/skills/insights-share/SKILL.md
+#   - plugin 装配性：已安装 plugin cache 或旧 skills 路径任一存在
 #   - 计数：~/.cache/insights-share/today_count.json
 #   - stale 判定：~/.cache/insights-share/manifest.json 超过 TTL 未同步
 #   - A/B 开关：SHARE_STATUSLINE=off 时输出空串（保持 A 侧零特征）
@@ -26,14 +26,23 @@ fi
 
 WIKI_URL="${INSIGHTS_SHARE_URL:-http://192.168.22.42:7821}"
 CACHE_DIR="${HOME}/.cache/insights-share"
+CONFIG_JSON="${CACHE_DIR}/config.json"
 TODAY_JSON="${CACHE_DIR}/today_count.json"
 MANIFEST_JSON="${CACHE_DIR}/manifest.json"
 HEALTH_CACHE="${CACHE_DIR}/.health_cache"
 IN_FLIGHT_FLAG="${CACHE_DIR}/.in_flight"
 SKILL_MARK="${HOME}/.claude/skills/insights-share/SKILL.md"
+PLUGIN_CACHE_ROOT="${HOME}/.claude/plugins/cache"
 STALE_TTL_SECONDS="${SHARE_STATUSLINE_STALE_TTL_SECONDS:-86400}"
 
 mkdir -p "${CACHE_DIR}" 2>/dev/null || true
+
+if [[ -z "${INSIGHTS_SHARE_URL:-}" && -r "${CONFIG_JSON}" ]]; then
+  cfg_url=$(sed -n 's/.*"server_url"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "${CONFIG_JSON}" | head -n1)
+  if [[ -n "${cfg_url}" ]]; then
+    WIKI_URL="${cfg_url}"
+  fi
+fi
 
 # ---- 色彩 ----
 if [[ -t 1 && -z "${SHARE_STATUSLINE_NO_COLOR:-}" ]]; then
@@ -73,9 +82,13 @@ if [[ -f "${IN_FLIGHT_FLAG}" ]]; then
   fi
 fi
 
-# ---- skill 装配性 ----
+# ---- plugin 装配性 ----
 skill_ok=0
-[[ -r "${SKILL_MARK}" ]] && skill_ok=1
+if [[ -r "${SKILL_MARK}" ]]; then
+  skill_ok=1
+elif [[ -d "${PLUGIN_CACHE_ROOT}" ]] && find "${PLUGIN_CACHE_ROOT}" -maxdepth 6 -path "*/skills/insights-share/SKILL.md" -type f -print -quit 2>/dev/null | grep -q .; then
+  skill_ok=1
+fi
 
 # ---- daemon 探活（60s TTL 缓存）----
 daemon_ok=0
@@ -91,11 +104,11 @@ if [[ -r "${HEALTH_CACHE}" ]]; then
 fi
 
 if (( cache_valid == 0 )); then
-  probe_status=$(curl -s --max-time 0.3 -o /dev/null -w '%{http_code}' \
+  probe_status=$(curl --noproxy '*' -s --max-time 0.3 -o /dev/null -w '%{http_code}' \
     "${WIKI_URL}/healthz" 2>/dev/null || echo "000")
   # 兼容旧端点 /health（proposal 两种写法）
   if [[ "${probe_status}" != "200" ]]; then
-    probe_status=$(curl -s --max-time 0.3 -o /dev/null -w '%{http_code}' \
+    probe_status=$(curl --noproxy '*' -s --max-time 0.3 -o /dev/null -w '%{http_code}' \
       "${WIKI_URL}/health" 2>/dev/null || echo "000")
   fi
   if [[ "${probe_status}" == "200" ]]; then
