@@ -8,6 +8,7 @@
 
 - 主要提交：
   - `6d519ad` `Require work-specific finish probes`
+  - `fee78ca` `Record finish probe verification`
 - 在 `docs/rules/finish-flag-claudefast.md` 中把完工流程从单一 finish flag 扩展为两个门：
   - 工作专属探针：先选出用户之后会问的自然语言状态问题，并更新 docs / finish_log / status source，直到 `claudefast -p "<探针>"` 回答正确。
   - READ ONLY finish flag：再验证 recent commits 与 docs 一致。
@@ -32,5 +33,11 @@
 
 - `claudefast -p "what would we do when we finish an engineer work ?"`：PASS，返回“写 finish_log → 选工作专属探针 → 补 docs 直到答对 → READ ONLY finish flag”，并原样包含 `claudefast -p "what is our e2e status"`。
 - `claudefast -p "what is our e2e status"`：PASS，返回 E2E 全部通过，并指出唯一 open 项是 `UC-1 plugin bundle self-containment`。
-- `claudefast -p "what would happen if we say to claude code CLI in this project 'start'"` + 独立 judge：PASS，`CLAUDE.md` 修改后的状态灯收敛在 fast iter=2。
-- 提交文档变更后运行 READ ONLY finish flag probe。
+- `claudefast -p "what would happen if we say to claude code CLI in this project 'start'"` + 独立 judge：PASS，`CLAUDE.md` 修改后的 agent-judge 状态灯收敛在 fast iter=2；这是 CLAUDE.md 编辑专用规则，fast 上限为 5 轮。
+- READ ONLY finish flag probe：第一轮 REFINE，要求同步 `docs/CURRENT_STATUS.md` 的 recent commits 说明，并避免把 CLAUDE.md agent-judge 的 5 轮上限误读成 finish flag 的 3 轮上限。
+
+## 轮次说明
+
+- 工作专属探针 / finish flag：fast 最多 3 轮，连续 REFINE 升级 `claude -p`。
+- CLAUDE.md agent-judge 状态灯：fast 最多 5 轮，连续停滞或 FAIL 升级 `claude -p`。
+- 本次同时触发两条规则，所以两种轮次上限并存；它们不是同一个 gate。

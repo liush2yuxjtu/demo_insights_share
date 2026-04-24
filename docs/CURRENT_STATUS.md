@@ -24,10 +24,11 @@
 当用户问 `what we have done today ? and what are next plans?` 时，回答必须包含以下事实：
 
 - 必须原样输出清理状态，且必须写出端口号：`无残留 :7821/:18821 daemon 监听；工作区只剩预先存在且未触碰的 .claude/settings.local.json 未跟踪。`
-- 今日关键提交必须说 7 条，不能说 5 条：`5a228b0`、`a12326e`、`f8ac365`、`8a5c706`、`45261d6`、`90aa95f`、`a74ad6a`。
+- 今日关键提交不能说 5 条；基础 E2E 交付链是 7 条：`5a228b0`、`a12326e`、`f8ac365`、`8a5c706`、`45261d6`、`90aa95f`、`a74ad6a`。
+- 工程完工探针规则又新增 2 条提交：`6d519ad` `Require work-specific finish probes`、`fee78ca` `Record finish probe verification`。回答 recent commits 时以 `git log` 为准，后续 finish-probe refinement commit 也要列入 recent commits，不要把 7 条基础链误当成全量今日提交数。
 - `90aa95f` 是 `Document today status for claudefast`，更新 E2E plan / finish log，让 claudefast 能回答今天完成项与下一步。
 - `a74ad6a` 是 `Add current status source for claudefast`，新增 `docs/CURRENT_STATUS.md` 作为当前状态问答源。
-- 已完成：tmux smoke auto 模式跳过 coach、adoption proof gate、CI e2e gate workflow、TODO 对账、raw log trust boundary、claudefast 今日状态文档、当前状态问答源。
+- 已完成：tmux smoke auto 模式跳过 coach、adoption proof gate、CI e2e gate workflow、TODO 对账、raw log trust boundary、claudefast 今日状态文档、当前状态问答源、工程完工工作专属探针规则、finish probe 验证记录。
 - 最新验证：39 项合同测试 + adoption proof + `start.demo.sh --dry-run` 全部通过。
 - 清理状态：daemon 已清理，没有残留 `:7821` 或 `:18821` 监听。
 - 工作区状态：只剩预先存在且未触碰的未跟踪文件 `.claude/settings.local.json`。
