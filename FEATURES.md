@@ -35,7 +35,7 @@ Claude Code 状态栏常驻 `[share <icon> N/today]` 徽章：
 
 - 一条 `claude plugin install` 完成 skill + hook + statusline + MCP + agent + slash 命令的注册
 - MVP 演示面**零 bash**，全部走 slash 命令
-- manifest：`plugins/insights-share/.claude-plugin/plugin.json`（当前 `0.6.0-m7`）
+- manifest：`plugins/insights-share/.claude-plugin/plugin.json`（当前 `0.6.1-m7`）
 - 内网 marketplace：`.claude-plugin/marketplace.json`
 - 升级 / 卸载：`claude plugin upgrade|uninstall insights-share`
 - 设计：[proposal/proposal_plugin_design.md](proposal/proposal_plugin_design.md)

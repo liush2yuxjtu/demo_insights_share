@@ -60,7 +60,7 @@ def test_plugin_manifest_declares_current_release() -> None:
         "skills/insights-share/SKILL.md",
         "skills/insights-share-server/SKILL.md",
     ]
-    assert manifest["version"] == "0.6.0-m7"
+    assert manifest["version"] == "0.6.1-m7"
     assert manifest["milestones"]["current"] == "M7_LATENCY_DEEP"
     assert "M5_RENAME" in manifest["milestones"]["completed"]
     assert manifest["milestones"]["pending"] == ["M8_LATENCY_INDEX"]
@@ -155,11 +155,11 @@ def test_marketplace_and_readme_align_with_current_release() -> None:
     plugin = marketplace["plugins"][0]
     assert marketplace["name"] == "insights-share"
     assert plugin["name"] == "insights-share"
-    assert plugin["version"] == manifest["version"] == "0.6.0-m7"
+    assert plugin["version"] == manifest["version"] == "0.6.1-m7"
     assert plugin["source"] == "./"
     assert manifest["milestones"]["current"] == "M7_LATENCY_DEEP"
     assert "M7_LATENCY_DEEP" in readme
-    assert "v0.6.0-m7" in readme
+    assert "v0.6.1-m7" in readme
     assert "/share-diff" in readme
     assert "[share ⚠ stale]" in readme
     assert "[share 🔒 sig-fail]" in readme

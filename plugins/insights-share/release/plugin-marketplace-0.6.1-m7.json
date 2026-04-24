@@ -1,0 +1,1648 @@
+{
+  "name": "insights-share",
+  "version": "0.6.1-m7",
+  "published_at": "2026-04-24T05:49:19.215286+00:00",
+  "source": "./",
+  "checksums": [
+    {
+      "path": ".claude-plugin/marketplace.json",
+      "sha256": "53466673012f1afe6540cd777b43179dedfab05f770780abde9e47786ffa6d66"
+    },
+    {
+      "path": ".claude-plugin/plugin.json",
+      "sha256": "a68432418325c199ca74457ca2b182ab027c634e4cb4644795e0d118faa2b4e3"
+    },
+    {
+      "path": "README.md",
+      "sha256": "5f79cbb78b4192e2c05475a9ce3d7059fca3b316fa42227daab4eb62910ec3b7"
+    },
+    {
+      "path": "agents/share-curator.md",
+      "sha256": "3391f3070baa5797eef7b304ecf4ecda284b0356a815e226e0148cebd1a26bf6"
+    },
+    {
+      "path": "agents/share-validator.md",
+      "sha256": "a5839d6d7ef33e06f97f373665b4d62994310f6835fea39bfbeb3f0dff750206"
+    },
+    {
+      "path": "commands/share-diff.md",
+      "sha256": "4cf6ca7cc627cab2e5242ea0c6f16215102fc9f6ce4a2e306f852765703f8e23"
+    },
+    {
+      "path": "commands/share-install.md",
+      "sha256": "02a00334dbfa68676d5a48cc1651d2dcbf60e4b4f9dbe9c9885657b64bc55297"
+    },
+    {
+      "path": "commands/share-publish.md",
+      "sha256": "5331d18c744d9b0eb30bfbc2439be8aa9aef0402afa43087ce4c9b8b8f182c75"
+    },
+    {
+      "path": "commands/share-review.md",
+      "sha256": "f88e037e25f834c40880d907feb0b30f28f2e3138856b7923dd87fe605634c53"
+    },
+    {
+      "path": "commands/share-search.md",
+      "sha256": "0bfc69c74c33a2d5d52207d421e6be9437039f0716a83e37f0a6948e17282bd8"
+    },
+    {
+      "path": "hooks/session-start.sh",
+      "sha256": "a97cc0414f6c76bda4cc765b1e00a0b7490efe6236816f9e3b100564cfb79189"
+    },
+    {
+      "path": "hooks/user-prompt-submit.sh",
+      "sha256": "f0d21498453eaf32ebe24fbd13a3ffeb6822519d6992412aecf5048e50872984"
+    },
+    {
+      "path": "mcp/wiki-server.json",
+      "sha256": "60ab9edeb77ddd680e798a106185add9026075fa0df61491ce2628dd9ec30fdc"
+    },
+    {
+      "path": "release/plugin-marketplace-0.6.0-m7.json",
+      "sha256": "3a43d7450f6aff65f081b907346d46e687be1fb832e6b069a67b18781bbe3ef2"
+    },
+    {
+      "path": "runtime/.gitignore",
+      "sha256": "bd653720de2ca7a7f114fb602a262ab4d4c8e24350ae4a443ef88b0bc83cfb20"
+    },
+    {
+      "path": "runtime/_sdk_common.py",
+      "sha256": "b15801bf5ed86dca91f5593ade1af27d0acb3084d354d4162960a9e4b6e62036"
+    },
+    {
+      "path": "runtime/adapter.py",
+      "sha256": "6d8c3fde8acb1f2491b369778297c875e0055d7cbfa8177a7ea9d9d2923c69e4"
+    },
+    {
+      "path": "runtime/capture_m7_post_local_search.py",
+      "sha256": "8e56c6285363928053de644a3e96c524ebb1f46b8be2e283883ce30800c6d282"
+    },
+    {
+      "path": "runtime/hooks/insights_cache.py",
+      "sha256": "28e02c90c8414d515e0a8a3d30fdee09f6a427875a8862c05de5eb205d433bc7"
+    },
+    {
+      "path": "runtime/hooks/insights_prefetch.py",
+      "sha256": "a4c34073d6d0f118f2a9343fe1b209ff3866090e1300972d3eb1e2fb7bf2d246"
+    },
+    {
+      "path": "runtime/hooks/insights_stop_hook.py",
+      "sha256": "94ea4222ab958b4e83f918569b7d9d974fa9f072a74d57d2ae4ec1ef072b9cc5"
+    },
+    {
+      "path": "runtime/hooks/session_start_full_fetch.py",
+      "sha256": "27edb622185e9e69208501261da593c01fbf84e5d7a5ff85b45590e06dd52376"
+    },
+    {
+      "path": "runtime/insights_cli.py",
+      "sha256": "36a3232908d08cb373d1bb9c9b64a94bc455f7302e1cf1cfa4fb922bf32ae582"
+    },
+    {
+      "path": "runtime/insightsd/__init__.py",
+      "sha256": "366722ffa94aea8565609921b8cbadafd688c605e3b76c24978d9c1c26bf7fa2"
+    },
+    {
+      "path": "runtime/insightsd/cli.css",
+      "sha256": "217c2d89044d1e1b8b75a3336cbcf4b63843471f800a5d478429572e2854b379"
+    },
+    {
+      "path": "runtime/insightsd/cli.html",
+      "sha256": "55da32a2af7f85a619361548a1800be5645f0447061f2060c93c78da164da09a"
+    },
+    {
+      "path": "runtime/insightsd/cli.js",
+      "sha256": "111228c1e22bdc48b8f282d82fe381d80d50fe78dbf9036a5c650b9da6f719cf"
+    },
+    {
+      "path": "runtime/insightsd/dashboard.html",
+      "sha256": "3512ba0e6e043e6d33dda1209c28a72893c136b424429127599af2a4c703cf0d"
+    },
+    {
+      "path": "runtime/insightsd/emitter.py",
+      "sha256": "1de523bee2807ab91fbd26aa74538527e6d0f8fa91d312f9b052d8d769d76834"
+    },
+    {
+      "path": "runtime/insightsd/favicon.svg",
+      "sha256": "8fc917ce7df4f2bb7f776b2ef19e5d10f033c22f98a1e208e49711aa31e2b8c4"
+    },
+    {
+      "path": "runtime/insightsd/handout.css",
+      "sha256": "f63169595b592f7eda44b024a84d8c6b43942257d1fcf838b11e399ad1faff53"
+    },
+    {
+      "path": "runtime/insightsd/handout.html",
+      "sha256": "94784b4a43ccdf46e48fc36ea8b9b33b4112a808ca99d4fbba6d27f8b93032ef"
+    },
+    {
+      "path": "runtime/insightsd/handout.js",
+      "sha256": "42e564db18de50d35e2ff315f70cd3281604971456542882555161ae4b2085bc"
+    },
+    {
+      "path": "runtime/insightsd/ops.html",
+      "sha256": "7b3c5eb7a19133e8518878ac49202cdf83f478df32201e437c0332d307944d79"
+    },
+    {
+      "path": "runtime/insightsd/pm_script.html",
+      "sha256": "9c0ea7b72b5fc946bc1ad8641f79f648109a9cfdabe396d10bfc4eed79725833"
+    },
+    {
+      "path": "runtime/insightsd/preview.html",
+      "sha256": "de6da339889993142b09854268849752361da84559f2d373b600a503d0344fca"
+    },
+    {
+      "path": "runtime/insightsd/runners.py",
+      "sha256": "df6bf17e95ea97936b3af7271fdead9018c538ceb0e0cff8a8b02228e3edbace"
+    },
+    {
+      "path": "runtime/insightsd/runtime.css",
+      "sha256": "ec39c1193e1feacbf332b182e5462e070a1df631733d534628b292c0062ce0cc"
+    },
+    {
+      "path": "runtime/insightsd/runtime.js",
+      "sha256": "f15cf2c90e79cd3cc3df8cbcbd70095bdb9ae9de6c23c80f804d81305730fc9a"
+    },
+    {
+      "path": "runtime/insightsd/runtime.py",
+      "sha256": "84fd817831d61f43a2579a4534744d698edf87bd430f9976efc442c13b3ecbd3"
+    },
+    {
+      "path": "runtime/insightsd/server.py",
+      "sha256": "d4f55a1b6d81d3cd7eada9033bfdb25953569966e3b382e1e5e8411e6987d517"
+    },
+    {
+      "path": "runtime/insightsd/signing.py",
+      "sha256": "b72229ba529f67fecda891cc05c77cf304325e12f3228e92a289c2dd4bd37114"
+    },
+    {
+      "path": "runtime/insightsd/store.py",
+      "sha256": "55e7bc92377d64b9766355d3ffdfe00c931e25e42014cb3ff20081400bfc123d"
+    },
+    {
+      "path": "runtime/insightsd/terminal.py",
+      "sha256": "f5fa01905de05cd59fb3a3cb98b5c6a36383efc459bd256b7ad887b7cfb3b84b"
+    },
+    {
+      "path": "runtime/latency_cache.py",
+      "sha256": "2f3f2fcde6f428c499d65188af6375aa004c6a05a86ab8ff6c519cd678cdfc65"
+    },
+    {
+      "path": "runtime/local_search.py",
+      "sha256": "ec4d1fa3c88ba53be40afd4fd951df14238477988e0e02b934ee127e624b0860"
+    },
+    {
+      "path": "runtime/requirements.txt",
+      "sha256": "f37a68bdfda0a2aa837b0673bc178547b9684fc5ee641354754fef6f9257d064"
+    },
+    {
+      "path": "runtime/run_demo.sh",
+      "sha256": "39c824a1c91968d5433a4fce0335bfb47735877ebfbd43d45d2a974a35fa02c6"
+    },
+    {
+      "path": "runtime/search_agent.py",
+      "sha256": "684e2aaaaa22b35195009fd852ad981382a2f214f35ba79c3886b258fc6d953c"
+    },
+    {
+      "path": "runtime/seeds/alice_celery_retry.json",
+      "sha256": "37d06545243aceff415c7af7898b301a8c54f8ac3b63b0664b0f33ae16b0790c"
+    },
+    {
+      "path": "runtime/seeds/alice_pgpool.json",
+      "sha256": "cbe8f53b1dab79e1f2d23f872903b17af1cf23c469f6a6a2dcf3a3c4b837f77a"
+    },
+    {
+      "path": "runtime/seeds/bob_pgpool_bad.json",
+      "sha256": "56a2e1b88a010be7270ca8c949c02d96cf1375b1396a4ad492a42f699266c6ca"
+    },
+    {
+      "path": "runtime/seeds/carol_redis_eviction.json",
+      "sha256": "a578cf7001d04b4e13a86f1a02f8d1b8355f61e2bc39b7d708c2ccde04376f78"
+    },
+    {
+      "path": "runtime/standalone_runtime_preview.html",
+      "sha256": "fd1d7013d3e44ca5e2fb4b7220d6c7cbd0478b0efcc1f661482ab9649585fc68"
+    },
+    {
+      "path": "runtime/ui.py",
+      "sha256": "5bf9c97cf012df8d14c478883c6475fb3ad680d991c951d34df34344a1c03741"
+    },
+    {
+      "path": "runtime/upload_errors.py",
+      "sha256": "f87c366cd9dfb42db0530e10951ede36afb8b1b94ae70123828632a360670f04"
+    },
+    {
+      "path": "runtime/wiki.json",
+      "sha256": "67df29db31eeced64611a25c9ed53d2a7d3f5be68bed5978fdd61eb6860d0a05"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/INDEX.md",
+      "sha256": "bbb24f35541ab07933d90c42be81746bb49bd5f566817b30b3a160051be18f8c"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/raw/m1-tdd_开发流程-2026-04-18.jsonl",
+      "sha256": "69e9fab3aff4b708dd1d9c3443e83bc7b0678ed56a8f54f4619631d08c1a248d"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/raw/m1-任务前上下文准备-2026-04-18.jsonl",
+      "sha256": "66796c8e537d2085b31e30a2bd0e7ca40a5a819b3ddb22e85f6382b91cb66fcc"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/raw/m1-先执行再门控-2026-04-18.jsonl",
+      "sha256": "490bf21eb37059dae26d6d11df32c69a8335123c73a4630f9a9979ac9dab1e7e"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/raw/m1-删除前审计-2026-04-18.jsonl",
+      "sha256": "c8d14e4cc40d01744008760796f900a6fd5d1777a7854452c08f9f72889a003c"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/raw/m1-外科式回滚-2026-04-18.jsonl",
+      "sha256": "490bf21eb37059dae26d6d11df32c69a8335123c73a4630f9a9979ac9dab1e7e"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/raw/m1-强制执行不问-2026-04-18.jsonl",
+      "sha256": "9f37763b842cc0371b6aa938b7b3e1002dc21f6554039a612a6ff8ac6842de9d"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/raw/m1-懒惰信号检测-2026-04-18.jsonl",
+      "sha256": "cdd225ba2c0f570c92a9c7c443bddcbdb83d8bc9c6feed69cc04c4b378cde5f0"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/raw/m1-计划_批准流程-2026-04-18.jsonl",
+      "sha256": "06c7579358f0bfad87a4da94e7c9def77d2fcdcbc8e3800a802025e501f1bdd2"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/raw/m1-运行期数据保留-2026-04-18.jsonl",
+      "sha256": "1b787f478c5486ce787dee0ee5e9d712ab83be78c4b44125b24a987a44348cc2"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/raw/m1-配置更新验证-2026-04-18.jsonl",
+      "sha256": "490bf21eb37059dae26d6d11df32c69a8335123c73a4630f9a9979ac9dab1e7e"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/raw/m1-验证三要素-2026-04-18.jsonl",
+      "sha256": "490bf21eb37059dae26d6d11df32c69a8335123c73a4630f9a9979ac9dab1e7e"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/tdd_开发流程.md",
+      "sha256": "b4cf9789232e1fcce26dbaf6535af4599c6ca9f0045114ce49172569813de05a"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/任务前上下文准备.md",
+      "sha256": "8df0b2daca8d82e5bf5e69ac14410ff5178c7fe440d3c22d832c6669b4cc03a5"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/先执行再门控.md",
+      "sha256": "3a6758706f12b705388a54f699a82235a2b7db3b47b10037142951dafd8c9eb5"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/删除前审计.md",
+      "sha256": "4bf7a5fac1f11e6645ea2d1bd73739c149d86d820d5c7559899cbc4f1b567d11"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/外科式回滚.md",
+      "sha256": "353016841e151f453e6fd17fede984455e452887e06063418977294ae1a49d2b"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/强制执行不问.md",
+      "sha256": "5a9dd2f876dd937604b9ed9e5f6534e8d2b912471886720b23c4558bb7b6880d"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/懒惰信号检测.md",
+      "sha256": "4c9dfff4e011e69da3225d7592c2d9d38b25c8b74cf13fc09d921c82637ce124"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/计划_批准流程.md",
+      "sha256": "0c4b0b5f9ae83836bc8aa3f7fbba89f95096a1c804c0d069900e30e6aa8e7564"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/运行期数据保留.md",
+      "sha256": "7716ba9a76d0fc30dfa60240b78f1cb4104375823f229172b8950bc089f1726c"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/配置更新验证.md",
+      "sha256": "9ebffa532261b11e43af05bc8ce2c6c45c992dc65a1b69fe6450ece31efae46f"
+    },
+    {
+      "path": "runtime/wiki_tree/agent_workflow/验证三要素.md",
+      "sha256": "3a611183861e3ea721bd0ae5875b484b11057ffd6aaf454d5f457d8d38080d5c"
+    },
+    {
+      "path": "runtime/wiki_tree/database/INDEX.md",
+      "sha256": "71679e8900df622b4710e672dd4593cff571533217248e17bdfe319171d4580a"
+    },
+    {
+      "path": "runtime/wiki_tree/database/postgres_pool.md",
+      "sha256": "c8b293aa9679f8ec60dd03d63bea8098ad1314bb464b7591f32496ad19b8d687"
+    },
+    {
+      "path": "runtime/wiki_tree/database/raw/170c76d6-1a72-5bcb-85e0-4949a6514898.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "runtime/wiki_tree/database/raw/alice-pgpool-2026-04-10.jsonl",
+      "sha256": "6eade75c2b07501714a27503529ac66b244d2e0654b215db4e2b55f278b35ecd"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/INDEX.md",
+      "sha256": "991d107c0aaced181c349296112cf9e10b5c49c44d60a87977cd3093770bac28"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/claude_md_规则格式.md",
+      "sha256": "b281495928b5f0805642e4bbd30e2cff230f3eeb20eeb7cb384d492894d44d38"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/git_非破坏操作.md",
+      "sha256": "fe1489f245b953ce9d02ba408770e0bb6e366bbf755ec93b32c1e7f31d38334f"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/raw/m1-claude_md_规则格式-2026-04-18.jsonl",
+      "sha256": "06c7579358f0bfad87a4da94e7c9def77d2fcdcbc8e3800a802025e501f1bdd2"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/raw/m1-git_非破坏操作-2026-04-18.jsonl",
+      "sha256": "66796c8e537d2085b31e30a2bd0e7ca40a5a819b3ddb22e85f6382b91cb66fcc"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/raw/m1-skill_触发条件-2026-04-18.jsonl",
+      "sha256": "796e84a46d070418d8688dafc3e4be9939c4a5080a83ed3ba40efa2d032e2bfc"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/raw/m1-user_design目录禁止编辑-2026-04-18.jsonl",
+      "sha256": "c8e86ca495886e1db2acc55378dff1ffb62a063d0f2fa165b911764c09bb880a"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/raw/m1-代码注释中文化-2026-04-18.jsonl",
+      "sha256": "c8e86ca495886e1db2acc55378dff1ffb62a063d0f2fa165b911764c09bb880a"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/raw/m1-前文档版本记录-2026-04-18.jsonl",
+      "sha256": "52666709f29b2a639bbdb40f66e43c9d340afdb33d38eb7a14d8bed542fab64f"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/raw/m1-单一职责原则-2026-04-18.jsonl",
+      "sha256": "796e84a46d070418d8688dafc3e4be9939c4a5080a83ed3ba40efa2d032e2bfc"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/raw/m1-可视化优先-2026-04-18.jsonl",
+      "sha256": "0c3d93483b9910ffcf1f9588a01b6eb3501cc240a0e63886ff013665f53775fc"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/raw/m1-根目录md只读-2026-04-18.jsonl",
+      "sha256": "66796c8e537d2085b31e30a2bd0e7ca40a5a819b3ddb22e85f6382b91cb66fcc"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/raw/m1-缓存与无状态-2026-04-18.jsonl",
+      "sha256": "c8e86ca495886e1db2acc55378dff1ffb62a063d0f2fa165b911764c09bb880a"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/raw/m1-编码风格-2026-04-18.jsonl",
+      "sha256": "490bf21eb37059dae26d6d11df32c69a8335123c73a4630f9a9979ac9dab1e7e"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/raw/m1-错误信号判断-2026-04-18.jsonl",
+      "sha256": "907f9007ec024f6f520e1a3091cc56242570037a2162d63018f4913cee731a37"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/raw/m1-错误消息格式-2026-04-18.jsonl",
+      "sha256": "0c3d93483b9910ffcf1f9588a01b6eb3501cc240a0e63886ff013665f53775fc"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/raw/m1-默认脱敏-2026-04-18.jsonl",
+      "sha256": "1b787f478c5486ce787dee0ee5e9d712ab83be78c4b44125b24a987a44348cc2"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/skill_触发条件.md",
+      "sha256": "36bbc6aafb2680fa852e3cea9b1884e21fb75554e29e8c802da8dcb3e2c003d9"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/user_design目录禁止编辑.md",
+      "sha256": "59901bfc6fc156aaa6d66c23f64267d7c1adcb368d239d510ede5241b9f47417"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/代码注释中文化.md",
+      "sha256": "66d45ab498664bf94699e1034960f51505ac727746979ac6332f376d9fe2577b"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/前文档版本记录.md",
+      "sha256": "b8e46e81ef0a6136592c15e6e3b9ed657d7ef9e759abd069e32d0e8497158382"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/单一职责原则.md",
+      "sha256": "14f9b7e333961dca79446728b55bfb9a483e5a6f5bcf0e306470a0788ebc5b4b"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/可视化优先.md",
+      "sha256": "25102f546ce588b0e293fa616eb9cfa0811863b5b31d8336d0b2f010641df8d9"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/根目录md只读.md",
+      "sha256": "5fd9fe79bd8ef42da8f1961adcb6baf0050bbb106164c7b4d7807d606e3d85b9"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/缓存与无状态.md",
+      "sha256": "69213e7e8709cafdd059d9d8e30f0dd125a5d3e9e623debf4e21d25931ad5cab"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/编码风格.md",
+      "sha256": "b88db186b6732b89434e67e2cc5c6ecba7658ea8a6a961090d9320eadde29bbd"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/错误信号判断.md",
+      "sha256": "69a6c56f39a8da0a8306a5b4544c5c31c92617f16128443ccb16a8f376608189"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/错误消息格式.md",
+      "sha256": "fc74382932b86e0f255a911e6221f5ded971564bbf236a8c26c365fa3e51274f"
+    },
+    {
+      "path": "runtime/wiki_tree/docs_rules/默认脱敏.md",
+      "sha256": "ace80d6ae608dbf4f962230ba717b7460af1c0b92eb0c27cc07687677a722f42"
+    },
+    {
+      "path": "runtime/wiki_tree/general/INDEX.md",
+      "sha256": "bf83969ac9cc9dbc4f1ea68eda1c697ab72cb7408f19075c1afd9be9b8563078"
+    },
+    {
+      "path": "runtime/wiki_tree/general/bob_pgpool_bad_2026_04_12.md",
+      "sha256": "c6906a067a40378cbf5bfe762ab3aa2aa9f3240ab37207622456bde4be85e46f"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-aa-001.md",
+      "sha256": "5b1ceddfeab94ccc0dc3f78cf5fd02700fa02f8c6ce52c64a1eaf3d7c0259ff6"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-aa-002.md",
+      "sha256": "9637543e2de8353ddd423c643723194d4b6296e3d7e9ff0c03163092fd6f7750"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-aa-003.md",
+      "sha256": "2335715c7b8eccac5ad06a26946190cd00f69ce2476ea55edddf9605db7e0e61"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-aa-004.md",
+      "sha256": "3b634256f6651ae77eebc0cf6b3bfd3e4eed14a3fe9f536b2777a948c56d7c32"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-aa-005.md",
+      "sha256": "f687316c4ac7c41b56da8f19675aa979bd97dcf5e572b7bd443044dce19cf1a7"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-aa-006.md",
+      "sha256": "6bff4b8b8a9620ee9dcc3e90f44afa8c41976ba0a758f899510f76e810b06d77"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-aa-007.md",
+      "sha256": "81143bd47bbf75069de3f1e1fa9eb8fd6d634eefed3ccacd26d0f3ef6fb8d93c"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-aa-008.md",
+      "sha256": "84e8605c96dd09a2fac4cd85172715d5e66f516e0e7237f7c389085ccdb31b5b"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ab-001.md",
+      "sha256": "9db2fecbeaeecec0df5fb88b42e3c7cb3982363a0f541afc204c5b146734e09a"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ab-002.md",
+      "sha256": "4e7c130dbbc539115db4ff8941ac68cf7bfd2fc252e980f7ae94867c35c796c8"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ab-003.md",
+      "sha256": "4a3a086340e3115207525505235379d460eaa0bb886aec9c15e5c50e538e9a1c"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ab-004.md",
+      "sha256": "47b5f89bb485400eedff360cc09aed921b3ac4e379d994ce1f62c7d91ed7b879"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ab-005.md",
+      "sha256": "afcb06b386843ff2fcb820b12f3a4e2a9a2798b420f6ad8383744392aa3b5984"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ab-006.md",
+      "sha256": "a5e113b392a00bfabf59e9451c3b66f3b54808d516581948d8771d77b9f4201c"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ab-007.md",
+      "sha256": "9b741e6d2b15015390a08823502ed78e3e24a7d5992517f257ed9eda4c0d9dfd"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ab-008.md",
+      "sha256": "75358e90a4a71f25699bf9e162800ddc3293c7da1a595d688d9c1b82c02e9452"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ab-009.md",
+      "sha256": "91a3bb1d0828ee1e9e1762d77181cd0fffc5b2b18ac9fcb1294f0fc887408142"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ab-010.md",
+      "sha256": "d6319335ebbaa423e55d2f05d25322c2681babe32df8812d8b390ce2d659224a"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ac-001.md",
+      "sha256": "cb8e6136c898f2cb9dcfcf9ab5d3d34143d91cfb5fbafdf89d6c1ebce31abf8f"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ac-002.md",
+      "sha256": "a7ef06b130309b32f27e547e1597c4a0f39d0c81366f0dda3d1e55654d95b779"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ac-003.md",
+      "sha256": "d4885668d2d9955e858f0ff2e2efb0525335b88f84e1c7c2130bfd4a4296634b"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ac-004.md",
+      "sha256": "f971493bd184f32bbb9287d33916592abd98d929a9f2fcd322e6530e98e59df8"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ac-005.md",
+      "sha256": "f0b78fc5f3d59cfd122ec2684e35a2ba05886ad522734c186dfdb850639daa90"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ad-001.md",
+      "sha256": "eae93b904678d08e9f233449562429c42227fdcc28775167d9bb9c5dd527835c"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ad-002.md",
+      "sha256": "b1851902d432000dea03800ef0d5bf7e35d9be6f1de3bf7471bbff47728b4318"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ad-003.md",
+      "sha256": "719525bb8806f33dda477917b003c2e08f5725e55646fe6770dcbfb410f76c47"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ad-004.md",
+      "sha256": "72ecfeda39d6cc9f2a644cd8e3409e0797dc41b278d876ff0603cfae8ae619b9"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ad-005.md",
+      "sha256": "9558b7af23f7368ea08f7331e48cbbd79a8f14a70bf7bb74e25483a95c13fe23"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ad-006.md",
+      "sha256": "db1a5f48071f7387227df3ffad71203547b24b81f3fb029423444505685189f7"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ad-007.md",
+      "sha256": "97ee1eb47487f0a4bf0e8551432f2416a43ef65e7c56523d92932b7b4471e39f"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ae-001.md",
+      "sha256": "cbb1eee7358502eac2f00f1f52c68fac925aa12a4a8dfe22458ff342879905f0"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ae-002.md",
+      "sha256": "df1d128d3b1dfc4a9de9b1e7916b06eb1d5c0ed35704e0a3c44939f4245ad463"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ae-003.md",
+      "sha256": "2b93daab14cee1f74b5510e5480a383c76ae293822f1ccbca7b265e65c54c37e"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ae-004.md",
+      "sha256": "a6a1787ea76703e5dd27929464bcb346ff93b60b6d2fac4d6eb9f38d4d18daeb"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ae-005.md",
+      "sha256": "77ccb1b883c0c4773a644b1130165d4c21ecec5a4d5009cfdff6ab92274c687c"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-af-001.md",
+      "sha256": "6246f8da4b1bb34c4e0547e40624d2fe973df0b97ea530a2ec921b2aa859b5f1"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-af-002.md",
+      "sha256": "076317fba954e523f8ccba5d5c48eea06fb69d945d90c561f3e03f372bf02887"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-af-003.md",
+      "sha256": "bb7c908e4133f2ac707f9c62979ca1efbf310bb36a361dcb67b38e7f2ddcbc17"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-af-004.md",
+      "sha256": "dece19ce4ed22898276942f1d5b41f201e795dd6cdbed84788c9a16db325b93b"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-af-005.md",
+      "sha256": "6a6091e6d1ef4742aa0e919b9226b62fc4eb89915cb73b636abcb2a9f7f10e91"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-af-006.md",
+      "sha256": "8629e694f763f34072c2d027aa7d534eead19d54563073bf1a2acfb00a4e46a0"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-af-007.md",
+      "sha256": "69b76b428f31c04edc53df7aeb1a05744dfa97a91bb72b4cd74b3da06d808e11"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-af-008.md",
+      "sha256": "49186998c8a310cf2aeea47ea4ee4610136f40361947d2588df525d3e7a48fac"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-af-009.md",
+      "sha256": "151ee5c9fb99856c35fd882e62d3187edeb5762385f96c0cb33988ea1825ea69"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-af-010.md",
+      "sha256": "9ab13a638877021c24648f412ab8b935da83e910353f2a0ab55279a1dba23a1c"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-af-011.md",
+      "sha256": "e7ba19c7a9c0f506f6d7f73d8a2a467d6c5ba2fb57e984c5ad5eb6a7421222b9"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-af-012.md",
+      "sha256": "aae397a025ec338604c283182d93ac9075ae1cc059c9618aaa39e318f7ea3133"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-af-013.md",
+      "sha256": "6cd2d4584942bf7d662ca3a27f7826429721fac4db57b7844349c82849c965bf"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-af-014.md",
+      "sha256": "80158f0ebc4d8641f35bd951a8aae0b0d0640a9ddc0d8e7ab4a4a70d9b26e19f"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ag-001.md",
+      "sha256": "802f8e0b7e09a560ef29287c51c667ed1e977787791984922fdf8dc6ac4be5f4"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ag-002.md",
+      "sha256": "b71011627aa24b337cf971b1582523739b3a6269da7fca5fe061d55a70e24fec"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ag-003.md",
+      "sha256": "1da81f70c60b2a6a3a51a47cc2b17dbe8d1dac4ab3356114cd473f263b99b9c5"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ag-004.md",
+      "sha256": "52acc6fdb3f34f115c317585e9600fa4385d6ea10030b92d786b18e1653d3f8e"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ag-005.md",
+      "sha256": "8827ae50af226793af7ded37b0801c28e1996b1c4d0f3b84b9700447c8cd429b"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-001.md",
+      "sha256": "2240be0b4a98d86b38a87f1b8de1a9e05b1b6da4753401ac9b9dec089e73e3d0"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-002.md",
+      "sha256": "0702bd76ff50b3108b9e1b73aedc49c054c060d7372eaccaa68ee4135cce5591"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-003.md",
+      "sha256": "4917a81f848268d5780ffa35077f89dbcb8ce7474922a50bb438e80856e62533"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-004.md",
+      "sha256": "8746f76a6a693a9da6c8eeffeedde3bfc1db352b2014a8c86c3a36b68af9bd81"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-005.md",
+      "sha256": "88af33f8ecafaa41f7e25eddc2df2f48a07fc6fb472b63568aac32f4f36471a5"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-006.md",
+      "sha256": "6011d493a70c7c242779cee6d1b9d17701492ec72fe25792155f0eb9fc116009"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-007.md",
+      "sha256": "57d037423cc9c8df4c637fb3a920e70104059c6bfb43adfaa76bd43c31574a7f"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-008.md",
+      "sha256": "0bd4708be2edd88eb7914031add8c4bf70ed7371e80e7112b0dd677b1c276319"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-009.md",
+      "sha256": "28349172d004ad4ff91aada19a618d54cb75111c1f0b9d43b47a51b8d8d09ea8"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-010.md",
+      "sha256": "f9572e85023d5eb49fe45bd6923c65e78a01f3ddf30509c7b60dd971bf94b273"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-011.md",
+      "sha256": "bdad5ed36dea8aeac0d032dc87ddf43198446e7d678b31923f42070d0f2cb147"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-012.md",
+      "sha256": "cd3d21f6c573d9f0f0b3c880eab03ce1411776663e91e2edc163a74ecf6215b2"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-013.md",
+      "sha256": "ad472629bed2d739da8efdd2ade7cf8755342014d2059b9b708c1b1ba6891bda"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-014.md",
+      "sha256": "bd5636388a936f2cd242984ceb456de25a5793f920ed5e4f9493bc41cb09223b"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-015.md",
+      "sha256": "bb361ef4aef59b43b40df7e2e6754708e546ba09febc05bae714810c366fddce"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-016.md",
+      "sha256": "6364dcf67043f29f65f86ded24264ca976e3eacecc260e7ed04c218cdc377c9a"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-017.md",
+      "sha256": "2c40281457e01bb54c106331fa237ae1d6ec13dcd802169dda903e76185c62c6"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-018.md",
+      "sha256": "3076f36fb5be76768dd548e792699545430f0a56b62175ac1e2a6eb6f8577efb"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-019.md",
+      "sha256": "cabaad9dba8e4770168795493241812db844bab751f558fbe457c72b936be57d"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-020.md",
+      "sha256": "2847c73d555fbbfecb45cdcc4f53de93d4c5aeb2dc59dd9d8f2cda213327352e"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-021.md",
+      "sha256": "a815b182f9e7d25e963e89b26a420ef1f9478505e0269068dc761f2f328a5231"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-022.md",
+      "sha256": "8f2be0525f035ffe7d56b4efc17fc9402022e9277b545e1c24e323b906900d16"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-023.md",
+      "sha256": "2849818287a3611eedb75161ba353fa2de9cdd63f498e2e146b8e952b1a0bd37"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-024.md",
+      "sha256": "313575af144b43ec734f1a66d5aedbd4ee00e3e8dd2adbbade346c8860ca980d"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-025.md",
+      "sha256": "f419ecfc1b3f30a9f58f717c1c28b2af7521d39243a68c97db68f7448c1f96c1"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-026.md",
+      "sha256": "101be5fece3638b4bb0362b69a7dbac00fa4b1671277c77ed7e138501be61763"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-027.md",
+      "sha256": "467c0252a9bdafa2b6009c3857edbf579ab57fd24126c5a16258265cfae045d1"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-028.md",
+      "sha256": "d7cfd64426e9692f93f3c797b76ee2faa4a8a36fec2cc4713f0571e7088ca66a"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-029.md",
+      "sha256": "72a1754dc13da24c0ff5ef7d5b22e8aa49b06b6ef7ee6382e8e575c11911d8cf"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-030.md",
+      "sha256": "620aa3f80abea62d7c30a76a2001e9ad1a68cd45b79febeaf647caf5b82e0c1b"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-031.md",
+      "sha256": "8d50bee6a2b3e622acc227e8497e448803bca5bc2df847c57aff50cd67fc74c5"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-032.md",
+      "sha256": "231af06808bb3a77ebbf64d927697e868c22f70e1ace13548eb48222f725e053"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-033.md",
+      "sha256": "47ffd012c10aee6f42ea806b64901b0b791ca938702b2799fb090ea1ff4e2b54"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-034.md",
+      "sha256": "b8100fe200a0f413ea4592c7c4c73d2d84a52da7c7dcdfec62ac129a0c72eefa"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-035.md",
+      "sha256": "01584097b9e5d5b3baf551d494e6c974f8b77be06438721b52f2fba55c1d63b6"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-036.md",
+      "sha256": "803fe0175bb86bdd7663f20c8358daa37d0938d4d02db58ad48605c431e302cb"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-037.md",
+      "sha256": "28ec565b528b2f7b9245668f46cad2ecec0b952c6bb2cfdc8edc63fae4c1f80d"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-038.md",
+      "sha256": "4f901e58c17f168d3ddfa010c529f09541c13160282efe217a7f6ef004daa131"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-039.md",
+      "sha256": "45df38408ada52b920ec2b4ca7fbb3ec51f1578c3ae04b51bc12ad4c634940b1"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-040.md",
+      "sha256": "10268ac35a146d4558749f39531dc030ae9055201d32d330356b064ff519dbc6"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-041.md",
+      "sha256": "5dd5a0eab153dd822e6aa7a5f1790f42dacd363faf5e5ae8756f406ff2f81b6e"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-042.md",
+      "sha256": "3129603a7f22ff1ee774f1edb427ffd96cea514b27d14e15cd0308d95485da67"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-043.md",
+      "sha256": "2e7d1d5314e4bc8bf46e6294a85c2bdb6b57316620be8af841c9b19a67560cc9"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-044.md",
+      "sha256": "972d5bf36f2eab97eef94c729f0692daeb678478cc4f713f08e44934c2679be7"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-045.md",
+      "sha256": "4035d5871ef9903499b667cec5dca4494f8e0d36318bb2a415d421d427c8c68a"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-046.md",
+      "sha256": "6a77bc5772b9caa3283c50994dd9ab8a07c0dd853e91f1b97c72169d51b526b8"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-047.md",
+      "sha256": "44870ef648366df06b0de2fae93551de4c96abf8bb0caf6d00d47d2f2fcdd6e1"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-048.md",
+      "sha256": "c33c32daa3cbb761558fdc44642b8606bfe20dd2cb93fe6679188a1c5c7ad0c0"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-049.md",
+      "sha256": "eb7ca2819966bac8ff657f9d3cd7ebf3af6e4bbe6bbb3fc61ae8bdf64bf1487f"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ah-050.md",
+      "sha256": "9f078ca38e1ddf2c687e318bfc64a0934012beb1a6f562285fe40e6c9eebec63"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ai-001.md",
+      "sha256": "e10b0dda80d20bd9ca7e4261fe56c291e0d45a1a5f6f57465f52d4dce2971987"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ai-002.md",
+      "sha256": "f96084f05a6d635bdd85684b10bf3954b18a00484bc46454a458171e777f019a"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ai-003.md",
+      "sha256": "fe9d6f6dba212ae2eecc148bbed7c4d95d30914cb3fa2b0e42870d5e0b4351bc"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ai-004.md",
+      "sha256": "95f03eff90e6164d9cbbe162475618f5b27b475ba52dab71b3dbb7e07035cd1e"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ai-005.md",
+      "sha256": "6769569f95d8f1d5639632b6cd1eb2e99225933d01e879f5ee3e1df11e1b6619"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ai-006.md",
+      "sha256": "92a21c22437d6dbddf5ab29768b493962223932e3d489b01083e0c3c1a81cc4b"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ai-007.md",
+      "sha256": "0a1cf504e894757232d97557388232a1f6c3b3453e58421591fbeb3141f92a02"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ai-008.md",
+      "sha256": "55dafdcdb054249933ad2b0f8aaad5b7d9e08c62a4c9a6cd87e6453914047609"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-aj-001.md",
+      "sha256": "48fbcc3ec7d32c4410a8d5ef94a8e191ae52351de94cd5355b9f68d8ff886d10"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-aj-002.md",
+      "sha256": "8a7427e84521d9ffd25611057cb4f157733afa6e0dc7cb19ec4746329232c5b8"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-aj-003.md",
+      "sha256": "cdd8fcc5ed61e2c031112fa20af7249772ba4737486098bf49f94cb8418bfd0a"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-aj-004.md",
+      "sha256": "efe4a40033ab052d9c3df4465c89a771e9687083967dc1b0eb3fa81b7dd66fae"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-aj-005.md",
+      "sha256": "4a35ce770c45b44e5d1ee7e705887472497577efd9ee4bce53ad144c4511c0a1"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ak-001.md",
+      "sha256": "3cdfbe4cc21a7caf0c4e21231dee9402cc2ea40a4a4ef1b1623cd81a59b51b28"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ak-002.md",
+      "sha256": "4a5a7eb8e9c1f512eddbb39c0f60b6749fd27b1d2c81e2d7db4fdaa852b5c77c"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ak-003.md",
+      "sha256": "8790ddbd1b8559930e06df70d3aa387aed0a7679410dcbd5a1eb2681b0770548"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ak-004.md",
+      "sha256": "b930b841d029f88fb250c9691f127f5de9adf0b049dc561e784222e483fec87b"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ak-005.md",
+      "sha256": "fc01dfb63f7f0d16187afbfb42dfd2b167d13fb34c2daea8ffb44f32edea0f8b"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-al-001.md",
+      "sha256": "909004bbfa327567dc9012162661d30d0fad2f8dae8bf3a845162f89a368e0dc"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-al-002.md",
+      "sha256": "ad9093cf6cb4dd16a065ab73bb938aa32a72d85650ff04a466479d1c6c921abf"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-al-003.md",
+      "sha256": "ee6faa46e41a497bfd388301a1f0a5d1699f213100afa91ec2dd62bcb897c2e9"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-al-004.md",
+      "sha256": "5d2dcbeaad9b78240eb565ec254319e642bf865d9d469feadb03a1f9a2898633"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-al-005.md",
+      "sha256": "e2b5bc961cc2662a771bfe26db1a854d2954681e1a68e0df353a5a3e6703fcee"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-am-001.md",
+      "sha256": "13d7de9aeb7af03ad8a5e72356263b6f5e0cb319b197f549dcb8588df2a7c06e"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-am-002.md",
+      "sha256": "46d6799b6fc596e7277eecc629814e2cd859b4e251b6aab30089cfd372cc428f"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-am-003.md",
+      "sha256": "beb3aee81591718b0eec604872ecc7d735f31b2e5032996a399195a5160e018b"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-am-004.md",
+      "sha256": "7051cac8173314bee516d633387f529942e9815526af0aecbbb435dc688e8954"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-am-005.md",
+      "sha256": "b9bffaeb952d2a2483cd0b1e254733a27742aa4a9b6f742f1a4383e6658f7753"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-am-006.md",
+      "sha256": "0151b315873f56b390e1a228f911d66433bc14761c09f46600353810ee6a5af6"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-am-007.md",
+      "sha256": "130d277cfa20613c28fcaf9c0f7005298779c99aadb9dbd14e74fc87b2323d04"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-am-008.md",
+      "sha256": "9c1b7cb5724a26b94c8d717bf5f4b19be3b676aa3c6de88259d1f0745e0211e9"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-an-001.md",
+      "sha256": "ed4f79be5bf9c02a505976b4565be859f4a5fc83773ef0ed54e498b57b01c786"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-an-002.md",
+      "sha256": "0e6eea5201e5a902cb0be236cd7be366d7a458e104a4ea12f90f7a37c8cc1f90"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-an-003.md",
+      "sha256": "ccb90a812ce7f5741539b69d41828779a35351464a73c28bd042edc72b542f78"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-an-004.md",
+      "sha256": "9d9ea6492d398f1dd72eacbd91e5fb2506dd4d2df2775c1520f83b1802d2cddb"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-an-005.md",
+      "sha256": "fe0e6244a78a6a9a8d1ab7219c8ca8a1e4909a49a133bcd4774280782b917940"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-001.md",
+      "sha256": "4af42afe1959b143470e1ca5bd7a0e559e1deb3a4c35670ed413d0a743770eec"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-002.md",
+      "sha256": "5f6de549fd95c0b29e9f752fee5db9907866595c4f08df6fa3fdebfdf4ed9983"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-003.md",
+      "sha256": "8ccb7e8babb2ef50d0e5923702fd4683c7f166c82b703a34e6e032d92835a8fd"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-004.md",
+      "sha256": "862a522455311c6e6c010105d3edb427f5467d98bac345b006786e84477d1209"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-005.md",
+      "sha256": "21607585cb444798dc414a8ea099f974e666dcd08c417dd0ea99037e1f8e65fa"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-006.md",
+      "sha256": "3cd14055a8789c691a0b3cfb1029a634362ea98c933e97bca3149885aa80dc55"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-007.md",
+      "sha256": "32acaf83fab45c4d3fe00dfe1b569d97afa6f423389b31bf187f793b8c8cef32"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-008.md",
+      "sha256": "0e71f8cffd6d6aa550f7556b474d99e6c0ea2dd87aa4fea99c5304a32a531c04"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-009.md",
+      "sha256": "86567f563170ca96c4d75ab2ff7d8945fa1882ec0d9b44ff9f071f3aa29d05c7"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-010.md",
+      "sha256": "771dcf3c05d5e11824159682c9b564aa11e38fcbb887ec024d14ba74a5da5b62"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-011.md",
+      "sha256": "ca07ba09eecd9cf6613f44cc0244550990e8df866b3ca2636ae62301d0755de7"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-012.md",
+      "sha256": "cdc11cfa1293ce5359edd42db2111fceb4bc3d95fedaae456b3d081482792451"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-013.md",
+      "sha256": "09383d27cc3ce5d4910f4580647e2b6975ff915a48596f92a1af32a0b5528b17"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-014.md",
+      "sha256": "a5f42ba7cce35281ef5a312e2ef2c4fa18c343cb8f5c875e6d7d612b9d4b76a4"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-015.md",
+      "sha256": "50cb70707008c3c92e14993ce43899294bdd9c1080ca6aad4f6839da0db7f747"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-016.md",
+      "sha256": "108168314efd260df304d3ad788739112ba7439d89145f5258915431795ac71e"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-017.md",
+      "sha256": "05f395591087156288bc359d1c2348bf3ee8218498deb23732adecd283b3d7e8"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ao-018.md",
+      "sha256": "b671674f1336d74e4d8ebaf42c4a85b83cd261fddc7ee318bf3990861f457826"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ap-001.md",
+      "sha256": "740db1129cc1fbc6878ab7279a22ccd0aaa30604c62b5e1da6a460e288c5c442"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ap-002.md",
+      "sha256": "8a7633fc83bffebdd2a98ca2af1c18fead258344a88f316495cb5d07457fce80"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ap-003.md",
+      "sha256": "84ba073f5673cc96c2bd218f3e48092348a3f4f193a6c3a77fe38479902970f8"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ap-004.md",
+      "sha256": "7d9cdeb452c59965bdffee3c93a003a13e6e4bbbd7b22bd4b6b597dec08ee8d7"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ap-005.md",
+      "sha256": "4cd6649f894eb38a8482840944341bce7e46c399470f35b92f13ca334f0648ee"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ap-006.md",
+      "sha256": "559ec6472d606090c2fdaa6be8b2cb43fd1fe90174122fcae1f252b597af6ecf"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1-kb-ap-007.md",
+      "sha256": "271e744ef8b80304cc3bb8ac0e07b6c56b24acce73c41987a79e695dbf169f8b"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_agent_judge_double_probe_2026_04_22.md",
+      "sha256": "f482875465589182c6d051741975662ce24a5dcde6e71e547ad489bd5f8e7da8"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_agent_judge_dp_2026_04_22.md",
+      "sha256": "b1a77b13ec1fe9ff83d2c7eed391dd73e31c2f60bd52807ec0766d1144ee14bb"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_agent_teams_001.md",
+      "sha256": "f35bacb04a6569c0e125a317a91a9d3899627089337a7c5b6168261e724244e2"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_agent_teams_002.md",
+      "sha256": "42b26f8d70941d253036024fc835d8d114f71f6cb24a4de2fd76308943c1b04e"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_agent_teams_003.md",
+      "sha256": "86c301e4d6b0c78c6944668e151494abc95700da01c7b93d902d9739dcf39668"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_agent_teams_004.md",
+      "sha256": "94aa9656034b5245fca20429283519bf109ac1aa139586e29bb682e3695e3e27"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_agent_teams_005.md",
+      "sha256": "8cdad09a5c46b3abf61c9b9914d074f42ec7517981c8c119c54e0c53a566cb4b"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_atomic_commit_2026_04_22.md",
+      "sha256": "75623fabd04a4eafc396a48819998b979e0af9e684ca69ef7adf1a679d6adfa4"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_bootstrap_start_2026_04_22.md",
+      "sha256": "0e219bd580cf27e6edb5230a2e30cadcb59826658f166265573b3b9c5a1fb7e9"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_caveman_mode_2026_04_22.md",
+      "sha256": "1780acbaca436f27d6215420cec8b5bd56b177b05e71ad95ac465c57dfeed6cb"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_default_sanitization_2026_04_22.md",
+      "sha256": "654341e45cc9ec74b4341973531b63b423c6b381d5fda3f08fc4a468289d1075"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_error_001.md",
+      "sha256": "51e4b4c50f372e2cb0d39fed7f96d2eaafa6ec37715b894e9dc1d43542d81ddc"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_error_002.md",
+      "sha256": "7107f923f23de6459ec82ea9743972d49fc9b7f80c13617f067665001b72c1a8"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_error_003.md",
+      "sha256": "0e50c85cba9d653cf6e1e9d2cd7ef103384902edfe5bb2f6eea0721b4ac42cc9"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_error_004.md",
+      "sha256": "c83fe29034be176be77973b213ccec5bce5d34f3eda56874ea06be697206a09a"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_error_005.md",
+      "sha256": "91430fd711745ad940bab69878b5cb78818bc5fa072e02fe1947ac68b71fdf31"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_finish_flag_2026_04_22.md",
+      "sha256": "7a7407c2d82275674aaa6184875e48b61d476a1f3c82295e283076fee3a2a2da"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_git_worktree_2026_04_22.md",
+      "sha256": "3a38af046416aadfef66db4aa7190dcfa893258f8061092be884c6b3f76b78fd"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_hooks_001.md",
+      "sha256": "c962c0c7ddc58493cac5c8a0f672338a4e6e7533cd8ba0310468e0919319dca2"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_hooks_002.md",
+      "sha256": "93be71023a181499e3e28c93c9be72fbb389f2720fe762dcac9fda37046a6722"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_hooks_003.md",
+      "sha256": "a986beb542fdfac422ea22a416fb7d39bce448c65539bd96fcb498401180b340"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_hooks_004.md",
+      "sha256": "f4810c22cc069967f9df5f7d552ac72688e8d78cfb4fb4ea7dd9e2746018ecdd"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_hooks_005.md",
+      "sha256": "f9316d40f6dd472b5769760f1bf5b412fc308e2acf7e132bac0b48f760e08c89"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_knowledge_work_2026_04_22.md",
+      "sha256": "b07085d4c1fed2740f3411648ae5f1a2ae52b1d8f8be70bfbd99e78b8543bb7c"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_knowledge_work_dir_2026_04_22.md",
+      "sha256": "76fbeb4273bd5db09c84a00b1613239eba65d1c576a630b893584962c9c7af7b"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_live_terminal_2026_04_22.md",
+      "sha256": "c05df40d64552c0ba23bb39d5f43e406f9bbf8fe0cc1aa466467dd6330f2b087"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_meta_self_verify_2026_04_22.md",
+      "sha256": "8d2904fe4441a797be612abd7a252b63e7b5421a18c69c5f1942d59a8711d614"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_predeletion_audit_2026_04_22.md",
+      "sha256": "2f9df7ff7c0dde8600042200d2fa773d5745eedeccd4cfbe32205ad21a7a25ba"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_project_001.md",
+      "sha256": "6f1220bc4a2e11a7b22782bdd7b7c056501e68e36205e3a33091890461812247"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_project_002.md",
+      "sha256": "e46d1bd6f6d9274ad4accc3a0fde4e170925b034785f1e01425633d2b1a3c60f"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_project_003.md",
+      "sha256": "e8777bf038c520eafe3095b6085a2e0653ae2ff731511fda00d0f5d2adc69de3"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_project_004.md",
+      "sha256": "01da1c254cd80fabae49aa9664ec4cd71c72ec589e8e9f3cc5d4c1334c8d82cb"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_project_005.md",
+      "sha256": "f0b83128630f28b676633ffadf744dc388211fce9ceaec9528209db717816591"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_read_before_task_2026_04_22.md",
+      "sha256": "99072641acacebce8ef0efa9ffcebb691243d0d3d32531c0e79e51f0800e6bbc"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_register_fallback_2026_04_22.md",
+      "sha256": "495ab360a8a8d93fba0a92973772862463f664de59e523462559ba0058970059"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_sandbox_home_2026_04_22.md",
+      "sha256": "0f70a4dd0305e2d2cb772d3fe46fca094aabe27114e409439d963bb4b7d5fd9e"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_self_verify_loop_2026_04_22.md",
+      "sha256": "ebc023821d544ecaf50f7232113d5e8afdd651b4efe5adf1e25557d38d6befa4"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_start_demo_verify_2026_04_22.md",
+      "sha256": "cdd9f113c1b3d88261c8ad31ca5481377dcec1fd1c6f95a5ed9cfb78c352b3e3"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_surgical_rollback_2026_04_22.md",
+      "sha256": "f309a9befdda277b485edcac007600d11397fbada529f95bbc3aaec0e704ae4c"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_tmux_nested_2026_04_22.md",
+      "sha256": "f2479d6deb0ed5405e19729b04f107b1361c8a6980224ef871f238461aa33bb5"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_visualization_first_2026_04_22.md",
+      "sha256": "ee220fc9a541ed2f6044a793b4a18120c248fbb97b4bf86c80b24f93f8ea7410"
+    },
+    {
+      "path": "runtime/wiki_tree/general/m1_zotero_mcp_2026_04_22.md",
+      "sha256": "c959558345347f516d4b513d258ea2fe1d0861fc9e3274096a83bfaaf16a8136"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/bob-pgpool-bad-2026-04-12.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-agent-teams-001.jsonl",
+      "sha256": "e811985027d901634a240c267e87bbc6ac0c017c7c0a67c6279f4f40aa18c6f8"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-agent-teams-002.jsonl",
+      "sha256": "8aea2b72e2c96b4cb356a1b319078040abfbdaf197ab1237b898a196a55abdf1"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-agent-teams-003.jsonl",
+      "sha256": "e97b23d4245f2a2973a680bf2eaca37359ebf0d1d57a7b1a4b92aae705b5ce4c"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-agent-teams-004.jsonl",
+      "sha256": "049f7b27d6aa0f6f0fcf6b9dbd91d6dbc01808e91ca5cc8d5c6f57d6b81ceef1"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-agent-teams-005.jsonl",
+      "sha256": "13a9af34ede864f9ccc008a4280b7218d2ee2ead7331193ca45ed151110fcf89"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-error-001.jsonl",
+      "sha256": "af1605dbf4de7f28d05e55b16fa939b6bb0f6a75f3bbb0c886ba47dbe1d84e5e"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-error-002.jsonl",
+      "sha256": "ca735a02d1d22fd5c45520982caeb4c924f2f9626153f46cf269c64cae9929bb"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-error-003.jsonl",
+      "sha256": "14af65d5377be7712a56049965b60c002aed26280cfa87f335fa263a33ad9d01"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-error-004.jsonl",
+      "sha256": "9bd8559b7b855713061cd7d249f8d09bf55ba5a5ea0aa6d55d5aafb57c778e76"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-error-005.jsonl",
+      "sha256": "00f6fe00a26b4adf3fc71f19e2c4b4dfd4ca7a72db781ee12171887b566f11f7"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-hooks-001.jsonl",
+      "sha256": "374efc8859cdebe91a0db9642ba21792d9964ede12d4b6890e1f9924c3bf0f96"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-hooks-002.jsonl",
+      "sha256": "9b5fec0b25dd0846d0079bfb1b2fb00acf941da7da6fb14974dbe9581a4d5305"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-hooks-003.jsonl",
+      "sha256": "6cf0a7e291dcfce63b092c174271cf60f7041d6dafaf9b8d11d00911114867b3"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-hooks-004.jsonl",
+      "sha256": "c81b0291db85f1482a84c22333b66d34348cc0eff9fe70e647d782ebebde97df"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-hooks-005.jsonl",
+      "sha256": "0f31bd63b34376d606a95ab4722b1db075e451fa034eb42a2d0ec9a507f2582f"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-project-001.jsonl",
+      "sha256": "4f90aa465aaafe70efe0af52cb8b3db5093ba0d3ef5e687afedf403938f7b055"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-project-002.jsonl",
+      "sha256": "6ab756ce0fe96fe4cd6c71934f44c84bc56ca20d5549704eddd5d7a257e5f53f"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-project-003.jsonl",
+      "sha256": "47c4b384d28fba750df70bd934c9fd2e74edf9013cfb2eef86014ad5b9c68c01"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-project-004.jsonl",
+      "sha256": "1ab72cbedc5c7655fec758d5b2e68836b08578d2021a1d121cee960a3796fb3d"
+    },
+    {
+      "path": "runtime/wiki_tree/general/raw/m1-project-005.jsonl",
+      "sha256": "47eb29d42c2d629377a8b78ec534b3be2fa5e6e60f965ba6be29cf4ef6e899d4"
+    },
+    {
+      "path": "runtime/wiki_tree/infra_cache/42a6556e_5e45_5e37_8acf_0cc46fe06c5b.md",
+      "sha256": "b7fea7bd8fb316f141e0a19cd18ce3778c9dc479e71837e3bc14053e7b623690"
+    },
+    {
+      "path": "runtime/wiki_tree/infra_cache/6c755530_8eb0_5ced_87d7_d4811ba6b3dc.md",
+      "sha256": "6ee6a6e4d218a37c37cc25cffe63186a5c300ececba0c1228192abde211f468c"
+    },
+    {
+      "path": "runtime/wiki_tree/infra_cache/INDEX.md",
+      "sha256": "b7a943afdc2774a851c91871348668c23b2fbdac916882c3e8d42c976ed068f2"
+    },
+    {
+      "path": "runtime/wiki_tree/infra_cache/f53c099b_cbde_571a_abf7_2b3ba4d33b7c.md",
+      "sha256": "22ea201d685a2d155774b990c5805690829ce76fe82012867d0788e101495ef8"
+    },
+    {
+      "path": "runtime/wiki_tree/infra_cache/raw/42a6556e-5e45-5e37-8acf-0cc46fe06c5b.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "runtime/wiki_tree/infra_cache/raw/6c755530-8eb0-5ced-87d7-d4811ba6b3dc.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "runtime/wiki_tree/infra_cache/raw/carol-redis-eviction-2026-03-27.jsonl",
+      "sha256": "51460a8a5c227f7478c87cc925e748e40dd5f2d7a0000acc2d246abb9d7a5015"
+    },
+    {
+      "path": "runtime/wiki_tree/infra_cache/raw/f53c099b-cbde-571a-abf7-2b3ba4d33b7c.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "runtime/wiki_tree/infra_cache/redis_lru_session_eviction.md",
+      "sha256": "80d6bd1285226ba27dc433774a9af67dfbcced0a2ab11a9a1b87731b1253b672"
+    },
+    {
+      "path": "runtime/wiki_tree/infra_queue/INDEX.md",
+      "sha256": "c0d71827404b226ebd7696c0af7955dedc4df408671303153af11682e414fecd"
+    },
+    {
+      "path": "runtime/wiki_tree/infra_queue/celery_retry_storm.md",
+      "sha256": "fb8f0b24502ad331ae24d75b860f85ac2532c0470caaa8decc9ce3e349e2a3d0"
+    },
+    {
+      "path": "runtime/wiki_tree/infra_queue/raw/alice-celery-retry-2026-04-08.jsonl",
+      "sha256": "19484655f2bbe2e97a18d9153dd45d05e5559ceab26ca1068f3d34b0dc436125"
+    },
+    {
+      "path": "runtime/wiki_tree/shell_env/INDEX.md",
+      "sha256": "a38f832e09c0bfca7d6025f0347b4b69486a0c2d2ed6e9e6d46bb588e9e8e96f"
+    },
+    {
+      "path": "runtime/wiki_tree/shell_env/raw/m1-tmux嵌套环境变量-2026-04-18.jsonl",
+      "sha256": "5f5e923ea9ef8387bc2c49e52eb4d2abc8ba3209d259a8225473224d737c6a41"
+    },
+    {
+      "path": "runtime/wiki_tree/shell_env/raw/m1-worktree_分离开发-2026-04-18.jsonl",
+      "sha256": "36d96677be445e5f5d6905e92f0f40f1e261297cd62ba46e132d670db73216fe"
+    },
+    {
+      "path": "runtime/wiki_tree/shell_env/raw/m1-实机日志契约-2026-04-18.jsonl",
+      "sha256": "9165aa59638bacf43eeeee293fa60f994ab4f9742fa7518ea8f58a960f288639"
+    },
+    {
+      "path": "runtime/wiki_tree/shell_env/raw/m1-权限检查优化-2026-04-18.jsonl",
+      "sha256": "796e84a46d070418d8688dafc3e4be9939c4a5080a83ed3ba40efa2d032e2bfc"
+    },
+    {
+      "path": "runtime/wiki_tree/shell_env/raw/m1-沙箱脚本污染-2026-04-18.jsonl",
+      "sha256": "fa982606660ef5ae151de3f465d201cd494aee16c13fd777ce335f729c742195"
+    },
+    {
+      "path": "runtime/wiki_tree/shell_env/tmux嵌套环境变量.md",
+      "sha256": "284d06fe2d773c0089f988d677c9611fe0ce19d2bcf325ab25a9eb7b06549eab"
+    },
+    {
+      "path": "runtime/wiki_tree/shell_env/worktree_分离开发.md",
+      "sha256": "9789aae9ac1c9b6e826f8a0db4fd276d3a9800989cc90b8e9554c69bc7c6b35d"
+    },
+    {
+      "path": "runtime/wiki_tree/shell_env/实机日志契约.md",
+      "sha256": "fbe81bffe73d7b750380074aad0311c40d82397ec97bf36aa7d3a4992a1ce04c"
+    },
+    {
+      "path": "runtime/wiki_tree/shell_env/权限检查优化.md",
+      "sha256": "33ebdc6f540e9b666129987180c343fa70968749c979f2f5f5492628124f19f7"
+    },
+    {
+      "path": "runtime/wiki_tree/shell_env/沙箱脚本污染.md",
+      "sha256": "39fe0da8b25812f273e052ced423507980c6467ee7f7b3bfb151204726eb33f3"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/INDEX.md",
+      "sha256": "e9baeb27e6bc03809cbc88f550fd8a436a8b53a975afc521e40b54e36eabfb27"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/ed73b704_8c53_5e0d_9ee0_d5dcfe11a376.md",
+      "sha256": "4960e4e3208962b90b61426a4bf6866d293947f988f24d8816d224070dc26ed8"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/html_自动预览.md",
+      "sha256": "6235da56e21f7e2d02c4224f408ef51b8474f40591a65ef22e21e54b1d3b0672"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/json_文件逐行处理.md",
+      "sha256": "c017ba829d2329e212c737b0d17b585b99375094c7964e3a404474d692b2ded2"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/raw/ed73b704-8c53-5e0d-9ee0-d5dcfe11a376.txt",
+      "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/raw/m1-html_自动预览-2026-04-18.jsonl",
+      "sha256": "7e91d40a3f6b2567016d6eb29c54d3ea9555d2769a702d83ff1874f7c68fa962"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/raw/m1-json_文件逐行处理-2026-04-18.jsonl",
+      "sha256": "6d9de2f07b56123d6b9635da0003d375893a3750d9ecf7ac734285499838aaeb"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/raw/m1-嵌套深度控制-2026-04-18.jsonl",
+      "sha256": "7e0f8e1690d9bc0aefe2d35a2c9f6dd39abce83da4d8479cbd07adfd58d6bf36"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/raw/m1-工作目录持久化-2026-04-18.jsonl",
+      "sha256": "b624d24c3cf65d3360d36f7ec89562234760018de6477434a6970f04326c1917"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/raw/m1-循环内文件写入优化-2026-04-18.jsonl",
+      "sha256": "dec8131801655ed0e55e045adf4d05675ab4a552da7394f932a716372585c56b"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/raw/m1-格式化验证-2026-04-18.jsonl",
+      "sha256": "1fbb486d22e019fd5422b2ecc56c9e130d0baf8a758a74f8f1927c11906de882"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/raw/m1-正则表达式斜杠转义-2026-04-18.jsonl",
+      "sha256": "fc29fd00a02890d2f7f9bdb140e9585753436cce54e0af3264cce55b695a452d"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/raw/m1-目录树展示-2026-04-18.jsonl",
+      "sha256": "c8e86ca495886e1db2acc55378dff1ffb62a063d0f2fa165b911764c09bb880a"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/raw/m1-相对路径避免-2026-04-18.jsonl",
+      "sha256": "0d2a5450aaef9747dda083e5748fb066893320b6c0ddfd85ce162acc3b2881ab"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/raw/m1-跨平台路径-2026-04-18.jsonl",
+      "sha256": "b545e7bcf8bab8b498794d2c4ccbf9bda41b60d3f285f20e26528aca51f3c0bc"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/raw/m1-长文本分片读取-2026-04-18.jsonl",
+      "sha256": "151f431ee06313e5a0781feb50eaf024bbbe4f5fe6f3dbf9e1bda6c7e96761c5"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/raw/m1-频繁工具调用优化-2026-04-18.jsonl",
+      "sha256": "c8e86ca495886e1db2acc55378dff1ffb62a063d0f2fa165b911764c09bb880a"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/raw/m1-默认全量并只选-2026-04-18.jsonl",
+      "sha256": "c8e86ca495886e1db2acc55378dff1ffb62a063d0f2fa165b911764c09bb880a"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/嵌套深度控制.md",
+      "sha256": "e70194dae7c01a16049423e612007d078487c495834a8a48822cab1c40f468a1"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/工作目录持久化.md",
+      "sha256": "4df856ca0ef8d63e26e862fc0c8dae20e0ae5a1def9362cc9740db67cad04009"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/循环内文件写入优化.md",
+      "sha256": "7eb732a9980b7c683cf606d79dc9fe3f2cbdaedfbca09737fa620181d9e317f1"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/格式化验证.md",
+      "sha256": "5cfd62c515119d2416c476feee5c220ebb2ffc9a9f8feb4eb0a624119debe0b3"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/正则表达式斜杠转义.md",
+      "sha256": "04319dac16233cc5d71ea14f2477ed542593af3259641dd60bbcf1c4d0fd14dc"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/目录树展示.md",
+      "sha256": "2e52bfff8dd181525d81ee462aa32413ae985217ba14e5fdce0b85fa97e7d21f"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/相对路径避免.md",
+      "sha256": "c9ac849410ce0d4a59044eaeaa4d99e40c6b337202ca4d55bf62a2fc23cb06ca"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/跨平台路径.md",
+      "sha256": "0bb20a1bfb9e0bf695f637e1b0397d8147dadbd80701de37eca8a5fe5bcb5d95"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/长文本分片读取.md",
+      "sha256": "be3d91fb018495367fa416e62878bf3e92cea2da2c8fc682e2ebaccc5e995dee"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/频繁工具调用优化.md",
+      "sha256": "585f3919c1716b5b8144630ef65315493ed592cc3eb99e8d50da103de8d070b5"
+    },
+    {
+      "path": "runtime/wiki_tree/tooling/默认全量并只选.md",
+      "sha256": "ae3113e1f5f01adc1a582f2402c2cf555b6ef990a1b0749ddf7bccceee2a6058"
+    },
+    {
+      "path": "runtime/wiki_tree/topics.json",
+      "sha256": "84dd512cd2a7e416b21f896dfe7dc65fa292cdba190965b3c98efa2d7bbca007"
+    },
+    {
+      "path": "runtime/wiki_tree/wiki_types.json",
+      "sha256": "69d258f1567ec7121960dfdc91f0245df6701a1bcb92bc953f6d96a74beabad8"
+    },
+    {
+      "path": "scripts/insights_cache.py",
+      "sha256": "0c015791b0f79954a06909601264fbc459b11a05d08d16e8a0ca30ae1a404815"
+    },
+    {
+      "path": "scripts/insights_prefetch.py",
+      "sha256": "b31f0e8520d0c36a69a15206f9ed874216e3dc2b9cd6f4fef52527c6422aec7d"
+    },
+    {
+      "path": "scripts/latency_gate.py",
+      "sha256": "f93ed755679e5431097eb3dba1a4e0a1ac5370955dcb0313374d9736537d2b01"
+    },
+    {
+      "path": "scripts/publish_marketplace.py",
+      "sha256": "f6f99b156ecfd3ce1803eae009325b14e27f2daf851c5fd4f60bfd7f535323c0"
+    },
+    {
+      "path": "scripts/self_check.sh",
+      "sha256": "46fef55e79e69fecb409a3a3fedf80252e39d08d800346715725ccd5bd560a2a"
+    },
+    {
+      "path": "scripts/session_start_full_fetch.py",
+      "sha256": "ef026664333462b5c44aee59832fa232c1adc5fb040820fe313cbd8bacab6bc0"
+    },
+    {
+      "path": "scripts/today_count.py",
+      "sha256": "f848efa86e96a242bb7a558878b089bfac44a6817b0c19a3b7419249f8bc77a3"
+    },
+    {
+      "path": "skills/insights-share/SKILL.md",
+      "sha256": "76b99940782062bf250a266b6eadd119c190c1a35b05015912655bfd738eea4a"
+    },
+    {
+      "path": "skills/insights-share/TEAM_A_REPORT.md",
+      "sha256": "2f59e91c60a7ffd8b02779466b41fd82f3d8f3ebeef5cb40afbfbd24638c485c"
+    },
+    {
+      "path": "skills/insights-share-server/SKILL.md",
+      "sha256": "6a233e87dd924086c2cf40c38790b66921bcf95f043264d1c6e544cdd6838e8a"
+    },
+    {
+      "path": "skills/insights-share-server/scripts/start_server.sh",
+      "sha256": "345979e0682cea9fc09ef90af9d85c3bd86d580fe35618cc5b132b72ff0055bb"
+    },
+    {
+      "path": "skills/insights-share-server/scripts/start_ui.sh",
+      "sha256": "cb1c2065c9615a81edc4dd0267eae80639939613a83ef43e232fa1d6705c77c2"
+    },
+    {
+      "path": "statusline/insights_share_statusline.sh",
+      "sha256": "d8742f65f9310af205175cd8a107c658f3a161268584cd9e7b0c9f278df19de1"
+    }
+  ]
+}

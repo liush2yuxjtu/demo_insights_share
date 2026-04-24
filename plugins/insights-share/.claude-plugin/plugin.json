@@ -1,6 +1,6 @@
 {
   "name": "insights-share",
-  "version": "0.6.0-m7",
+  "version": "0.6.1-m7",
   "description": "局域网 insights-share：topic 中心 Good/Bad 并列卡片的静默回灌 + 管理面板。M5 已交付：插件深度重命名 insights-wiki -> insights-share、plugins/<name>/ 布局、share-* 命令与 agent、[share ...] 徽章。M6/M7 交付：latency_cache + early-exit + async hook + SessionStart prefetch + parallel search/adapter（cache-hit p95=1ms）。",
   "author": {
     "name": "demo_insights_share Team A",

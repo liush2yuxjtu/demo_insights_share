@@ -1,6 +1,6 @@
 # insights-share plugin
 
-demo_insights_share 团队内部 Claude Code plugin。当前主线是 **v0.6.0-m7 / M7_LATENCY_DEEP**。
+demo_insights_share 团队内部 Claude Code plugin。当前主线是 **v0.6.1-m7 / M7_LATENCY_DEEP**。
 
 > **权威设计文档**：[`proposal/proposal_rename_to_insights_share.md`](../../proposal/proposal_rename_to_insights_share.md)
 >
@@ -118,7 +118,7 @@ claude plugin install insights-share    # 新包
 
 安装后应能看到：
 
-- version: `0.6.0-m7`
+- version: `0.6.1-m7`
 - commands: `share-install/share-search/share-publish/share-review/share-diff`
 - agents: `share-curator/share-validator`
 - mcp: `wiki-server`（内部名，M6 改）
