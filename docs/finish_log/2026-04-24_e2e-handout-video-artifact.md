@@ -18,6 +18,7 @@
   - required：6/6 PASS
   - enabled：6/6 PASS
   - P1/P4/P5/P6/P7 均 PASS，P3/AP-1/P2 按本次 E2E 口径跳过
+- `claudefast -p "what is our e2e status"`：PASS，回答包含 E2E PASS、plugin `0.6.1-m7`、当前分支与本 finish log。
 
 ## 产物
 
