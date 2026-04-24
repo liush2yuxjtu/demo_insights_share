@@ -9,6 +9,10 @@
 
 无。
 
+## 当前下一步
+
+默认下一步是 release/PR 收尾；当前没有开放 E2E 阻塞项。adoption-proof 扩展是后续产品开发轨道，用来扩展更多真实采纳证据、质量指标和回访信号，不作为当前 E2E 修复项。
+
 ## Closed / Deferred
 
 ### [DONE] [UC-1] plugin bundle self-containment

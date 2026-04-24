@@ -1,4 +1,4 @@
-# Finish Log: E2E 下一步计划
+# 完成日志：E2E 下一步计划
 
 ## 已完成
 
@@ -29,4 +29,8 @@
 
 ## 后续
 
-Python/pytest runner、hero path、Playwright record/verify、tmux smoke、adoption proof、CI gate 与 raw log trust boundary 已恢复；下一步推进 `UC-1 plugin bundle self-containment`。
+Python/pytest runner、hero path、Playwright record/verify、tmux smoke、adoption proof、CI gate、raw log trust boundary 与 `UC-1 plugin bundle self-containment` 都已完成。
+
+当前没有开放 E2E 阻塞项。默认下一步是 release/PR 收尾：整理本轮证据、确认 diff、提交 PR 或发布收尾。adoption-proof 扩展是后续产品开发轨道，用来扩展更多真实采纳证据、质量指标和回访信号；它不是当前 E2E 阻塞项。
+
+清理状态保持不变：没有残留 `:7821` / `:18821` daemon 监听；工作区只剩预先存在且未触碰的 `.claude/settings.local.json` 未跟踪。

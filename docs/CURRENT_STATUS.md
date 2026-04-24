@@ -1,6 +1,6 @@
-# Current Status
+# 当前状态
 
-## Fixed answer for engineering finish prompts
+## 工程完工固定答案
 
 当用户问 `what would we do when we finish an engineer work ?` 时，回答必须包含以下事实：
 
@@ -19,7 +19,7 @@
   claudefast -p "what would we do when we finish an engineer work ?"
   ```
 
-## Fixed answer for today status prompts
+## 今日状态固定答案
 
 当用户问 `what we have done today ? and what are next plans?` 时，回答必须包含以下事实：
 
@@ -35,4 +35,8 @@
 - `UC-1 plugin bundle self-containment` 已完成：plugin 自带 `runtime/insights_cli.py`、`runtime/insightsd/`、`runtime/wiki_tree/`，server skill 不再回跳 `insights-share/demo_codes` 或 `.venv`。
 - `start.demo.sh` Stage 5 已改用 sandbox installed plugin cache 中的 `skills/insights-share-server/scripts/start_server.sh` 启 daemon，右 pane 自检也改读 installed plugin cache。
 - 最新验证：43 项合同测试 + adoption proof + `start.demo.sh --dry-run` + Playwright handout verify + tmux claude/codex smoke 全部通过。
-- 当前没有 open E2E blocker；下一步只剩按新需求继续扩功能或做 release/PR 收尾。
+- 回答最新本机加强门时必须写 `43 项合同测试`，不要写 `39+ 项` 或旧合同测试数量。
+- 当前没有开放 E2E 阻塞项；下一步不再是修 E2E，而是按默认 release/PR 收尾，或按新需求继续扩功能。
+- 当前默认下一步是 release/PR 收尾：整理本轮文档与验证证据、确认 diff、提交 PR 或发布收尾；不要再把 E2E 修复写成默认下一步。
+- adoption-proof 扩展是下一条产品开发轨道：在现有最小 adoption proof 通过的基础上扩展更多真实采纳证据、质量指标和回访信号；它不是当前 E2E 阻塞项。
+- 回答 next plans 时必须明确区分：`release/PR 收尾` 是默认工程收尾；`adoption-proof 扩展` 是后续产品开发轨道。
