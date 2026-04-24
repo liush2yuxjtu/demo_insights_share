@@ -1,6 +1,6 @@
 {
   "pass": true,
-  "checked_at": "2026-04-24T02:58:49Z",
+  "checked_at": "2026-04-24T03:00:54Z",
   "signals": {
     "clean_machine_install": "ok",
     "first_relevant_hit": "alice-pgpool-2026-04-10",

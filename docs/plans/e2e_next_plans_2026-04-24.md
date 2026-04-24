@@ -20,6 +20,7 @@
 - `npm run handout:record` 已通过：完整用户流 mp4 与 manifest 已刷新，ffmpeg 退出逻辑已加超时兜底。
 - `bash insights-share/validation/run_start_tmux_smoke.sh` 已通过：`start.claude.sh` 与 `start.codex.sh` auto smoke 均完成 healthz/publish/solve/install/cache 闭环。
 - 已新增并跑通 adoption proof 最小门：`bash insights-share/validation/run_adoption_proof.sh`，用隔离 `HOME` 验证 clean-machine install、first relevant hit、first publish、day-2 return 四个信号；最新报告在 `insights-share/validation/reports/deliverables/adoption_proof_latest.json`。
+- 已新增 CI/pre-commit 共用入口：`bash insights-share/validation/run_ci_gate.sh`，并接入 `.github/workflows/e2e-gates.yml`。CI 默认跑合同测试 + adoption proof；本机有 `claude`/`tmux` 时自动加跑 `start.demo.sh --dry-run`。
 - `TODOS.md` 中 `SB-1` 与 `UC-2` 很可能已由近期 commit 落地，需要用测试和文档对账后关闭。
 
 ## 分层 E2E 门禁
@@ -44,7 +45,7 @@
 5. 已完成：跑 Playwright record，重录完整 user-flow mp4。
 6. 已完成：跑 tmux smoke，覆盖 `start.claude.sh` 与 `start.codex.sh`。
 7. 已完成：adoption proof 最小门已落脚本、合同测试和一次真实报告。
-8. 最后再加 CI/pre-commit gate；现在 P3、hero path、Playwright record/verify、tmux smoke 已绿，可以把 `run_contract_tests.sh` + `start.demo.sh --dry-run` + `npm run handout:verify` + `run_start_tmux_smoke.sh` + `run_adoption_proof.sh` 作为 gate 的测试入口。
+8. 已完成：新增 CI/pre-commit 共用 gate。默认入口是 `run_ci_gate.sh`；本机加强门可设置 `RUN_HANDOUT_VERIFY=1 RUN_TMUX_SMOKE=1` 叠加 Playwright 回放和 tmux smoke。
 
 ## PASS 标准
 

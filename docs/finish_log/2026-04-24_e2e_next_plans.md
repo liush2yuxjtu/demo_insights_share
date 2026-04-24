@@ -17,6 +17,7 @@
 - 修复 `start_demo_driver.sh` 的 auto 模式：`--auto-approve` 不再调用 Claude/Codex coach 生成讲解，改用内置说明，避免 tmux smoke 卡在外部 LLM 调用。
 - 已跑通 `bash insights-share/validation/run_start_tmux_smoke.sh`：`start.claude.sh` 与 `start.codex.sh` 均完成 healthz、publish_good、publish_bad、solve、install、cache，报告写入 `tmux_claude_smoke.txt` 与 `tmux_codex_smoke.txt`。
 - 新增并跑通 AP-1 最小 adoption proof 入口：`bash insights-share/validation/run_adoption_proof.sh`，用隔离 `HOME` 与临时 wiki store 验证 clean-machine install、first relevant hit、first publish、day-2 return，最新报告写入 `adoption_proof_latest.json`。
+- 新增 CI/pre-commit 共用 gate：`bash insights-share/validation/run_ci_gate.sh`；新增 `.github/workflows/e2e-gates.yml`，在 `start.*`、plugin、demo_codes、validation、release 改动时跑确定性门禁。
 
 ## 关键结论
 
@@ -24,4 +25,4 @@
 
 ## 后续
 
-Python/pytest runner、hero path、Playwright record/verify、tmux smoke 与 adoption proof 已恢复；下一步推进 CI gate。
+Python/pytest runner、hero path、Playwright record/verify、tmux smoke、adoption proof 与 CI gate 已恢复；下一步对账 `TODOS.md` 中已完成/过时条目。

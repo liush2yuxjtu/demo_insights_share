@@ -29,16 +29,25 @@ log() {
 }
 
 choose_python() {
-  if [ -x "${PYTHON_BIN}" ]; then
+  if [ -x "${PYTHON_BIN}" ] && "${PYTHON_BIN}" --version >/dev/null 2>&1; then
     printf '%s\n' "${PYTHON_BIN}"
     return 0
   fi
-  if command -v python3 >/dev/null 2>&1; then
-    printf '%s\n' "$(command -v python3)"
-    return 0
+  local bootstrap_python=""
+  for candidate in python3.11 python3.12 python3.13 python3; do
+    if command -v "${candidate}" >/dev/null 2>&1; then
+      bootstrap_python="$(command -v "${candidate}")"
+      break
+    fi
+  done
+  if [ -z "${bootstrap_python}" ]; then
+    log "missing Python runtime"
+    return 127
   fi
-  log "missing Python runtime"
-  return 127
+  "${bootstrap_python}" -m venv "${WORKDIR}/.venv"
+  "${WORKDIR}/.venv/bin/python" -m pip install --upgrade pip >/dev/null
+  "${WORKDIR}/.venv/bin/python" -m pip install -r "${SOURCE_DIR}/requirements.txt" >/dev/null
+  printf '%s\n' "${WORKDIR}/.venv/bin/python"
 }
 
 cleanup() {
@@ -101,13 +110,13 @@ main() {
   mkdir -p "${LOG_DIR}"
   exec > >(tee "${REPORT_TXT}") 2>&1
 
-  PYTHON_BIN="$(choose_python)"
   WORKDIR="$(mktemp -d "/tmp/insights-adoption-proof.XXXXXX")"
   HOME_DIR="${WORKDIR}/home"
   STORE_DIR="${WORKDIR}/wiki_tree"
   DAEMON_LOG="${WORKDIR}/daemon.log"
   mkdir -p "${HOME_DIR}" "${STORE_DIR}"
   trap cleanup EXIT
+  PYTHON_BIN="$(choose_python)"
 
   log "workdir=${WORKDIR}"
   log "home=${HOME_DIR}"
