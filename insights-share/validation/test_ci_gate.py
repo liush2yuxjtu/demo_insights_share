@@ -7,6 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 RUNNER = ROOT / "insights-share/validation/run_ci_gate.sh"
+CONTRACT_RUNNER = ROOT / "insights-share/validation/run_contract_tests.sh"
 WORKFLOW = ROOT / ".github/workflows/e2e-gates.yml"
 
 
@@ -26,6 +27,12 @@ def test_ci_gate_runner_includes_required_gates() -> None:
     assert "start.demo.sh --dry-run" in script
     assert "RUN_HANDOUT_VERIFY" in script
     assert "RUN_TMUX_SMOKE" in script
+
+
+def test_contract_runner_default_set_includes_statusline_gate() -> None:
+    script = _read(CONTRACT_RUNNER)
+
+    assert '"insights-share/validation/test_statusline.py"' in script
 
 
 def test_github_workflow_watches_product_surfaces() -> None:
