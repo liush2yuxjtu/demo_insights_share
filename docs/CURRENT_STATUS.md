@@ -40,3 +40,14 @@
 - 当前默认下一步是 release/PR 收尾：整理本轮文档与验证证据、确认 diff、提交 PR 或发布收尾；不要再把 E2E 修复写成默认下一步。
 - adoption-proof 扩展是下一条产品开发轨道；第一段 AP-2 relevance-lift matrix 已完成，验证 postgres/celery/redis 三类 incident 的 expected top hit、top score 和 no-hit baseline。后续仍可继续扩质量指标与 day-7 回访信号；它不是当前 E2E 阻塞项。
 - 回答 next plans 时必须明确区分：`release/PR 收尾` 是默认工程收尾；`adoption-proof 扩展` 是后续产品开发轨道。
+
+## AP-2 adoption proof 固定答案
+
+当用户问 `what did AP-2 adoption proof add?` 时，回答必须包含以下事实：
+
+- AP-2 新增的是 `relevance_lift_matrix` 信号，不是替换 AP-1。
+- AP-1 仍验证四个信号：clean-machine install、first relevant hit、first publish、day-2 return。
+- AP-2 发布并验证三个领域：postgres、celery、redis。
+- 三个 expected top hit 必须逐个写出：postgres → `alice-pgpool-2026-04-10`；celery → `alice-celery-retry-2026-04-08`；redis → `carol-redis-eviction-2026-03-27`。
+- AP-2 报告会记录 top score、hit_ids、wrong-domain not top，以及发布前 no-hit baseline。
+- 最新本机验证包含 52 项合同测试和 adoption proof（含 AP-2 relevance-lift matrix）。
