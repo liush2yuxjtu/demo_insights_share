@@ -10,6 +10,7 @@ import asyncio
 import importlib.metadata
 import json
 import os
+import shlex
 import sys
 import urllib.error
 import urllib.parse
@@ -32,6 +33,7 @@ DEFAULT_PROBLEM = (
 )
 CONFIG_PATH = Path.home() / ".cache" / "insights-share" / "config.json"
 TRUSTED_KEYS_PATH = Path.home() / ".cache" / "insights-share" / "trusted_keys.json"
+CLAUDE_SETTINGS_PATH = Path.home() / ".claude" / "settings.json"
 
 
 def _resolve_version() -> str:
@@ -88,6 +90,107 @@ def _load_install_config() -> dict[str, Any]:
     except (OSError, json.JSONDecodeError):
         return {}
     return data if isinstance(data, dict) else {}
+
+
+def _read_json_file(path: Path) -> dict[str, Any]:
+    if not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return data if isinstance(data, dict) else {}
+
+
+def _write_json_file(path: Path, payload: dict[str, Any]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    tmp.replace(path)
+
+
+def _statusline_script_path() -> Path:
+    plugin_root = Path(__file__).resolve().parents[1]
+    return plugin_root / "statusline" / "insights_share_statusline.sh"
+
+
+def _statusline_command(server: str, script: Path | None = None) -> str:
+    script_path = script or _statusline_script_path()
+    no_proxy = "127.0.0.1,localhost"
+    return (
+        f"NO_PROXY={shlex.quote(no_proxy)} "
+        f"no_proxy={shlex.quote(no_proxy)} "
+        f"INSIGHTS_SHARE_URL={shlex.quote(server)} "
+        f"{shlex.quote(str(script_path))}"
+    )
+
+
+def _shell_single_quote(value: str) -> str:
+    return "'" + value.replace("'", "'\"'\"'") + "'"
+
+
+def _write_statusline_wrapper(
+    wrapper: Path,
+    previous_command: str,
+    server: str,
+    script: Path | None = None,
+) -> None:
+    script_path = script or _statusline_script_path()
+    wrapper.parent.mkdir(parents=True, exist_ok=True)
+    body = f"""#!/usr/bin/env bash
+set -u
+
+input_file="$(mktemp "${{TMPDIR:-/tmp}}/insights-share-statusline.XXXXXX")"
+trap 'rm -f "$input_file"' EXIT
+cat > "$input_file"
+
+previous_command={_shell_single_quote(previous_command)}
+previous_output=""
+if [ -n "$previous_command" ]; then
+  previous_output="$(bash -c "$previous_command" < "$input_file" 2>/dev/null || true)"
+fi
+
+share_output="$(NO_PROXY=127.0.0.1,localhost \\
+  no_proxy=127.0.0.1,localhost \\
+  INSIGHTS_SHARE_URL={shlex.quote(server)} \\
+  {shlex.quote(str(script_path))} < "$input_file" 2>/dev/null || true)"
+
+if [ -n "$previous_output" ] && [ -n "$share_output" ]; then
+  printf '%s  %s\\n' "$previous_output" "$share_output"
+elif [ -n "$previous_output" ]; then
+  printf '%s\\n' "$previous_output"
+else
+  printf '%s\\n' "$share_output"
+fi
+"""
+    wrapper.write_text(body, encoding="utf-8")
+    wrapper.chmod(0o700)
+
+
+def _configure_claude_statusline(server: str) -> str:
+    settings = _read_json_file(CLAUDE_SETTINGS_PATH)
+    existing = settings.get("statusLine")
+    existing_command = ""
+    if isinstance(existing, dict):
+        value = existing.get("command")
+        existing_command = value if isinstance(value, str) else ""
+
+    desired = _statusline_command(server)
+    wrapper = Path.home() / ".cache" / "insights-share" / "statusline_wrapper.sh"
+
+    if not existing_command:
+        settings["statusLine"] = {"type": "command", "command": desired}
+        outcome = "statusline=installed"
+    elif "insights_share_statusline.sh" in existing_command or str(wrapper) in existing_command:
+        settings["statusLine"] = {"type": "command", "command": desired}
+        outcome = "statusline=updated"
+    else:
+        _write_statusline_wrapper(wrapper, existing_command, server)
+        settings["statusLine"] = {"type": "command", "command": str(wrapper)}
+        outcome = "statusline=wrapped"
+
+    _write_json_file(CLAUDE_SETTINGS_PATH, settings)
+    return outcome
 
 
 def _resolve_wiki_url(value: str) -> str:
@@ -482,6 +585,10 @@ def cmd_wiki_install(args: argparse.Namespace) -> int:
         json.dumps(cfg, ensure_ascii=False, indent=2), encoding="utf-8"
     )
     try:
+        (cfg_dir / ".health_cache").unlink()
+    except FileNotFoundError:
+        pass
+    try:
         key_payload = _http_get(f"{server}/signing/public-keys")
     except urllib.error.URLError:
         key_payload = {"keys": [], "updated_at": None}
@@ -496,11 +603,17 @@ def cmd_wiki_install(args: argparse.Namespace) -> int:
             (cfg_dir / f"{cid}.json").write_text(
                 json.dumps(c, ensure_ascii=False), encoding="utf-8"
             )
+    statusline_note = "statusline=skipped"
+    if not args.no_statusline:
+        try:
+            statusline_note = _configure_claude_statusline(server)
+        except OSError as exc:
+            statusline_note = f"statusline=failed:{exc}"
     team_note = f" team={team}" if team else ""
     print(
         ui.color(
             f"install ok server={server}{team_note} cached={len(cards)} cards "
-            f"trusted_keys={len(key_payload.get('keys') or [])}",
+            f"trusted_keys={len(key_payload.get('keys') or [])} {statusline_note}",
             "green",
         )
     )
@@ -622,6 +735,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="LAN server URL, e.g. http://192.168.22.42:7821"
     )
     p_inst.add_argument("--team", default="")
+    p_inst.add_argument(
+        "--no-statusline",
+        action="store_true",
+        help="只写 server/team/cache 配置，不修改 Claude Code statusLine",
+    )
     p_inst.set_defaults(func=cmd_wiki_install)
 
     p_demo = sub.add_parser("demo", help="print how to run the end-to-end demo")

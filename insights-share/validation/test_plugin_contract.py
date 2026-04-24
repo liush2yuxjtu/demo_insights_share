@@ -39,6 +39,18 @@ def _load_module(path: Path, name: str):
     return module
 
 
+def _load_runtime_cli(monkeypatch, home: Path):
+    monkeypatch.setenv("HOME", str(home))
+    sys.path.insert(0, str(PLUGIN_RUNTIME))
+    try:
+        return _load_module(PLUGIN_RUNTIME / "insights_cli.py", f"insights_cli_test_{time.time_ns()}")
+    finally:
+        try:
+            sys.path.remove(str(PLUGIN_RUNTIME))
+        except ValueError:
+            pass
+
+
 def test_plugin_manifest_declares_current_release() -> None:
     manifest = json.loads(_read(MANIFEST))
     commands = manifest["entry"]["commands"]
@@ -216,6 +228,55 @@ def test_bundle_cache_persist_sanitizes_sensitive_fields(tmp_path: Path, monkeyp
     assert "raw_log" not in saved
     assert "label_note" not in saved
     assert "description" not in saved
+
+
+def test_wiki_install_statusline_config_installs_direct_command(tmp_path: Path, monkeypatch) -> None:
+    home = tmp_path / "home"
+    module = _load_runtime_cli(monkeypatch, home)
+
+    outcome = module._configure_claude_statusline("http://127.0.0.1:7821")
+
+    settings = json.loads((home / ".claude" / "settings.json").read_text(encoding="utf-8"))
+    command = settings["statusLine"]["command"]
+    assert outcome == "statusline=installed"
+    assert settings["statusLine"]["type"] == "command"
+    assert "INSIGHTS_SHARE_URL=http://127.0.0.1:7821" in command
+    assert "NO_PROXY=127.0.0.1,localhost" in command
+    assert "statusline/insights_share_statusline.sh" in command
+
+
+def test_wiki_install_statusline_config_wraps_existing_command(tmp_path: Path, monkeypatch) -> None:
+    home = tmp_path / "home"
+    settings = home / ".claude" / "settings.json"
+    settings.parent.mkdir(parents=True)
+    settings.write_text(
+        json.dumps(
+            {
+                "statusLine": {
+                    "type": "command",
+                    "command": "printf existing",
+                },
+                "effortLevel": "high",
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    module = _load_runtime_cli(monkeypatch, home)
+
+    outcome = module._configure_claude_statusline("http://127.0.0.1:7821")
+
+    payload = json.loads(settings.read_text(encoding="utf-8"))
+    wrapper = home / ".cache" / "insights-share" / "statusline_wrapper.sh"
+    wrapper_text = wrapper.read_text(encoding="utf-8")
+    assert outcome == "statusline=wrapped"
+    assert payload["effortLevel"] == "high"
+    assert payload["statusLine"]["command"] == str(wrapper)
+    assert "previous_command='printf existing'" in wrapper_text
+    assert "INSIGHTS_SHARE_URL=http://127.0.0.1:7821" in wrapper_text
+    assert "insights_share_statusline.sh" in wrapper_text
+    assert wrapper.stat().st_mode & 0o700 == 0o700
 
 
 def test_prefetch_additional_context_uses_public_card_allowlist() -> None:

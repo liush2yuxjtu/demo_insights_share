@@ -14,15 +14,18 @@ allowed-tools: Bash, Read
 2. 运行 `claude plugin marketplace add <当前 plugin 目录>`，若 marketplace 已存在则复用
 3. 运行 `claude plugin install insights-share@insights-share`
 4. 校验已安装 plugin cache、skills、hook wrapper、statusline、commands、agents、MCP 契约
-5. 触发一次 statusline 预览，打印 `[share ✓|✗|…]` 当前态
-6. 打印 today_count 当前值（迁移前后对账基线）
-7. 打印一段 PM 友好的“装好啦”摘要
+5. 调用 `insights_cli.py wiki-install --server <url> --team <team>` 写入 `~/.cache/insights-share/config.json`，并自动配置 Claude Code `~/.claude/settings.json` 的 `statusLine`
+6. 若用户已有 statusline 命令，不覆盖丢失；自动生成 `~/.cache/insights-share/statusline_wrapper.sh`，把原 statusline 输出和 `[share ...]` 徽章拼接
+7. 触发一次 statusline 预览，打印 `[share ✓|✗|…]` 当前态
+8. 打印 today_count 当前值（迁移前后对账基线）
+9. 打印一段 PM 友好的“装好啦”摘要
 
 ## 不做什么
 
 - 不在用户无感时自动启动 daemon（daemon 管理走 `insights-share-server`）
 - 不修改任何位于仓库根目录的只读 md
 - 不自动启动 daemon（daemon 管理走 `insights-share-server` 或单独 `insights_cli.py serve`）
+- 不在已有 statusline 存在时静默删除它；只做 wrapper 合并
 
 ## 和 M2+ 的边界
 

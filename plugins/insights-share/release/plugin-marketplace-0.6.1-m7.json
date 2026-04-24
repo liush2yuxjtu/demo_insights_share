@@ -1,7 +1,7 @@
 {
   "name": "insights-share",
   "version": "0.6.1-m7",
-  "published_at": "2026-04-24T05:49:19.215286+00:00",
+  "published_at": "2026-04-24T06:08:32.423903+00:00",
   "source": "./",
   "checksums": [
     {
@@ -30,7 +30,7 @@
     },
     {
       "path": "commands/share-install.md",
-      "sha256": "02a00334dbfa68676d5a48cc1651d2dcbf60e4b4f9dbe9c9885657b64bc55297"
+      "sha256": "bca802cd7f42e081cbb97591054b44645cc803941291ed5aac7f4b1d5c2dc9e8"
     },
     {
       "path": "commands/share-publish.md",
@@ -59,6 +59,10 @@
     {
       "path": "release/plugin-marketplace-0.6.0-m7.json",
       "sha256": "3a43d7450f6aff65f081b907346d46e687be1fb832e6b069a67b18781bbe3ef2"
+    },
+    {
+      "path": "release/plugin-marketplace-0.6.1-m7.json",
+      "sha256": "5441b233a2f2f5b6be84350d3952a6cfa5c02fbc1e173187259cc48ff4cd3058"
     },
     {
       "path": "runtime/.gitignore",
@@ -94,7 +98,7 @@
     },
     {
       "path": "runtime/insights_cli.py",
-      "sha256": "36a3232908d08cb373d1bb9c9b64a94bc455f7302e1cf1cfa4fb922bf32ae582"
+      "sha256": "815c4d9400a44313828f480ab27d0d17c69131e90e7957cef6cb2e898dfa1ea8"
     },
     {
       "path": "runtime/insightsd/__init__.py",
@@ -1642,7 +1646,7 @@
     },
     {
       "path": "statusline/insights_share_statusline.sh",
-      "sha256": "d8742f65f9310af205175cd8a107c658f3a161268584cd9e7b0c9f278df19de1"
+      "sha256": "07d02ca7d66fda2f36e972efbb3bdb569d99874d509ce18a3a379ee40e349216"
     }
   ]
 }
