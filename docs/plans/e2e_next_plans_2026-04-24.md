@@ -10,7 +10,9 @@
 
 - gstack 已安装：`GSTACK_OK`。
 - `bash start.demo.sh --dry-run` 已通过 7 阶段，并真实执行 `claude plugin install insights-share@insights-share`。
-- 全局 `pytest` 不存在；项目 `.venv` 绑定旧路径 `/Users/m1/...` 与缺失 `libpython3.12.dylib`，所以 pytest 合同当前不能本地复验。
+- 全局 `pytest` 不存在；项目 `.venv` 绑定旧路径 `/Users/m1/...` 与缺失 `libpython3.12.dylib`。
+- 已新增固定入口 `bash insights-share/validation/run_contract_tests.sh`，默认用 `uv + Python 3.11 + pytest`，不依赖全局 pytest 或 `demo_codes/.venv`。
+- P3 合同已通过：`test_start_scripts.py`、`test_plugin_contract.py`、`test_release_package.py` 共 15 项全绿。
 - `TODOS.md` 中 `SB-1` 与 `UC-2` 很可能已由近期 commit 落地，需要用测试和文档对账后关闭。
 
 ## 分层 E2E 门禁
@@ -28,13 +30,13 @@
 
 ## 下一步顺序
 
-1. 修复本机 Python 测试入口：重建 `insights-share/demo_codes/.venv` 或改用仓库内固定 test runner，先让 P3 可执行。
-2. 跑 P3 合同测试；若通过，把 `SB-1`、`UC-2` 从 TODO open 状态迁到 closed/evidence。
-3. 跑 `start.demo.sh --dry-run` 和一次 live `start.demo.sh`，确认 plugin install hero path 不是表面 install。
+1. 已完成：修复本机 Python 测试入口，固定为 `bash insights-share/validation/run_contract_tests.sh`。
+2. 已完成：跑 P3 合同测试，15 项全绿。
+3. 下一步：跑 `start.demo.sh --dry-run` 和一次 live `start.demo.sh`，确认 plugin install hero path 不是表面 install。
 4. 跑 Playwright record/verify，确认用户流录屏与 manifest 不漂移。
 5. 跑 tmux smoke，覆盖 `start.claude.sh` 与 `start.codex.sh`。
 6. 新增 adoption proof 最小门：clean-machine install、first relevant hit、first publish、day-2 return 四项先做手工 runbook 或脚本。
-7. 最后再加 CI/pre-commit gate；在 P3 修绿前不要加 CI，否则只会制造假红。
+7. 最后再加 CI/pre-commit gate；现在 P3 已绿，可以把 `run_contract_tests.sh` 作为 gate 的测试入口。
 
 ## PASS 标准
 
