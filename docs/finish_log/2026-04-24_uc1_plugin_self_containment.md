@@ -26,7 +26,7 @@ The plugin seed corpus in `runtime/wiki_tree/` is treated as unsigned bundled se
 - `bash insights-share/validation/run_contract_tests.sh insights-share/validation/test_plugin_contract.py -q` passed: 12 tests.
 - `bash insights-share/validation/run_contract_tests.sh` passed: 43 tests.
 - `bash insights-share/validation/run_ci_gate.sh` passed.
-- `RUN_HANDOUT_VERIFY=1 RUN_TMUX_SMOKE=1 bash insights-share/validation/run_ci_gate.sh` passed:
+- 历史加强门 `RUN_HANDOUT_VERIFY=1 RUN_TMUX_SMOKE=1 bash insights-share/validation/run_ci_gate.sh` 当时 passed:
   - 43 contract tests
   - adoption proof
   - `start.demo.sh --dry-run`
@@ -49,7 +49,7 @@ The correct answer must say:
 - `plugins/insights-share/runtime/` now carries server runtime and seed corpus.
 - `start_server.sh` / `start_ui.sh` no longer depend on repo checkout or `demo_codes/.venv`.
 - `start.demo.sh` now launches daemon and right-pane self-check from the sandbox installed plugin cache.
-- Latest verification includes 43 contract tests, adoption proof, `start.demo.sh --dry-run`, Playwright handout verify, and tmux claude/codex smoke.
+- 本工作当时的历史验证包含 43 项合同测试、adoption proof、`start.demo.sh --dry-run`、Playwright handout verify、tmux claude/codex smoke。当前默认 E2E 已归档 Playwright handout verify；最新状态以 `docs/CURRENT_STATUS.md` 为准。
 
 ## Probe Results
 

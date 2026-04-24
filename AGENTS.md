@@ -6,18 +6,15 @@
 
 | 层 | 作用 | 入口 | 产物 |
 |----|------|------|------|
-| Playwright 录屏层 | `insights_cli.py serve` + chromium 录完整 user-flow | [insights-share/validation/scripts/handout_record.mjs](insights-share/validation/scripts/handout_record.mjs) | `insights-share/validation/artifacts/handout/runs/<ts>/user-flow.mp4` |
-| Playwright 回放校验 | 回放录屏、比对 manifest | [insights-share/validation/scripts/handout_verify.mjs](insights-share/validation/scripts/handout_verify.mjs) | 退出码 + `artifacts/handout/latest.json` |
 | tmux smoke 层 | `start.demo.sh` / `start.{claude,codex}.sh` 在 register-session 下全流程实机 debug | [insights-share/validation/run_start_tmux_smoke.sh](insights-share/validation/run_start_tmux_smoke.sh) | `insights-share/validation/reports/deliverables/tmux_*_smoke.txt` |
 | tmux driver | start.demo.sh 自动驾驶脚本 | [insights-share/validation/start_demo_driver.sh](insights-share/validation/start_demo_driver.sh) | stdout + reports |
 | pytest 集成层 | HTTP / CLI / handout / plugin / runtime-store 行为契约 | [insights-share/validation/run_all_validations.sh](insights-share/validation/run_all_validations.sh) | `insights-share/validation/reports/final_report.html` |
 
-## Playwright 入口
+## 归档入口
 
 | 命令 | 作用 |
 |------|------|
-| `cd insights-share/validation && npm run handout:record` | 起 daemon + 录屏，生成 mp4/console.log/manifest |
-| `cd insights-share/validation && npm run handout:verify` | 回放 latest run，门控退出码 |
+| [docs/archive/playwright-handout-e2e.md](docs/archive/playwright-handout-e2e.md) | Playwright handout 录屏/回放已归档；默认 E2E 用户验证不再需要浏览器层 |
 
 ## tmux smoke 入口
 

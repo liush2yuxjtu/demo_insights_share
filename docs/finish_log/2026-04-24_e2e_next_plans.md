@@ -25,7 +25,7 @@
 
 ## 关键结论
 
-`start.demo.sh` 是 hero E2E surface，但不是完整 E2E suite。完整门禁必须叠加 pytest 合同、Playwright 录屏/回放、tmux smoke、validation 汇总与 adoption proof。
+`start.demo.sh` 是 hero E2E surface，但不是完整 E2E suite。完整门禁必须叠加 pytest 合同、tmux smoke、validation 汇总与 adoption proof。Playwright 录屏/回放是历史浏览器层，已在后续归档，不再属于默认 E2E。
 
 ## 后续
 

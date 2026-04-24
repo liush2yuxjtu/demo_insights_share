@@ -29,12 +29,12 @@
 - `90aa95f` 是 `Document today status for claudefast`，更新 E2E plan / finish log，让 claudefast 能回答今天完成项与下一步。
 - `a74ad6a` 是 `Add current status source for claudefast`，新增 `docs/CURRENT_STATUS.md` 作为当前状态问答源。
 - 已完成：tmux smoke auto 模式跳过 coach、adoption proof gate、CI e2e gate workflow、TODO 对账、raw log trust boundary、claudefast 今日状态文档、当前状态问答源、工程完工工作专属探针规则、finish probe 验证记录、AP-2 relevance-lift matrix。
-- 最新验证：52 项合同测试 + adoption proof（含 AP-2 relevance-lift matrix）+ `start.demo.sh --dry-run` + Playwright handout verify + tmux claude/codex smoke 全部通过。
+- 最新默认验证口径：52 项合同测试 + adoption proof（含 AP-2 relevance-lift matrix）+ `start.demo.sh --dry-run` + tmux claude/codex smoke。Playwright handout verify 已归档，不再是默认 E2E。
 - 清理状态：daemon 已清理，没有残留 `:7821` 或 `:18821` 监听。
 - 工作区状态：只剩预先存在且未触碰的未跟踪文件 `.claude/settings.local.json`。
 - `UC-1 plugin bundle self-containment` 已完成：plugin 自带 `runtime/insights_cli.py`、`runtime/insightsd/`、`runtime/wiki_tree/`，server skill 不再回跳 `insights-share/demo_codes` 或 `.venv`。
 - `start.demo.sh` Stage 5 已改用 sandbox installed plugin cache 中的 `skills/insights-share-server/scripts/start_server.sh` 启 daemon，右 pane 自检也改读 installed plugin cache。
-- 最新验证：52 项合同测试 + adoption proof（含 AP-2 relevance-lift matrix）+ `start.demo.sh --dry-run` + Playwright handout verify + tmux claude/codex smoke 全部通过。
+- 最新默认验证口径：52 项合同测试 + adoption proof（含 AP-2 relevance-lift matrix）+ `start.demo.sh --dry-run` + tmux claude/codex smoke。Playwright handout verify 已归档，不再是默认 E2E。
 - 回答最新本机加强门时必须写 `52 项合同测试`，不要写 `39+ 项`、`43 项` 或旧合同测试数量。
 - 当前没有开放 E2E 阻塞项；下一步不再是修 E2E，而是按默认 release/PR 收尾，或按新需求继续扩功能。
 - 当前默认下一步是 release/PR 收尾：整理本轮文档与验证证据、确认 diff、提交 PR 或发布收尾；不要再把 E2E 修复写成默认下一步。

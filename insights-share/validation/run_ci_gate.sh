@@ -9,7 +9,6 @@
 #   - start.demo.sh --dry-run (requires local claude + tmux)
 #
 # Optional local gates:
-#   RUN_HANDOUT_VERIFY=1  npm run handout:verify
 #   RUN_TMUX_SMOKE=1      run_start_tmux_smoke.sh
 
 set -euo pipefail
@@ -17,7 +16,6 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 RUN_START_DEMO="${RUN_START_DEMO:-auto}"
-RUN_HANDOUT_VERIFY="${RUN_HANDOUT_VERIFY:-0}"
 RUN_TMUX_SMOKE="${RUN_TMUX_SMOKE:-0}"
 
 log() {
@@ -57,11 +55,6 @@ main() {
     bash start.demo.sh --dry-run
   else
     log "skip start.demo.sh --dry-run (requires claude + tmux; set RUN_START_DEMO=1 to require it)"
-  fi
-
-  if [ "${RUN_HANDOUT_VERIFY}" = "1" ]; then
-    log "handout verify"
-    (cd insights-share/validation && npm run handout:verify)
   fi
 
   if [ "${RUN_TMUX_SMOKE}" = "1" ]; then

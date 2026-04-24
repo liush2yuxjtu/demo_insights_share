@@ -28,14 +28,14 @@ def test_run_all_validations_runner_is_executable_and_portable() -> None:
 def test_run_all_validations_declares_current_gate_surface() -> None:
     script = _read(RUNNER)
 
-    for gate in ("P0", "P1", "P2", "P3", "P4", "P5", "P6", "P7", "AP-1"):
+    for gate in ("P0", "P1", "P2", "P3", "P6", "P7", "AP-1"):
         assert f'gate_id="{gate}"' in script or f'"id": "{gate}"' in script
 
     assert "run_contract_tests.sh" in script
     assert "run_adoption_proof.sh" in script
     assert "start.demo.sh" in script
-    assert "handout:record" in script
-    assert "handout:verify" in script
+    assert "handout:record" not in script
+    assert "handout:verify" not in script
     assert "run_start_tmux_smoke.sh" in script
     assert "final_report.html" in script
     assert "final_summary.json" in script
@@ -50,8 +50,6 @@ def test_run_all_validations_generates_temp_report_without_rewriting_artifacts(t
             "RUN_ADOPTION_PROOF": "0",
             "RUN_START_DEMO_DRY": "0",
             "RUN_START_DEMO_LIVE": "0",
-            "RUN_HANDOUT_RECORD": "0",
-            "RUN_HANDOUT_VERIFY": "0",
             "RUN_TMUX_SMOKE": "0",
             "RUN_OPEN_REPORT": "0",
         }
@@ -87,5 +85,5 @@ def test_run_all_validations_generates_temp_report_without_rewriting_artifacts(t
 
     html = html_path.read_text(encoding="utf-8")
     assert "/Users/m1" not in html
-    assert "P0-P7" in html
+    assert "默认 E2E" in html
     assert "AP-1 adoption proof" in html

@@ -23,7 +23,7 @@
 
 - `bash insights-share/validation/run_ci_gate.sh` 已通过。
 - 最新 gate 覆盖：43 项合同测试、adoption proof、`start.demo.sh --dry-run`。
-- 最新加强门覆盖：Playwright handout verify、tmux claude/codex smoke。
+- 最新加强门覆盖：tmux claude/codex smoke。Playwright handout verify 已归档，不再属于默认 E2E。
 - adoption proof 覆盖四个信号：clean-machine install、first relevant hit、first publish、day-2 return。
 - 清理状态：没有残留 `:7821` 或 `:18821` daemon 监听。
 - 工作区状态：只剩预先存在且未触碰的未跟踪文件 `.claude/settings.local.json`。

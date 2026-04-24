@@ -4,7 +4,7 @@
 
 `start.demo.sh` 可以承担 hero E2E：沙箱、真实 `claude plugin install`、daemon、tmux 双 pane、feature manifest、statusline 与 plugin self-check。
 
-`start.demo.sh` 不能单独承担全部 E2E：Playwright 录屏/回放、pytest 合同、release package、tmux 批量 smoke、A/B adoption proof 都需要独立门禁。
+`start.demo.sh` 不能单独承担全部 E2E：pytest 合同、release package、tmux 批量 smoke、A/B adoption proof 都需要独立门禁。Playwright handout 录屏/回放已按用户要求归档，不再是默认用户 E2E 验证层。
 
 当前没有开放 E2E 阻塞项。默认下一步是 release/PR 收尾；adoption-proof 扩展是后续产品开发轨道，不再作为当前 E2E 修复项。AP-2 relevance-lift matrix 已完成，作为产品轨道的第一段扩展证据。
 
@@ -18,15 +18,14 @@
 - `start.demo.sh` 已能检测破损 `demo_codes/.venv` 并自动重建；旧 venv 会移到 `.venv.broken-<ts>/`。
 - live `start.demo.sh` 已验证通过：Stage 0-7、daemon :7821、`[share ✓ 0/today]`、`plugin self-check: ALL GREEN` 均通过，退出后无 7821 残留。
 - 左 pane 讲解已对齐 plugin install：检查 sandbox plugin cache，不再误报旧式 skill copy 缺失。
-- `npm run handout:verify` 已通过：临时 daemon + 临时 `web_cli_demo` tmux session 自动创建和清理，5 个 handout step 全部 passed。
-- `npm run handout:record` 已通过：完整用户流 mp4 与 manifest 已刷新，ffmpeg 退出逻辑已加超时兜底。
+- Playwright handout 录屏/回放历史上已通过；当前已归档到 [docs/archive/playwright-handout-e2e.md](../archive/playwright-handout-e2e.md)，默认 E2E 不再要求浏览器层。
 - `bash insights-share/validation/run_start_tmux_smoke.sh` 已通过：`start.claude.sh` 与 `start.codex.sh` auto smoke 均完成 healthz/publish/solve/install/cache 闭环。
 - 已新增并跑通 adoption proof 门：`bash insights-share/validation/run_adoption_proof.sh`，用隔离 `HOME` 验证 clean-machine install、first relevant hit、first publish、day-2 return、relevance-lift matrix 五个信号；最新报告在 `insights-share/validation/reports/deliverables/adoption_proof_latest.json`。
 - 已新增 CI/pre-commit 共用入口：`bash insights-share/validation/run_ci_gate.sh`，并接入 `.github/workflows/e2e-gates.yml`。CI 默认跑合同测试 + adoption proof；本机有 `claude`/`tmux` 时自动加跑 `start.demo.sh --dry-run`。
 - `TODOS.md` 已完成对账：`SB-1`、`AP-1`、`FL-1`、`FL-2`、`UC-2`、`UC-1` 已移入 Closed；当前没有开放 E2E 阻塞项。
 - `bash insights-share/validation/run_ci_gate.sh` 最新本机结果已通过：52 项合同测试 + adoption proof（含 AP-2 relevance-lift matrix）+ `start.demo.sh --dry-run`。
 - `UC-1 plugin bundle self-containment` 已完成：plugin 自带 `runtime/` server/search seed corpus；`start_server.sh` / `start_ui.sh` 和 `start.demo.sh` hero path 都走 installed plugin cache，不再依赖 repo checkout 或 `demo_codes/.venv`。
-- `RUN_HANDOUT_VERIFY=1 RUN_TMUX_SMOKE=1 bash insights-share/validation/run_ci_gate.sh` 最新本机结果已通过：52 项合同测试 + adoption proof（含 AP-2 relevance-lift matrix）+ `start.demo.sh --dry-run` + Playwright handout verify + tmux claude/codex smoke。
+- `RUN_TMUX_SMOKE=1 bash insights-share/validation/run_ci_gate.sh` 最新本机加强门口径：52 项合同测试 + adoption proof（含 AP-2 relevance-lift matrix）+ `start.demo.sh --dry-run` + tmux claude/codex smoke。Playwright handout verify 已归档，不再放入加强门。
 - 清理状态已确认：没有残留 `:7821` / `:18821` daemon 监听；工作区只剩预先存在且未触碰的 `.claude/settings.local.json` 未跟踪。
 
 ## 分层 E2E 门禁
@@ -37,8 +36,6 @@
 | P1 dry-run hero | `bash start.demo.sh --dry-run` | 验证沙箱、plugin install、脚本结构 | 是 |
 | P2 live hero | `bash start.demo.sh` | PM 可见实机闭环 | 是 |
 | P3 pytest 合同 | `python -m pytest ...test_start_scripts.py ...test_plugin_contract.py ...test_release_package.py` | start/plugin/release 合同 | 否 |
-| P4 Playwright 录屏 | `cd insights-share/validation && npm run handout:record` | 录完整 user-flow mp4 | 否 |
-| P5 Playwright 回放 | `cd insights-share/validation && npm run handout:verify` | 回放 latest manifest | 否 |
 | P6 tmux smoke | `bash insights-share/validation/run_start_tmux_smoke.sh` | start.claude/start.codex 批量实机 | 部分 |
 | P7 汇总报告 | `bash insights-share/validation/run_all_validations.sh` | 汇总既有 Phase 0-5 证据 | 否 |
 
@@ -47,11 +44,11 @@
 1. 已完成：修复本机 Python 测试入口，固定为 `bash insights-share/validation/run_contract_tests.sh`。
 2. 已完成：跑 P3 合同测试，15 项全绿。
 3. 已完成：跑 `start.demo.sh --dry-run` 和一次 live `start.demo.sh`，确认 plugin install hero path 不是表面 install。
-4. 已完成：跑 Playwright verify，确认 handout manifest 的 5 个 step 可自动回放。
-5. 已完成：跑 Playwright record，重录完整 user-flow mp4。
+4. 已归档：Playwright verify / record 移出默认 E2E，详见 [docs/archive/playwright-handout-e2e.md](../archive/playwright-handout-e2e.md)。
+5. 已归档：旧 `user-flow.mp4` 仅作为历史审计产物，不再作为默认 PASS 条件。
 6. 已完成：跑 tmux smoke，覆盖 `start.claude.sh` 与 `start.codex.sh`。
 7. 已完成：adoption proof 最小门已落脚本、合同测试和一次真实报告。
-8. 已完成：新增 CI/pre-commit 共用 gate。默认入口是 `run_ci_gate.sh`；本机加强门可设置 `RUN_HANDOUT_VERIFY=1 RUN_TMUX_SMOKE=1` 叠加 Playwright 回放和 tmux smoke。
+8. 已完成：新增 CI/pre-commit 共用 gate。默认入口是 `run_ci_gate.sh`；本机加强门可设置 `RUN_TMUX_SMOKE=1` 叠加 tmux smoke。Playwright 回放已归档。
 9. 已完成：补 raw log trust boundary。tree store 写 raw log 前会对敏感字段和常见 token pattern 脱敏；`additionalContext` 保持公开字段 allowlist。
 10. 已完成：推进 `UC-1 plugin bundle self-containment`，切断 plugin server skill 的 `insights-share/demo_codes` / `.venv` 运行时依赖，让 clean plugin install 不靠 repo checkout 也能启动 server/search。
 11. 默认下一步：release/PR 收尾，整理本轮文档与验证证据、确认 diff、提交 PR 或发布收尾。
@@ -60,4 +57,4 @@
 
 ## PASS 标准
 
-全部通过才算 E2E 绿：P1/P2 hero 绿、P3 合同绿、P4/P5 录屏回放绿、P6 tmux smoke 绿、P7 报告绿、adoption proof 至少有一次 clean-machine 证据。
+全部通过才算 E2E 绿：P1/P2 hero 绿、P3 合同绿、P6 tmux smoke 绿、P7 报告绿、adoption proof 至少有一次 clean-machine 证据。P4/P5 Playwright handout 录屏回放为归档层，不参与默认 E2E PASS。

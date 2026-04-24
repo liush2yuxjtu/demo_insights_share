@@ -3,7 +3,7 @@
 # - 路径从脚本自身位置解析，不依赖开发者 home 目录
 # - 默认仍写兼容报告路径：
 #   insights-share/validation/reports/final_report.html
-# - 默认执行确定性必需门；昂贵或强本机依赖的门通过环境变量显式开启。
+# - 默认执行确定性必需门；强本机依赖的门通过环境变量显式开启。
 
 set -u
 
@@ -135,13 +135,6 @@ def start_demo_auto_check() -> tuple[bool, str]:
     return True, "auto enabled: claude and tmux are available"
 
 
-def node_auto_check() -> tuple[bool, str]:
-    missing = [cmd for cmd in ("npm", "node") if not command_exists(cmd)]
-    if missing:
-        return False, "auto skip: missing " + ", ".join(missing)
-    return True, "auto enabled: npm and node are available"
-
-
 def tmux_auto_check() -> tuple[bool, str]:
     if not command_exists("tmux"):
         return False, "auto skip: missing tmux"
@@ -195,26 +188,6 @@ def main() -> int:
             required_when_enabled=True,
         ),
         run_gate(
-            gate_id="P4",
-            title="Playwright handout record",
-            expectation="录完整 user-flow mp4/console/manifest",
-            command=["npm", "run", "handout:record"],
-            cwd=SCRIPT_DIR,
-            mode=env_value("RUN_HANDOUT_RECORD", "0"),
-            auto_check=node_auto_check,
-            required_when_enabled=True,
-        ),
-        run_gate(
-            gate_id="P5",
-            title="Playwright handout verify",
-            expectation="回放 latest manifest 并门控退出码",
-            command=["npm", "run", "handout:verify"],
-            cwd=SCRIPT_DIR,
-            mode=env_value("RUN_HANDOUT_VERIFY", "0"),
-            auto_check=node_auto_check,
-            required_when_enabled=True,
-        ),
-        run_gate(
             gate_id="P6",
             title="tmux start-script smoke",
             expectation="start.claude.sh / start.codex.sh 批量实机 smoke",
@@ -231,7 +204,7 @@ def main() -> int:
         {
             "id": "P7",
             "title": "validation aggregate report",
-            "expectation": "生成 final_report.html / final_summary.json，并汇总当前 P0-P7 + AP-1 口径",
+            "expectation": "生成 final_report.html / final_summary.json，并汇总当前默认 E2E + AP-1 口径",
             "command": ["bash", "insights-share/validation/run_all_validations.sh"],
             "cwd": str(REPO_ROOT),
             "mode": "1",
@@ -267,8 +240,6 @@ def main() -> int:
             "RUN_ADOPTION_PROOF": env_value("RUN_ADOPTION_PROOF", "1"),
             "RUN_START_DEMO_DRY": run_start_demo_dry,
             "RUN_START_DEMO_LIVE": env_value("RUN_START_DEMO_LIVE", "0"),
-            "RUN_HANDOUT_RECORD": env_value("RUN_HANDOUT_RECORD", "0"),
-            "RUN_HANDOUT_VERIFY": env_value("RUN_HANDOUT_VERIFY", "0"),
             "RUN_TMUX_SMOKE": env_value("RUN_TMUX_SMOKE", "0"),
         },
         "gates": gates,
@@ -354,8 +325,8 @@ def render_html(summary: dict) -> str:
   总览：{escape(summary_text)} · 生成时间：{escape(summary['generated_at'])}
 </div>
 <p>
-当前口径覆盖 P0-P7 与 AP-1 adoption proof。P0 / P3 / AP-1 默认执行；
-P1/P2/P4/P5/P6 是本机增强门，按环境变量开启。
+当前口径覆盖默认 E2E 与 AP-1 adoption proof。P0 / P3 / AP-1 默认执行；
+P1/P2/P6 是本机增强门，按环境变量开启。P4/P5 Playwright handout 录屏回放已归档。
 </p>
 <pre>{escape(flags)}</pre>
 <table>
@@ -368,7 +339,7 @@ P1/P2/P4/P5/P6 是本机增强门，按环境变量开启。
 报告由 <code>run_all_validations.sh</code> 生成；默认输出保持在
 <code>insights-share/validation/reports/final_report.html</code>。
 完整本机增强门示例：
-<code>RUN_START_DEMO_DRY=1 RUN_HANDOUT_VERIFY=1 RUN_TMUX_SMOKE=1 bash insights-share/validation/run_all_validations.sh</code>
+<code>RUN_START_DEMO_DRY=1 RUN_TMUX_SMOKE=1 bash insights-share/validation/run_all_validations.sh</code>
 </footer>
 </body></html>
 """
