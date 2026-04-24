@@ -16,6 +16,7 @@
 - 已修复并跑通 `npm run handout:record`：完整 Dashboard/CLI/Validation/handout 用户流录制通过，生成 `artifacts/handout/latest.json` 指向新的 `user-flow.mp4`；ffmpeg 退出现在有超时兜底，不再卡住 daemon 清理。
 - 修复 `start_demo_driver.sh` 的 auto 模式：`--auto-approve` 不再调用 Claude/Codex coach 生成讲解，改用内置说明，避免 tmux smoke 卡在外部 LLM 调用。
 - 已跑通 `bash insights-share/validation/run_start_tmux_smoke.sh`：`start.claude.sh` 与 `start.codex.sh` 均完成 healthz、publish_good、publish_bad、solve、install、cache，报告写入 `tmux_claude_smoke.txt` 与 `tmux_codex_smoke.txt`。
+- 新增并跑通 AP-1 最小 adoption proof 入口：`bash insights-share/validation/run_adoption_proof.sh`，用隔离 `HOME` 与临时 wiki store 验证 clean-machine install、first relevant hit、first publish、day-2 return，最新报告写入 `adoption_proof_latest.json`。
 
 ## 关键结论
 
@@ -23,4 +24,4 @@
 
 ## 后续
 
-Python/pytest runner、hero path、Playwright record/verify 与 tmux smoke 已恢复；下一步推进 adoption proof 与 CI gate。
+Python/pytest runner、hero path、Playwright record/verify、tmux smoke 与 adoption proof 已恢复；下一步推进 CI gate。

@@ -19,6 +19,7 @@
 - `npm run handout:verify` 已通过：临时 daemon + 临时 `web_cli_demo` tmux session 自动创建和清理，5 个 handout step 全部 passed。
 - `npm run handout:record` 已通过：完整用户流 mp4 与 manifest 已刷新，ffmpeg 退出逻辑已加超时兜底。
 - `bash insights-share/validation/run_start_tmux_smoke.sh` 已通过：`start.claude.sh` 与 `start.codex.sh` auto smoke 均完成 healthz/publish/solve/install/cache 闭环。
+- 已新增并跑通 adoption proof 最小门：`bash insights-share/validation/run_adoption_proof.sh`，用隔离 `HOME` 验证 clean-machine install、first relevant hit、first publish、day-2 return 四个信号；最新报告在 `insights-share/validation/reports/deliverables/adoption_proof_latest.json`。
 - `TODOS.md` 中 `SB-1` 与 `UC-2` 很可能已由近期 commit 落地，需要用测试和文档对账后关闭。
 
 ## 分层 E2E 门禁
@@ -42,8 +43,8 @@
 4. 已完成：跑 Playwright verify，确认 handout manifest 的 5 个 step 可自动回放。
 5. 已完成：跑 Playwright record，重录完整 user-flow mp4。
 6. 已完成：跑 tmux smoke，覆盖 `start.claude.sh` 与 `start.codex.sh`。
-7. 下一步：新增 adoption proof 最小门，clean-machine install、first relevant hit、first publish、day-2 return 四项先做手工 runbook 或脚本。
-8. 最后再加 CI/pre-commit gate；现在 P3、hero path、Playwright record/verify、tmux smoke 已绿，可以把 `run_contract_tests.sh` + `start.demo.sh --dry-run` + `npm run handout:verify` + `run_start_tmux_smoke.sh` 作为 gate 的测试入口。
+7. 已完成：adoption proof 最小门已落脚本、合同测试和一次真实报告。
+8. 最后再加 CI/pre-commit gate；现在 P3、hero path、Playwright record/verify、tmux smoke 已绿，可以把 `run_contract_tests.sh` + `start.demo.sh --dry-run` + `npm run handout:verify` + `run_start_tmux_smoke.sh` + `run_adoption_proof.sh` 作为 gate 的测试入口。
 
 ## PASS 标准
 

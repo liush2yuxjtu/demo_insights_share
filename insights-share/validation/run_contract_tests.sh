@@ -12,6 +12,7 @@ DEFAULT_TESTS=(
   "insights-share/validation/test_start_scripts.py"
   "insights-share/validation/test_plugin_contract.py"
   "insights-share/validation/test_release_package.py"
+  "insights-share/validation/test_adoption_proof.py"
 )
 
 choose_python() {
