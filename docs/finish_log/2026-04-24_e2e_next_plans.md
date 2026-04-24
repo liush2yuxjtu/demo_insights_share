@@ -10,6 +10,8 @@
 - 新增固定 P3 合同测试入口：`bash insights-share/validation/run_contract_tests.sh`，默认用 `uv + Python 3.11 + pytest`，不依赖全局 pytest 或破损的 `demo_codes/.venv`。
 - 已跑通 P3 合同测试：`test_start_scripts.py`、`test_plugin_contract.py`、`test_release_package.py` 共 15 项全绿。
 - `start.demo.sh` 已新增 demo venv 自修复：检测到 `.venv/bin/python` 无法启动时，先把旧目录移到 `.venv.broken-<ts>/`，再用可用 Python 重建并安装 `requirements.txt`。
+- 已跑 live `bash start.demo.sh`：Stage 0-7 通过，daemon :7821 正常启动，右 pane 显示 `[share ✓ 0/today]` 与 `plugin self-check: ALL GREEN`，退出后沙箱和 daemon 已清理。
+- 修复左 pane 讲解旧检查：不再等待旧式 `~/.claude/skills/.../SKILL.md`，改为检测 sandbox plugin cache 内的 `skills/insights-share/SKILL.md`，避免真实 plugin install 路径误报。
 
 ## 关键结论
 

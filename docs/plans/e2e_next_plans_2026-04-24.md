@@ -14,6 +14,8 @@
 - 已新增固定入口 `bash insights-share/validation/run_contract_tests.sh`，默认用 `uv + Python 3.11 + pytest`，不依赖全局 pytest 或 `demo_codes/.venv`。
 - P3 合同已通过：`test_start_scripts.py`、`test_plugin_contract.py`、`test_release_package.py` 共 15 项全绿。
 - `start.demo.sh` 已能检测破损 `demo_codes/.venv` 并自动重建；旧 venv 会移到 `.venv.broken-<ts>/`。
+- live `start.demo.sh` 已验证通过：Stage 0-7、daemon :7821、`[share ✓ 0/today]`、`plugin self-check: ALL GREEN` 均通过，退出后无 7821 残留。
+- 左 pane 讲解已对齐 plugin install：检查 sandbox plugin cache，不再误报旧式 skill copy 缺失。
 - `TODOS.md` 中 `SB-1` 与 `UC-2` 很可能已由近期 commit 落地，需要用测试和文档对账后关闭。
 
 ## 分层 E2E 门禁
@@ -33,11 +35,11 @@
 
 1. 已完成：修复本机 Python 测试入口，固定为 `bash insights-share/validation/run_contract_tests.sh`。
 2. 已完成：跑 P3 合同测试，15 项全绿。
-3. 下一步：跑 `start.demo.sh --dry-run` 和一次 live `start.demo.sh`，确认 plugin install hero path 不是表面 install。
-4. 跑 Playwright record/verify，确认用户流录屏与 manifest 不漂移。
+3. 已完成：跑 `start.demo.sh --dry-run` 和一次 live `start.demo.sh`，确认 plugin install hero path 不是表面 install。
+4. 下一步：跑 Playwright record/verify，确认用户流录屏与 manifest 不漂移。
 5. 跑 tmux smoke，覆盖 `start.claude.sh` 与 `start.codex.sh`。
 6. 新增 adoption proof 最小门：clean-machine install、first relevant hit、first publish、day-2 return 四项先做手工 runbook 或脚本。
-7. 最后再加 CI/pre-commit gate；现在 P3 已绿，可以把 `run_contract_tests.sh` 作为 gate 的测试入口。
+7. 最后再加 CI/pre-commit gate；现在 P3 与 hero path 已绿，可以把 `run_contract_tests.sh` + `start.demo.sh --dry-run` 作为 gate 的测试入口。
 
 ## PASS 标准
 
