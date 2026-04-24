@@ -54,9 +54,50 @@ step() { printf '\033[32m🟢 [%s/7]\033[0m %s\n' "$1" "$2"; }
 die()  { printf '\033[31m[错误]\033[0m %s\n' "$1" >&2; exit 1; }
 note() { printf '\033[36m[提示]\033[0m %s\n' "$1"; }
 
+choose_bootstrap_python() {
+  for candidate in python3.11 python3.12 python3.13 python3; do
+    if command -v "$candidate" >/dev/null 2>&1; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
+ensure_demo_venv() {
+  if [ -x "$DEMO_VENV_PY" ]; then
+    local venv_home=""
+    if [ -f "$DEMO_CODES/.venv/pyvenv.cfg" ]; then
+      venv_home="$(awk -F'= ' '/^home = / {print $2; exit}' "$DEMO_CODES/.venv/pyvenv.cfg")"
+    fi
+    if [ -z "$venv_home" ] || [ -e "$venv_home" ]; then
+      if "$DEMO_VENV_PY" --version >/dev/null 2>&1; then
+        return 0
+      fi
+    fi
+  fi
+
+  local bootstrap_python
+  bootstrap_python="$(choose_bootstrap_python)" || die "缺少 Python 3.11+，无法创建 demo venv"
+
+  if [ -e "$DEMO_CODES/.venv" ]; then
+    local broken_dir="$DEMO_CODES/.venv.broken-${TS}"
+    mv "$DEMO_CODES/.venv" "$broken_dir"
+    note "检测到破损 demo venv，已移到 ${broken_dir}"
+  fi
+
+  note "创建 demo venv：${bootstrap_python} -m venv $DEMO_CODES/.venv"
+  "$bootstrap_python" -m venv "$DEMO_CODES/.venv" \
+    || die "创建 demo venv 失败：$DEMO_CODES/.venv"
+  "$DEMO_VENV_PY" -m pip install --upgrade pip >/dev/null \
+    || die "升级 demo venv pip 失败"
+  "$DEMO_VENV_PY" -m pip install -r "$DEMO_CODES/requirements.txt" >/dev/null \
+    || die "安装 demo venv 依赖失败：$DEMO_CODES/requirements.txt"
+}
+
 # ── 前置检查 ───────────────────────────────────────────
 [ -d "$PLUGIN_DIR/.claude-plugin" ] || die "缺失 plugin 根目录：$PLUGIN_DIR"
-[ -x "$DEMO_VENV_PY" ]  || die "缺失 demo venv：$DEMO_VENV_PY（请先 cd $DEMO_CODES && python -m venv .venv && .venv/bin/pip install -r requirements.txt）"
+ensure_demo_venv
 [ -f "$TMUX_CONF" ]     || die "缺失 tmux 配置：$TMUX_CONF"
 [ -f "$GUIDE_SCRIPT" ]  || die "缺失 guide 脚本：$GUIDE_SCRIPT"
 command -v tmux   >/dev/null 2>&1 || die "请先安装 tmux：brew install tmux"

@@ -9,6 +9,7 @@
 - 新增 E2E 分层计划文档：`docs/plans/e2e_next_plans_2026-04-24.md`。
 - 新增固定 P3 合同测试入口：`bash insights-share/validation/run_contract_tests.sh`，默认用 `uv + Python 3.11 + pytest`，不依赖全局 pytest 或破损的 `demo_codes/.venv`。
 - 已跑通 P3 合同测试：`test_start_scripts.py`、`test_plugin_contract.py`、`test_release_package.py` 共 15 项全绿。
+- `start.demo.sh` 已新增 demo venv 自修复：检测到 `.venv/bin/python` 无法启动时，先把旧目录移到 `.venv.broken-<ts>/`，再用可用 Python 重建并安装 `requirements.txt`。
 
 ## 关键结论
 
