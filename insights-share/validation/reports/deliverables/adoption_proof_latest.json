@@ -1,20 +1,20 @@
 {
   "schema_version": "adoption-proof/v2",
   "pass": true,
-  "checked_at": "2026-04-24T05:05:38Z",
+  "checked_at": "2026-04-24T05:09:53Z",
   "run": {
-    "started_at": "2026-04-24T05:05:36Z",
-    "finished_at": "2026-04-24T05:05:38Z",
-    "duration_ms": 1713
+    "started_at": "2026-04-24T05:09:51Z",
+    "finished_at": "2026-04-24T05:09:53Z",
+    "duration_ms": 1437
   },
   "wiki_url": "http://127.0.0.1:18821",
   "report": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_latest.txt",
   "environment": {
     "repo_root": "/Users/liushiyu/projects/demo_insights_share",
     "source_dir": "/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes",
-    "workdir": "/tmp/insights-adoption-proof.zzRIR4",
-    "home_dir": "/tmp/insights-adoption-proof.zzRIR4/home",
-    "store_dir": "/tmp/insights-adoption-proof.zzRIR4/wiki_tree",
+    "workdir": "/tmp/insights-adoption-proof.HQ6oCi",
+    "home_dir": "/tmp/insights-adoption-proof.HQ6oCi/home",
+    "store_dir": "/tmp/insights-adoption-proof.HQ6oCi/wiki_tree",
     "python": "/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python"
   },
   "artifacts": {
@@ -31,9 +31,9 @@
   "signals": {
     "clean_machine_install": {
       "status": "ok",
-      "started_at": "2026-04-24T05:05:38Z",
-      "finished_at": "2026-04-24T05:05:38Z",
-      "duration_ms": 203,
+      "started_at": "2026-04-24T05:09:52Z",
+      "finished_at": "2026-04-24T05:09:52Z",
+      "duration_ms": 200,
       "command": [
         "insights_cli.py",
         "wiki-install",
@@ -41,8 +41,8 @@
         "http://127.0.0.1:18821"
       ],
       "evidence": {
-        "isolated_home": "/tmp/insights-adoption-proof.zzRIR4/home",
-        "ephemeral_cache_dir": "/tmp/insights-adoption-proof.zzRIR4/home/.cache/insights-share",
+        "isolated_home": "/tmp/insights-adoption-proof.HQ6oCi/home",
+        "ephemeral_cache_dir": "/tmp/insights-adoption-proof.HQ6oCi/home/.cache/insights-share",
         "cache_dir": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/cache/insights-share",
         "config_path": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/cache/insights-share/config.json",
         "trusted_keys_path": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/cache/insights-share/trusted_keys.json",
@@ -58,9 +58,9 @@
     },
     "first_relevant_hit": {
       "status": "ok",
-      "started_at": "2026-04-24T05:05:37Z",
-      "finished_at": "2026-04-24T05:05:38Z",
-      "duration_ms": 208,
+      "started_at": "2026-04-24T05:09:52Z",
+      "finished_at": "2026-04-24T05:09:52Z",
+      "duration_ms": 201,
       "command": [
         "insights_cli.py",
         "solve",
@@ -85,9 +85,9 @@
     },
     "first_publish": {
       "status": "ok",
-      "started_at": "2026-04-24T05:05:37Z",
-      "finished_at": "2026-04-24T05:05:37Z",
-      "duration_ms": 390,
+      "started_at": "2026-04-24T05:09:51Z",
+      "finished_at": "2026-04-24T05:09:52Z",
+      "duration_ms": 384,
       "commands": [
         [
           "insights_cli.py",
@@ -133,16 +133,16 @@
           "wiki_types_json": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/wiki_tree/wiki_types.json"
         },
         "outputs": {
-          "good": "published alice-pgpool-2026-04-10 signed_by=abf0f10127610961",
-          "bad": "published bob-pgpool-bad-2026-04-12 signed_by=abf0f10127610961"
+          "good": "published alice-pgpool-2026-04-10 signed_by=bec94da0d83ea04c",
+          "bad": "published bob-pgpool-bad-2026-04-12 signed_by=bec94da0d83ea04c"
         }
       }
     },
     "day_2_return": {
       "status": "ok",
-      "started_at": "2026-04-24T05:05:38Z",
-      "finished_at": "2026-04-24T05:05:38Z",
-      "duration_ms": 211,
+      "started_at": "2026-04-24T05:09:52Z",
+      "finished_at": "2026-04-24T05:09:53Z",
+      "duration_ms": 194,
       "command": [
         "insights_cli.py",
         "solve",
@@ -150,7 +150,7 @@
         "--no-ai"
       ],
       "evidence": {
-        "cwd": "/tmp/insights-adoption-proof.zzRIR4/day2",
+        "cwd": "/tmp/insights-adoption-proof.HQ6oCi/day2",
         "used_installed_config": true,
         "config_path": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/cache/insights-share/config.json",
         "config_server_url": "http://127.0.0.1:18821",
