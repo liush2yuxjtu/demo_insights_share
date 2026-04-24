@@ -6,6 +6,8 @@
 
 ## 本次结果
 
+- 主要提交：
+  - `6d519ad` `Require work-specific finish probes`
 - 在 `docs/rules/finish-flag-claudefast.md` 中把完工流程从单一 finish flag 扩展为两个门：
   - 工作专属探针：先选出用户之后会问的自然语言状态问题，并更新 docs / finish_log / status source，直到 `claudefast -p "<探针>"` 回答正确。
   - READ ONLY finish flag：再验证 recent commits 与 docs 一致。
@@ -28,6 +30,7 @@
 
 ## 验证计划
 
-- 运行 `claudefast -p "what would we do when we finish an engineer work ?"`，确认返回包含工作专属探针闭环。
-- 运行 `claudefast -p "what is our e2e status"`，确认 E2E 示例探针能返回当前 E2E 状态。
+- `claudefast -p "what would we do when we finish an engineer work ?"`：PASS，返回“写 finish_log → 选工作专属探针 → 补 docs 直到答对 → READ ONLY finish flag”，并原样包含 `claudefast -p "what is our e2e status"`。
+- `claudefast -p "what is our e2e status"`：PASS，返回 E2E 全部通过，并指出唯一 open 项是 `UC-1 plugin bundle self-containment`。
+- `claudefast -p "what would happen if we say to claude code CLI in this project 'start'"` + 独立 judge：PASS，`CLAUDE.md` 修改后的状态灯收敛在 fast iter=2。
 - 提交文档变更后运行 READ ONLY finish flag probe。
