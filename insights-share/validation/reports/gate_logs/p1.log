@@ -1,9 +1,9 @@
 [P1] PASS
 cwd=/Users/liushiyu/projects/demo_insights_share
 command=bash start.demo.sh --dry-run
-duration_ms=4597
+duration_ms=4643
 [36m[提示][0m Stage 0 secret gate passed（wiki_tree/**/raw 无明文 secret）
-[32m🟢 [1/7][0m 创建沙箱 /tmp/demo-sandbox-20260424-132045.MAszIB ........ done
+[32m🟢 [1/7][0m 创建沙箱 /tmp/demo-sandbox-20260424-132423.afSTNV ........ done
 [32m🟢 [2/7][0m MiniMax 模式无需 credentials ........ done
 [32m🟢 [3/7][0m claude plugin install insights-share@insights-share ... done
 [32m🟢 [4/7][0m 注入 MiniMax 高速通道 ............... done
@@ -13,16 +13,16 @@ duration_ms=4597
 [36m[提示][0m 左=讲解（自动推进）│ 右=你的 Claude │ F12 整体退出
 [36m[提示][0m 鼠标拖选 = 自动复制到系统剪贴板（松开即复制，Cmd+V 可粘贴）
 
-==== DRY RUN: provider=demo auth_mode=minimax sandbox=/tmp/demo-sandbox-20260424-132045.MAszIB ====
+==== DRY RUN: provider=demo auth_mode=minimax sandbox=/tmp/demo-sandbox-20260424-132423.afSTNV ====
 ==== 固定步骤数=7 ====
-==== would spawn tmux session 'demo-59330' on socket 'demo-20260424-132045-59330' ====
+==== would spawn tmux session 'demo-80183' on socket 'demo-20260424-132423-80183' ====
 
-==== LEFT_SH (/tmp/demo-sandbox-20260424-132045.MAszIB/left.sh) ====
+==== LEFT_SH (/tmp/demo-sandbox-20260424-132423.afSTNV/left.sh) ====
 #!/usr/bin/env bash
 # 只加 set -u 不加 -e/-pipefail：exec tail -f 下 -e 无意义，下游 lossy pipe 无。
 set -u
 # 入口预检 4 项资源（feedback_real_sandbox.md: 沙箱隔离不可退化）
-for _p in "/tmp/demo-sandbox-20260424-132045.MAszIB" "/tmp/demo-sandbox-20260424-132045.MAszIB/guide.log" "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/guide_loop.sh" "/tmp/demo-sandbox-20260424-132045.MAszIB/home"; do
+for _p in "/tmp/demo-sandbox-20260424-132423.afSTNV" "/tmp/demo-sandbox-20260424-132423.afSTNV/guide.log" "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/guide_loop.sh" "/tmp/demo-sandbox-20260424-132423.afSTNV/home"; do
   if [ ! -e "$_p" ]; then
     echo "[left pane FATAL] 缺资源: $_p" >&2
     echo "(pane 保留 60s 供查看, 然后退出)" >&2
@@ -30,17 +30,17 @@ for _p in "/tmp/demo-sandbox-20260424-132045.MAszIB" "/tmp/demo-sandbox-20260424
     exit 1
   fi
 done
-export HOME="/tmp/demo-sandbox-20260424-132045.MAszIB/home"
-bash "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/guide_loop.sh" "/tmp/demo-sandbox-20260424-132045.MAszIB" "/tmp/demo-sandbox-20260424-132045.MAszIB/guide.log" "insights-share" "/tmp/demo-sandbox-20260424-132045.MAszIB/home" >/dev/null 2>&1 &
-exec tail -f "/tmp/demo-sandbox-20260424-132045.MAszIB/guide.log"
+export HOME="/tmp/demo-sandbox-20260424-132423.afSTNV/home"
+bash "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/guide_loop.sh" "/tmp/demo-sandbox-20260424-132423.afSTNV" "/tmp/demo-sandbox-20260424-132423.afSTNV/guide.log" "insights-share" "/tmp/demo-sandbox-20260424-132423.afSTNV/home" >/dev/null 2>&1 &
+exec tail -f "/tmp/demo-sandbox-20260424-132423.afSTNV/guide.log"
 
-==== RIGHT_SH (/tmp/demo-sandbox-20260424-132045.MAszIB/right.sh) ====
+==== RIGHT_SH (/tmp/demo-sandbox-20260424-132423.afSTNV/right.sh) ====
 #!/usr/bin/env bash
 # 只加 set -u 不加 -e/-pipefail：RIGHT_SH 里大量故意 lossy pipe (| head | sed | xargs)，
 # pipefail 会把 benign miss 变 pane killer；-u 只防未定义变量，是最小诚实防护。
 set -u
 # 入口预检 5 项资源
-for _p in "/tmp/demo-sandbox-20260424-132045.MAszIB/workdir" "/tmp/demo-sandbox-20260424-132045.MAszIB/.env" "/tmp/demo-sandbox-20260424-132045.MAszIB/home" "/Users/liushiyu/projects/demo_insights_share" "/tmp/demo-sandbox-20260424-132045.MAszIB/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7"; do
+for _p in "/tmp/demo-sandbox-20260424-132423.afSTNV/workdir" "/tmp/demo-sandbox-20260424-132423.afSTNV/.env" "/tmp/demo-sandbox-20260424-132423.afSTNV/home" "/Users/liushiyu/projects/demo_insights_share" "/tmp/demo-sandbox-20260424-132423.afSTNV/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7"; do
   if [ ! -e "$_p" ]; then
     echo "[right pane FATAL] 缺资源: $_p" >&2
     echo "(pane 保留 60s 供查看, 然后退出)" >&2
@@ -48,17 +48,17 @@ for _p in "/tmp/demo-sandbox-20260424-132045.MAszIB/workdir" "/tmp/demo-sandbox-
     exit 1
   fi
 done
-cd "/tmp/demo-sandbox-20260424-132045.MAszIB/workdir"
-source "/tmp/demo-sandbox-20260424-132045.MAszIB/.env"
+cd "/tmp/demo-sandbox-20260424-132423.afSTNV/workdir"
+source "/tmp/demo-sandbox-20260424-132423.afSTNV/.env"
 clear
 echo "================ sandbox self-check ================"
-echo "cwd  : /tmp/demo-sandbox-20260424-132045.MAszIB/workdir"
-echo "HOME : /tmp/demo-sandbox-20260424-132045.MAszIB/home"
+echo "cwd  : /tmp/demo-sandbox-20260424-132423.afSTNV/workdir"
+echo "HOME : /tmp/demo-sandbox-20260424-132423.afSTNV/home"
 echo "tmux : F1=左pane(讲解) / F2=右pane(Claude) / F12=退出"
 echo "----- installed plugins (\$HOME/.claude/plugins/installed_plugins.json) -----"
-cat "/tmp/demo-sandbox-20260424-132045.MAszIB/home/.claude/plugins/installed_plugins.json" 2>/dev/null || echo "(missing)"
+cat "/tmp/demo-sandbox-20260424-132423.afSTNV/home/.claude/plugins/installed_plugins.json" 2>/dev/null || echo "(missing)"
 echo "----- plugin cache roots (\$HOME/.claude/plugins/cache/) -----"
-find "/tmp/demo-sandbox-20260424-132045.MAszIB/home/.claude/plugins/cache" -maxdepth 4 -mindepth 1 2>/dev/null | sed 's#^#  #' || echo "(none)"
+find "/tmp/demo-sandbox-20260424-132423.afSTNV/home/.claude/plugins/cache" -maxdepth 4 -mindepth 1 2>/dev/null | sed 's#^#  #' || echo "(none)"
 echo "----- repo *.sh (\$REPO_ROOT/*.sh) -----"
 ls "/Users/liushiyu/projects/demo_insights_share"/*.sh 2>/dev/null | xargs -n1 basename 2>/dev/null || echo "(none)"
 echo ""
@@ -76,9 +76,9 @@ echo "║  🔬 LIVE RUNTIME EVIDENCE (per-feature)                      ║"
 echo "╚══════════════════════════════════════════════════════════════╝"
 echo ""
 echo "┌─ [F1] wiki_tree 数据 ─────────────────────────────────────────"
-if [ -f "/tmp/demo-sandbox-20260424-132045.MAszIB/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/runtime/wiki_tree/topics.json" ]; then
-  topic_n=$(python3 -c 'import json,sys;print(len(json.load(open(sys.argv[1]))))' "/tmp/demo-sandbox-20260424-132045.MAszIB/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/runtime/wiki_tree/topics.json" 2>/dev/null || echo "?")
-  card_n=$(find "/tmp/demo-sandbox-20260424-132045.MAszIB/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/runtime/wiki_tree" -name "*.md" -not -name "INDEX.md" 2>/dev/null | wc -l | tr -d ' ')
+if [ -f "/tmp/demo-sandbox-20260424-132423.afSTNV/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/runtime/wiki_tree/topics.json" ]; then
+  topic_n=$(python3 -c 'import json,sys;print(len(json.load(open(sys.argv[1]))))' "/tmp/demo-sandbox-20260424-132423.afSTNV/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/runtime/wiki_tree/topics.json" 2>/dev/null || echo "?")
+  card_n=$(find "/tmp/demo-sandbox-20260424-132423.afSTNV/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/runtime/wiki_tree" -name "*.md" -not -name "INDEX.md" 2>/dev/null | wc -l | tr -d ' ')
   echo "│  Topics: ${topic_n} · Cards: ${card_n}"
 else
   echo "│  (wiki_tree 未就绪)"
@@ -86,10 +86,10 @@ fi
 echo ""
 echo "┌─ [F2] 实机 statusline 徽章 ───────────────────────────────────"
 printf  "│  "
-INSIGHTS_SHARE_URL=http://127.0.0.1:7821 SHARE_STATUSLINE_NO_COLOR=1   bash "/tmp/demo-sandbox-20260424-132045.MAszIB/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/statusline/insights_share_statusline.sh"   2>&1 | head -1 || echo "(statusline exit non-zero)"
+INSIGHTS_SHARE_URL=http://127.0.0.1:7821 SHARE_STATUSLINE_NO_COLOR=1   bash "/tmp/demo-sandbox-20260424-132423.afSTNV/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/statusline/insights_share_statusline.sh"   2>&1 | head -1 || echo "(statusline exit non-zero)"
 echo ""
 echo "┌─ [F3] plugin manifest ────────────────────────────────────────"
-plugin_json="/tmp/demo-sandbox-20260424-132045.MAszIB/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/.claude-plugin/plugin.json"
+plugin_json="/tmp/demo-sandbox-20260424-132423.afSTNV/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/.claude-plugin/plugin.json"
 if [ -f "$plugin_json" ]; then
   ver=$(python3 -c 'import json,sys;print(json.load(open(sys.argv[1]))["version"])' "$plugin_json" 2>/dev/null || echo "?")
   echo "│  version: ${ver}"
@@ -98,7 +98,7 @@ else
 fi
 echo ""
 echo "┌─ [F4] slash 命令 + agent 文件存在性 ──────────────────────────"
-cmd_dir="/tmp/demo-sandbox-20260424-132045.MAszIB/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/commands"
+cmd_dir="/tmp/demo-sandbox-20260424-132423.afSTNV/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/commands"
 if [ -d "$cmd_dir" ]; then
   for f in share-install share-search share-publish share-review share-diff; do
     if [ -f "$cmd_dir/${f}.md" ]; then
@@ -107,19 +107,19 @@ if [ -d "$cmd_dir" ]; then
       echo "│  /${f}   ✗ MISSING"
     fi
   done
-  agent_dir="/tmp/demo-sandbox-20260424-132045.MAszIB/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/agents"
+  agent_dir="/tmp/demo-sandbox-20260424-132423.afSTNV/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/agents"
   echo "│  agents: share-validator($([ -f "$agent_dir/share-validator.md" ] && echo ✓ || echo ✗)) · share-curator($([ -f "$agent_dir/share-curator.md" ] && echo ✓ || echo ✗))"
 else
   echo "│  (commands 目录未找到)"
 fi
 echo ""
 echo "┌─ [F5] 签名 + marketplace ─────────────────────────────────────"
-if grep -q "sig-fail" "/tmp/demo-sandbox-20260424-132045.MAszIB/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/statusline/insights_share_statusline.sh" 2>/dev/null; then
+if grep -q "sig-fail" "/tmp/demo-sandbox-20260424-132423.afSTNV/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/statusline/insights_share_statusline.sh" 2>/dev/null; then
   echo "│  ed25519 sig-fail state: ✓ 支持"
 else
   echo "│  ed25519 sig-fail state: ? 未找到"
 fi
-mp_json="/tmp/demo-sandbox-20260424-132045.MAszIB/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/.claude-plugin/marketplace.json"
+mp_json="/tmp/demo-sandbox-20260424-132423.afSTNV/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/.claude-plugin/marketplace.json"
 if [ -f "$mp_json" ]; then
   echo "│  LAN marketplace: ✓"
 else
@@ -127,7 +127,7 @@ else
 fi
 echo ""
 echo "┌─ [F6] 样例 Example schema 字段 ───────────────────────────────"
-sample="/tmp/demo-sandbox-20260424-132045.MAszIB/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/runtime/wiki_tree/database/postgres_pool.md"
+sample="/tmp/demo-sandbox-20260424-132423.afSTNV/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/runtime/wiki_tree/database/postgres_pool.md"
 if [ -f "$sample" ]; then
   grep -E '"(id|topic_id|label|applies_when|do_not_apply_when|raw_log_type|raw_log)"' "$sample" 2>/dev/null | head -6 | sed 's/^/│  /'
 else
@@ -135,20 +135,20 @@ else
 fi
 echo ""
 echo "----- plugin self-check (sandbox installed plugin cache) -----"
-bash "/tmp/demo-sandbox-20260424-132045.MAszIB/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/scripts/self_check.sh"   || echo "(plugin self-check exit non-zero)"
+bash "/tmp/demo-sandbox-20260424-132423.afSTNV/home/.claude/plugins/cache/insights-share/insights-share/0.6.0-m7/scripts/self_check.sh"   || echo "(plugin self-check exit non-zero)"
 echo "===================================================="
 echo "期望: 6/6 feature 全 ✓；sandbox 内已完成真实 plugin install；plugin self-check ALL GREEN。"
 echo "按 F1 看左 pane 讲解 · F2 回来进 claude · F12 退出 demo。"
 printf "按回车进入 claude…"
 read _
-HOME="/tmp/demo-sandbox-20260424-132045.MAszIB/home" exec claude
+HOME="/tmp/demo-sandbox-20260424-132423.afSTNV/home" exec claude
 
-==== ENV_FILE (/tmp/demo-sandbox-20260424-132045.MAszIB/.env, secrets REDACTED) ====
-# sandbox env (ts=20260424-132045, auth_mode=minimax)
-export SANDBOX_ROOT="/tmp/demo-sandbox-20260424-132045.MAszIB"
-export DEMO_GUIDE_LOG="/tmp/demo-sandbox-20260424-132045.MAszIB/guide.log"
+==== ENV_FILE (/tmp/demo-sandbox-20260424-132423.afSTNV/.env, secrets REDACTED) ====
+# sandbox env (ts=20260424-132423, auth_mode=minimax)
+export SANDBOX_ROOT="/tmp/demo-sandbox-20260424-132423.afSTNV"
+export DEMO_GUIDE_LOG="/tmp/demo-sandbox-20260424-132423.afSTNV/guide.log"
 # KEY: override HOME so claude reads sandbox ~/.claude/
-export HOME="/tmp/demo-sandbox-20260424-132045.MAszIB/home"
+export HOME="/tmp/demo-sandbox-20260424-132423.afSTNV/home"
 
 # --- MiniMax 高速通道 -----------------
 export ANTHROPIC_AUTH_TOKEN="<REDACTED>"

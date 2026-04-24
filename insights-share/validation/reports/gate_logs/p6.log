@@ -1,6 +1,6 @@
 [P6] PASS
 cwd=/Users/liushiyu/projects/demo_insights_share
 command=bash insights-share/validation/run_start_tmux_smoke.sh
-duration_ms=20207
+duration_ms=20232
 tmux smoke pass: claude -> /Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/tmux_claude_smoke.txt
 tmux smoke pass: codex -> /Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/tmux_codex_smoke.txt
