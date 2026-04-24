@@ -31,9 +31,9 @@
   "raw_log_sha256": "ae811fe679e8072aadcc7b660bf6fed0a20ed4b079f49eaf8f1519607ddc8691",
   "signature_algorithm": "ed25519",
   "signature_schema": 1,
-  "signature_key_id": "4ad2de9c3e93f122",
-  "signature": "sEBqCkP95yKjNrWarEv8cVgzr3ruCmzGv8WLfSl29dt2mLrhoA89LQ66lvTo0CGr0lTRxHEZsSyVvSsEpyxDBg==",
-  "signature_signed_at": "2026-04-24T05:24:22.076452+00:00"
+  "signature_key_id": "124bb59f5dc65992",
+  "signature": "ulAJkbbM3KSb//oDWN2LN8+agWbUMhw/1UyfM78eMjQ5nzjFB/xFPguDTvsUq3ejDCM3OVS5LmNwTTMpUt1RDw==",
+  "signature_signed_at": "2026-04-24T05:28:29.005414+00:00"
 }
 ---
 

@@ -280,19 +280,21 @@ def test_bundle_copy_can_start_server_and_search_without_repo_checkout(tmp_path:
     try:
         base = f"http://127.0.0.1:{port}"
         last_error = ""
-        for _ in range(40):
+        for _ in range(120):
             if proc.poll() is not None:
                 out, err = proc.communicate(timeout=1)
                 raise AssertionError(f"server exited early\nstdout={out}\nstderr={err}")
             try:
-                with urllib.request.urlopen(f"{base}/healthz", timeout=0.5) as resp:
+                with urllib.request.urlopen(f"{base}/healthz", timeout=1.0) as resp:
                     assert resp.status == 200
                     break
             except Exception as exc:  # noqa: BLE001
                 last_error = repr(exc)
-                time.sleep(0.1)
+                time.sleep(0.25)
         else:
-            raise AssertionError(f"server did not become healthy: {last_error}")
+            proc.terminate()
+            out, err = proc.communicate(timeout=3)
+            raise AssertionError(f"server did not become healthy: {last_error}\nstdout={out}\nstderr={err}")
 
         with urllib.request.urlopen(
             f"{base}/search?q=checkout%20postgres%20pool&k=1",

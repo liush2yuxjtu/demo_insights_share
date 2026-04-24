@@ -1,5 +1,5 @@
-[adoption-proof] workdir=/tmp/insights-adoption-proof.RgeXL0
-[adoption-proof] home=/tmp/insights-adoption-proof.RgeXL0/home
+[adoption-proof] workdir=/tmp/insights-adoption-proof.8eWgQt
+[adoption-proof] home=/tmp/insights-adoption-proof.8eWgQt/home
 [adoption-proof] python=/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python
 [adoption-proof] start isolated daemon on http://127.0.0.1:18821
 [adoption-proof] assert initial wiki is empty

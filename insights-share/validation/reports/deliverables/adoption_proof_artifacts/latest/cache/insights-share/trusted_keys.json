@@ -1,10 +1,10 @@
 {
   "keys": [
     {
-      "key_id": "4ad2de9c3e93f122",
+      "key_id": "124bb59f5dc65992",
       "algorithm": "ed25519",
-      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEARiytY6oEXExM5P/nbVC7VvEJpSQFGUFkhPkZb1kznW0=\n-----END PUBLIC KEY-----\n"
+      "public_key_pem": "-----BEGIN PUBLIC KEY-----\nMCowBQYDK2VwAyEA8nxr2gkHUXHi3k/lyYNr5dH21kWgWM/iVAuAN8LosIQ=\n-----END PUBLIC KEY-----\n"
     }
   ],
-  "updated_at": "2026-04-24T05:24:22.683129+00:00"
+  "updated_at": "2026-04-24T05:28:29.610976+00:00"
 }

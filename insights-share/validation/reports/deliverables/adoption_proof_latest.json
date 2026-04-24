@@ -1,20 +1,20 @@
 {
   "schema_version": "adoption-proof/v2",
   "pass": true,
-  "checked_at": "2026-04-24T05:24:23Z",
+  "checked_at": "2026-04-24T05:28:30Z",
   "run": {
-    "started_at": "2026-04-24T05:24:21Z",
-    "finished_at": "2026-04-24T05:24:23Z",
-    "duration_ms": 1880
+    "started_at": "2026-04-24T05:28:28Z",
+    "finished_at": "2026-04-24T05:28:30Z",
+    "duration_ms": 1909
   },
   "wiki_url": "http://127.0.0.1:18821",
   "report": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_latest.txt",
   "environment": {
     "repo_root": "/Users/liushiyu/projects/demo_insights_share",
     "source_dir": "/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes",
-    "workdir": "/tmp/insights-adoption-proof.RgeXL0",
-    "home_dir": "/tmp/insights-adoption-proof.RgeXL0/home",
-    "store_dir": "/tmp/insights-adoption-proof.RgeXL0/wiki_tree",
+    "workdir": "/tmp/insights-adoption-proof.8eWgQt",
+    "home_dir": "/tmp/insights-adoption-proof.8eWgQt/home",
+    "store_dir": "/tmp/insights-adoption-proof.8eWgQt/wiki_tree",
     "python": "/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python"
   },
   "artifacts": {
@@ -32,9 +32,9 @@
   "signals": {
     "clean_machine_install": {
       "status": "ok",
-      "started_at": "2026-04-24T05:24:22Z",
-      "finished_at": "2026-04-24T05:24:22Z",
-      "duration_ms": 202,
+      "started_at": "2026-04-24T05:28:29Z",
+      "finished_at": "2026-04-24T05:28:29Z",
+      "duration_ms": 198,
       "command": [
         "insights_cli.py",
         "wiki-install",
@@ -42,8 +42,8 @@
         "http://127.0.0.1:18821"
       ],
       "evidence": {
-        "isolated_home": "/tmp/insights-adoption-proof.RgeXL0/home",
-        "ephemeral_cache_dir": "/tmp/insights-adoption-proof.RgeXL0/home/.cache/insights-share",
+        "isolated_home": "/tmp/insights-adoption-proof.8eWgQt/home",
+        "ephemeral_cache_dir": "/tmp/insights-adoption-proof.8eWgQt/home/.cache/insights-share",
         "cache_dir": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/cache/insights-share",
         "config_path": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/cache/insights-share/config.json",
         "trusted_keys_path": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/cache/insights-share/trusted_keys.json",
@@ -59,9 +59,9 @@
     },
     "first_relevant_hit": {
       "status": "ok",
-      "started_at": "2026-04-24T05:24:22Z",
-      "finished_at": "2026-04-24T05:24:22Z",
-      "duration_ms": 194,
+      "started_at": "2026-04-24T05:28:29Z",
+      "finished_at": "2026-04-24T05:28:29Z",
+      "duration_ms": 200,
       "command": [
         "insights_cli.py",
         "solve",
@@ -87,9 +87,9 @@
     },
     "first_publish": {
       "status": "ok",
-      "started_at": "2026-04-24T05:24:21Z",
-      "finished_at": "2026-04-24T05:24:22Z",
-      "duration_ms": 385,
+      "started_at": "2026-04-24T05:28:28Z",
+      "finished_at": "2026-04-24T05:28:29Z",
+      "duration_ms": 380,
       "commands": [
         [
           "insights_cli.py",
@@ -137,16 +137,16 @@
           "wiki_types_json": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/wiki_tree/wiki_types.json"
         },
         "outputs": {
-          "good": "published alice-pgpool-2026-04-10 signed_by=4ad2de9c3e93f122",
-          "bad": "published bob-pgpool-bad-2026-04-12 signed_by=4ad2de9c3e93f122"
+          "good": "published alice-pgpool-2026-04-10 signed_by=124bb59f5dc65992",
+          "bad": "published bob-pgpool-bad-2026-04-12 signed_by=124bb59f5dc65992"
         }
       }
     },
     "day_2_return": {
       "status": "ok",
-      "started_at": "2026-04-24T05:24:22Z",
-      "finished_at": "2026-04-24T05:24:22Z",
-      "duration_ms": 196,
+      "started_at": "2026-04-24T05:28:29Z",
+      "finished_at": "2026-04-24T05:28:29Z",
+      "duration_ms": 198,
       "command": [
         "insights_cli.py",
         "solve",
@@ -154,7 +154,7 @@
         "--no-ai"
       ],
       "evidence": {
-        "cwd": "/tmp/insights-adoption-proof.RgeXL0/day2",
+        "cwd": "/tmp/insights-adoption-proof.8eWgQt/day2",
         "used_installed_config": true,
         "config_path": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_artifacts/latest/cache/insights-share/config.json",
         "config_server_url": "http://127.0.0.1:18821",
@@ -164,9 +164,9 @@
     },
     "relevance_lift_matrix": {
       "status": "ok",
-      "started_at": "2026-04-24T05:24:22Z",
-      "finished_at": "2026-04-24T05:24:23Z",
-      "duration_ms": 422,
+      "started_at": "2026-04-24T05:28:29Z",
+      "finished_at": "2026-04-24T05:28:30Z",
+      "duration_ms": 418,
       "commands": [
         [
           "insights_cli.py",
@@ -248,8 +248,8 @@
           "carol-redis-eviction-2026-03-27"
         ],
         "outputs": {
-          "celery": "published alice-celery-retry-2026-04-08 signed_by=4ad2de9c3e93f122",
-          "redis": "published carol-redis-eviction-2026-03-27 signed_by=4ad2de9c3e93f122"
+          "celery": "published alice-celery-retry-2026-04-08 signed_by=124bb59f5dc65992",
+          "redis": "published carol-redis-eviction-2026-03-27 signed_by=124bb59f5dc65992"
         }
       }
     }
