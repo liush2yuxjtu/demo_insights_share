@@ -43,6 +43,7 @@
 | 文件 | 类型 | 说明 |
 |------|------|------|
 | [FEATURES.md](FEATURES.md) | 功能清单（canonical）| 6 大核心功能的单一真源；`start.demo.sh` 右 pane self-check 原样 echo 做实机证据；probe 标准答案 |
+| [CLAUDEFAST_USAGE.md](CLAUDEFAST_USAGE.md) | claudefast 使用总表（canonical） | 回答 `where do we use claudefast?` 的单一真源；区分规则门禁、可执行入口、role summon、设计 probe 与非入口历史记录 |
 | [proposal/proposal_conflict_design.md](proposal/proposal_conflict_design.md) | 正式数据模型（权威） | Topic 中心 Good/Bad 并列共存：同一 Topic 下多人多场景决策并列展示；good=此场景选了此方案，bad=此场景拒绝此方案；不挑最优、不合并、不做冲突检测 |
 | [proposal/proposal_wiki_card.md](proposal/proposal_wiki_card.md) | 现状磁盘形态（参考） | `wiki_tree/` 存储布局、卡片 JSON+markdown 结构、label override 流程、已废弃冲突机制说明 |
 | [proposal/proposal_statusline.md](proposal/proposal_statusline.md) | 反馈机制 | statusline 右侧常驻 `[share ✓ N/today]`：展示 insights-share 运行状态 + 今日触发计数，给用户/client 实时信任感信号（M5 前徽章为 `[wiki ...]`） |
