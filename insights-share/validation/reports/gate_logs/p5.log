@@ -1,0 +1,15 @@
+[P5] PASS
+cwd=/Users/liushiyu/projects/demo_insights_share/insights-share/validation
+command=npm run handout:verify
+duration_ms=6588
+
+> handout:verify
+> node scripts/handout_verify.mjs
+
+[2026-04-24T05:20:50.402Z] 已创建临时 tmux session: web_cli_demo
+[2026-04-24T05:20:50.404Z] daemon 未在线，handout verify 临时启动 insightsd
+[2026-04-24T05:20:51.413Z] 临时 daemon 已在线
+[2026-04-24T05:20:51.414Z] 验证 /handout 自动检查
+[2026-04-24T05:20:52.239Z] 验证 Dashboard 实时状态与 Demo
+[2026-04-24T05:20:54.499Z] 验证 CLI 输入链路
+[2026-04-24T05:20:54.744Z] 验证 Validation 与 handout 自动回填

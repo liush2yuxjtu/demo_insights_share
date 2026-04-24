@@ -15,12 +15,19 @@
 
 ## Closed / Deferred
 
+### [DONE] [AP-2] relevance-lift matrix
+
+- **What**：`run_adoption_proof.sh` 在 AP-1 四信号后新增 `relevance_lift_matrix`，发布 Celery retry storm 与 Redis session eviction 两个现有 seed，并对 postgres/celery/redis 三类 canonical incident 执行 `/search?k=3`。
+- **Evidence**：报告 `signals.relevance_lift_matrix` 记录 no-hit baseline、每个 case 的 expected top hit、top score、hit_ids 与 `wrong_domain_not_top=true`；`test_adoption_proof.py` 已把该信号纳入合同。
+- **Verification**：`bash insights-share/validation/run_adoption_proof.sh` 通过；`bash insights-share/validation/run_contract_tests.sh insights-share/validation/test_adoption_proof.py` 通过；`bash insights-share/validation/run_ci_gate.sh` 通过，覆盖 52 项合同测试。
+- **Source**：2026-04-24 AP-2 adoption proof expansion。
+
 ### [DONE] [UC-1] plugin bundle self-containment
 
 - **What**：plugin 现在自带 `plugins/insights-share/runtime/`，其中包含 `insights_cli.py`、`insightsd/`、`wiki_tree/` seed corpus；`start_server.sh` / `start_ui.sh` 默认从 installed plugin runtime 启 daemon，不再回跳 dev repo checkout 或 `demo_codes/.venv`。
 - **Evidence**：`test_plugin_contract.py` 新增隔离 bundle copy smoke，复制 `plugins/insights-share` 到 `tmp_path` 后从任意 cwd 启 server 并搜索 `alice-pgpool-2026-04-10`；`self_check.sh` 现在检查 `server runtime bundle: OK`、`start_server.sh: OK`、`start_ui.sh: OK`。
 - **Hero path**：`start.demo.sh` Stage 5 已改为使用 sandbox 内 `claude plugin install` 后的 plugin cache 启 daemon；右 pane manifest/statusline/self-check/sample 也来自 sandbox installed plugin cache。
-- **Verification**：`bash insights-share/validation/run_ci_gate.sh` 通过；`RUN_HANDOUT_VERIFY=1 RUN_TMUX_SMOKE=1 bash insights-share/validation/run_ci_gate.sh` 通过，覆盖 43 项合同测试、adoption proof、`start.demo.sh --dry-run`、Playwright handout verify、tmux claude/codex smoke。
+- **Verification**：`bash insights-share/validation/run_ci_gate.sh` 通过；`RUN_HANDOUT_VERIFY=1 RUN_TMUX_SMOKE=1 bash insights-share/validation/run_ci_gate.sh` 通过，当前覆盖 52 项合同测试、adoption proof（含 AP-2）、`start.demo.sh --dry-run`、Playwright handout verify、tmux claude/codex smoke。
 - **Source**：2026-04-24 UC-1 self-containment closeout。
 
 ### [DONE] [SB-1] start.demo.sh 主入口改走 `claude plugin install`

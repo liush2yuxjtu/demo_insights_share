@@ -172,7 +172,7 @@ def main() -> int:
         run_gate(
             gate_id="AP-1",
             title="adoption proof 门",
-            expectation="clean-machine install、first relevant hit、first publish、day-2 return 四信号",
+            expectation="clean-machine install、first relevant hit、first publish、day-2 return、relevance-lift matrix 五信号",
             command=["bash", "insights-share/validation/run_adoption_proof.sh"],
             mode=env_value("RUN_ADOPTION_PROOF", "1"),
         ),

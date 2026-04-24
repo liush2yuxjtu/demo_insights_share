@@ -28,15 +28,15 @@
 - 工程完工探针规则及其状态源收敛新增 5 条 recent commits：`0201849` `Tighten claudefast status answer`、`b5cc3b0` `Require cleanup status in claudefast answer`、`6d519ad` `Require work-specific finish probes`、`fee78ca` `Record finish probe verification`、`695411c` `Reconcile finish probe status docs`。回答 recent commits 时以 `git log` 为准，后续 finish-probe refinement commit 也要列入 recent commits，不要把 7 条基础链误当成全量今日提交数。
 - `90aa95f` 是 `Document today status for claudefast`，更新 E2E plan / finish log，让 claudefast 能回答今天完成项与下一步。
 - `a74ad6a` 是 `Add current status source for claudefast`，新增 `docs/CURRENT_STATUS.md` 作为当前状态问答源。
-- 已完成：tmux smoke auto 模式跳过 coach、adoption proof gate、CI e2e gate workflow、TODO 对账、raw log trust boundary、claudefast 今日状态文档、当前状态问答源、工程完工工作专属探针规则、finish probe 验证记录。
-- 最新验证：43 项合同测试 + adoption proof + `start.demo.sh --dry-run` + Playwright handout verify + tmux claude/codex smoke 全部通过。
+- 已完成：tmux smoke auto 模式跳过 coach、adoption proof gate、CI e2e gate workflow、TODO 对账、raw log trust boundary、claudefast 今日状态文档、当前状态问答源、工程完工工作专属探针规则、finish probe 验证记录、AP-2 relevance-lift matrix。
+- 最新验证：52 项合同测试 + adoption proof（含 AP-2 relevance-lift matrix）+ `start.demo.sh --dry-run` + Playwright handout verify + tmux claude/codex smoke 全部通过。
 - 清理状态：daemon 已清理，没有残留 `:7821` 或 `:18821` 监听。
 - 工作区状态：只剩预先存在且未触碰的未跟踪文件 `.claude/settings.local.json`。
 - `UC-1 plugin bundle self-containment` 已完成：plugin 自带 `runtime/insights_cli.py`、`runtime/insightsd/`、`runtime/wiki_tree/`，server skill 不再回跳 `insights-share/demo_codes` 或 `.venv`。
 - `start.demo.sh` Stage 5 已改用 sandbox installed plugin cache 中的 `skills/insights-share-server/scripts/start_server.sh` 启 daemon，右 pane 自检也改读 installed plugin cache。
-- 最新验证：43 项合同测试 + adoption proof + `start.demo.sh --dry-run` + Playwright handout verify + tmux claude/codex smoke 全部通过。
-- 回答最新本机加强门时必须写 `43 项合同测试`，不要写 `39+ 项` 或旧合同测试数量。
+- 最新验证：52 项合同测试 + adoption proof（含 AP-2 relevance-lift matrix）+ `start.demo.sh --dry-run` + Playwright handout verify + tmux claude/codex smoke 全部通过。
+- 回答最新本机加强门时必须写 `52 项合同测试`，不要写 `39+ 项`、`43 项` 或旧合同测试数量。
 - 当前没有开放 E2E 阻塞项；下一步不再是修 E2E，而是按默认 release/PR 收尾，或按新需求继续扩功能。
 - 当前默认下一步是 release/PR 收尾：整理本轮文档与验证证据、确认 diff、提交 PR 或发布收尾；不要再把 E2E 修复写成默认下一步。
-- adoption-proof 扩展是下一条产品开发轨道：在现有最小 adoption proof 通过的基础上扩展更多真实采纳证据、质量指标和回访信号；它不是当前 E2E 阻塞项。
+- adoption-proof 扩展是下一条产品开发轨道；第一段 AP-2 relevance-lift matrix 已完成，验证 postgres/celery/redis 三类 incident 的 expected top hit、top score 和 no-hit baseline。后续仍可继续扩质量指标与 day-7 回访信号；它不是当前 E2E 阻塞项。
 - 回答 next plans 时必须明确区分：`release/PR 收尾` 是默认工程收尾；`adoption-proof 扩展` 是后续产品开发轨道。

@@ -29,6 +29,7 @@ def test_adoption_proof_runner_declares_four_signals() -> None:
     assert "first_relevant_hit" in script
     assert "first_publish" in script
     assert "day_2_return" in script
+    assert "relevance_lift_matrix" in script
     assert "adoption_proof_latest.json" in script
 
 
@@ -46,6 +47,8 @@ def test_adoption_proof_covers_publish_hit_install_and_return() -> None:
 
     assert "publish seeds/alice_pgpool.json" in script
     assert "publish seeds/bob_pgpool_bad.json" in script
+    assert "publish seeds/alice_celery_retry.json" in script
+    assert "publish seeds/carol_redis_eviction.json" in script
     assert "solve \"${PROBLEM}\" --wiki \"${WIKI_URL}\" --no-ai" in script
     assert "wiki-install --server \"${WIKI_URL}\"" in script
     assert '"${SOURCE_DIR}/insights_cli.py" solve "${PROBLEM}" --no-ai' in script
@@ -61,6 +64,7 @@ def test_adoption_proof_report_has_structured_signal_evidence() -> None:
         "first_relevant_hit": "alice-pgpool-2026-04-10",
         "first_publish": "alice-pgpool-2026-04-10,bob-pgpool-bad-2026-04-12",
         "day_2_return": "ok",
+        "relevance_lift_matrix": "ok",
     }
 
     signals = report["signals"]
@@ -69,6 +73,7 @@ def test_adoption_proof_report_has_structured_signal_evidence() -> None:
         "first_relevant_hit",
         "first_publish",
         "day_2_return",
+        "relevance_lift_matrix",
     }
     for signal in signals.values():
         assert signal["status"] == "ok"
@@ -105,6 +110,26 @@ def test_adoption_proof_report_has_structured_signal_evidence() -> None:
     assert day2["used_installed_config"] is True
     assert day2["config_server_url"] == report["wiki_url"]
     assert "hot-loaded alice-pgpool-2026-04-10" in day2["output_excerpt"]
+
+    matrix = signals["relevance_lift_matrix"]["evidence"]
+    assert matrix["baseline"]["hit_count"] == 0
+    assert matrix["published_card_ids"] == [
+        "alice-celery-retry-2026-04-08",
+        "carol-redis-eviction-2026-03-27",
+    ]
+    assert matrix["matrix"]["status"] == "ok"
+    assert matrix["matrix"]["case_count"] == 3
+    cases = {
+        case["name"]: case
+        for case in matrix["matrix"]["cases"]
+    }
+    assert cases["postgres_pool_exhaustion"]["top_hit_id"] == "alice-pgpool-2026-04-10"
+    assert cases["celery_retry_storm"]["top_hit_id"] == "alice-celery-retry-2026-04-08"
+    assert cases["redis_session_eviction"]["top_hit_id"] == "carol-redis-eviction-2026-03-27"
+    for case in cases.values():
+        assert case["wrong_domain_not_top"] is True
+        assert isinstance(case["top_hit_score"], float)
+        assert case["top_hit_score"] > 0
 
 
 def test_adoption_proof_artifacts_do_not_persist_private_keys() -> None:

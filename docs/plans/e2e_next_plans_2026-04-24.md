@@ -6,7 +6,7 @@
 
 `start.demo.sh` 不能单独承担全部 E2E：Playwright 录屏/回放、pytest 合同、release package、tmux 批量 smoke、A/B adoption proof 都需要独立门禁。
 
-当前没有开放 E2E 阻塞项。默认下一步是 release/PR 收尾；adoption-proof 扩展是后续产品开发轨道，不再作为当前 E2E 修复项。
+当前没有开放 E2E 阻塞项。默认下一步是 release/PR 收尾；adoption-proof 扩展是后续产品开发轨道，不再作为当前 E2E 修复项。AP-2 relevance-lift matrix 已完成，作为产品轨道的第一段扩展证据。
 
 ## 当前证据
 
@@ -21,12 +21,12 @@
 - `npm run handout:verify` 已通过：临时 daemon + 临时 `web_cli_demo` tmux session 自动创建和清理，5 个 handout step 全部 passed。
 - `npm run handout:record` 已通过：完整用户流 mp4 与 manifest 已刷新，ffmpeg 退出逻辑已加超时兜底。
 - `bash insights-share/validation/run_start_tmux_smoke.sh` 已通过：`start.claude.sh` 与 `start.codex.sh` auto smoke 均完成 healthz/publish/solve/install/cache 闭环。
-- 已新增并跑通 adoption proof 最小门：`bash insights-share/validation/run_adoption_proof.sh`，用隔离 `HOME` 验证 clean-machine install、first relevant hit、first publish、day-2 return 四个信号；最新报告在 `insights-share/validation/reports/deliverables/adoption_proof_latest.json`。
+- 已新增并跑通 adoption proof 门：`bash insights-share/validation/run_adoption_proof.sh`，用隔离 `HOME` 验证 clean-machine install、first relevant hit、first publish、day-2 return、relevance-lift matrix 五个信号；最新报告在 `insights-share/validation/reports/deliverables/adoption_proof_latest.json`。
 - 已新增 CI/pre-commit 共用入口：`bash insights-share/validation/run_ci_gate.sh`，并接入 `.github/workflows/e2e-gates.yml`。CI 默认跑合同测试 + adoption proof；本机有 `claude`/`tmux` 时自动加跑 `start.demo.sh --dry-run`。
 - `TODOS.md` 已完成对账：`SB-1`、`AP-1`、`FL-1`、`FL-2`、`UC-2`、`UC-1` 已移入 Closed；当前没有开放 E2E 阻塞项。
-- `bash insights-share/validation/run_ci_gate.sh` 最新本机结果已通过：43 项合同测试 + adoption proof + `start.demo.sh --dry-run`。
+- `bash insights-share/validation/run_ci_gate.sh` 最新本机结果已通过：52 项合同测试 + adoption proof（含 AP-2 relevance-lift matrix）+ `start.demo.sh --dry-run`。
 - `UC-1 plugin bundle self-containment` 已完成：plugin 自带 `runtime/` server/search seed corpus；`start_server.sh` / `start_ui.sh` 和 `start.demo.sh` hero path 都走 installed plugin cache，不再依赖 repo checkout 或 `demo_codes/.venv`。
-- `RUN_HANDOUT_VERIFY=1 RUN_TMUX_SMOKE=1 bash insights-share/validation/run_ci_gate.sh` 最新本机结果已通过：43 项合同测试 + adoption proof + `start.demo.sh --dry-run` + Playwright handout verify + tmux claude/codex smoke。
+- `RUN_HANDOUT_VERIFY=1 RUN_TMUX_SMOKE=1 bash insights-share/validation/run_ci_gate.sh` 最新本机结果已通过：52 项合同测试 + adoption proof（含 AP-2 relevance-lift matrix）+ `start.demo.sh --dry-run` + Playwright handout verify + tmux claude/codex smoke。
 - 清理状态已确认：没有残留 `:7821` / `:18821` daemon 监听；工作区只剩预先存在且未触碰的 `.claude/settings.local.json` 未跟踪。
 
 ## 分层 E2E 门禁
@@ -55,7 +55,8 @@
 9. 已完成：补 raw log trust boundary。tree store 写 raw log 前会对敏感字段和常见 token pattern 脱敏；`additionalContext` 保持公开字段 allowlist。
 10. 已完成：推进 `UC-1 plugin bundle self-containment`，切断 plugin server skill 的 `insights-share/demo_codes` / `.venv` 运行时依赖，让 clean plugin install 不靠 repo checkout 也能启动 server/search。
 11. 默认下一步：release/PR 收尾，整理本轮文档与验证证据、确认 diff、提交 PR 或发布收尾。
-12. 后续产品开发轨道：adoption-proof 扩展，在现有最小门通过的基础上扩展更多真实采纳证据、质量指标和 day-2/day-7 回访信号；该轨道不是当前 E2E 阻塞项。
+12. 已完成：AP-2 relevance-lift matrix，在现有最小 adoption proof 基础上新增 postgres/celery/redis 三类 incident 的 expected top hit、top score、wrong-domain not top 与 no-hit baseline 证据。
+13. 后续产品开发轨道：继续扩展更多真实采纳证据、质量指标和 day-7 回访信号；该轨道不是当前 E2E 阻塞项。
 
 ## PASS 标准
 

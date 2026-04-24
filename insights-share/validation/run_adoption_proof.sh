@@ -4,6 +4,8 @@
 #   2. first relevant hit cites the canonical Alice card
 #   3. first publish stores both good and bad seed cards
 #   4. day-2 return works from installed config without passing --wiki
+# AP-2 adoption proof:
+#   5. relevance-lift matrix returns the right top card across multiple incidents
 
 set -euo pipefail
 
@@ -37,6 +39,13 @@ HIT_DURATION_MS="0"
 DAY2_STARTED_AT=""
 DAY2_FINISHED_AT=""
 DAY2_DURATION_MS="0"
+AP2_STARTED_AT=""
+AP2_FINISHED_AT=""
+AP2_DURATION_MS="0"
+BASELINE_SEARCH_JSON=""
+AP2_MATRIX_JSON_PATH=""
+PUBLISH_CELERY_OUTPUT=""
+PUBLISH_REDIS_OUTPUT=""
 INSTALL_OUTPUT=""
 FIRST_SOLVE_OUTPUT=""
 DAY2_SOLVE_OUTPUT=""
@@ -100,6 +109,24 @@ run_cli() {
   (cd "${SOURCE_DIR}" && HOME="${HOME_DIR}" "${PYTHON_BIN}" insights_cli.py "$@")
 }
 
+search_json() {
+  local query="$1"
+  local k="${2:-3}"
+  QUERY="${query}" K="${k}" WIKI_URL="${WIKI_URL}" "${PYTHON_BIN}" - <<'PY'
+from __future__ import annotations
+
+import json
+import os
+import urllib.parse
+import urllib.request
+
+wiki_url = os.environ["WIKI_URL"].rstrip("/")
+query = urllib.parse.urlencode({"q": os.environ["QUERY"], "k": os.environ.get("K", "3")})
+with urllib.request.urlopen(f"{wiki_url}/search?{query}", timeout=5.0) as resp:
+    print(json.dumps(json.loads(resp.read().decode("utf-8")), ensure_ascii=False))
+PY
+}
+
 assert_contains() {
   local label="$1"
   local haystack="$2"
@@ -135,6 +162,8 @@ write_report() {
   export PUBLISH_STARTED_AT PUBLISH_FINISHED_AT PUBLISH_DURATION_MS PUBLISH_GOOD_OUTPUT PUBLISH_BAD_OUTPUT
   export HIT_STARTED_AT HIT_FINISHED_AT HIT_DURATION_MS FIRST_SOLVE_OUTPUT
   export DAY2_STARTED_AT DAY2_FINISHED_AT DAY2_DURATION_MS DAY2_SOLVE_OUTPUT
+  export AP2_STARTED_AT AP2_FINISHED_AT AP2_DURATION_MS AP2_MATRIX_JSON_PATH BASELINE_SEARCH_JSON
+  export PUBLISH_CELERY_OUTPUT PUBLISH_REDIS_OUTPUT
   "${PYTHON_BIN}" - <<'PY'
 from __future__ import annotations
 
@@ -170,6 +199,14 @@ def output_excerpt(value: str, limit: int = 800) -> str:
     if len(value) <= limit:
         return value
     return value[:limit] + "...<truncated>"
+
+
+def read_json_text(value: str) -> dict:
+    try:
+        data = json.loads(value)
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
 
 
 def card_paths(store_dir: Path, card_id: str) -> dict[str, str]:
@@ -221,6 +258,8 @@ top_hit = hits[0] if hits else {}
 config = read_json(config_path)
 trusted_keys = read_json(trusted_keys_path)
 cached_card_ids = sorted(path.stem for path in cache_dir.glob("*.json") if path.name not in {"config.json", "trusted_keys.json"})
+baseline_search = read_json_text(env("BASELINE_SEARCH_JSON"))
+ap2_matrix = read_json(Path(env("AP2_MATRIX_JSON_PATH"))) if env("AP2_MATRIX_JSON_PATH") else {}
 
 report = {
     "schema_version": "adoption-proof/v2",
@@ -251,6 +290,7 @@ report = {
         "first_relevant_hit": "alice-pgpool-2026-04-10",
         "first_publish": "alice-pgpool-2026-04-10,bob-pgpool-bad-2026-04-12",
         "day_2_return": "ok",
+        "relevance_lift_matrix": "ok",
     },
     "signals": {
         "clean_machine_install": {
@@ -338,6 +378,33 @@ report = {
                 "output_excerpt": output_excerpt(env("DAY2_SOLVE_OUTPUT")),
             },
         },
+        "relevance_lift_matrix": {
+            "status": "ok",
+            "started_at": env("AP2_STARTED_AT"),
+            "finished_at": env("AP2_FINISHED_AT"),
+            "duration_ms": int(env("AP2_DURATION_MS", "0")),
+            "commands": [
+                ["insights_cli.py", "publish", "seeds/alice_celery_retry.json", "--wiki", wiki_url],
+                ["insights_cli.py", "publish", "seeds/carol_redis_eviction.json", "--wiki", wiki_url],
+                ["GET", "/search?q=<canonical>&k=3"],
+            ],
+            "evidence": {
+                "baseline": {
+                    "query": problem,
+                    "hit_count": len(baseline_search.get("hits") or []),
+                    "hit_ids": [hit.get("id") for hit in (baseline_search.get("hits") or []) if hit.get("id")],
+                },
+                "matrix": ap2_matrix,
+                "published_card_ids": [
+                    "alice-celery-retry-2026-04-08",
+                    "carol-redis-eviction-2026-03-27",
+                ],
+                "outputs": {
+                    "celery": output_excerpt(env("PUBLISH_CELERY_OUTPUT")),
+                    "redis": output_excerpt(env("PUBLISH_REDIS_OUTPUT")),
+                },
+            },
+        },
     },
 }
 
@@ -384,6 +451,7 @@ main() {
   log "assert initial wiki is empty"
   initial_list="$(run_cli list --wiki "${WIKI_URL}")"
   assert_contains "initial list" "${initial_list}" "(no insights yet)"
+  BASELINE_SEARCH_JSON="$(search_json "${PROBLEM}" 3)"
 
   log "first publish: Alice good + Bob bad"
   PUBLISH_STARTED_AT="$(iso_utc)"
@@ -432,8 +500,112 @@ main() {
   DAY2_DURATION_MS="$(duration_ms "${day2_started_ms}" "${day2_finished_ms}")"
   assert_contains "day-2 return" "${DAY2_SOLVE_OUTPUT}" "hot-loaded alice-pgpool-2026-04-10"
 
+  log "AP-2 relevance-lift matrix"
+  AP2_STARTED_AT="$(iso_utc)"
+  ap2_started_ms="$(epoch_ms)"
+  PUBLISH_CELERY_OUTPUT="$(run_cli publish seeds/alice_celery_retry.json --wiki "${WIKI_URL}")"
+  PUBLISH_REDIS_OUTPUT="$(run_cli publish seeds/carol_redis_eviction.json --wiki "${WIKI_URL}")"
+  assert_contains "publish celery" "${PUBLISH_CELERY_OUTPUT}" "published alice-celery-retry-2026-04-08"
+  assert_contains "publish redis" "${PUBLISH_REDIS_OUTPUT}" "published carol-redis-eviction-2026-03-27"
+  AP2_MATRIX_JSON_PATH="${WORKDIR}/relevance_lift_matrix.json"
+  export WIKI_URL AP2_MATRIX_JSON_PATH BASELINE_SEARCH_JSON PROBLEM
+  "${PYTHON_BIN}" - <<'PY'
+from __future__ import annotations
+
+import json
+import os
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+
+def http_json(path: str, params: dict[str, str]) -> dict:
+    query = urllib.parse.urlencode(params)
+    url = f"{os.environ['WIKI_URL'].rstrip('/')}{path}?{query}"
+    with urllib.request.urlopen(url, timeout=5.0) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+    return data if isinstance(data, dict) else {}
+
+
+def search(query: str) -> list[dict]:
+    return list(http_json("/search", {"q": query, "k": "3"}).get("hits") or [])
+
+
+def score_of(hit: dict) -> float:
+    try:
+        return float(hit.get("score") or 0.0)
+    except Exception:
+        return 0.0
+
+
+baseline = json.loads(os.environ.get("BASELINE_SEARCH_JSON") or "{}")
+baseline_hits = list(baseline.get("hits") or [])
+if baseline_hits:
+    raise SystemExit(f"expected empty baseline before first publish, got {[hit.get('id') for hit in baseline_hits]}")
+
+cases = [
+    {
+        "name": "postgres_pool_exhaustion",
+        "query": os.environ["PROBLEM"],
+        "expected_top_id": "alice-pgpool-2026-04-10",
+        "wrong_domain_ids": ["alice-celery-retry-2026-04-08", "carol-redis-eviction-2026-03-27"],
+    },
+    {
+        "name": "celery_retry_storm",
+        "query": "Celery retry storm is overwhelming Redis broker and workers loop immediate retry without backoff",
+        "expected_top_id": "alice-celery-retry-2026-04-08",
+        "wrong_domain_ids": ["alice-pgpool-2026-04-10", "bob-pgpool-bad-2026-04-12", "carol-redis-eviction-2026-03-27"],
+    },
+    {
+        "name": "redis_session_eviction",
+        "query": "Redis allkeys-lru is evicting session data and users are logged out during cache warm-up",
+        "expected_top_id": "carol-redis-eviction-2026-03-27",
+        "wrong_domain_ids": ["alice-pgpool-2026-04-10", "bob-pgpool-bad-2026-04-12", "alice-celery-retry-2026-04-08"],
+    },
+]
+
+results = []
+for case in cases:
+    hits = search(case["query"])
+    top = hits[0] if hits else {}
+    top_id = top.get("id")
+    if top_id != case["expected_top_id"]:
+        raise SystemExit(f"{case['name']} expected top {case['expected_top_id']}, got {top_id}; hits={[hit.get('id') for hit in hits]}")
+    if top_id in set(case["wrong_domain_ids"]):
+        raise SystemExit(f"{case['name']} wrong-domain top hit {top_id}")
+    results.append(
+        {
+            "name": case["name"],
+            "query": case["query"],
+            "expected_top_id": case["expected_top_id"],
+            "top_hit_id": top_id,
+            "top_hit_score": score_of(top),
+            "hit_ids": [hit.get("id") for hit in hits if hit.get("id")],
+            "wrong_domain_not_top": all(top_id != wrong_id for wrong_id in case["wrong_domain_ids"]),
+        }
+    )
+
+matrix = {
+    "status": "ok",
+    "baseline_before_publish": {
+        "query": os.environ["PROBLEM"],
+        "hit_count": 0,
+        "hit_ids": [],
+    },
+    "case_count": len(results),
+    "cases": results,
+}
+Path(os.environ["AP2_MATRIX_JSON_PATH"]).write_text(
+    json.dumps(matrix, ensure_ascii=False, indent=2) + "\n",
+    encoding="utf-8",
+)
+PY
+  ap2_finished_ms="$(epoch_ms)"
+  AP2_FINISHED_AT="$(iso_utc)"
+  AP2_DURATION_MS="$(duration_ms "${ap2_started_ms}" "${ap2_finished_ms}")"
+
   write_report "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-  log "PASS clean_machine_install=ok first_relevant_hit=alice-pgpool-2026-04-10 first_publish=2 day_2_return=ok"
+  log "PASS clean_machine_install=ok first_relevant_hit=alice-pgpool-2026-04-10 first_publish=2 day_2_return=ok relevance_lift_matrix=ok"
   log "report=${REPORT_JSON}"
 }
 
