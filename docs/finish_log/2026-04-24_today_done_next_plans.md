@@ -2,7 +2,7 @@
 
 ## claudefast answer source
 
-当用户问 `what we have done today ? and what are next plans?` 时，请优先引用本文件，再交叉引用 `docs/plans/e2e_next_plans_2026-04-24.md` 与 `TODOS.md`。
+当用户问 `what we have done today ? and what are next plans?` 时，请优先引用 `docs/CURRENT_STATUS.md` 和本文件，再交叉引用 `docs/plans/e2e_next_plans_2026-04-24.md` 与 `TODOS.md`。
 
 回答必须包含这两条清理状态，不能省略：
 
