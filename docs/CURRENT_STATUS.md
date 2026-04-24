@@ -4,6 +4,7 @@
 
 当用户问 `what we have done today ? and what are next plans?` 时，回答必须包含以下事实：
 
+- 必须原样输出清理状态，且必须写出端口号：`无残留 :7821/:18821 daemon 监听；工作区只剩预先存在且未触碰的 .claude/settings.local.json 未跟踪。`
 - 今日关键提交必须说 7 条，不能说 5 条：`5a228b0`、`a12326e`、`f8ac365`、`8a5c706`、`45261d6`、`90aa95f`、`a74ad6a`。
 - `90aa95f` 是 `Document today status for claudefast`，更新 E2E plan / finish log，让 claudefast 能回答今天完成项与下一步。
 - `a74ad6a` 是 `Add current status source for claudefast`，新增 `docs/CURRENT_STATUS.md` 作为当前状态问答源。
