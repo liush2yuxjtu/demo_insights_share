@@ -1,10 +1,18 @@
 cd /Users/liushiyu/projects/demo_insights_share
 bash /Users/liushiyu/projects/demo_insights_share/start.codex.sh --auto-approve; printf '\n__SCRIPT_DONE__:%s\n' $?
 /Users/liushiyu/.zshrc:381: command not found: starship
-[1m[7m%[27m[1m[0m                                                                                                                                                                                                                            [0m[27m[24m[Jliushiyu@liushiyudeMac-mini demo_insights_share % [K[?2004hccd /Users/liushiyu/projects/demo_insights_share[?2004l
-[1m[7m%[27m[1m[0m                                                                                                                                                                                                                            bash /Users/liushiyu/projects/demo_insights_share/start.codex.sh --auto-approve; printf '\n__SCRIPT_DONE__:%s\n' $?
-[0m[27m[24m[Jliushiyu@liushiyudeMac-mini demo_insights_share % [K[?2004hbbash /Users/liushiyu/projects/demo_insights_share/start.codex.sh --auto-approve; printf '\n__SCRIPT_DONE__:%s\n' $?[?2004l
-[start.codex] 隔离副本：/tmp/start-codex.O3bpm7/demo_codes
+[1m[7m%[27m[1m[0m
+
+
+[0m[27m[24m[Jliushiyu@liushiyudeMac-mini demo_insights_share % [K[?2004hccd /Users/liushiyu/projects/demo_insights_share[?2004l
+
+bash /Users/liushiyu/projects/demo_insights_share/start.codex.sh --auto-approve; printf '\n__SCRIPT_DONE__:%s\n' $?
+[1m[7m%[27m[1m[0m
+
+
+[0m[27m[24m[Jliushiyu@liushiyudeMac-mini demo_insights_share % [K[?2004hbbash /Users/liushiyu/projects/demo_insights_share/start.codex.sh --auto-approve; printf '\n__SCRIPT_DONE__:%s\n' $?[?2004l
+
+[start.codex] 隔离副本：/tmp/start-codex.cQZQYp/demo_codes
 [start.codex] 日志文件：/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_codex.latest.txt
 [start.codex] 当前模式：自动
 
@@ -15,11 +23,11 @@ bash /Users/liushiyu/projects/demo_insights_share/start.codex.sh --auto-approve;
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
 [自动模式] 继续执行下一步。
 固定命令：pwd && printf '\n' && ls -la
-/tmp/start-codex.O3bpm7/demo_codes
+/tmp/start-codex.cQZQYp/demo_codes
 
 total 664
 drwxr-xr-x  29 liushiyu  staff     928 Apr 24 10:32 .
-drwx------   5 liushiyu  wheel     160 Apr 24 10:55 ..
+drwx------   6 liushiyu  wheel     192 Apr 24 12:05 ..
 drwxr-xr-x   5 liushiyu  staff     160 Apr 23 11:50 .claude
 -rw-r--r--   1 liushiyu  staff     544 Apr 15 13:37 .env
 -rw-r--r--   1 liushiyu  staff     283 Apr 13 17:03 .env.example
@@ -66,7 +74,7 @@ drwxr-xr-x  12 liushiyu  staff     384 Apr 18 19:01 wiki_tree
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
 [自动模式] 继续执行下一步。
 固定命令：mkdir -p ./runtime-start && "/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py serve --host 127.0.0.1 --port 17821 --store ./runtime-start/wiki_tree --store-mode tree >/tmp/start_codex_daemon.17821.log 2>&1 & echo $! > .start_demo_daemon.pid && cat .start_demo_daemon.pid
-3444
+39771
 这一步完成：启动本地 wiki 服务
 
 第4步：确认服务健康检查通过
@@ -77,7 +85,7 @@ drwxr-xr-x  12 liushiyu  staff     384 Apr 18 19:01 wiki_tree
 [自动模式] 继续执行下一步。
 固定命令：for attempt in 1 2 3 4 5 6 7 8 9 10; do curl -fsS "http://127.0.0.1:17821/healthz" && exit 0; sleep 1; done; exit 1
 curl: (7) Failed to connect to 127.0.0.1 port 17821 after 0 ms: Couldn't connect to server
-{"ok": true, "signing": {"enabled": true, "key_ids": ["90e34be3e6a5955f"]}}这一步完成：确认服务健康检查通过
+{"ok": true, "signing": {"enabled": true, "key_ids": ["906e2147bfb76717"]}}这一步完成：确认服务健康检查通过
 
 第5步：查看初始 wiki 列表
 这一步的目的很简单：先看空表，PM 才能直观看到“发布前”和“发布后”的差异。
@@ -96,7 +104,7 @@ curl: (7) Failed to connect to 127.0.0.1 port 17821 after 0 ms: Couldn't connect
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
 [自动模式] 继续执行下一步。
 固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py publish seeds/alice_pgpool.json --wiki "http://127.0.0.1:17821"
-published alice-pgpool-2026-04-10 signed_by=90e34be3e6a5955f
+published alice-pgpool-2026-04-10 signed_by=906e2147bfb76717
 这一步完成：发布 Alice 的 good 案例
 
 第7步：发布 Bob 的 bad 案例
@@ -106,7 +114,7 @@ published alice-pgpool-2026-04-10 signed_by=90e34be3e6a5955f
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
 [自动模式] 继续执行下一步。
 固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py publish seeds/bob_pgpool_bad.json --wiki "http://127.0.0.1:17821"
-published bob-pgpool-bad-2026-04-12 signed_by=90e34be3e6a5955f
+published bob-pgpool-bad-2026-04-12 signed_by=906e2147bfb76717
 这一步完成：发布 Bob 的 bad 案例
 
 第8步：用真实事故问题做一次 solve
@@ -149,13 +157,13 @@ install ok server=http://127.0.0.1:17821 cached=2 cards trusted_keys=1
 [自动模式] 继续执行下一步。
 固定命令：ls -la ~/.cache/insights-share && printf '\n' && find ~/.cache/insights-share -maxdepth 1 -type f | sort
 total 32
-drwxr-xr-x   7 liushiyu  staff   224 Apr 24 10:55 .
-drwxr-xr-x  10 liushiyu  staff   320 Apr 24 10:55 ..
--rw-r--r--   1 liushiyu  staff  1759 Apr 24 10:55 alice-pgpool-2026-04-10.json
--rw-r--r--   1 liushiyu  staff  2371 Apr 24 10:55 bob-pgpool-bad-2026-04-12.json
--rw-r--r--   1 liushiyu  staff   108 Apr 24 10:55 config.json
-drwxr-xr-x   4 liushiyu  staff   128 Apr 24 10:55 signing
--rw-r--r--   1 liushiyu  staff   292 Apr 24 10:55 trusted_keys.json
+drwxr-xr-x   7 liushiyu  staff   224 Apr 24 12:05 .
+drwxr-xr-x  10 liushiyu  staff   320 Apr 24 12:05 ..
+-rw-r--r--   1 liushiyu  staff  1759 Apr 24 12:05 alice-pgpool-2026-04-10.json
+-rw-r--r--   1 liushiyu  staff  2371 Apr 24 12:05 bob-pgpool-bad-2026-04-12.json
+-rw-r--r--   1 liushiyu  staff   108 Apr 24 12:05 config.json
+drwxr-xr-x   4 liushiyu  staff   128 Apr 24 12:05 signing
+-rw-r--r--   1 liushiyu  staff   292 Apr 24 12:05 trusted_keys.json
 
 /Users/liushiyu/.cache/insights-share/alice-pgpool-2026-04-10.json
 /Users/liushiyu/.cache/insights-share/bob-pgpool-bad-2026-04-12.json
@@ -177,16 +185,19 @@ RESULT solve=ok
 RESULT install=ok
 RESULT cache=ok
 日志文件：/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_codex.latest.txt
-隔离副本：/tmp/start-codex.O3bpm7/demo_codes
+隔离副本：/tmp/start-codex.cQZQYp/demo_codes
 
 __SCRIPT_DONE__:0
-[1m[7m%[27m[1m[0m                                                                                                                                                                                                                            [0m[27m[24m[Jliushiyu@liushiyudeMac-mini demo_insights_share % [K[?2004hcd /Users/liushiyu/projects/demo_insights_share
+[1m[7m%[27m[1m[0m
+
+
+[0m[27m[24m[Jliushiyu@liushiyudeMac-mini demo_insights_share % [K[?2004hcd /Users/liushiyu/projects/demo_insights_share
 bash /Users/liushiyu/projects/demo_insights_share/start.codex.sh --auto-approve; printf '\n__SCRIPT_DONE__:%s\n' $?
 /Users/liushiyu/.zshrc:381: command not found: starship
 liushiyu@liushiyudeMac-mini demo_insights_share % cd /Users/liushiyu/projects/demo_insights_share
 bash /Users/liushiyu/projects/demo_insights_share/start.codex.sh --auto-approve; printf '\n__SCRIPT_DONE__:%s\n' $?
 liushiyu@liushiyudeMac-mini demo_insights_share % bash /Users/liushiyu/projects/demo_insights_share/start.codex.sh --auto-approve; printf '\n__SCRIPT_DONE__:%s\n' $?
-[start.codex] 隔离副本：/tmp/start-codex.O3bpm7/demo_codes
+[start.codex] 隔离副本：/tmp/start-codex.cQZQYp/demo_codes
 [start.codex] 日志文件：/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_codex.latest.txt
 [start.codex] 当前模式：自动
 
@@ -197,11 +208,11 @@ liushiyu@liushiyudeMac-mini demo_insights_share % bash /Users/liushiyu/projects/
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
 [自动模式] 继续执行下一步。
 固定命令：pwd && printf '\n' && ls -la
-/tmp/start-codex.O3bpm7/demo_codes
+/tmp/start-codex.cQZQYp/demo_codes
 
 total 664
 drwxr-xr-x  29 liushiyu  staff     928 Apr 24 10:32 .
-drwx------   5 liushiyu  wheel     160 Apr 24 10:55 ..
+drwx------   6 liushiyu  wheel     192 Apr 24 12:05 ..
 drwxr-xr-x   5 liushiyu  staff     160 Apr 23 11:50 .claude
 -rw-r--r--   1 liushiyu  staff     544 Apr 15 13:37 .env
 -rw-r--r--   1 liushiyu  staff     283 Apr 13 17:03 .env.example
@@ -249,7 +260,7 @@ drwxr-xr-x  12 liushiyu  staff     384 Apr 18 19:01 wiki_tree
 [自动模式] 继续执行下一步。
 固定命令：mkdir -p ./runtime-start && "/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py serve --host 127.0.0.1 --port 17821 --store ./runtime-start/wiki_tree --stor
 e-mode tree >/tmp/start_codex_daemon.17821.log 2>&1 & echo $! > .start_demo_daemon.pid && cat .start_demo_daemon.pid
-3444
+39771
 这一步完成：启动本地 wiki 服务
 
 第4步：确认服务健康检查通过
@@ -260,7 +271,7 @@ e-mode tree >/tmp/start_codex_daemon.17821.log 2>&1 & echo $! > .start_demo_daem
 [自动模式] 继续执行下一步。
 固定命令：for attempt in 1 2 3 4 5 6 7 8 9 10; do curl -fsS "http://127.0.0.1:17821/healthz" && exit 0; sleep 1; done; exit 1
 curl: (7) Failed to connect to 127.0.0.1 port 17821 after 0 ms: Couldn't connect to server
-{"ok": true, "signing": {"enabled": true, "key_ids": ["90e34be3e6a5955f"]}}这一步完成：确认服务健康检查通过
+{"ok": true, "signing": {"enabled": true, "key_ids": ["906e2147bfb76717"]}}这一步完成：确认服务健康检查通过
 
 第5步：查看初始 wiki 列表
 这一步的目的很简单：先看空表，PM 才能直观看到“发布前”和“发布后”的差异。
@@ -279,7 +290,7 @@ curl: (7) Failed to connect to 127.0.0.1 port 17821 after 0 ms: Couldn't connect
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
 [自动模式] 继续执行下一步。
 固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py publish seeds/alice_pgpool.json --wiki "http://127.0.0.1:17821"
-published alice-pgpool-2026-04-10 signed_by=90e34be3e6a5955f
+published alice-pgpool-2026-04-10 signed_by=906e2147bfb76717
 这一步完成：发布 Alice 的 good 案例
 
 第7步：发布 Bob 的 bad 案例
@@ -289,7 +300,7 @@ published alice-pgpool-2026-04-10 signed_by=90e34be3e6a5955f
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
 [自动模式] 继续执行下一步。
 固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py publish seeds/bob_pgpool_bad.json --wiki "http://127.0.0.1:17821"
-published bob-pgpool-bad-2026-04-12 signed_by=90e34be3e6a5955f
+published bob-pgpool-bad-2026-04-12 signed_by=906e2147bfb76717
 这一步完成：发布 Bob 的 bad 案例
 
 第8步：用真实事故问题做一次 solve
@@ -333,13 +344,13 @@ install ok server=http://127.0.0.1:17821 cached=2 cards trusted_keys=1
 [自动模式] 继续执行下一步。
 固定命令：ls -la ~/.cache/insights-share && printf '\n' && find ~/.cache/insights-share -maxdepth 1 -type f | sort
 total 32
-drwxr-xr-x   7 liushiyu  staff   224 Apr 24 10:55 .
-drwxr-xr-x  10 liushiyu  staff   320 Apr 24 10:55 ..
--rw-r--r--   1 liushiyu  staff  1759 Apr 24 10:55 alice-pgpool-2026-04-10.json
--rw-r--r--   1 liushiyu  staff  2371 Apr 24 10:55 bob-pgpool-bad-2026-04-12.json
--rw-r--r--   1 liushiyu  staff   108 Apr 24 10:55 config.json
-drwxr-xr-x   4 liushiyu  staff   128 Apr 24 10:55 signing
--rw-r--r--   1 liushiyu  staff   292 Apr 24 10:55 trusted_keys.json
+drwxr-xr-x   7 liushiyu  staff   224 Apr 24 12:05 .
+drwxr-xr-x  10 liushiyu  staff   320 Apr 24 12:05 ..
+-rw-r--r--   1 liushiyu  staff  1759 Apr 24 12:05 alice-pgpool-2026-04-10.json
+-rw-r--r--   1 liushiyu  staff  2371 Apr 24 12:05 bob-pgpool-bad-2026-04-12.json
+-rw-r--r--   1 liushiyu  staff   108 Apr 24 12:05 config.json
+drwxr-xr-x   4 liushiyu  staff   128 Apr 24 12:05 signing
+-rw-r--r--   1 liushiyu  staff   292 Apr 24 12:05 trusted_keys.json
 
 /Users/liushiyu/.cache/insights-share/alice-pgpool-2026-04-10.json
 /Users/liushiyu/.cache/insights-share/bob-pgpool-bad-2026-04-12.json
@@ -361,7 +372,7 @@ RESULT solve=ok
 RESULT install=ok
 RESULT cache=ok
 日志文件：/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_codex.latest.txt
-隔离副本：/tmp/start-codex.O3bpm7/demo_codes
+隔离副本：/tmp/start-codex.cQZQYp/demo_codes
 
 __SCRIPT_DONE__:0
 liushiyu@liushiyudeMac-mini demo_insights_share %

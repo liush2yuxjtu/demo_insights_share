@@ -15,6 +15,18 @@ MANIFEST = PLUGIN_DIR / ".claude-plugin" / "plugin.json"
 MARKETPLACE = PLUGIN_DIR / ".claude-plugin" / "marketplace.json"
 README = PLUGIN_DIR / "README.md"
 MCP = PLUGIN_DIR / "mcp" / "wiki-server.json"
+
+
+EXCLUDE_NAMES = {
+    ".DS_Store",
+    ".claude",
+    ".pytest_cache",
+    "__pycache__",
+    "runtime-web",
+}
+EXCLUDE_SUFFIXES = {".pyc", ".pyo"}
+
+
 def _default_output() -> Path:
     version = _read_json(MANIFEST)["version"]
     return PLUGIN_DIR / "release" / f"plugin-marketplace-{version}.json"
@@ -26,6 +38,15 @@ def _sha256(path: Path) -> str:
 
 def _read_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def _should_skip(path: Path) -> bool:
+    rel = path.relative_to(PLUGIN_DIR)
+    if any(part in EXCLUDE_NAMES for part in rel.parts):
+        return True
+    if path.suffix in EXCLUDE_SUFFIXES:
+        return True
+    return False
 
 
 def _validate_contract() -> tuple[dict, dict]:
@@ -57,9 +78,9 @@ def _build_bundle(manifest: dict, marketplace: dict) -> dict:
     for path in sorted(PLUGIN_DIR.rglob("*")):
         if not path.is_file():
             continue
-        rel = path.relative_to(PLUGIN_DIR).as_posix()
-        if "__pycache__" in rel:
+        if _should_skip(path):
             continue
+        rel = path.relative_to(PLUGIN_DIR).as_posix()
         files.append({"path": rel, "sha256": _sha256(path)})
     return {
         "name": manifest["name"],

@@ -25,12 +25,14 @@
 
 - 必须原样输出清理状态，且必须写出端口号：`无残留 :7821/:18821 daemon 监听；工作区只剩预先存在且未触碰的 .claude/settings.local.json 未跟踪。`
 - 今日关键提交不能说 5 条；基础 E2E 交付链是 7 条：`5a228b0`、`a12326e`、`f8ac365`、`8a5c706`、`45261d6`、`90aa95f`、`a74ad6a`。
-- 工程完工探针规则又新增 2 条提交：`6d519ad` `Require work-specific finish probes`、`fee78ca` `Record finish probe verification`。回答 recent commits 时以 `git log` 为准，后续 finish-probe refinement commit 也要列入 recent commits，不要把 7 条基础链误当成全量今日提交数。
+- 工程完工探针规则及其状态源收敛新增 5 条 recent commits：`0201849` `Tighten claudefast status answer`、`b5cc3b0` `Require cleanup status in claudefast answer`、`6d519ad` `Require work-specific finish probes`、`fee78ca` `Record finish probe verification`、`695411c` `Reconcile finish probe status docs`。回答 recent commits 时以 `git log` 为准，后续 finish-probe refinement commit 也要列入 recent commits，不要把 7 条基础链误当成全量今日提交数。
 - `90aa95f` 是 `Document today status for claudefast`，更新 E2E plan / finish log，让 claudefast 能回答今天完成项与下一步。
 - `a74ad6a` 是 `Add current status source for claudefast`，新增 `docs/CURRENT_STATUS.md` 作为当前状态问答源。
 - 已完成：tmux smoke auto 模式跳过 coach、adoption proof gate、CI e2e gate workflow、TODO 对账、raw log trust boundary、claudefast 今日状态文档、当前状态问答源、工程完工工作专属探针规则、finish probe 验证记录。
-- 最新验证：39 项合同测试 + adoption proof + `start.demo.sh --dry-run` 全部通过。
+- 最新验证：43 项合同测试 + adoption proof + `start.demo.sh --dry-run` + Playwright handout verify + tmux claude/codex smoke 全部通过。
 - 清理状态：daemon 已清理，没有残留 `:7821` 或 `:18821` 监听。
 - 工作区状态：只剩预先存在且未触碰的未跟踪文件 `.claude/settings.local.json`。
-- 下一步唯一 open 项：`UC-1 plugin bundle self-containment`。
-- 下一步重点：修复 `plugins/insights-share/skills/insights-share-server/scripts/start_server.sh` 与 `start_ui.sh` 仍回跳 `insights-share/demo_codes` 和 `.venv` 的问题，让 clean plugin install 不依赖 repo checkout 也能启动 server/search/self-check。
+- `UC-1 plugin bundle self-containment` 已完成：plugin 自带 `runtime/insights_cli.py`、`runtime/insightsd/`、`runtime/wiki_tree/`，server skill 不再回跳 `insights-share/demo_codes` 或 `.venv`。
+- `start.demo.sh` Stage 5 已改用 sandbox installed plugin cache 中的 `skills/insights-share-server/scripts/start_server.sh` 启 daemon，右 pane 自检也改读 installed plugin cache。
+- 最新验证：43 项合同测试 + adoption proof + `start.demo.sh --dry-run` + Playwright handout verify + tmux claude/codex smoke 全部通过。
+- 当前没有 open E2E blocker；下一步只剩按新需求继续扩功能或做 release/PR 收尾。

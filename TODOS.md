@@ -7,18 +7,17 @@
 
 ## Open — surfaced at final gate
 
-### [UC-1] plugin bundle self-containment：先切断 repo 绑定，再让 demo 走真实 `claude plugin install`
-
-- **What**：把 `plugins/insights-share/hooks/user-prompt-submit.sh`、`hooks/session-start.sh`、`scripts/self_check.sh` 对 repo checkout 和 `demo_codes/.venv` 的回跳依赖改成 bundle-local 或 runtime-packaged 资源；目标是 clean-machine 上只装 plugin / publish 仓也能跑通 first search / prefetch / self-check。
-- **Why**：两路 Eng outside voices 都指出当前 `SB-1` 不是“真实 install parity”，而是“表面 install + 实际 repo fallback”。现状下就算 `start.demo.sh` 改成 `claude plugin install`，hook 仍会回跳到 repo 内 `insights-share/demo_codes`，hero surface 还是假的。
-- **Pros**：把 `SB-1` 从 chore 变成真实分发合同；plugin 仓才有资格代表 teammate install 路径；clean-machine 失败会更早暴露。
-- **Cons**：会牵动 hook bootstrap、Python 运行时、publish 仓内容和 self-check；不是“两行 shell 替换 cp”。
-- **Context**：证据见 `plugins/insights-share/hooks/user-prompt-submit.sh`、`plugins/insights-share/hooks/session-start.sh`、`plugins/insights-share/scripts/self_check.sh`。
-- **Depends on / blocked by**：建议并入 `SB-1` 重写；否则 `SB-1` 落地后仍会保留 repo 绑定。
-- **Estimate**：human ~0.5-1 day / CC ~1-2h。
-- **Source**：/autoplan Eng dual voices 2026-04-23。
+无。
 
 ## Closed / Deferred
+
+### [DONE] [UC-1] plugin bundle self-containment
+
+- **What**：plugin 现在自带 `plugins/insights-share/runtime/`，其中包含 `insights_cli.py`、`insightsd/`、`wiki_tree/` seed corpus；`start_server.sh` / `start_ui.sh` 默认从 installed plugin runtime 启 daemon，不再回跳 dev repo checkout 或 `demo_codes/.venv`。
+- **Evidence**：`test_plugin_contract.py` 新增隔离 bundle copy smoke，复制 `plugins/insights-share` 到 `tmp_path` 后从任意 cwd 启 server 并搜索 `alice-pgpool-2026-04-10`；`self_check.sh` 现在检查 `server runtime bundle: OK`、`start_server.sh: OK`、`start_ui.sh: OK`。
+- **Hero path**：`start.demo.sh` Stage 5 已改为使用 sandbox 内 `claude plugin install` 后的 plugin cache 启 daemon；右 pane manifest/statusline/self-check/sample 也来自 sandbox installed plugin cache。
+- **Verification**：`bash insights-share/validation/run_ci_gate.sh` 通过；`RUN_HANDOUT_VERIFY=1 RUN_TMUX_SMOKE=1 bash insights-share/validation/run_ci_gate.sh` 通过，覆盖 43 项合同测试、adoption proof、`start.demo.sh --dry-run`、Playwright handout verify、tmux claude/codex smoke。
+- **Source**：2026-04-24 UC-1 self-containment closeout。
 
 ### [DONE] [SB-1] start.demo.sh 主入口改走 `claude plugin install`
 

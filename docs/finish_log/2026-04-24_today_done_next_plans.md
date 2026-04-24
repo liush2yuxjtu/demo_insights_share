@@ -22,15 +22,16 @@
 ## Verification
 
 - `bash insights-share/validation/run_ci_gate.sh` 已通过。
-- 最新 gate 覆盖：39 项合同测试、adoption proof、`start.demo.sh --dry-run`。
+- 最新 gate 覆盖：43 项合同测试、adoption proof、`start.demo.sh --dry-run`。
+- 最新加强门覆盖：Playwright handout verify、tmux claude/codex smoke。
 - adoption proof 覆盖四个信号：clean-machine install、first relevant hit、first publish、day-2 return。
 - 清理状态：没有残留 `:7821` 或 `:18821` daemon 监听。
 - 工作区状态：只剩预先存在且未触碰的未跟踪文件 `.claude/settings.local.json`。
-- `TODOS.md` 当前唯一 open 项是 `UC-1 plugin bundle self-containment`。
+- `TODOS.md` 当前没有 open E2E blocker；`UC-1 plugin bundle self-containment` 已关闭。
 
 ## Next Plans
 
-1. 推进 `UC-1 plugin bundle self-containment`。
-2. 重点检查并修复 `plugins/insights-share/skills/insights-share-server/scripts/start_server.sh` 与 `start_ui.sh`，它们仍回跳 `insights-share/demo_codes` 和 `.venv`。
-3. 目标是 clean plugin install 不依赖 repo checkout，也能启动 server/search/self-check。
-4. 完成后继续跑 `bash insights-share/validation/run_ci_gate.sh`，必要时再叠加 `RUN_HANDOUT_VERIFY=1 RUN_TMUX_SMOKE=1` 做本机加强门。
+1. 已完成 `UC-1 plugin bundle self-containment`。
+2. plugin 现在自带 `runtime/insights_cli.py`、`runtime/insightsd/`、`runtime/wiki_tree/`；`start_server.sh` 与 `start_ui.sh` 不再回跳 `insights-share/demo_codes` 或 `.venv`。
+3. `start.demo.sh` hero path 已改为使用 sandbox installed plugin cache 启 daemon，并从 installed plugin cache 做右 pane self-check。
+4. 当前没有 open E2E blocker；下一步只剩 release/PR 收尾或按新需求继续扩功能。

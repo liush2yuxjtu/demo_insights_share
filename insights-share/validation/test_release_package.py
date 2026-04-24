@@ -43,6 +43,9 @@ def test_build_release_produces_versioned_bundle(tmp_path: Path) -> None:
     assert "plugins/insights-share/commands/share-diff.md" in manifest_lines
     assert "plugins/insights-share/mcp/wiki-server.json" in manifest_lines
     assert "plugins/insights-share/scripts/insights_prefetch.py" in manifest_lines
+    assert "plugins/insights-share/runtime/insights_cli.py" in manifest_lines
+    assert "plugins/insights-share/runtime/insightsd/server.py" in manifest_lines
+    assert "plugins/insights-share/runtime/wiki_tree/database/postgres_pool.md" in manifest_lines
     assert "validation/test_release_package.py" in manifest_lines
     assert "demo_codes/.env" not in manifest_lines
     assert "demo_codes/wiki.json" not in manifest_lines
@@ -50,6 +53,9 @@ def test_build_release_produces_versioned_bundle(tmp_path: Path) -> None:
     assert not any(".venv/" in line for line in manifest_lines)
     assert not any(".pytest_cache/" in line for line in manifest_lines)
     assert not any("__pycache__/" in line for line in manifest_lines)
+    assert not any("runtime/.claude/" in line for line in manifest_lines)
+    assert not any("runtime-web" in line for line in manifest_lines)
+    assert not any("/sessions/" in line for line in manifest_lines)
 
     with zipfile.ZipFile(zip_path) as zf:
         names = set(zf.namelist())
@@ -63,6 +69,12 @@ def test_build_release_produces_versioned_bundle(tmp_path: Path) -> None:
     assert f"{prefix}/plugins/insights-share/commands/share-diff.md" in names
     assert f"{prefix}/plugins/insights-share/mcp/wiki-server.json" in names
     assert f"{prefix}/plugins/insights-share/scripts/insights_prefetch.py" in names
+    assert f"{prefix}/plugins/insights-share/runtime/insights_cli.py" in names
+    assert f"{prefix}/plugins/insights-share/runtime/insightsd/server.py" in names
+    assert f"{prefix}/plugins/insights-share/runtime/wiki_tree/database/postgres_pool.md" in names
     assert f"{prefix}/validation/test_release_package.py" in names
     assert f"{prefix}/demo_codes/.env" not in names
     assert f"{prefix}/demo_codes/wiki.json" not in names
+    assert not any("runtime/.claude/" in name for name in names)
+    assert not any("runtime-web" in name for name in names)
+    assert not any("/sessions/" in name for name in names)

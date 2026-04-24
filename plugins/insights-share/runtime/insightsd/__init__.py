@@ -1,0 +1,1 @@
+"""Insight wiki daemon package."""

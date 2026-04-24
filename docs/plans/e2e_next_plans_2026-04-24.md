@@ -21,8 +21,10 @@
 - `bash insights-share/validation/run_start_tmux_smoke.sh` 已通过：`start.claude.sh` 与 `start.codex.sh` auto smoke 均完成 healthz/publish/solve/install/cache 闭环。
 - 已新增并跑通 adoption proof 最小门：`bash insights-share/validation/run_adoption_proof.sh`，用隔离 `HOME` 验证 clean-machine install、first relevant hit、first publish、day-2 return 四个信号；最新报告在 `insights-share/validation/reports/deliverables/adoption_proof_latest.json`。
 - 已新增 CI/pre-commit 共用入口：`bash insights-share/validation/run_ci_gate.sh`，并接入 `.github/workflows/e2e-gates.yml`。CI 默认跑合同测试 + adoption proof；本机有 `claude`/`tmux` 时自动加跑 `start.demo.sh --dry-run`。
-- `TODOS.md` 已完成对账：`SB-1`、`AP-1`、`FL-1`、`FL-2`、`UC-2` 已移入 Closed；当前唯一 open 项是 `UC-1 plugin bundle self-containment`。
-- `bash insights-share/validation/run_ci_gate.sh` 最新本机结果已通过：39 项合同测试 + adoption proof + `start.demo.sh --dry-run`。
+- `TODOS.md` 已完成对账：`SB-1`、`AP-1`、`FL-1`、`FL-2`、`UC-2`、`UC-1` 已移入 Closed；当前没有 open E2E blocker。
+- `bash insights-share/validation/run_ci_gate.sh` 最新本机结果已通过：43 项合同测试 + adoption proof + `start.demo.sh --dry-run`。
+- `UC-1 plugin bundle self-containment` 已完成：plugin 自带 `runtime/` server/search seed corpus；`start_server.sh` / `start_ui.sh` 和 `start.demo.sh` hero path 都走 installed plugin cache，不再依赖 repo checkout 或 `demo_codes/.venv`。
+- `RUN_HANDOUT_VERIFY=1 RUN_TMUX_SMOKE=1 bash insights-share/validation/run_ci_gate.sh` 最新本机结果已通过：43 项合同测试 + adoption proof + `start.demo.sh --dry-run` + Playwright handout verify + tmux claude/codex smoke。
 
 ## 分层 E2E 门禁
 
@@ -48,7 +50,8 @@
 7. 已完成：adoption proof 最小门已落脚本、合同测试和一次真实报告。
 8. 已完成：新增 CI/pre-commit 共用 gate。默认入口是 `run_ci_gate.sh`；本机加强门可设置 `RUN_HANDOUT_VERIFY=1 RUN_TMUX_SMOKE=1` 叠加 Playwright 回放和 tmux smoke。
 9. 已完成：补 raw log trust boundary。tree store 写 raw log 前会对敏感字段和常见 token pattern 脱敏；`additionalContext` 保持公开字段 allowlist。
-10. 下一步：推进 `UC-1 plugin bundle self-containment`，重点切断 plugin server skill 的 `insights-share/demo_codes` / `.venv` 运行时依赖，让 clean plugin install 不靠 repo checkout 也能启动 server/search。
+10. 已完成：推进 `UC-1 plugin bundle self-containment`，切断 plugin server skill 的 `insights-share/demo_codes` / `.venv` 运行时依赖，让 clean plugin install 不靠 repo checkout 也能启动 server/search。
+11. 下一步：当前没有 open E2E blocker；后续进入 release/PR 收尾或按新需求继续扩功能。
 
 ## PASS 标准
 

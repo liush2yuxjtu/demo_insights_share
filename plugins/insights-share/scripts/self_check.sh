@@ -13,6 +13,9 @@ PREFETCH_SCRIPT="$PLUGIN_DIR/scripts/insights_prefetch.py"
 SESSION_FETCH_SCRIPT="$PLUGIN_DIR/scripts/session_start_full_fetch.py"
 CACHE_SCRIPT="$PLUGIN_DIR/scripts/insights_cache.py"
 TODAY_COUNT_SCRIPT="$PLUGIN_DIR/scripts/today_count.py"
+RUNTIME_DIR="$PLUGIN_DIR/runtime"
+SERVER_START_SCRIPT="$PLUGIN_DIR/skills/insights-share-server/scripts/start_server.sh"
+UI_START_SCRIPT="$PLUGIN_DIR/skills/insights-share-server/scripts/start_ui.sh"
 
 fail_count=0
 say() { printf '%s\n' "$*"; }
@@ -94,6 +97,44 @@ else
   say "session_start_full_fetch.py: MISSING"
   fail_count=$((fail_count+1))
 fi
+
+# bundle-local server runtime
+if [ -f "$RUNTIME_DIR/insights_cli.py" ] && [ -d "$RUNTIME_DIR/insightsd" ] && [ -d "$RUNTIME_DIR/wiki_tree" ]; then
+  say "server runtime bundle: OK"
+else
+  say "server runtime bundle: MISSING"
+  fail_count=$((fail_count+1))
+fi
+
+for server_script in "$SERVER_START_SCRIPT" "$UI_START_SCRIPT"; do
+  server_name="$(basename "$server_script")"
+  if [ ! -x "$server_script" ]; then
+    say "$server_name: MISSING"
+    fail_count=$((fail_count+1))
+    continue
+  fi
+  if grep -E 'insights-share/demo_codes|demo_codes/\.venv|\$\(pwd\)/\.venv|\.\./\.\./\.\./\.\./\.\./insights-share' "$server_script" >/dev/null 2>&1; then
+    say "$server_name: REPO-FALLBACK"
+    fail_count=$((fail_count+1))
+  else
+    say "$server_name: OK"
+  fi
+done
+
+for runtime_py in "$RUNTIME_DIR/insights_cli.py" "$RUNTIME_DIR/adapter.py" "$RUNTIME_DIR/insightsd/signing.py" "$RUNTIME_DIR/insightsd/server.py" "$RUNTIME_DIR/insightsd/store.py"; do
+  runtime_name="runtime/$(basename "$runtime_py")"
+  if [ -f "$runtime_py" ]; then
+    if /usr/bin/python3 -c "import ast; ast.parse(open('$runtime_py').read())" 2>/dev/null; then
+      say "$runtime_name: OK"
+    else
+      say "$runtime_name: PARSE-FAIL"
+      fail_count=$((fail_count+1))
+    fi
+  else
+    say "$runtime_name: MISSING"
+    fail_count=$((fail_count+1))
+  fi
+done
 
 # statusline
 if [ -x "$PLUGIN_DIR/statusline/insights_share_statusline.sh" ]; then

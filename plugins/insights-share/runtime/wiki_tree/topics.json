@@ -1,0 +1,615 @@
+{
+  "topics": [
+    {
+      "id": "postgres-pool-exhaustion",
+      "title": "PostgreSQL 连接池耗尽",
+      "tags": [
+        "postgres",
+        "connection-pool",
+        "latency"
+      ],
+      "created_by": "alice",
+      "created_at": "2026-04-10T08:00:00Z",
+      "wiki_type": "database",
+      "team": null
+    },
+    {
+      "id": "celery-retry-storm",
+      "title": "Celery 重试风暴",
+      "tags": [
+        "celery",
+        "retry",
+        "queue"
+      ],
+      "created_by": "alice",
+      "created_at": "2026-04-10T09:00:00Z",
+      "wiki_type": "queue",
+      "team": null
+    },
+    {
+      "id": "redis-allkeys-lru-evicts-session",
+      "title": "Redis LRU 淘汰导致会话丢失",
+      "tags": [
+        "redis",
+        "lru",
+        "session"
+      ],
+      "created_by": "carol",
+      "created_at": "2026-04-10T10:00:00Z",
+      "wiki_type": "cache",
+      "team": null
+    },
+    {
+      "id": "m1-实机日志契约",
+      "title": "实机日志契约",
+      "tags": [
+        "demo-project",
+        "live-terminal",
+        "logging"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "shell_env",
+      "team": null
+    },
+    {
+      "id": "m1-权限检查优化",
+      "title": "权限检查优化",
+      "tags": [
+        "logging",
+        "permissions",
+        "skill"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "shell_env",
+      "team": null
+    },
+    {
+      "id": "m1-懒惰信号检测",
+      "title": "懒惰信号检测",
+      "tags": [
+        "permissions"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "agent_workflow",
+      "team": null
+    },
+    {
+      "id": "m1-任务前上下文准备",
+      "title": "任务前上下文准备",
+      "tags": [
+        "context-mgmt",
+        "demo-project",
+        "validation"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "agent_workflow",
+      "team": null
+    },
+    {
+      "id": "m1-根目录md只读",
+      "title": "根目录MD只读",
+      "tags": [
+        "delete",
+        "demo-project",
+        "immutable-docs",
+        "io-optimization",
+        "validation"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "docs_rules",
+      "team": null
+    },
+    {
+      "id": "m1-skill_触发条件",
+      "title": "Skill 触发条件",
+      "tags": [
+        "io-optimization",
+        "skill"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "docs_rules",
+      "team": null
+    },
+    {
+      "id": "m1-沙箱脚本污染",
+      "title": "沙箱脚本污染",
+      "tags": [
+        "delete",
+        "demo-project",
+        "sandbox",
+        "shell"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "shell_env",
+      "team": null
+    },
+    {
+      "id": "m1-运行期数据保留",
+      "title": "运行期数据保留",
+      "tags": [
+        "cleanup",
+        "json",
+        "logging"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "agent_workflow",
+      "team": null
+    },
+    {
+      "id": "m1-tmux嵌套环境变量",
+      "title": "tmux嵌套环境变量",
+      "tags": [
+        "demo-project",
+        "nested",
+        "tmux"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "shell_env",
+      "team": null
+    },
+    {
+      "id": "m1-跨平台路径",
+      "title": "跨平台路径",
+      "tags": [
+        "paths",
+        "python",
+        "shell"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "tooling",
+      "team": null
+    },
+    {
+      "id": "m1-html_自动预览",
+      "title": "HTML 自动预览",
+      "tags": [
+        "chrome",
+        "demo-project",
+        "html",
+        "io-optimization",
+        "preview"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "tooling",
+      "team": null
+    },
+    {
+      "id": "m1-错误消息格式",
+      "title": "错误消息格式",
+      "tags": [
+        "error-handling",
+        "formatting"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "docs_rules",
+      "team": null
+    },
+    {
+      "id": "m1-先执行再门控",
+      "title": "先执行再门控",
+      "tags": [
+        "execution-strategy"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "agent_workflow",
+      "team": null
+    },
+    {
+      "id": "m1-嵌套深度控制",
+      "title": "嵌套深度控制",
+      "tags": [
+        "complexity-control",
+        "json",
+        "nested"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "tooling",
+      "team": null
+    },
+    {
+      "id": "m1-worktree_分离开发",
+      "title": "worktree 分离开发",
+      "tags": [
+        "context-mgmt",
+        "parallelism",
+        "worktree"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "shell_env",
+      "team": null
+    },
+    {
+      "id": "m1-claude_md_规则格式",
+      "title": "CLAUDE.md 规则格式",
+      "tags": [
+        "claude-md",
+        "delete",
+        "demo-project",
+        "formatting",
+        "io-optimization"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "docs_rules",
+      "team": null
+    },
+    {
+      "id": "m1-错误信号判断",
+      "title": "错误信号判断",
+      "tags": [
+        "error-handling",
+        "shell"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "docs_rules",
+      "team": null
+    },
+    {
+      "id": "m1-编码风格",
+      "title": "编码风格",
+      "tags": [
+        "error-handling"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "docs_rules",
+      "team": null
+    },
+    {
+      "id": "m1-正则表达式斜杠转义",
+      "title": "正则表达式斜杠转义",
+      "tags": [
+        "grep"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "tooling",
+      "team": null
+    },
+    {
+      "id": "m1-强制执行不问",
+      "title": "强制执行不问",
+      "tags": [
+        "delete",
+        "execution-strategy"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "agent_workflow",
+      "team": null
+    },
+    {
+      "id": "m1-计划_批准流程",
+      "title": "计划-批准流程",
+      "tags": [
+        "execution-strategy",
+        "io-optimization",
+        "planning",
+        "workflow"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "agent_workflow",
+      "team": null
+    },
+    {
+      "id": "m1-工作目录持久化",
+      "title": "工作目录持久化",
+      "tags": [
+        "paths",
+        "shell"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "tooling",
+      "team": null
+    },
+    {
+      "id": "m1-json_文件逐行处理",
+      "title": "JSON 文件逐行处理",
+      "tags": [
+        "json"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "tooling",
+      "team": null
+    },
+    {
+      "id": "m1-长文本分片读取",
+      "title": "长文本分片读取",
+      "tags": [
+        "chunking"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "tooling",
+      "team": null
+    },
+    {
+      "id": "m1-git_非破坏操作",
+      "title": "Git 非破坏操作",
+      "tags": [
+        "execution-strategy",
+        "git"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "docs_rules",
+      "team": null
+    },
+    {
+      "id": "m1-代码注释中文化",
+      "title": "代码注释中文化",
+      "tags": [
+        "demo-project",
+        "i18n"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "docs_rules",
+      "team": null
+    },
+    {
+      "id": "m1-默认脱敏",
+      "title": "默认脱敏",
+      "tags": [
+        "json",
+        "logging"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "docs_rules",
+      "team": null
+    },
+    {
+      "id": "m1-可视化优先",
+      "title": "可视化优先",
+      "tags": [
+        "html"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "docs_rules",
+      "team": null
+    },
+    {
+      "id": "m1-循环内文件写入优化",
+      "title": "循环内文件写入优化",
+      "tags": [
+        "io-optimization"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "tooling",
+      "team": null
+    },
+    {
+      "id": "m1-user_design目录禁止编辑",
+      "title": "user_design目录禁止编辑",
+      "tags": [
+        "delete",
+        "demo-project",
+        "immutable-docs",
+        "io-optimization"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "docs_rules",
+      "team": null
+    },
+    {
+      "id": "m1-格式化验证",
+      "title": "格式化验证",
+      "tags": [
+        "formatting",
+        "json",
+        "validation"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "tooling",
+      "team": null
+    },
+    {
+      "id": "m1-缓存与无状态",
+      "title": "缓存与无状态",
+      "tags": [
+        "untagged"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "docs_rules",
+      "team": null
+    },
+    {
+      "id": "m1-外科式回滚",
+      "title": "外科式回滚",
+      "tags": [
+        "json",
+        "rollback"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "agent_workflow",
+      "team": null
+    },
+    {
+      "id": "m1-前文档版本记录",
+      "title": "前文档版本记录",
+      "tags": [
+        "versioning"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "docs_rules",
+      "team": null
+    },
+    {
+      "id": "m1-配置更新验证",
+      "title": "配置更新验证",
+      "tags": [
+        "ci-hook",
+        "json",
+        "validation"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "agent_workflow",
+      "team": null
+    },
+    {
+      "id": "m1-相对路径避免",
+      "title": "相对路径避免",
+      "tags": [
+        "error-handling",
+        "paths"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "tooling",
+      "team": null
+    },
+    {
+      "id": "m1-验证三要素",
+      "title": "验证三要素",
+      "tags": [
+        "validation"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "agent_workflow",
+      "team": null
+    },
+    {
+      "id": "m1-默认全量并只选",
+      "title": "默认全量并只选",
+      "tags": [
+        "grep",
+        "parallelism"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "tooling",
+      "team": null
+    },
+    {
+      "id": "m1-单一职责原则",
+      "title": "单一职责原则",
+      "tags": [
+        "skill",
+        "srp"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "docs_rules",
+      "team": null
+    },
+    {
+      "id": "m1-tdd_开发流程",
+      "title": "TDD 开发流程",
+      "tags": [
+        "workflow"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "agent_workflow",
+      "team": null
+    },
+    {
+      "id": "m1-删除前审计",
+      "title": "删除前审计",
+      "tags": [
+        "cleanup",
+        "delete",
+        "execution-strategy",
+        "rollback"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "agent_workflow",
+      "team": null
+    },
+    {
+      "id": "m1-目录树展示",
+      "title": "目录树展示",
+      "tags": [
+        "untagged"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "tooling",
+      "team": null
+    },
+    {
+      "id": "m1-频繁工具调用优化",
+      "title": "频繁工具调用优化",
+      "tags": [
+        "parallelism"
+      ],
+      "created_by": "m1",
+      "created_at": "2026-04-18T00:00:00Z",
+      "wiki_type": "tooling",
+      "team": null
+    },
+    {
+      "id": "auto-database",
+      "title": "自动抽取: database",
+      "tags": [
+        "auto-extracted",
+        "database"
+      ],
+      "created_by": "extract_lessons.py",
+      "wiki_type": "database",
+      "team": null
+    },
+    {
+      "id": "auto-infra_cache",
+      "title": "自动抽取: infra_cache",
+      "tags": [
+        "auto-extracted",
+        "infra_cache"
+      ],
+      "created_by": "extract_lessons.py",
+      "wiki_type": "infra_cache",
+      "team": null
+    },
+    {
+      "id": "auto-tooling",
+      "title": "自动抽取: tooling",
+      "tags": [
+        "auto-extracted",
+        "tooling"
+      ],
+      "created_by": "extract_lessons.py",
+      "wiki_type": "tooling",
+      "team": null
+    },
+    {
+      "id": "team6-verify-topic",
+      "title": "Team6 验证 topic",
+      "tags": [
+        "verify"
+      ],
+      "created_by": "team6",
+      "wiki_type": "general",
+      "team": null
+    }
+  ]
+}

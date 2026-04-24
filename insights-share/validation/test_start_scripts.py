@@ -40,14 +40,17 @@ def test_start_scripts_exist_and_are_shell_scripts() -> None:
 def test_start_demo_script_surfaces_plugin_m5_checks() -> None:
     script = _read(START_DEMO)
 
-    assert 'plugins/insights-share/statusline/insights_share_statusline.sh' in script
-    assert 'plugin M5 self-check' in script
+    assert 'statusline/insights_share_statusline.sh' in script
+    assert 'plugin self-check (sandbox installed plugin cache)' in script
     assert 'claude plugin install "${PLUGIN_NAME}@${PLUGIN_NAME}"' in script
+    assert "resolve_installed_plugin_dir" in script
+    assert "PLUGIN_SERVER_START" in script
+    assert "installed plugin runtime" in script
     assert "sandbox 内已完成真实 plugin install" in script
     assert "Stage 0 secret gate" in script
     assert "wiki_tree/**/raw" in script
     assert "sk-[A-Za-z0-9_-]{10,}" in script
-    assert "ensure_demo_venv" in script
+    assert "demo_codes/.venv" not in script
 
 
 def test_start_claude_script_wraps_shared_driver() -> None:
