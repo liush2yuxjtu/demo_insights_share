@@ -248,6 +248,9 @@ run_coach_note() {
 
 prefetch_note() {
   local step_index="$1"
+  if [ "${AUTO_APPROVE}" -eq 1 ]; then
+    return 0
+  fi
   if [ "${START_PROVIDER}" = "codex" ]; then
     if [ -s "$(guide_note_file)" ] || [ -n "${GUIDE_PID}" ]; then
       return 0
@@ -364,6 +367,10 @@ show_note() {
   local note_ready=0
   local marker
   local block=""
+  if [ "${AUTO_APPROVE}" -eq 1 ]; then
+    builtin_note "${step_index}"
+    return 0
+  fi
   if [ "${START_PROVIDER}" = "codex" ]; then
     if [ -n "${GUIDE_PID}" ]; then
       if wait "${GUIDE_PID}"; then
@@ -529,6 +536,16 @@ EOF
 show_final_note() {
   local prompt_file note_file raw_file
   local block=""
+  if [ "${AUTO_APPROVE}" -eq 1 ]; then
+    cat <<EOF
+完整真实闭环已经跑完，你现在看到的是脚本的内置总结。
+业务价值：用户不用改代码，只要接入 wiki，就能复用团队经验。
+成功证据：healthz、publish、solve、install、cache 五个信号都已经在日志里留下了原始输出。
+下一次可以继续做的事：换一个问题重跑 solve，或者拿日志给 PM/VC 做演示。
+接下来可输入 1 重新执行 solve，输入 2 查看日志目录，输入 3 查看缓存目录，输入 q 退出。
+EOF
+    return 0
+  fi
   if [ "${START_PROVIDER}" = "codex" ]; then
     if [ -n "${GUIDE_PID}" ]; then
       wait "${GUIDE_PID}" 2>/dev/null || true

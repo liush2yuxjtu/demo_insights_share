@@ -1,117 +1,126 @@
-bash start.codex.sh --auto-approve; printf '\n__SCRIPT_DONE__:%s\n' $?
-
-demo_insights_share on  main [?]
-❯ bash start.codex.sh --auto-approve; printf '\n__SCRIPT_DONE__:%s\n' $?
-[start.codex] 隔离副本：/tmp/start-codex.oeNQcw/demo_codes
-[start.codex] 日志文件：/Users/m1/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_codex.latest.txt
+cd /Users/liushiyu/projects/demo_insights_share
+bash /Users/liushiyu/projects/demo_insights_share/start.codex.sh --auto-approve; printf '\n__SCRIPT_DONE__:%s\n' $?
+/Users/liushiyu/.zshrc:381: command not found: starship
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                            [0m[27m[24m[Jliushiyu@liushiyudeMac-mini demo_insights_share % [K[?2004hccd /Users/liushiyu/projects/demo_insights_share[?2004l
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                            bash /Users/liushiyu/projects/demo_insights_share/start.codex.sh --auto-approve; printf '\n__SCRIPT_DONE__:%s\n' $?
+[0m[27m[24m[Jliushiyu@liushiyudeMac-mini demo_insights_share % [K[?2004hbbash /Users/liushiyu/projects/demo_insights_share/start.codex.sh --auto-approve; printf '\n__SCRIPT_DONE__:%s\n' $?[?2004l
+[start.codex] 隔离副本：/tmp/start-codex.O3bpm7/demo_codes
+[start.codex] 日志文件：/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_codex.latest.txt
 [start.codex] 当前模式：自动
 
 第1步：确认自己在隔离副本里
-业务意义：先确认你看到的是临时副本，不会污染正式仓库。
-命令：pwd && printf '\n' && ls -la
-你要看什么：当前目录和文件列表是否符合临时演示环境。
+这一步的目的很简单：先确认你看到的是临时副本，不会污染正式仓库。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
 [自动模式] 继续执行下一步。
 固定命令：pwd && printf '\n' && ls -la
-/tmp/start-codex.oeNQcw/demo_codes
+/tmp/start-codex.O3bpm7/demo_codes
 
-total 208
-drwxr-xr-x@ 19 m1  staff    608 Apr 17 10:25 .
-drwx------@  8 m1  wheel    256 Apr 17 11:36 ..
-drwxr-xr-x@  5 m1  staff    160 Apr 14 09:52 .claude
--rw-r--r--@  1 m1  staff    544 Apr 15 13:37 .env
--rw-r--r--@  1 m1  staff    283 Apr 13 17:03 .env.example
--rw-r--r--@  1 m1  staff     50 Apr 17 10:20 .gitignore
--rw-r--r--@  1 m1  staff   1009 Apr 13 18:28 _sdk_common.py
--rw-r--r--@  1 m1  staff   4040 Apr 13 17:03 adapter.py
-drwxr-xr-x@  6 m1  staff    192 Apr 17 10:20 hooks
--rw-r--r--@  1 m1  staff  19439 Apr 17 10:20 insights_cli.py
-drwxr-xr-x@ 22 m1  staff    704 Apr 17 10:20 insightsd
--rw-r--r--@  1 m1  staff     31 Apr 13 17:03 requirements.txt
--rwxr-xr-x@  1 m1  staff   1782 Apr 17 10:20 run_demo.sh
--rw-r--r--@  1 m1  staff   6203 Apr 17 10:20 search_agent.py
-drwxr-xr-x@  6 m1  staff    192 Apr 15 18:34 seeds
--rw-r--r--@  1 m1  staff  34254 Apr 17 10:20 standalone_runtime_preview.html
--rw-r--r--@  1 m1  staff   3413 Apr 13 17:03 ui.py
--rw-r--r--@  1 m1  staff   5311 Apr 17 10:25 wiki.json
-drwxr-xr-x@  8 m1  staff    256 Apr 15 18:47 wiki_tree
+total 664
+drwxr-xr-x  29 liushiyu  staff     928 Apr 24 10:32 .
+drwx------   5 liushiyu  wheel     160 Apr 24 10:55 ..
+drwxr-xr-x   5 liushiyu  staff     160 Apr 23 11:50 .claude
+-rw-r--r--   1 liushiyu  staff     544 Apr 15 13:37 .env
+-rw-r--r--   1 liushiyu  staff     283 Apr 13 17:03 .env.example
+-rw-r--r--   1 liushiyu  staff      79 Apr 24 10:45 .gitignore
+drwxr-xr-x   6 liushiyu  staff     192 Apr 13 17:03 .venv.broken-20260424-103256
+-rw-r--r--   1 liushiyu  staff    1009 Apr 13 18:28 _sdk_common.py
+-rw-r--r--   1 liushiyu  staff    5677 Apr 22 18:30 adapter.py
+-rw-r--r--   1 liushiyu  staff    4461 Apr 22 18:31 capture_m7_post_local_search.py
+drwxr-xr-x   8 liushiyu  staff     256 Apr 23 13:10 hooks
+-rw-r--r--   1 liushiyu  staff   23992 Apr 23 16:43 insights_cli.py
+drwxr-xr-x  23 liushiyu  staff     736 Apr 23 13:08 insightsd
+-rw-r--r--   1 liushiyu  staff    4722 Apr 22 13:16 latency_cache.py
+-rw-r--r--   1 liushiyu  staff    7747 Apr 22 18:22 local_search.py
+-rw-r--r--   1 liushiyu  staff      31 Apr 13 17:03 requirements.txt
+-rwxr-xr-x   1 liushiyu  staff    1782 Apr 17 10:20 run_demo.sh
+-rw-r--r--   1 liushiyu  staff   11354 Apr 22 18:26 search_agent.py
+drwxr-xr-x   6 liushiyu  staff     192 Apr 15 18:34 seeds
+-rw-r--r--   1 liushiyu  staff   34254 Apr 17 10:20 standalone_runtime_preview.html
+-rw-r--r--   1 liushiyu  staff    6063 Apr 22 13:17 test_latency_cache.py
+-rw-r--r--   1 liushiyu  staff    7267 Apr 22 18:25 test_local_search.py
+-rw-r--r--   1 liushiyu  staff    4586 Apr 22 18:34 test_search_agent_priority.py
+-rw-r--r--   1 liushiyu  staff    5112 Apr 23 13:09 test_search_http_integration.py
+-rw-r--r--   1 liushiyu  staff    5204 Apr 23 12:43 test_search_ranking.py
+-rw-r--r--   1 liushiyu  staff    3413 Apr 13 17:03 ui.py
+-rw-r--r--   1 liushiyu  staff    4307 Apr 22 17:58 upload_errors.py
+-rw-r--r--   1 liushiyu  staff  154048 Apr 22 16:01 wiki.json
+drwxr-xr-x  12 liushiyu  staff     384 Apr 18 19:01 wiki_tree
 这一步完成：确认自己在隔离副本里
 
 第2步：确认 demo CLI 可以运行
-业务意义：先看 CLI 版本，最快证明可执行文件和 Python 运行时是通的。
-命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py version
-你要看什么：版本号能正常输出，就说明基础运行链路没问题。
+这一步的目的很简单：先看 CLI 版本，能最快证明可执行文件和 Python 运行时是通的。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
 [自动模式] 继续执行下一步。
-固定命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py version
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py version
 0.0.0+dev
 这一步完成：确认 demo CLI 可以运行
 
 第3步：启动本地 wiki 服务
-业务意义：没有服务端就没有后续发布、搜索和安装，所以它是整条链路的起点。
-命令：mkdir -p ./runtime-start && "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py serve --host 127.0.0.1 --port 17821 --store ./runtime-start/wiki_tree --store-mode tre
-e >/tmp/start_codex_daemon.17821.log 2>&1 & echo $! > .start_demo_daemon.pid && cat .start_demo_daemon.pid
-你要看什么：进程号被写出，表示服务已在后台启动。
+这一步的目的很简单：没有服务端就没有后续发布、搜索和安装，所以它是整条链路的起点。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
 [自动模式] 继续执行下一步。
-固定命令：mkdir -p ./runtime-start && "/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py serve --host 127.0.0.1 --port 17821 --store ./runtime-start/wiki_tree --store-mode
- tree >/tmp/start_codex_daemon.17821.log 2>&1 & echo $! > .start_demo_daemon.pid && cat .start_demo_daemon.pid
-7775
+固定命令：mkdir -p ./runtime-start && "/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py serve --host 127.0.0.1 --port 17821 --store ./runtime-start/wiki_tree --store-mode tree >/tmp/start_codex_daemon.17821.log 2>&1 & echo $! > .start_demo_daemon.pid && cat .start_demo_daemon.pid
+3444
 这一步完成：启动本地 wiki 服务
 
 第4步：确认服务健康检查通过
-业务意义：健康检查通过，后面所有 HTTP 命令才有意义。
-命令：for attempt in 1 2 3 4 5 6 7 8 9 10; do curl -fsS "http://127.0.0.1:17821/healthz" && exit 0; sleep 1; done; exit 1
-你要看什么：healthz 返回成功，说明服务已经可以对外响应。
+这一步的目的很简单：健康检查通过，后面所有 HTTP 命令才有意义。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
 [自动模式] 继续执行下一步。
 固定命令：for attempt in 1 2 3 4 5 6 7 8 9 10; do curl -fsS "http://127.0.0.1:17821/healthz" && exit 0; sleep 1; done; exit 1
-{"ok": true}这一步完成：确认服务健康检查通过
+curl: (7) Failed to connect to 127.0.0.1 port 17821 after 0 ms: Couldn't connect to server
+{"ok": true, "signing": {"enabled": true, "key_ids": ["90e34be3e6a5955f"]}}这一步完成：确认服务健康检查通过
 
 第5步：查看初始 wiki 列表
-业务意义：先看空表，PM 才能直观看到“发布前”和“发布后”的差异。
-命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py list --wiki "http://127.0.0.1:17821"
-你要看什么：初始列表内容尽量少，方便后面展示新增效果。
+这一步的目的很简单：先看空表，PM 才能直观看到“发布前”和“发布后”的差异。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
 [自动模式] 继续执行下一步。
-固定命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py list --wiki "http://127.0.0.1:17821"
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py list --wiki "http://127.0.0.1:17821"
 (no insights yet)
 这一步完成：查看初始 wiki 列表
 
 第6步：发布 Alice 的 good 案例
-业务意义：先放入一个 good 实战案例，让 solve 有正确经验可命中。
-命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py publish seeds/alice_pgpool.json --wiki "http://127.0.0.1:17821"
-你要看什么：发布成功后，wiki 里会多出一条正向案例。
+这一步的目的很简单：先放入一个 good 实战案例，让 solve 有正确经验可命中。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
 [自动模式] 继续执行下一步。
-固定命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py publish seeds/alice_pgpool.json --wiki "http://127.0.0.1:17821"
-published alice-pgpool-2026-04-10
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py publish seeds/alice_pgpool.json --wiki "http://127.0.0.1:17821"
+published alice-pgpool-2026-04-10 signed_by=90e34be3e6a5955f
 这一步完成：发布 Alice 的 good 案例
 
 第7步：发布 Bob 的 bad 案例
-业务意义：再放入一个 bad 案例，展示 wiki 同时能容纳反例。
-命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py publish seeds/bob_pgpool_bad.json --wiki "http://127.0.0.1:17821"
-你要看什么：发布成功后，正例和反例会一起出现在知识库里。
+这一步的目的很简单：再放入一个 bad 案例，展示 wiki 同时能容纳反例。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
 [自动模式] 继续执行下一步。
-固定命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py publish seeds/bob_pgpool_bad.json --wiki "http://127.0.0.1:17821"
-published bob-pgpool-bad-2026-04-12
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py publish seeds/bob_pgpool_bad.json --wiki "http://127.0.0.1:17821"
+published bob-pgpool-bad-2026-04-12 signed_by=90e34be3e6a5955f
 这一步完成：发布 Bob 的 bad 案例
 
 第8步：用真实事故问题做一次 solve
-业务意义：这一步最像真实使用场景，用户问问题，系统热加载经验并直接给出答案。
-命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py solve "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike" --wiki "http:
-//127.0.0.1:17821" --no-ai
-你要看什么：系统应结合已发布案例，输出可理解的处理建议。
+这一步的目的很简单：这一步最像真实使用场景：用户问问题，系统热加载经验并直接给出答案。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
 [自动模式] 继续执行下一步。
-固定命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py solve "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike" --wiki "h
-ttp://127.0.0.1:17821" --no-ai
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py solve "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike" --wiki "http://127.0.0.1:17821" --no-ai
                           DEMO: Bob hits prod incident
 
 restate: Our checkout API is timing out, postgres is rejecting new connections during the lunch spike
 
-hot-loaded alice-pgpool-2026-04-10 from alice (score=0.0625)
+hot-loaded alice-pgpool-2026-04-10 from alice (score=0.3625)
 
 +------------------------------------------------------------------------------+
 | Set idle_in_transaction_session_timeout=30s and bump pool size to 2x worker count |
@@ -122,39 +131,42 @@ hot-loaded alice-pgpool-2026-04-10 from alice (score=0.0625)
 fast path: 0.0s (no-ai)   slow path baseline: ~62s
 这一步完成：用真实事故问题做一次 solve
 
-第9步：安装 insights-wiki 到本机缓存
-业务意义：安装步骤会把服务端内容写入本机缓存，模拟普通用户接入 LAN wiki。
-命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py wiki-install --server "http://127.0.0.1:17821"
-你要看什么：安装完成后，本机缓存会出现可复用的数据。
+第9步：安装 insights-share 到本机缓存
+这一步的目的很简单：安装步骤会把服务端内容写入本机缓存，模拟普通用户接入 LAN wiki。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
 [自动模式] 继续执行下一步。
-固定命令："/Users/m1/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py wiki-install --server "http://127.0.0.1:17821"
-install ok server=http://127.0.0.1:17821 cached=2 cards
-这一步完成：安装 insights-wiki 到本机缓存
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py wiki-install --server "http://127.0.0.1:17821"
+install ok server=http://127.0.0.1:17821 cached=2 cards trusted_keys=1
+这一步完成：安装 insights-share 到本机缓存
 
 第10步：确认缓存文件已经落地
-业务意义：最后确认缓存文件真的落盘，给 PM 一个可以截图的成功证据。
-命令：ls -la ~/.cache/insights-wiki && printf '\n' && find ~/.cache/insights-wiki -maxdepth 1 -type f | sort
-你要看什么：缓存目录和文件列表都出现，说明安装闭环已完成。
+这一步的目的很简单：最后确认缓存文件真的落盘，给 PM 一个可以截图的成功证据。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
 下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
 [自动模式] 继续执行下一步。
-固定命令：ls -la ~/.cache/insights-wiki && printf '\n' && find ~/.cache/insights-wiki -maxdepth 1 -type f | sort
-total 24
-drwxr-xr-x@  5 m1  staff  160 Apr 17 11:36 .
-drwxr-xr-x  17 m1  staff  544 Apr 17 11:36 ..
--rw-r--r--@  1 m1  staff  224 Apr 17 11:36 alice-pgpool-2026-04-10.json
--rw-r--r--@  1 m1  staff  212 Apr 17 11:36 bob-pgpool-bad-2026-04-12.json
--rw-r--r--@  1 m1  staff   92 Apr 17 11:36 config.json
+固定命令：ls -la ~/.cache/insights-share && printf '\n' && find ~/.cache/insights-share -maxdepth 1 -type f | sort
+total 32
+drwxr-xr-x   7 liushiyu  staff   224 Apr 24 10:55 .
+drwxr-xr-x  10 liushiyu  staff   320 Apr 24 10:55 ..
+-rw-r--r--   1 liushiyu  staff  1759 Apr 24 10:55 alice-pgpool-2026-04-10.json
+-rw-r--r--   1 liushiyu  staff  2371 Apr 24 10:55 bob-pgpool-bad-2026-04-12.json
+-rw-r--r--   1 liushiyu  staff   108 Apr 24 10:55 config.json
+drwxr-xr-x   4 liushiyu  staff   128 Apr 24 10:55 signing
+-rw-r--r--   1 liushiyu  staff   292 Apr 24 10:55 trusted_keys.json
 
-/Users/m1/.cache/insights-wiki/alice-pgpool-2026-04-10.json
-/Users/m1/.cache/insights-wiki/bob-pgpool-bad-2026-04-12.json
-/Users/m1/.cache/insights-wiki/config.json
+/Users/liushiyu/.cache/insights-share/alice-pgpool-2026-04-10.json
+/Users/liushiyu/.cache/insights-share/bob-pgpool-bad-2026-04-12.json
+/Users/liushiyu/.cache/insights-share/config.json
+/Users/liushiyu/.cache/insights-share/trusted_keys.json
 这一步完成：确认缓存文件已经落地
 
-这是一条完整闭环：先启动服务，再发布案例，再用真实问题求解，最后完成本机安装与缓存落地。
-整个演示只展示业务结果，不要求 PM 或 VC 会写代码。
-你可以把这 10 步直接当成现场讲解卡片逐步演示。
-核心价值是把“知识库可用”变成“能看见、能验证、能截图”的结果。
+完整真实闭环已经跑完，你现在看到的是脚本的内置总结。
+业务价值：用户不用改代码，只要接入 wiki，就能复用团队经验。
+成功证据：healthz、publish、solve、install、cache 五个信号都已经在日志里留下了原始输出。
+下一次可以继续做的事：换一个问题重跑 solve，或者拿日志给 PM/VC 做演示。
 接下来可输入 1 重新执行 solve，输入 2 查看日志目录，输入 3 查看缓存目录，输入 q 退出。
 
 结果摘要：
@@ -164,10 +176,192 @@ RESULT publish_bad=ok
 RESULT solve=ok
 RESULT install=ok
 RESULT cache=ok
-日志文件：/Users/m1/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_codex.latest.txt
-隔离副本：/tmp/start-codex.oeNQcw/demo_codes
+日志文件：/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_codex.latest.txt
+隔离副本：/tmp/start-codex.O3bpm7/demo_codes
 
 __SCRIPT_DONE__:0
+[1m[7m%[27m[1m[0m                                                                                                                                                                                                                            [0m[27m[24m[Jliushiyu@liushiyudeMac-mini demo_insights_share % [K[?2004hcd /Users/liushiyu/projects/demo_insights_share
+bash /Users/liushiyu/projects/demo_insights_share/start.codex.sh --auto-approve; printf '\n__SCRIPT_DONE__:%s\n' $?
+/Users/liushiyu/.zshrc:381: command not found: starship
+liushiyu@liushiyudeMac-mini demo_insights_share % cd /Users/liushiyu/projects/demo_insights_share
+bash /Users/liushiyu/projects/demo_insights_share/start.codex.sh --auto-approve; printf '\n__SCRIPT_DONE__:%s\n' $?
+liushiyu@liushiyudeMac-mini demo_insights_share % bash /Users/liushiyu/projects/demo_insights_share/start.codex.sh --auto-approve; printf '\n__SCRIPT_DONE__:%s\n' $?
+[start.codex] 隔离副本：/tmp/start-codex.O3bpm7/demo_codes
+[start.codex] 日志文件：/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_codex.latest.txt
+[start.codex] 当前模式：自动
 
-demo_insights_share on  main [?] took 1m13s
-❯
+第1步：确认自己在隔离副本里
+这一步的目的很简单：先确认你看到的是临时副本，不会污染正式仓库。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：pwd && printf '\n' && ls -la
+/tmp/start-codex.O3bpm7/demo_codes
+
+total 664
+drwxr-xr-x  29 liushiyu  staff     928 Apr 24 10:32 .
+drwx------   5 liushiyu  wheel     160 Apr 24 10:55 ..
+drwxr-xr-x   5 liushiyu  staff     160 Apr 23 11:50 .claude
+-rw-r--r--   1 liushiyu  staff     544 Apr 15 13:37 .env
+-rw-r--r--   1 liushiyu  staff     283 Apr 13 17:03 .env.example
+-rw-r--r--   1 liushiyu  staff      79 Apr 24 10:45 .gitignore
+drwxr-xr-x   6 liushiyu  staff     192 Apr 13 17:03 .venv.broken-20260424-103256
+-rw-r--r--   1 liushiyu  staff    1009 Apr 13 18:28 _sdk_common.py
+-rw-r--r--   1 liushiyu  staff    5677 Apr 22 18:30 adapter.py
+-rw-r--r--   1 liushiyu  staff    4461 Apr 22 18:31 capture_m7_post_local_search.py
+drwxr-xr-x   8 liushiyu  staff     256 Apr 23 13:10 hooks
+-rw-r--r--   1 liushiyu  staff   23992 Apr 23 16:43 insights_cli.py
+drwxr-xr-x  23 liushiyu  staff     736 Apr 23 13:08 insightsd
+-rw-r--r--   1 liushiyu  staff    4722 Apr 22 13:16 latency_cache.py
+-rw-r--r--   1 liushiyu  staff    7747 Apr 22 18:22 local_search.py
+-rw-r--r--   1 liushiyu  staff      31 Apr 13 17:03 requirements.txt
+-rwxr-xr-x   1 liushiyu  staff    1782 Apr 17 10:20 run_demo.sh
+-rw-r--r--   1 liushiyu  staff   11354 Apr 22 18:26 search_agent.py
+drwxr-xr-x   6 liushiyu  staff     192 Apr 15 18:34 seeds
+-rw-r--r--   1 liushiyu  staff   34254 Apr 17 10:20 standalone_runtime_preview.html
+-rw-r--r--   1 liushiyu  staff    6063 Apr 22 13:17 test_latency_cache.py
+-rw-r--r--   1 liushiyu  staff    7267 Apr 22 18:25 test_local_search.py
+-rw-r--r--   1 liushiyu  staff    4586 Apr 22 18:34 test_search_agent_priority.py
+-rw-r--r--   1 liushiyu  staff    5112 Apr 23 13:09 test_search_http_integration.py
+-rw-r--r--   1 liushiyu  staff    5204 Apr 23 12:43 test_search_ranking.py
+-rw-r--r--   1 liushiyu  staff    3413 Apr 13 17:03 ui.py
+-rw-r--r--   1 liushiyu  staff    4307 Apr 22 17:58 upload_errors.py
+-rw-r--r--   1 liushiyu  staff  154048 Apr 22 16:01 wiki.json
+drwxr-xr-x  12 liushiyu  staff     384 Apr 18 19:01 wiki_tree
+这一步完成：确认自己在隔离副本里
+
+第2步：确认 demo CLI 可以运行
+这一步的目的很简单：先看 CLI 版本，能最快证明可执行文件和 Python 运行时是通的。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py version
+0.0.0+dev
+这一步完成：确认 demo CLI 可以运行
+
+第3步：启动本地 wiki 服务
+这一步的目的很简单：没有服务端就没有后续发布、搜索和安装，所以它是整条链路的起点。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：mkdir -p ./runtime-start && "/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py serve --host 127.0.0.1 --port 17821 --store ./runtime-start/wiki_tree --stor
+e-mode tree >/tmp/start_codex_daemon.17821.log 2>&1 & echo $! > .start_demo_daemon.pid && cat .start_demo_daemon.pid
+3444
+这一步完成：启动本地 wiki 服务
+
+第4步：确认服务健康检查通过
+这一步的目的很简单：健康检查通过，后面所有 HTTP 命令才有意义。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：for attempt in 1 2 3 4 5 6 7 8 9 10; do curl -fsS "http://127.0.0.1:17821/healthz" && exit 0; sleep 1; done; exit 1
+curl: (7) Failed to connect to 127.0.0.1 port 17821 after 0 ms: Couldn't connect to server
+{"ok": true, "signing": {"enabled": true, "key_ids": ["90e34be3e6a5955f"]}}这一步完成：确认服务健康检查通过
+
+第5步：查看初始 wiki 列表
+这一步的目的很简单：先看空表，PM 才能直观看到“发布前”和“发布后”的差异。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py list --wiki "http://127.0.0.1:17821"
+(no insights yet)
+这一步完成：查看初始 wiki 列表
+
+第6步：发布 Alice 的 good 案例
+这一步的目的很简单：先放入一个 good 实战案例，让 solve 有正确经验可命中。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py publish seeds/alice_pgpool.json --wiki "http://127.0.0.1:17821"
+published alice-pgpool-2026-04-10 signed_by=90e34be3e6a5955f
+这一步完成：发布 Alice 的 good 案例
+
+第7步：发布 Bob 的 bad 案例
+这一步的目的很简单：再放入一个 bad 案例，展示 wiki 同时能容纳反例。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py publish seeds/bob_pgpool_bad.json --wiki "http://127.0.0.1:17821"
+published bob-pgpool-bad-2026-04-12 signed_by=90e34be3e6a5955f
+这一步完成：发布 Bob 的 bad 案例
+
+第8步：用真实事故问题做一次 solve
+这一步的目的很简单：这一步最像真实使用场景：用户问问题，系统热加载经验并直接给出答案。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py solve "Our checkout API is timing out, postgres is rejecting new connections during the lunch spike" --w
+iki "http://127.0.0.1:17821" --no-ai
+                          DEMO: Bob hits prod incident
+
+restate: Our checkout API is timing out, postgres is rejecting new connections during the lunch spike
+
+hot-loaded alice-pgpool-2026-04-10 from alice (score=0.3625)
+
++------------------------------------------------------------------------------+
+| Set idle_in_transaction_session_timeout=30s and bump pool size to 2x worker count |
++------------------------------------------------------------------------------+
+| raw (no-ai) confidence=0.82                                                  |
++------------------------------------------------------------------------------+
+
+fast path: 0.0s (no-ai)   slow path baseline: ~62s
+这一步完成：用真实事故问题做一次 solve
+
+第9步：安装 insights-share 到本机缓存
+这一步的目的很简单：安装步骤会把服务端内容写入本机缓存，模拟普通用户接入 LAN wiki。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令："/Users/liushiyu/projects/demo_insights_share/insights-share/demo_codes/.venv/bin/python" insights_cli.py wiki-install --server "http://127.0.0.1:17821"
+install ok server=http://127.0.0.1:17821 cached=2 cards trusted_keys=1
+这一步完成：安装 insights-share 到本机缓存
+
+第10步：确认缓存文件已经落地
+这一步的目的很简单：最后确认缓存文件真的落盘，给 PM 一个可以截图的成功证据。
+你马上会看到脚本执行一条固定命令，并把原始结果完整打印出来。
+只要命令退出成功，而且输出和这一步的目标一致，就说明我们继续往下走是安全的。
+下一步：按回车继续，输入 q 退出，输入 log 查看日志路径。
+[自动模式] 继续执行下一步。
+固定命令：ls -la ~/.cache/insights-share && printf '\n' && find ~/.cache/insights-share -maxdepth 1 -type f | sort
+total 32
+drwxr-xr-x   7 liushiyu  staff   224 Apr 24 10:55 .
+drwxr-xr-x  10 liushiyu  staff   320 Apr 24 10:55 ..
+-rw-r--r--   1 liushiyu  staff  1759 Apr 24 10:55 alice-pgpool-2026-04-10.json
+-rw-r--r--   1 liushiyu  staff  2371 Apr 24 10:55 bob-pgpool-bad-2026-04-12.json
+-rw-r--r--   1 liushiyu  staff   108 Apr 24 10:55 config.json
+drwxr-xr-x   4 liushiyu  staff   128 Apr 24 10:55 signing
+-rw-r--r--   1 liushiyu  staff   292 Apr 24 10:55 trusted_keys.json
+
+/Users/liushiyu/.cache/insights-share/alice-pgpool-2026-04-10.json
+/Users/liushiyu/.cache/insights-share/bob-pgpool-bad-2026-04-12.json
+/Users/liushiyu/.cache/insights-share/config.json
+/Users/liushiyu/.cache/insights-share/trusted_keys.json
+这一步完成：确认缓存文件已经落地
+
+完整真实闭环已经跑完，你现在看到的是脚本的内置总结。
+业务价值：用户不用改代码，只要接入 wiki，就能复用团队经验。
+成功证据：healthz、publish、solve、install、cache 五个信号都已经在日志里留下了原始输出。
+下一次可以继续做的事：换一个问题重跑 solve，或者拿日志给 PM/VC 做演示。
+接下来可输入 1 重新执行 solve，输入 2 查看日志目录，输入 3 查看缓存目录，输入 q 退出。
+
+结果摘要：
+RESULT healthz=ok
+RESULT publish_good=ok
+RESULT publish_bad=ok
+RESULT solve=ok
+RESULT install=ok
+RESULT cache=ok
+日志文件：/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/start_codex.latest.txt
+隔离副本：/tmp/start-codex.O3bpm7/demo_codes
+
+__SCRIPT_DONE__:0
+liushiyu@liushiyudeMac-mini demo_insights_share %

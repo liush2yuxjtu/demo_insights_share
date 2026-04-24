@@ -14,6 +14,8 @@
 - 修复左 pane 讲解旧检查：不再等待旧式 `~/.claude/skills/.../SKILL.md`，改为检测 sandbox plugin cache 内的 `skills/insights-share/SKILL.md`，避免真实 plugin install 路径误报。
 - 已修复并跑通 `npm run handout:verify`：verify 现在会按需临时启动 daemon 与 `web_cli_demo` tmux session，结束后清理；同时修复 daemon 内 tmux socket 环境，CLI 输入框可写，5 个 handout step 全部 passed。
 - 已修复并跑通 `npm run handout:record`：完整 Dashboard/CLI/Validation/handout 用户流录制通过，生成 `artifacts/handout/latest.json` 指向新的 `user-flow.mp4`；ffmpeg 退出现在有超时兜底，不再卡住 daemon 清理。
+- 修复 `start_demo_driver.sh` 的 auto 模式：`--auto-approve` 不再调用 Claude/Codex coach 生成讲解，改用内置说明，避免 tmux smoke 卡在外部 LLM 调用。
+- 已跑通 `bash insights-share/validation/run_start_tmux_smoke.sh`：`start.claude.sh` 与 `start.codex.sh` 均完成 healthz、publish_good、publish_bad、solve、install、cache，报告写入 `tmux_claude_smoke.txt` 与 `tmux_codex_smoke.txt`。
 
 ## 关键结论
 
@@ -21,4 +23,4 @@
 
 ## 后续
 
-Python/pytest runner 与 P3 合同测试已恢复；下一步推进 `start.demo.sh --dry-run` + live hero、Playwright、tmux smoke、adoption proof 与 CI gate。
+Python/pytest runner、hero path、Playwright record/verify 与 tmux smoke 已恢复；下一步推进 adoption proof 与 CI gate。
