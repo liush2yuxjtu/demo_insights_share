@@ -12,6 +12,7 @@
 - `start.demo.sh` 已新增 demo venv 自修复：检测到 `.venv/bin/python` 无法启动时，先把旧目录移到 `.venv.broken-<ts>/`，再用可用 Python 重建并安装 `requirements.txt`。
 - 已跑 live `bash start.demo.sh`：Stage 0-7 通过，daemon :7821 正常启动，右 pane 显示 `[share ✓ 0/today]` 与 `plugin self-check: ALL GREEN`，退出后沙箱和 daemon 已清理。
 - 修复左 pane 讲解旧检查：不再等待旧式 `~/.claude/skills/.../SKILL.md`，改为检测 sandbox plugin cache 内的 `skills/insights-share/SKILL.md`，避免真实 plugin install 路径误报。
+- 已修复并跑通 `npm run handout:verify`：verify 现在会按需临时启动 daemon 与 `web_cli_demo` tmux session，结束后清理；同时修复 daemon 内 tmux socket 环境，CLI 输入框可写，5 个 handout step 全部 passed。
 
 ## 关键结论
 

@@ -29,8 +29,6 @@ class TerminalBridge:
         self.repo_root = self.app_root.parent
         self.tmux_bin = shutil.which("tmux")
         self.tmux_env = dict(os.environ)
-        if not self.tmux_env.get("TMUX_TMPDIR") and self.tmux_env.get("TMPDIR"):
-            self.tmux_env["TMUX_TMPDIR"] = self.tmux_env["TMPDIR"]
 
     def _run_tmux(self, args: list[str]) -> subprocess.CompletedProcess[str]:
         return subprocess.run(
