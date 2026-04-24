@@ -17,6 +17,22 @@ from .signing import CardSignatureService, sha256_hex
 
 _TOKEN_RE = re.compile(r"[^\w]+", re.UNICODE)
 
+_SECRET_PATTERNS = (
+    re.compile(r"sk-[A-Za-z0-9_-]{10,}"),
+    re.compile(r"ghp_[A-Za-z0-9]{20,}"),
+    re.compile(r"Bearer[ \t]+[A-Za-z0-9._~+/-]{10,}"),
+    re.compile(r"AKIA[0-9A-Z]{16}"),
+)
+_SENSITIVE_KEYS = {
+    "api_key",
+    "apikey",
+    "authorization",
+    "bearer",
+    "password",
+    "secret",
+    "token",
+}
+
 _STOPWORDS = frozenset(
     {
         "the",
@@ -54,6 +70,29 @@ _STOPWORDS = frozenset(
         "app",
     }
 )
+
+
+def redact_sensitive_text(text: str) -> str:
+    redacted = text
+    for pattern in _SECRET_PATTERNS:
+        redacted = pattern.sub("<redacted:secret>", redacted)
+    return redacted
+
+
+def _redact_for_raw_log(value: Any, *, key: str = "") -> Any:
+    lowered = key.lower().replace("-", "_")
+    if any(part in lowered for part in _SENSITIVE_KEYS):
+        return "<redacted:field>"
+    if isinstance(value, str):
+        return redact_sensitive_text(value)
+    if isinstance(value, list):
+        return [_redact_for_raw_log(item) for item in value]
+    if isinstance(value, dict):
+        return {
+            item_key: _redact_for_raw_log(item_value, key=str(item_key))
+            for item_key, item_value in value.items()
+        }
+    return value
 
 
 def _stem(tok: str) -> str:
@@ -542,14 +581,17 @@ class TreeInsightStore:
         raw_log_type = card.get("raw_log_type", "jsonl")
         if raw_log_type == "export":
             ext = "txt"
-            raw_content = ((card.get("raw_log_export_content") or "") + "\n").encode("utf-8")
+            raw_content = (
+                redact_sensitive_text(str(card.get("raw_log_export_content") or ""))
+                + "\n"
+            ).encode("utf-8")
         else:
             ext = "jsonl"
+            raw_card = _redact_for_raw_log(
+                {k: v for k, v in card.items() if k not in {"wiki_type", "item_slug", "score"}}
+            )
             raw_content = (
-                json.dumps(
-                    {k: v for k, v in card.items() if k not in {"wiki_type", "item_slug", "score"}},
-                    ensure_ascii=False,
-                )
+                json.dumps(raw_card, ensure_ascii=False)
                 + "\n"
             ).encode("utf-8")
         raw_rel = f"./raw/{card['id']}.{ext}"

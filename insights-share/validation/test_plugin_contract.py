@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 REPO_ROOT = ROOT.parents[0]
 PLUGIN_DIR = REPO_ROOT / "plugins" / "insights-share"
+DEMO_CODES = REPO_ROOT / "insights-share" / "demo_codes"
 MANIFEST = PLUGIN_DIR / ".claude-plugin" / "plugin.json"
 MARKETPLACE = PLUGIN_DIR / ".claude-plugin" / "marketplace.json"
 README = PLUGIN_DIR / "README.md"
@@ -143,3 +144,31 @@ def test_bundle_cache_persist_sanitizes_sensitive_fields(tmp_path: Path, monkeyp
     assert "raw_log" not in saved
     assert "label_note" not in saved
     assert "description" not in saved
+
+
+def test_prefetch_additional_context_uses_public_card_allowlist() -> None:
+    module = _load_module(DEMO_CODES / "hooks" / "insights_prefetch.py", "prefetch_contract_test")
+
+    additional = module._build_context(
+        "postgres token",
+        [
+            {
+                "id": "safe-card-1",
+                "title": "Postgres Pool",
+                "author": "alice",
+                "tags": ["postgres"],
+                "raw_log": "./raw/safe-card-1.jsonl",
+                "raw_log_export_content": "sk-liveSECRET1234567890",
+                "description": "Bearer abcdefghijklmnopqrstuvwxyz",
+                "fix": "do not leak this field",
+            }
+        ],
+    )
+
+    assert "safe-card-1" in additional
+    assert "Postgres Pool" in additional
+    assert "alice" in additional
+    assert "raw_log" not in additional
+    assert "sk-liveSECRET1234567890" not in additional
+    assert "Bearer abcdefghijklmnopqrstuvwxyz" not in additional
+    assert "do not leak this field" not in additional

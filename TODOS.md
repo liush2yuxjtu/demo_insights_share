@@ -18,19 +18,6 @@
 - **Estimate**：human ~0.5-1 day / CC ~1-2h。
 - **Source**：/autoplan Eng dual voices 2026-04-23。
 
-### [UC-2] trust / audit boundary：不要只 grep secret，还要给写接口和 raw_log 注入画边界
-
-- **What**：为 daemon 的 `POST /insights`、`/topics`、`/topics/{id}/examples`、`/insights/{id}/relabel`、`DELETE /insights/{id}` 加 loopback / token / role policy，并给 `raw_log` 与 `additionalContext` 注入链路补显式 allowlist / redact / 测试。
-- **Why**：当前只有 `/_events` 和 `/api/cli/tmux/input` 做了 loopback/token 限制；同时 `insights_prefetch.py` 会静默把卡片内容注入回答上下文，`FEATURES.md` 又明确 `raw_log` 是明文存储。只做 Stage 0 secret grep 仍然是在补错层。
-- **Pros**：把“trust”从 demo hygiene 拉回真实数据边界；也让 sponsor / teammate install 风险更可解释。
-- **Cons**：会触到 daemon API 契约、plugin hooks 和缓存行为，scope 比单纯 grep 大。
-- **Context**：证据见 `insights-share/demo_codes/insightsd/server.py`、`insights-share/demo_codes/hooks/insights_prefetch.py`、`FEATURES.md`。
-- **Depends on / blocked by**：不阻塞 dry-run；是否升 ship-blocker 需要 final gate 决策。
-- **Estimate**：human ~0.5-1 day / CC ~1-2h。
-- **Source**：/autoplan Eng dual voices 2026-04-23。
-
----
-
 ## Closed / Deferred
 
 ### [DONE] [SB-1] start.demo.sh 主入口改走 `claude plugin install`
@@ -57,6 +44,12 @@
 - **What**：`start.demo.sh` 已在 Stage 0 扫描 `insights-share/demo_codes/wiki_tree/**/raw/` 中的常见 token/secret pattern，命中即阻断 demo。
 - **Evidence**：`bash start.demo.sh --dry-run` 与 `run_ci_gate.sh` 输出 `Stage 0 secret gate passed`。
 - **Source**：2026-04-24 E2E recovery。
+
+### [DONE] [UC-2] trust / audit boundary
+
+- **What**：daemon 写接口已有 loopback/token 检查；tree store 写 raw log 前新增敏感字段和 token pattern 脱敏；`insights_prefetch.py` 的 `additionalContext` 继续只输出 card id/title/author/tags 等公开字段。
+- **Evidence**：`test_topic_api.py::test_write_auth_allows_loopback_or_valid_token` 覆盖写 auth；`test_topic_store.py` 覆盖 export/jsonl raw log 脱敏；`test_plugin_contract.py::test_prefetch_additional_context_uses_public_card_allowlist` 覆盖注入 allowlist；`run_ci_gate.sh` 已通过 39 项合同。
+- **Source**：2026-04-24 trust boundary gate。
 
 ### [DONE] [SB-2] start.demo.sh 新增 `--dry-run` seam
 

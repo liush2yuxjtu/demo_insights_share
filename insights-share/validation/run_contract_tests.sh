@@ -14,6 +14,7 @@ DEFAULT_TESTS=(
   "insights-share/validation/test_release_package.py"
   "insights-share/validation/test_adoption_proof.py"
   "insights-share/validation/test_ci_gate.py"
+  "insights-share/validation/test_topic_store.py"
 )
 
 choose_python() {
@@ -35,7 +36,7 @@ run_with_uv() {
   local python_cmd="$1"
   shift
   command -v uv >/dev/null 2>&1 || return 127
-  uv run --python "$python_cmd" --with pytest -- python -m pytest "$@"
+  uv run --python "$python_cmd" --with pytest --with cryptography -- python -m pytest "$@"
 }
 
 run_with_test_venv() {
@@ -44,7 +45,7 @@ run_with_test_venv() {
   if [[ ! -x "$TEST_VENV/bin/python" ]]; then
     "$python_cmd" -m venv "$TEST_VENV"
     "$TEST_VENV/bin/python" -m pip install --upgrade pip >/dev/null
-    "$TEST_VENV/bin/python" -m pip install pytest >/dev/null
+    "$TEST_VENV/bin/python" -m pip install pytest cryptography >/dev/null
   fi
   "$TEST_VENV/bin/python" -m pytest "$@"
 }
