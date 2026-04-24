@@ -1,0 +1,12 @@
+{
+  "types": [
+    "agent_workflow",
+    "database",
+    "docs_rules",
+    "general",
+    "infra_cache",
+    "infra_queue",
+    "shell_env",
+    "tooling"
+  ]
+}

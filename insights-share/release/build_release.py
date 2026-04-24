@@ -30,8 +30,10 @@ EXCLUDE_NAMES = {
     ".pytest_cache",
     "__pycache__",
     ".coverage",
+    ".claude",
     "dist",
     "build",
+    "runtime-web",
 }
 EXCLUDE_SUFFIXES = {".pyc", ".pyo"}
 EXCLUDE_FILES = {

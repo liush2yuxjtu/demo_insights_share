@@ -1,0 +1,39 @@
+name: insights-share e2e gates
+
+on:
+  pull_request:
+    paths:
+      - "start.demo.sh"
+      - "start.claude.sh"
+      - "start.codex.sh"
+      - "plugins/insights-share/**"
+      - "insights-share/demo_codes/**"
+      - "insights-share/validation/**"
+      - "insights-share/release/**"
+      - ".github/workflows/e2e-gates.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "start.demo.sh"
+      - "start.claude.sh"
+      - "start.codex.sh"
+      - "plugins/insights-share/**"
+      - "insights-share/demo_codes/**"
+      - "insights-share/validation/**"
+      - "insights-share/release/**"
+      - ".github/workflows/e2e-gates.yml"
+
+jobs:
+  deterministic-gates:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Contract and adoption gates
+        run: bash insights-share/validation/run_ci_gate.sh

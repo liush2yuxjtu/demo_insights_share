@@ -1,0 +1,12 @@
+{
+  "pass": true,
+  "checked_at": "2026-04-24T04:05:01Z",
+  "signals": {
+    "clean_machine_install": "ok",
+    "first_relevant_hit": "alice-pgpool-2026-04-10",
+    "first_publish": "alice-pgpool-2026-04-10,bob-pgpool-bad-2026-04-12",
+    "day_2_return": "ok"
+  },
+  "wiki_url": "http://127.0.0.1:18821",
+  "report": "/Users/liushiyu/projects/demo_insights_share/insights-share/validation/reports/deliverables/adoption_proof_latest.txt"
+}

@@ -19,7 +19,8 @@ LOG="${2:?需要 guide.log 路径}"
 SKILL_NAME="${3:-insights-share}"
 SANDBOX_HOME="${4:?需要 SANDBOX_HOME 路径（用于沙箱隔离检测）}"
 
-SKILL_DIR="$SANDBOX_HOME/.claude/skills/$SKILL_NAME"
+PLUGIN_CACHE_ROOT="$SANDBOX_HOME/.claude/plugins/cache"
+INSTALLED_PLUGINS="$SANDBOX_HOME/.claude/plugins/installed_plugins.json"
 CACHE_DIR="$SANDBOX_HOME/.cache/insights-share"
 
 # 每阶段最多等多少秒（避免某个信号永远不来时左边卡死）
@@ -59,11 +60,28 @@ wait_for_file() {
   return 0
 }
 
+find_plugin_skill() {
+  find "$PLUGIN_CACHE_ROOT" -path "*/skills/$SKILL_NAME/SKILL.md" -print -quit 2>/dev/null || true
+}
+
+wait_for_plugin_skill() {
+  local timeout="${1:-$STAGE_TIMEOUT}"
+  local waited=0
+  while [ -z "$(find_plugin_skill)" ]; do
+    sleep 2
+    waited=$((waited + 2))
+    if [ "$waited" -ge "$timeout" ]; then
+      return 1
+    fi
+  done
+  return 0
+}
+
 # ── Stage 0: 欢迎 ─────────────────────────────────────
 sleep 1
 card "📖 欢迎进入 insights-share demo（左边讲解 / 右边 Claude）" \
   "这个 demo 会带你亲眼看完一条完整链路：" \
-  "  1. 确认 insights-share skill 已经装好" \
+  "  1. 确认 insights-share plugin 已经装好" \
   "  2. 在右边 Claude 会话提一个真实 postgres 超时问题" \
   "  3. 观察 skill 静默触发，拉回 LAN wiki 卡片" \
   "  4. 对比有无 skill 时的答案差异" \
@@ -76,22 +94,25 @@ card "📖 欢迎进入 insights-share demo（左边讲解 / 右边 Claude）" \
 
 sleep 3
 
-# ── Stage 1: 确认 skill 已装 ──────────────────────────
-card "📖 第 1 步：确认 insights-share skill 已经装好" \
-  "skill 是一种把团队经验写成文件的方式，Claude 会自动读它。" \
-  "我们刚刚已经帮你把 skill 放到：" \
-  "  $SKILL_DIR" \
+# ── Stage 1: 确认 plugin 已装 ─────────────────────────
+card "📖 第 1 步：确认 insights-share plugin 已经装好" \
+  "plugin 会把 skill、hook、statusline、slash 命令一起装进沙箱。" \
+  "我们刚刚已经用 claude plugin install 写入：" \
+  "  $INSTALLED_PLUGINS" \
+  "并把 plugin 内容缓存到：" \
+  "  $PLUGIN_CACHE_ROOT" \
   "" \
   "现在在右边 Claude 会话里输入：" \
   "" \
-  "    请列出我本地的 skill" \
+  "    请列出我本地的 plugin 和 skill" \
   "" \
   "输出里出现 insights-share 就说明装好了。"
 
-if wait_for_file "$SKILL_DIR/SKILL.md" 30; then
-  ok "检测到 $SKILL_DIR/SKILL.md — skill 已装好"
+if wait_for_plugin_skill 30; then
+  plugin_skill="$(find_plugin_skill)"
+  ok "检测到 $plugin_skill — plugin 内 skill 已装好"
 else
-  warn_msg "等了 30 秒还没看到 SKILL.md，可能安装脚本失败了。但不阻塞，继续往下。"
+  warn_msg "等了 30 秒还没看到 plugin cache 内的 SKILL.md，可能 plugin install 失败了。但不阻塞，继续往下。"
 fi
 
 sleep 3

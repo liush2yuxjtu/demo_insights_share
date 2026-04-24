@@ -5,85 +5,50 @@
 
 ---
 
-## Open — ship-blocker
-
-### [SB-1] start.demo.sh 主入口改走 `claude plugin install`
-
-- **What**：Stage 2 + Stage 3 现在 `cp -R skill × 2` + `cp settings.json × 2`，改成 `HOME=$SANDBOX_HOME claude plugin install <local-tarball-path or LAN marketplace>`。delete 两份手动 cp 路径。
-- **Why**：design doc `proposal/proposal_plugin_design.md:88,267` 明文要求 demo path 必含 `plugin install` + PM zero bash；codex outside voice (2026-04-23) 指出当前实现是绕开 shipping contract 的 dev-only 捷径；`/plan-eng-review` D2 override 落定。
-- **Pros**：demo 路径与真实 yesterday-teammate install 路径同构；小鸭子机器验证自动覆盖；取消双脚本（start.clean.sh 不再需要）；未来 plugin install 断掉第一时间在 demo 崩出。
-- **Cons**：需要 Stage 5 daemon 启动顺序微调（plugin install 可能提前触发 hook，daemon 未 up 会报错）；需要准备 local tarball 或 pin marketplace URL；dry-run seam 要同步改。
-- **Context**：现 start.demo.sh:89-108 做的 cp-R 是沙箱时代 workaround；plugin marketplace（`plugins/insights-share/.claude-plugin/marketplace.json`）已就绪；`claude plugin install` 命令 CLI 已在 `~/.claude/CLAUDE.md` 文档化。
-- **Depends on / blocked by**：需先 land `[SB-2] start.demo.sh --dry-run` 以便在不起 tmux 前验证；需先 land D5 白名单归档，否则 plugin install 后残留文件归档会漏。
-- **Estimate**：human ~½ day / CC ~2h。
-- **Source**：plan-eng-review 2026-04-23 m1-main, codex outside voice D2 override。
-
-## Open — product-proof
-
-### [AP-1] clean-machine adoption proof：把“脚本诚实”升级成“用户真的会回来用”
-
-- **What**：为 insights-share 增加一条 adoption proof 轨道，至少覆盖四个可验证信号：1) clean-machine install 成功率，2) first relevant hit / first cite 质量，3) first publish 成功率，4) day-2 return。可先落成 review gate / 验证脚本 / 手工 runbook，不要求本轮加新产品功能。
-- **Why**：当前 backlog 主要证明 demo 与 plugin packaging 更一致，但还没有证明共享 insight 相比 fresh inference 真能提升 teammate 结果。两路 CEO outside voices 都把这视为最关键的漏项。
-- **Pros**：把下一轮 ship 从“更像真的 install”推进到“更像真的产品 pull”；也能给 sponsor / teammate 一个更硬的 success story。
-- **Cons**：需要定义 success metric 和最小实验口径；会让本轮从纯 shell/validation 工作扩成一部分产品验证工作。
-- **Context**：`proposal.md` 的原始问题是 shared insight 是否让他人更快、更准、更稳定；`FEATURES.md` 说明产品已有 plugin / statusline / slash / corpus / signature 这些面，但 TODO 目前还没有“with vs without insights 的 outcome lift”验证项。
-- **Depends on / blocked by**：不阻塞 `SB-1`；建议在 `SB-1` 完成后立刻落一版最小 proof gate。
-- **Estimate**：human ~0.5-1 day / CC ~1-2h。
-- **Source**：/autoplan CEO phase 2026-04-23（Claude subagent + Codex 双声部一致）。
-
----
-
-## Open — follow-up
-
-### [FL-1] CI/pre-commit gate：把 contract suite 拉回真实产品，而不是只跑一个 stale test
-
-- **What**：GitHub Actions workflow 或 pre-commit hook 监视 `start.demo.sh` / `FEATURES.md` / `plugins/insights-share/**` / `insights-share/release/**` 改动，自动跑 `DRY_RUN=1 bash start.demo.sh` + `pytest -q insights-share/validation/test_start_scripts.py insights-share/validation/test_plugin_contract.py insights-share/validation/test_release_package.py`。失败 block PR。
-- **Why**：2026-04-23 实测不止一个 regression 红灯：`test_start_scripts.py` 还断言旧 M5 文案，`test_plugin_contract.py` 仍把版本固定在 `0.5.0-m5` 且要求 `127.0.0.1` MCP base URL，`test_release_package.py` 仍盯旧 `plugin/` bundle 结构。只 gate 一条 test 已经不够。
-- **Pros**：contract drift 零潜伏；demo / plugin / release 三条分发面一起被看守；未来改 README/manifest/打包结构时会立刻爆。
-- **Cons**：要先把现有 test expectation 全部对齐到 `0.6.0-m7` 和双仓布局；否则 CI 只会稳定报假红。
-- **Context**：`[SB-2]` 已经落地，不再阻塞；真正阻塞的是 test contract 还停留在旧产品快照。
-- **Depends on / blocked by**：先改绿上述 3 组 contract test，再加 gate 才有意义。
-- **Estimate**：human ~2h / CC ~30min。
-- **Source**：/autoplan Eng phase 2026-04-23（实测 + 双声部一致）。
-
-### [FL-2] corpus secret 自检升级为 start.demo.sh Stage 0
-
-- **What**：在 start.demo.sh 预检之后、Stage 1 创建沙箱之前插入 Stage 0：grep `insights-share/demo_codes/wiki_tree/**/raw/` 查 `sk-*/ghp_*/Bearer */AKIA*` 等 secret pattern。命中则 die，提示用户先 scrub。
-- **Why**：design doc F6 原方案靠用户手跑 grep（DM yesterday-teammate 前）；codex 指出 corpus 里已有 live-looking secret 痕迹；依赖人类记忆在 demo 前执行，可靠性低。`/plan-eng-review` TODO-3 user override 升级到自动化。
-- **Pros**：忘不了；sponsor 打开 wiki 第一眼不会看到明文 secret；LAN 内部配 secret 泄漏风险降一档。
-- **Cons**：每次跑 start.demo.sh 多 < 1s 的 grep 开销；false positive 会 block 合法 demo（例如用户在 raw log 里用了 placeholder 字符串形似 token）；die 消息要给清晰的 bypass 指引。
-- **Context**：wiki_tree 258 张卡的 raw_log 字段目前直连存储；design doc `## Codex Outside Voice Revisions F6` 指向具体 grep pattern；沙箱逻辑已由 feedback_real_sandbox.md 严格约束。
-- **Depends on / blocked by**：无，可在任何时间独立 land。
-- **Estimate**：human ~½h / CC ~15min。
-- **Source**：plan-eng-review 2026-04-23 m1-main, design doc F6 演进。
-
 ## Open — surfaced at final gate
 
-### [UC-1] plugin bundle self-containment：先切断 repo 绑定，再让 demo 走真实 `claude plugin install`
-
-- **What**：把 `plugins/insights-share/hooks/user-prompt-submit.sh`、`hooks/session-start.sh`、`scripts/self_check.sh` 对 repo checkout 和 `demo_codes/.venv` 的回跳依赖改成 bundle-local 或 runtime-packaged 资源；目标是 clean-machine 上只装 plugin / publish 仓也能跑通 first search / prefetch / self-check。
-- **Why**：两路 Eng outside voices 都指出当前 `SB-1` 不是“真实 install parity”，而是“表面 install + 实际 repo fallback”。现状下就算 `start.demo.sh` 改成 `claude plugin install`，hook 仍会回跳到 repo 内 `insights-share/demo_codes`，hero surface 还是假的。
-- **Pros**：把 `SB-1` 从 chore 变成真实分发合同；plugin 仓才有资格代表 teammate install 路径；clean-machine 失败会更早暴露。
-- **Cons**：会牵动 hook bootstrap、Python 运行时、publish 仓内容和 self-check；不是“两行 shell 替换 cp”。
-- **Context**：证据见 `plugins/insights-share/hooks/user-prompt-submit.sh`、`plugins/insights-share/hooks/session-start.sh`、`plugins/insights-share/scripts/self_check.sh`。
-- **Depends on / blocked by**：建议并入 `SB-1` 重写；否则 `SB-1` 落地后仍会保留 repo 绑定。
-- **Estimate**：human ~0.5-1 day / CC ~1-2h。
-- **Source**：/autoplan Eng dual voices 2026-04-23。
-
-### [UC-2] trust / audit boundary：不要只 grep secret，还要给写接口和 raw_log 注入画边界
-
-- **What**：为 daemon 的 `POST /insights`、`/topics`、`/topics/{id}/examples`、`/insights/{id}/relabel`、`DELETE /insights/{id}` 加 loopback / token / role policy，并给 `raw_log` 与 `additionalContext` 注入链路补显式 allowlist / redact / 测试。
-- **Why**：当前只有 `/_events` 和 `/api/cli/tmux/input` 做了 loopback/token 限制；同时 `insights_prefetch.py` 会静默把卡片内容注入回答上下文，`FEATURES.md` 又明确 `raw_log` 是明文存储。只做 Stage 0 secret grep 仍然是在补错层。
-- **Pros**：把“trust”从 demo hygiene 拉回真实数据边界；也让 sponsor / teammate install 风险更可解释。
-- **Cons**：会触到 daemon API 契约、plugin hooks 和缓存行为，scope 比单纯 grep 大。
-- **Context**：证据见 `insights-share/demo_codes/insightsd/server.py`、`insights-share/demo_codes/hooks/insights_prefetch.py`、`FEATURES.md`。
-- **Depends on / blocked by**：不阻塞 dry-run；是否升 ship-blocker 需要 final gate 决策。
-- **Estimate**：human ~0.5-1 day / CC ~1-2h。
-- **Source**：/autoplan Eng dual voices 2026-04-23。
-
----
+无。
 
 ## Closed / Deferred
+
+### [DONE] [UC-1] plugin bundle self-containment
+
+- **What**：plugin 现在自带 `plugins/insights-share/runtime/`，其中包含 `insights_cli.py`、`insightsd/`、`wiki_tree/` seed corpus；`start_server.sh` / `start_ui.sh` 默认从 installed plugin runtime 启 daemon，不再回跳 dev repo checkout 或 `demo_codes/.venv`。
+- **Evidence**：`test_plugin_contract.py` 新增隔离 bundle copy smoke，复制 `plugins/insights-share` 到 `tmp_path` 后从任意 cwd 启 server 并搜索 `alice-pgpool-2026-04-10`；`self_check.sh` 现在检查 `server runtime bundle: OK`、`start_server.sh: OK`、`start_ui.sh: OK`。
+- **Hero path**：`start.demo.sh` Stage 5 已改为使用 sandbox 内 `claude plugin install` 后的 plugin cache 启 daemon；右 pane manifest/statusline/self-check/sample 也来自 sandbox installed plugin cache。
+- **Verification**：`bash insights-share/validation/run_ci_gate.sh` 通过；`RUN_HANDOUT_VERIFY=1 RUN_TMUX_SMOKE=1 bash insights-share/validation/run_ci_gate.sh` 通过，覆盖 43 项合同测试、adoption proof、`start.demo.sh --dry-run`、Playwright handout verify、tmux claude/codex smoke。
+- **Source**：2026-04-24 UC-1 self-containment closeout。
+
+### [DONE] [SB-1] start.demo.sh 主入口改走 `claude plugin install`
+
+- **What**：`start.demo.sh` Stage 3 已在 sandbox HOME 内执行 `claude plugin marketplace add` + `claude plugin install insights-share@insights-share`，不再靠旧式手动 copy skill 作为 hero install path。
+- **Evidence**：`bash start.demo.sh --dry-run`、live `bash start.demo.sh`、`bash insights-share/validation/run_ci_gate.sh` 均已通过；右 pane 自检显示 sandbox plugin cache 与 `plugin self-check: ALL GREEN`。
+- **Follow-up still open**：`UC-1` 仍保留，因为 plugin runtime self-containment 是更大的分发契约，不等同于 hero surface 改用 plugin install。
+- **Source**：2026-04-24 E2E recovery。
+
+### [DONE] [AP-1] clean-machine adoption proof
+
+- **What**：新增 `bash insights-share/validation/run_adoption_proof.sh`，用隔离 `HOME` 与临时 wiki store 验证 clean-machine install、first relevant hit、first publish、day-2 return。
+- **Evidence**：`insights-share/validation/reports/deliverables/adoption_proof_latest.json` 记录 `pass=true`，四个 signals 均为 ok；`run_contract_tests.sh` 已把 `test_adoption_proof.py` 纳入默认合同。
+- **Source**：2026-04-24 AP-1 gate。
+
+### [DONE] [FL-1] CI/pre-commit gate
+
+- **What**：新增 `bash insights-share/validation/run_ci_gate.sh` 与 `.github/workflows/e2e-gates.yml`，监视 start/plugin/demo_codes/validation/release 相关改动。
+- **Evidence**：本机 `bash insights-share/validation/run_ci_gate.sh` 已跑通 contract tests、adoption proof、`start.demo.sh --dry-run`；合同测试扩到 23 项。
+- **Source**：2026-04-24 CI gate。
+
+### [DONE] [FL-2] corpus secret 自检升级为 start.demo.sh Stage 0
+
+- **What**：`start.demo.sh` 已在 Stage 0 扫描 `insights-share/demo_codes/wiki_tree/**/raw/` 中的常见 token/secret pattern，命中即阻断 demo。
+- **Evidence**：`bash start.demo.sh --dry-run` 与 `run_ci_gate.sh` 输出 `Stage 0 secret gate passed`。
+- **Source**：2026-04-24 E2E recovery。
+
+### [DONE] [UC-2] trust / audit boundary
+
+- **What**：daemon 写接口已有 loopback/token 检查；tree store 写 raw log 前新增敏感字段和 token pattern 脱敏；`insights_prefetch.py` 的 `additionalContext` 继续只输出 card id/title/author/tags 等公开字段。
+- **Evidence**：`test_topic_api.py::test_write_auth_allows_loopback_or_valid_token` 覆盖写 auth；`test_topic_store.py` 覆盖 export/jsonl raw log 脱敏；`test_plugin_contract.py::test_prefetch_additional_context_uses_public_card_allowlist` 覆盖注入 allowlist；`run_ci_gate.sh` 已通过 39 项合同。
+- **Source**：2026-04-24 trust boundary gate。
 
 ### [DONE] [SB-2] start.demo.sh 新增 `--dry-run` seam
 

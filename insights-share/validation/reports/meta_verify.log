@@ -14,3 +14,8 @@
 [2026-04-22T03:04:12Z] [ff7ef42822df] [tier=fast] [iter=1] [FAIL] [judge treated explanatory probe as missing execution evidence for CEO-plan/start-loop clarification]
 [2026-04-22T03:04:12Z] [ff7ef42822df] [tier=reliable] [iter=1] [ERROR] [claude -p returned 403 forbidden during CEO-plan/start-loop clarification]
 --- terminal ---
+[2026-04-24T02:20:12Z] [CLAUDE.md:c6df67e1f294] [tier=fast] [iter=1] [PASS] manual recheck after restoring claudefast executable: start probe still covers 四文件、proposal/INDEX、全量 proposal 扫描、新增/未落地识别、self-verify、PASS/FAIL 收尾
+--- terminal PASS @ fast iter=1 ---
+[2026-04-24T03:28:48Z] [CLAUDE.md:6d519ad] [tier=fast] [iter=1] [REFINE] judge 误判解释性探针为真实 start 执行，要求 actual execution trace
+[2026-04-24T03:28:48Z] [CLAUDE.md:6d519ad] [tier=fast] [iter=2] [PASS] 解释性探针正确覆盖 start bootstrap 流程和最低证据要求，未要求伪造实机输出
+--- terminal PASS @ fast iter=2 ---

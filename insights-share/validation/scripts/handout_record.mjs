@@ -90,6 +90,39 @@ function spawnDaemonFallback() {
   daemon.unref();
 }
 
+async function stopFfmpeg(ffmpeg) {
+  if (!ffmpeg || ffmpeg.exitCode !== null || ffmpeg.signalCode !== null) {
+    return;
+  }
+  const exited = new Promise((resolve) => ffmpeg.once('exit', resolve));
+  try {
+    if (ffmpeg.stdin && !ffmpeg.stdin.destroyed) {
+      ffmpeg.stdin.write('q\n');
+      ffmpeg.stdin.end();
+    }
+  } catch (error) {
+    consoleLines.push(`[ffmpeg] stop stdin failed: ${error.message}`);
+  }
+  const stopped = await Promise.race([
+    exited.then(() => true),
+    delay(5000).then(() => false),
+  ]);
+  if (stopped) {
+    return;
+  }
+  consoleLines.push('[ffmpeg] graceful stop timed out, sending SIGTERM');
+  ffmpeg.kill('SIGTERM');
+  const terminated = await Promise.race([
+    exited.then(() => true),
+    delay(3000).then(() => false),
+  ]);
+  if (!terminated) {
+    consoleLines.push('[ffmpeg] SIGTERM timed out, sending SIGKILL');
+    ffmpeg.kill('SIGKILL');
+    await exited.catch(() => undefined);
+  }
+}
+
 async function waitForHealth(timeoutMs = 30000) {
   const started = Date.now();
   while (Date.now() - started < timeoutMs) {
@@ -259,8 +292,7 @@ async function main() {
   } finally {
     await context.close().catch(() => undefined);
     await browser.close().catch(() => undefined);
-    ffmpeg.stdin.write('q\n');
-    await new Promise((resolve) => ffmpeg.once('exit', resolve));
+    await stopFfmpeg(ffmpeg);
     stopExistingDaemon();
   }
 }

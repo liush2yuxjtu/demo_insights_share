@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>insights-share · Web 控制台</title>
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="/static/runtime.css" />
+</head>
+<body data-mode="dashboard">
+  <main class="web-shell">
+    <section class="web-hero">
+      <div class="web-hero-copy">
+        <div class="eyebrow">insights-share · Web 控制台</div>
+        <h1>把 Claude Code CLI 的静默知识流，变成可观看、可操作、可回放的在线现场。</h1>
+        <p class="web-copy">
+          这是给 PM、评审和操作者打开的入口页。你不需要读 tmux 和终端日志，也能看到当前 session、
+          关键指标、证据落点、Validation 状态，以及 Claude Code CLI 该怎么接入这套链路。
+        </p>
+        <div class="web-actions">
+          <button id="dashboard-run-demo" class="action-btn">运行 Demo</button>
+          <button id="dashboard-run-validation" class="action-btn secondary">运行 Validation</button>
+          <a class="ghost-link" href="/handout">现场验收页</a>
+          <a class="ghost-link" href="/pm-script">PM 讲解稿</a>
+          <a class="ghost-link" href="/cli">CLI 窗口</a>
+          <a class="ghost-link" href="/preview">纯 Preview</a>
+          <a class="ghost-link" href="/ops">纯 Ops</a>
+        </div>
+      </div>
+
+      <aside class="web-hero-side">
+        <div class="web-status-head">
+          <span id="dashboard-stream-state" class="state-pill">连接中</span>
+          <span id="dashboard-live-session" class="mono">等待 session</span>
+        </div>
+        <div id="dashboard-summary-grid" class="dashboard-summary-grid"></div>
+        <section class="cli-panel">
+          <div class="section-label">Claude Code CLI</div>
+          <p class="muted-copy">
+            在项目根目录执行这条命令，就能把 daemon 和这张 Web 控制台一起跑起来。
+          </p>
+          <pre id="dashboard-cli-command" class="cli-command"></pre>
+          <div class="cli-actions">
+            <button id="dashboard-copy-cli" class="ghost-btn">复制命令</button>
+            <span id="dashboard-copy-state" class="mono">未复制</span>
+          </div>
+        </section>
+      </aside>
+    </section>
+
+    <section class="web-main-grid">
+      <section class="web-stage-panel">
+        <div class="section-label">现场主舞台</div>
+        <div class="stage-head">
+          <div>
+            <div id="dashboard-kind" class="stage-kind">DEMO</div>
+            <h2 id="dashboard-title">等待实时 session</h2>
+          </div>
+          <div class="stage-progress-wrap">
+            <div class="metric-label">进度</div>
+            <div id="dashboard-progress" class="metric-big">0%</div>
+          </div>
+        </div>
+        <div class="stage-rail">
+          <div id="dashboard-stage-name" class="stage-name">pending</div>
+          <div id="dashboard-status" class="stage-status">idle</div>
+          <div id="dashboard-timer" class="badge-inline">0 / 0</div>
+        </div>
+        <div id="dashboard-message" class="stage-message">
+          连接到 daemon 后，这里会显示当前主 session 的最新过程。
+        </div>
+        <div id="dashboard-metrics" class="metric-grid"></div>
+
+        <section class="dashboard-playback">
+          <div class="playback-bar">
+            <button id="dashboard-play" class="action-btn">播放回放</button>
+            <button id="dashboard-live" class="ghost-btn">回到实时</button>
+            <div id="dashboard-slider-label" class="mono">0 / 0</div>
+          </div>
+          <input id="dashboard-slider" type="range" min="0" max="0" value="0" />
+          <div id="dashboard-timeline" class="timeline-lane"></div>
+        </section>
+      </section>
+
+      <aside class="web-side-panel">
+        <div class="section-label">证据入口</div>
+        <div id="dashboard-artifacts" class="artifact-list"></div>
+        <div class="section-label space-top">最近 Session</div>
+        <div id="dashboard-session-strip" class="session-strip"></div>
+      </aside>
+    </section>
+
+    <section class="web-ops-grid">
+      <aside class="web-list-panel">
+        <div class="section-label">Session 队列</div>
+        <div id="dashboard-session-list" class="session-list"></div>
+      </aside>
+
+      <section class="web-event-panel">
+        <div class="section-label">当前事件</div>
+        <div id="dashboard-event-spotlight" class="event-spotlight">
+          选择 session 或拖动时间线后，这里会显示当前节点的 payload 与 metrics。
+        </div>
+        <div class="section-label space-top">事件列表</div>
+        <div id="dashboard-event-list" class="ops-timeline"></div>
+      </section>
+
+      <aside class="web-inspector-panel">
+        <div class="section-label">指标对比</div>
+        <select id="dashboard-compare-select"></select>
+        <div id="dashboard-compare" class="inspector-block">
+          选择对比对象后，这里会显示 headline metrics 的差异。
+        </div>
+
+        <div class="section-label space-top">Wiki / Topics</div>
+        <div class="subtabs">
+          <button class="subtab active" data-dashboard-subtab="wiki">Wiki</button>
+          <button class="subtab" data-dashboard-subtab="topics">Topics</button>
+        </div>
+        <div id="dashboard-wiki-panel" class="inspector-block live-panel"></div>
+        <div id="dashboard-topics-panel" class="inspector-block live-panel hidden"></div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="/static/runtime.js" defer></script>
+</body>
+</html>
