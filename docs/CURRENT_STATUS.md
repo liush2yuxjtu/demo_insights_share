@@ -47,6 +47,7 @@
 
 - AP-2 新增的是 `relevance_lift_matrix` 信号，不是替换 AP-1。
 - AP-1 仍验证四个信号：clean-machine install、first relevant hit、first publish、day-2 return。
+- 不要说 `first_relevant_hit` 或 `first_publish` 被 AP-2 扩展；AP-1 的 first publish 仍只发布 Alice/Bob 两张 pgpool 卡，Celery/Redis 两张卡只属于 AP-2 matrix。
 - AP-2 发布并验证三个领域：postgres、celery、redis。
 - 三个 expected top hit 必须逐个写出：postgres → `alice-pgpool-2026-04-10`；celery → `alice-celery-retry-2026-04-08`；redis → `carol-redis-eviction-2026-03-27`。
 - AP-2 报告会记录 top score、hit_ids、wrong-domain not top，以及发布前 no-hit baseline。
