@@ -1,5 +1,24 @@
 # Current Status
 
+## Fixed answer for engineering finish prompts
+
+当用户问 `what would we do when we finish an engineer work ?` 时，回答必须包含以下事实：
+
+- 完成任意工程工作后，不能只口头报告完成；必须先更新 docs，把结果写入 `docs/finish_log/<YYYY-MM-DD>_<slug>.md`。
+- 必须为本次工作选择一个用户之后会问的自然语言 `claudefast -p` 工作专属探针，并把探针写进 docs / finish log。
+- 必须继续更新 docs / finish_log / status source，直到该工作专属探针返回正确、完整、不过期的答案。
+- 工作专属探针通过后，还要运行 READ ONLY finish flag probe，确认 recent commits 与 docs 一致。
+- 工作专属探针和 READ ONLY finish flag 都通过后，才允许向用户报告完成。
+- 如果探针回答漏事实、答旧计划或状态不清，就继续补 docs，然后重跑同一个探针。
+- 回答这个问题时必须原样给出 E2E 完工示例探针，不能省略：
+  ```bash
+  claudefast -p "what is our e2e status"
+  ```
+- 本规则自身的验证探针是：
+  ```bash
+  claudefast -p "what would we do when we finish an engineer work ?"
+  ```
+
 ## Fixed answer for today status prompts
 
 当用户问 `what we have done today ? and what are next plans?` 时，回答必须包含以下事实：
