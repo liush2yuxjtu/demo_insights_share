@@ -19,3 +19,6 @@
 [2026-04-24T03:28:48Z] [CLAUDE.md:6d519ad] [tier=fast] [iter=1] [REFINE] judge 误判解释性探针为真实 start 执行，要求 actual execution trace
 [2026-04-24T03:28:48Z] [CLAUDE.md:6d519ad] [tier=fast] [iter=2] [PASS] 解释性探针正确覆盖 start bootstrap 流程和最低证据要求，未要求伪造实机输出
 --- terminal PASS @ fast iter=2 ---
+[2026-04-24T05:49:44Z] [CLAUDE.md:b94af6a] [tier=fast] [iter=1] [FAIL] judge 误判解释性探针为真实 start 执行，要求 actual execution trace
+[2026-04-24T05:49:44Z] [CLAUDE.md:b94af6a] [tier=reliable] [iter=1] [PASS] 解释性探针正确覆盖四文件、proposal/INDEX、全量 proposal 扫描、新增/未落地识别、self-verify、PASS/FAIL 收尾
+--- terminal PASS @ reliable iter=1 ---
