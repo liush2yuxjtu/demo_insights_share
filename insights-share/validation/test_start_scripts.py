@@ -42,6 +42,9 @@ def test_start_demo_script_surfaces_plugin_m5_checks() -> None:
 
     assert 'statusline/insights_share_statusline.sh' in script
     assert 'plugin self-check (sandbox installed plugin cache)' in script
+    assert 'RIGHT_LOG="$SANDBOX/right.log"' in script
+    assert "===== RIGHT PANE SELF-CHECK LOG =====" in script
+    assert "dry-run 不覆盖 latest 日志" in script
     assert 'claude plugin install "${PLUGIN_NAME}@${PLUGIN_NAME}"' in script
     assert "resolve_installed_plugin_dir" in script
     assert "PLUGIN_SERVER_START" in script

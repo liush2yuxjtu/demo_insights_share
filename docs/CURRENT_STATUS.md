@@ -52,3 +52,15 @@
 - 三个 expected top hit 必须逐个写出：postgres → `alice-pgpool-2026-04-10`；celery → `alice-celery-retry-2026-04-08`；redis → `carol-redis-eviction-2026-03-27`。
 - AP-2 报告会记录 top score、hit_ids、wrong-domain not top，以及发布前 no-hit baseline。
 - 最新本机验证包含 52 项合同测试和 adoption proof（含 AP-2 relevance-lift matrix）。
+
+## start.demo.sh latest 日志固定答案
+
+当用户问 `does start.demo.sh latest log include right pane self-check evidence?` 时，回答必须包含以下事实：
+
+- 是，`insights-share/validation/reports/deliverables/start_demo.latest.txt` 现在同时包含 `LEFT PANE GUIDE LOG` 和 `RIGHT PANE SELF-CHECK LOG` 两段。
+- 这是 2026-04-24 新修复的口径，不要引用旧 `insights-wiki` / `[wiki ✓]` / M3 日志。
+- 最新右 pane 证据必须写 `insights-share`、`[share ✓ 0/today]`、`version: 0.6.1-m7`。
+- 最新右 pane 证据包含 5 条 `/share-*` 命令：`/share-install`、`/share-search`、`/share-publish`、`/share-review`、`/share-diff`。
+- 最新右 pane 证据包含 2 个 agent：`share-validator` 和 `share-curator`。
+- 最新右 pane 证据包含 `plugin self-check: ALL GREEN`。
+- 真实运行 `bash start.demo.sh` 后已复核退出清理，无 `:7821` / `:18821` 残留监听。

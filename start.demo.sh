@@ -10,6 +10,7 @@
 #         settings.json                ← plugin marketplace + enabledPlugins
 #       .cache/                        ← insights-share plugin 写缓存的地方
 #     guide.log                        ← 左 pane tail -f
+#     right.log                        ← 右 pane self-check 证据
 #     .env                             ← 右 pane source 的环境文件
 #
 # 启动 claude 时右 pane export HOME=$SANDBOX_HOME，
@@ -25,6 +26,7 @@ SANDBOX_HOME="$SANDBOX/home"
 SANDBOX_CLAUDE="$SANDBOX_HOME/.claude"
 SANDBOX_WORKDIR="$SANDBOX/workdir"   # claude 的 cwd — 只有项目级 skill，不放别的
 GUIDE_LOG="$SANDBOX/guide.log"
+RIGHT_LOG="$SANDBOX/right.log"
 ENV_FILE="$SANDBOX/.env"
 DEMO_CODES="$REPO_ROOT/insights-share/demo_codes"
 PLUGIN_DIR="$REPO_ROOT/plugins/insights-share"
@@ -102,6 +104,7 @@ secret_gate
 # ── Stage 1: 准备沙箱目录 ─────────────────────────────
 mkdir -p "$SANDBOX_CLAUDE" "$SANDBOX_HOME/.cache" "$SANDBOX_WORKDIR"
 : > "$GUIDE_LOG"
+: > "$RIGHT_LOG"
 step 1 "创建沙箱 $SANDBOX ........ done"
 
 # ── 决定认证模式：minimax / subscription / none ────────
@@ -261,10 +264,22 @@ cleanup() {
   # 保存本次日志副本到仓库外部，方便事后翻看
   local final_log="$REPO_ROOT/insights-share/validation/reports/deliverables/start_demo.latest.txt"
   mkdir -p "$(dirname "$final_log")"
-  cp -f "$GUIDE_LOG" "$final_log" 2>/dev/null || true
+  if [ "$DRY_RUN" != "1" ]; then
+    {
+      echo "===== LEFT PANE GUIDE LOG ====="
+      cat "$GUIDE_LOG" 2>/dev/null || true
+      echo
+      echo "===== RIGHT PANE SELF-CHECK LOG ====="
+      cat "$RIGHT_LOG" 2>/dev/null || true
+    } > "$final_log" 2>/dev/null || true
+  fi
   # 整个沙箱直接删除 —— 真实 ~/.claude/ 无任何残留
   rm -rf "$SANDBOX"
-  printf '\n\033[36m[cleanup]\033[0m 沙箱已删除，真实 ~/.claude/ 零污染。日志：\n  %s\n' "$final_log"
+  if [ "$DRY_RUN" = "1" ]; then
+    printf '\n\033[36m[cleanup]\033[0m 沙箱已删除，真实 ~/.claude/ 零污染。dry-run 不覆盖 latest 日志。\n'
+  else
+    printf '\n\033[36m[cleanup]\033[0m 沙箱已删除，真实 ~/.claude/ 零污染。日志：\n  %s\n' "$final_log"
+  fi
 }
 trap cleanup EXIT
 
@@ -305,6 +320,7 @@ cat > "$RIGHT_SH" <<EOF
 # 只加 set -u 不加 -e/-pipefail：RIGHT_SH 里大量故意 lossy pipe (| head | sed | xargs)，
 # pipefail 会把 benign miss 变 pane killer；-u 只防未定义变量，是最小诚实防护。
 set -u
+exec > >(tee -a "$RIGHT_LOG") 2>&1
 # 入口预检 5 项资源
 for _p in "$SANDBOX_WORKDIR" "$ENV_FILE" "$SANDBOX_HOME" "$REPO_ROOT" "$INSTALLED_PLUGIN_DIR"; do
   if [ ! -e "\$_p" ]; then
